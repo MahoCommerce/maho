@@ -311,11 +311,11 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Refresh the enabled index of a store, for the given products or for all products of the store
      *
-     * @param array<int|string>|null $productIds
+     * @param list<int> $productIds An empty list refreshes all products of the store
      */
-    public function refreshEnabledIndex(Mage_Core_Model_Store $store, ?array $productIds = null): static
+    public function refreshEnabledIndex(Mage_Core_Model_Store $store, array $productIds = []): static
     {
-        $this->_refreshEnabledIndex($store, $productIds ?? []);
+        $this->_refreshEnabledIndex($store, $productIds);
         return $this;
     }
 
@@ -329,7 +329,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
-     * @param array<int|string> $productIds An empty list refreshes all products of the store
+     * @param list<int> $productIds An empty list refreshes all products of the store
      */
     protected function _refreshEnabledIndex(Mage_Core_Model_Store $store, array $productIds): void
     {

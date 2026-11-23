@@ -82,6 +82,7 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
         try {
             // Before adding of products we should remove it old rows with same ids
             $this->removeProducts($websiteIds, $productIds);
+            $indexProductIds = array_values(array_filter(array_map(\intval(...), $productIds)));
 
             foreach ($websiteIds as $websiteId) {
                 foreach ($productIds as $productId) {
@@ -96,9 +97,10 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
 
                 // Refresh product enabled index
                 $storeIds = Mage::app()->getWebsite($websiteId)->getStoreIds();
-                foreach ($storeIds as $storeId) {
-                    $store = Mage::app()->getStore($storeId);
-                    $this->_getProductResource()->refreshEnabledIndex($store, $productIds);
+                if ($indexProductIds) {
+                    foreach ($storeIds as $storeId) {
+                        $this->_getProductResource()->refreshEnabledIndex(Mage::app()->getStore($storeId), $indexProductIds);
+                    }
                 }
             }
 

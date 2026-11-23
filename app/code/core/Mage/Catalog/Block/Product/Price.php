@@ -118,8 +118,8 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
 
                     // if applicable, adjust the tier prices
                     if (isset($bundlePriceModel)) {
-                        $price['price']         = $bundlePriceModel->getLowestPrice($parent, $price['price']);
-                        $price['website_price'] = $bundlePriceModel->getLowestPrice($parent, $price['website_price']);
+                        $price['price']         = $bundlePriceModel->getLowestPrice($parent, (float) $price['price']);
+                        $price['website_price'] = $bundlePriceModel->getLowestPrice($parent, (float) $price['website_price']);
                     }
 
                     $tierPrice = Mage::app()->getStore()->convertPrice(

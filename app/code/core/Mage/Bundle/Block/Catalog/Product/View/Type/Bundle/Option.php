@@ -187,7 +187,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
     /**
      * Get price for selection product
      */
-    public function getSelectionPrice(Mage_Catalog_Model_Product $selection): int|float
+    public function getSelectionPrice(Mage_Catalog_Model_Product $selection): float
     {
         $store = $this->getProduct()->getStore();
         $price = Mage::helper('bundle')->getPriceModel($this->getProduct())->getSelectionPreFinalPrice($this->getProduct(), $selection);
@@ -196,7 +196,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
             $helper = $this->helper('core');
             $price = $helper::currencyByStore($price, $store, false);
         }
-        return is_numeric($price) ? $price : 0;
+        return is_numeric($price) ? (float) $price : 0.0;
     }
 
     /**

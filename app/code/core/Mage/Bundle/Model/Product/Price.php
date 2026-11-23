@@ -467,7 +467,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             }
         }
 
-        $price = $this->getLowestPrice($bundleProduct, $price, $bundleQty);
+        $price = $this->getLowestPrice($bundleProduct, (float) $price, $bundleQty);
 
         if ($multiplyQty) {
             $price *= $selectionQty;
@@ -481,9 +481,8 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      *
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getLowestPrice(Mage_Catalog_Model_Product $bundleProduct, float|string $price, ?float $bundleQty = 1): float
+    public function getLowestPrice(Mage_Catalog_Model_Product $bundleProduct, float $price, ?float $bundleQty = 1): float
     {
-        $price *= 1;
         return min(
             $this->_getApp()->getStore()->roundPrice($price),
             $this->_applyGroupPrice($bundleProduct, $price),
