@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			rawMessage: 'Parameter #1 $entityType of method Mage_Eav_Model_Config::getEntityAttributeCodes() expects Mage_Eav_Model_Entity_Type, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Info.php
-
-		-
 			rawMessage: 'Parameter #1 $order of method Mage_Sales_Helper_Reorder::canReorder() expects Mage_Sales_Model_Order, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -107,12 +101,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Attributes.php
-
-		-
-			rawMessage: Invalid array key type array.
-			identifier: offsetAccess.invalidOffset
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Type/Configurable.php
 
 		-
 			rawMessage: 'Parameter #1 $category (Mage_Catalog_Model_Category) of method Mage_Catalog_Block_Seo_Sitemap_Category::getItemUrl() should be compatible with parameter $item (Mage_Catalog_Block_Seo_Sitemap_Abstract) of method Mage_Catalog_Block_Seo_Sitemap_Abstract::getItemUrl()'
@@ -223,12 +211,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Model/Resource/Fulltext.php
 
 		-
-			rawMessage: Constructor of class Mage_Core_Controller_Varien_Action has an unused parameter $invokeArgs.
-			identifier: constructor.unusedParameter
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Action.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getMessages() expects int|string|null, true given.'
 			identifier: argument.type
 			count: 1
@@ -271,22 +253,10 @@ parameters:
 			path: app/code/core/Mage/Customer/Block/Newsletter.php
 
 		-
-			rawMessage: 'Parameter #1 $entityType of method Mage_Eav_Model_Config::getEntityAttributeCodes() expects Mage_Eav_Model_Entity_Type, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/Helper/Address.php
-
-		-
 			rawMessage: 'Parameter #1 $customer of method Mage_Customer_Model_Resource_Customer::_saveAddresses() expects Mage_Customer_Model_Customer, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #2 $string of function explode expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Convert/Parser/Abstract.php
 
 		-
 			rawMessage: 'Parameter #1 $object of method Mage_Eav_Model_Entity_Abstract::load() expects Mage_Core_Model_Abstract, Maho\DataObject given.'
@@ -337,18 +307,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Export/Entity/Product.php
 
 		-
-			rawMessage: 'Class Mage_ImportExport_Model_Import_Adapter_Abstract implements generic interface SeekableIterator but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Adapter/Abstract.php
-
-		-
-			rawMessage: 'Class Mage_ImportExport_Model_Resource_Import_Data implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Resource/Import/Data.php
-
-		-
 			rawMessage: 'Parameter #1 $e of static method Mage::logException() expects Throwable, string given.'
 			identifier: argument.type
 			count: 1
@@ -389,12 +347,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/Review/Block/Form.php
-
-		-
-			rawMessage: 'Parameter #1 $arr of method Mage_Rule_Model_Condition_Combine::loadArray() expects array, $this(Mage_Rule_Model_Condition_Combine) given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
 
 		-
 			rawMessage: 'Method Mage_Rule_Model_Condition_Product_Abstract::getAttributeObject() should return Mage_Catalog_Model_Resource_Eav_Attribute but returns Mage_Eav_Model_Entity_Attribute_Abstract|Maho\DataObject|false.'
