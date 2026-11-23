@@ -367,13 +367,18 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         }
         $lines = Mage::getResourceModel('sales/order_creditmemo_item_collection')
             ->addFieldToFilter('parent_id', ['in' => array_keys($memos)]);
-        $byMemo = [];
+        $byMemo = $linkedQuantities = [];
         foreach ($lines as $line) {
-            $byMemo[$line->getParentId()][] = $line;
+            $memoId = $line->getParentId();
+            $byMemo[$memoId][] = $line;
+            $invoiceId = $memos[$memoId]->getInvoiceId();
+            if ($invoiceId && $line->getQty() > 0.0) {
+                $id = $line->getOrderItemId();
+                $linkedQuantities[$invoiceId][$id] = ($linkedQuantities[$invoiceId][$id] ?? 0.0) + $line->getQty();
+            }
         }
         $recorded = $missing = $unknown = $quantities = $inferred = [];
         $invoices = $order->getInvoiceCollection()->getItems();
-        $creditsByInvoice = array_count_values(array_filter(array_map(static fn($memo) => $memo->getInvoiceId(), $memos)));
         foreach ($memos as $memoId => $memo) {
             $items = $byMemo[$memoId] ?? [];
             foreach ($items as $item) {
@@ -386,16 +391,25 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $quantities[$id] = ($quantities[$id] ?? 0.0) + $item->getQty();
                 $single = count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem);
                 $invoice = $invoices[$memo->getInvoiceId()] ?? null;
-                $source = $single && $invoice && !$invoice->isCanceled() && $creditsByInvoice[$invoice->getId()] === 1
-                    ? $invoice->getAllItems() : [];
-                $sourceLine = count($source) === 1 && $source[0]->getOrderItemId() == $id ? $source[0] : null;
+                $linked = $linkedQuantities[$memo->getInvoiceId()] ?? [];
+                $source = $single && $invoice && !$invoice->isCanceled() && count($linked) === 1 && isset($linked[$id]) ? $invoice->getAllItems() : [];
+                $sourceLine = count($source) === 1 && $source[0]->getOrderItemId() == $id && round($linked[$id] - $source[0]->getQty(), 4) <= 0.0
+                    ? $source[0] : null;
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
                     $header = $type === 'base' ? $memo->getBaseTaxAmount() : $memo->getTaxAmount();
-                    if ($header === null) {
+                    if (!$single || $qtyLeft < $item->getQty() || $header === null) {
                         $unknown[$id][$type] = true;
                         continue;
                     }
                     $paid = round($header - ($type === 'base' ? $memo->getBaseShippingTaxAmount() : $memo->getShippingTaxAmount()), 4);
+                    if ($amount !== null) {
+                        if ($amount !== $paid) {
+                            $unknown[$id][$type] = true;
+                        } else {
+                            $recorded[$id][$type] = ($recorded[$id][$type] ?? 0.0) + $amount;
+                        }
+                        continue;
+                    }
                     $invoiced = $type === 'base' ? $orderItem->getBaseTaxInvoiced() : $orderItem->getTaxInvoiced();
                     $taxLeft = round($invoiced - ($recorded[$id][$type] ?? 0.0) - ($missing[$id][$type] ?? 0.0), 4);
                     $expected = $qtyLeft > $item->getQty()
@@ -420,14 +434,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     if (!$direct) {
                         $inferred[$id][$type] = true;
                     }
-                    if (!$single || $qtyLeft < $item->getQty() || ($amount !== null && $paid !== $amount)
-                        || (!$direct && $paid !== round($expected, 4)
-                            && ($qtyLeft === $item->getQty() || $paid !== $order->getStore()->roundPrice($expected)))) {
+                    if (!$direct && $paid !== round($expected, 4)
+                        && ($qtyLeft === $item->getQty() || $paid !== $order->getStore()->roundPrice($expected))) {
                         $unknown[$id][$type] = true;
-                    } elseif ($amount === null) {
-                        $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $paid;
                     } else {
-                        $recorded[$id][$type] = ($recorded[$id][$type] ?? 0.0) + $amount;
+                        $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $paid;
                     }
                 }
             }
