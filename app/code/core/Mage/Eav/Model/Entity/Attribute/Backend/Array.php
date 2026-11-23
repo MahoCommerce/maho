@@ -22,7 +22,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Array extends Mage_Eav_Model_Entit
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $data = $object->getData($attributeCode);
         if (is_array($data)) {
-            $data = array_filter($data, boolval(...));
+            $data = array_filter($data, static fn(mixed $value): bool => $value !== null && $value !== '');
             $object->setData($attributeCode, implode(',', $data));
         }
 
