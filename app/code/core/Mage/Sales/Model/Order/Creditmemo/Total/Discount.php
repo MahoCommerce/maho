@@ -86,6 +86,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
     private function getBaseShippingDiscount(Mage_Sales_Model_Order_Creditmemo $memo, float $itemDiscount): float
     {
         $memo->unsetData('is_split_shipping_discount_invoice_refund');
+        $memo->unsetData('base_split_shipping_discount_left');
         $order = $memo->getOrder();
         $shipping = (float) $order->getBaseShippingAmount();
         $shippingDiscount = (float) $order->getBaseShippingDiscountAmount();
@@ -142,16 +143,25 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         ) {
             $share = $this->getRefundedItemDiscount($memo, $source, $previous, $shippingDiscount, $used);
             if ($share !== null) {
-                return max(0.0, min($share, $remaining, $capacity));
+                return $this->applyShippingDiscount($memo, max(0.0, min($share, $remaining)), $capacity);
             }
         }
         if ($adjusted) {
             return $default;
         }
         if ($refundedShipping === $shippingLeft && $this->refundsRemainingItems($memo)) {
-            return min($remaining, $capacity);
+            return $this->applyShippingDiscount($memo, $remaining, $capacity);
         }
         return $invoice && $invoice->getId() !== $source->getId() ? 0.0 : $default;
+    }
+
+    private function applyShippingDiscount(Mage_Sales_Model_Order_Creditmemo $memo, float $share, float $capacity): float
+    {
+        if ($share > $capacity) {
+            // The tax collector can cover the rest with tax refunded on this document.
+            $memo->setData('base_split_shipping_discount_left', round($share - $capacity, 4));
+        }
+        return min($share, $capacity);
     }
 
     private function getSplitDiscountInvoice(Mage_Sales_Model_Order $order, float $shipping, float $discount): ?Mage_Sales_Model_Order_Invoice
@@ -218,11 +228,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 ];
             }
         }
-        $total = round(array_sum(array_column($invoiced, 'net')), 4);
-        if ($total <= 0.0) {
-            return null;
-        }
-        if (array_all(
+        if ($invoiced && array_all(
             $invoiced,
             static fn(array $amount, int $id): bool
             => round($refunded[$id]['net'] ?? 0.0, 4) >= $amount['net']
@@ -230,7 +236,29 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         )) {
             return round($discount - $used, 4);
         }
+        $total = round(array_sum(array_column($invoiced, 'net')), 4);
         $store = $memo->getStore();
+        if ($total < $discount) {
+            // Only the tax can cover the part of the discount above the merchandise net.
+            $taxedItems = $this->getItemAmounts($source, $order, includeTax: true);
+            $gross = round(array_sum(array_column($taxedItems, 'net')), 4);
+            if ($gross > $total) {
+                $total = $gross;
+                $invoiced = $taxedItems;
+                foreach ($invoiced as $id => $amount) {
+                    $unit = $amount['net'] / $amount['qty'];
+                    if (isset($current[$id])) {
+                        $current[$id]['net'] = $unit * $current[$id]['qty'];
+                    }
+                    if (isset($refunded[$id])) {
+                        $refunded[$id]['net'] = $unit * $refunded[$id]['qty'];
+                    }
+                }
+            }
+        }
+        if ($total <= 0.0) {
+            return null;
+        }
         $lineDiscounts = $this->getWholeUnitDiscounts($order, $store, $invoiced, $total, $discount);
         $net = $target = $capacity = 0.0;
         foreach ($invoiced as $id => $amount) {
@@ -304,6 +332,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
     private function getItemAmounts(
         Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo $document,
         Mage_Sales_Model_Order $order,
+        bool $includeTax = false,
     ): array {
         $amounts = [];
         foreach ($document->getAllItems() as $item) {
@@ -312,9 +341,12 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             if (!$orderItem || !$item->getQty() || $orderItem->isDummy()) {
                 continue;
             }
-            $net = max(0.0, (float) $item->getBaseRowTotal() - (float) $item->getBaseDiscountAmount());
+            $net = (float) $item->getBaseRowTotal() - (float) $item->getBaseDiscountAmount();
+            if ($includeTax) {
+                $net += $item->getBaseTaxAmount() + $item->getBaseHiddenTaxAmount();
+            }
             $amounts[$id] = [
-                'net' => round(($amounts[$id]['net'] ?? 0.0) + $net, 4),
+                'net' => round(($amounts[$id]['net'] ?? 0.0) + max(0.0, $net), 4),
                 'qty' => (float) $item->getQty() + ($amounts[$id]['qty'] ?? 0.0),
             ];
         }
