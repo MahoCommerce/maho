@@ -19,13 +19,10 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract|Mage_Sales_Model_Quote $object
-     * @return Maho\Db\Select
+     * @param Mage_Sales_Model_Quote $object
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select   = parent::_getLoadSelect($field, $value, $object);
         $storeIds = $object->getSharedStoreIds();

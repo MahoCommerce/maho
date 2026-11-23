@@ -127,7 +127,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
     }
 
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         if ($field !== 'code') {
             return parent::_getLoadSelect($field, $value, $object);

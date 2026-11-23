@@ -336,18 +336,17 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     }
 
     /**
-     * Load an object
+     * Load an object. A value that is not a scalar, such as an array from a request parameter, loads nothing.
      *
-     * @param mixed $value
      * @param string|null $field field to load by (defaults to model id)
      * @return $this
      */
-    public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
+    public function load(Mage_Core_Model_Abstract $object, mixed $value, ?string $field = null)
     {
         $field ??= $this->getIdFieldName();
 
         $read = $this->_getReadAdapter();
-        if ($read && !is_null($value) && $this->_canFieldHoldValue($field, $value)) {
+        if ($read && is_scalar($value) && $this->_canFieldHoldValue($field, $value)) {
             $select = $this->_getLoadSelect($field, $value, $object);
             $data = $read->fetchRow($select);
 
@@ -376,13 +375,9 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract $object
-     * @return Maho\Db\Select
      * @throws Exception
      */
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $fields = $this->_getReadAdapter()->describeTable($this->getMainTable());
 

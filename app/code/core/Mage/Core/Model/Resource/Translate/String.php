@@ -20,7 +20,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      */
     #[\Override]
-    public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
+    public function load(Mage_Core_Model_Abstract $object, mixed $value, ?string $field = null): static
     {
         if (is_string($value)) {
             $select = $this->_getReadAdapter()->select()
@@ -37,13 +37,10 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
     /**
      * Retrieve select for load
      *
-     * @param String $field
      * @param String $value
-     * @param Mage_Core_Model_Abstract $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
         $select->where('store_id = ?', Mage_Core_Model_App::ADMIN_STORE_ID);

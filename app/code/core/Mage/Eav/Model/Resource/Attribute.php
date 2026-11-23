@@ -41,14 +41,9 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
 
     /**
      * Retrieve select object for load object data
-     *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract|Mage_Eav_Model_Attribute $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select     = parent::_getLoadSelect($field, $value, $object);
         $websiteId  = (int) $object->getWebsite()->getId();

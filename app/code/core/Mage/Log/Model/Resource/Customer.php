@@ -8,6 +8,8 @@
  * @package Mage_Log
  */
 
+declare(strict_types=1);
+
 class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -68,13 +70,10 @@ class Mage_Log_Model_Resource_Customer extends Mage_Core_Model_Resource_Db_Abstr
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
      * @param Mage_Log_Model_Customer $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
         if ($field == 'customer_id') {

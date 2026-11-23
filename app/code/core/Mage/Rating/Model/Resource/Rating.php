@@ -36,13 +36,10 @@ class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
      * @param Mage_Rating_Model_Rating $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $adapter    = $this->_getReadAdapter();
 

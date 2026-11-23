@@ -331,14 +331,9 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Retrieve select object for load object data
      * Redeclare parent method just for adding tag's base popularity if flag exists
-     *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract|Mage_Tag_Model_Tag $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
         if ($object->getAddBasePopularity() && $object->hasStoreId()) {

@@ -88,7 +88,7 @@ class Mage_Core_Model_Resource_Variable extends Mage_Core_Model_Resource_Db_Abst
      * @param Mage_Core_Model_Variable $object
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
         $this->_addValueToSelect($select, $object->getStoreId());
