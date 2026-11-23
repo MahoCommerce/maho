@@ -32,8 +32,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         if (!$signedTax || !$signedBaseTax) {
             foreach ($order->getAllItems() as $line) {
                 if (!$line->isDummy()) {
-                    $signedTax = $signedTax || (float) $line->getTaxInvoiced() < 0.0;
-                    $signedBaseTax = $signedBaseTax || (float) $line->getBaseTaxInvoiced() < 0.0;
+                    $refunded = (float) $line->getTaxRefunded();
+                    $baseRefunded = (float) $line->getBaseTaxRefunded();
+                    $signedTax = $signedTax || $refunded < 0.0 || $refunded > (float) $line->getTaxInvoiced();
+                    $signedBaseTax = $signedBaseTax || $baseRefunded < 0.0 || $baseRefunded > (float) $line->getBaseTaxInvoiced();
                 }
             }
         }
@@ -85,15 +87,15 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             $baseOrderItemHiddenTax = $orderItem->getBaseHiddenTaxInvoiced();
             $orderItemQty     = $orderItem->getQtyInvoiced();
             $source = $invoiceTaxes[$item->getOrderItemId()] ?? null;
+            $prior = $refundedOnHeaders[$item->getOrderItemId()] ?? [];
+            $tax = $orderItemTax - ($prior['regular'] ?? $orderItem->getTaxRefunded());
+            $baseTax = $baseOrderItemTax - ($prior['base'] ?? $orderItem->getBaseTaxRefunded());
 
-            if ($orderItemQty && ($orderItemTax || $baseOrderItemTax || $orderItemHiddenTax || $baseOrderItemHiddenTax
+            if ($orderItemQty && ($orderItemTax || $baseOrderItemTax || $tax || $baseTax || $orderItemHiddenTax || $baseOrderItemHiddenTax
                 || !empty($source['regular']) || !empty($source['base']))) {
                 /**
                  * Check item tax amount
                  */
-                $prior = $refundedOnHeaders[$item->getOrderItemId()] ?? [];
-                $tax            = $orderItemTax - ($prior['regular'] ?? $orderItem->getTaxRefunded());
-                $baseTax        = $baseOrderItemTax - ($prior['base'] ?? $orderItem->getBaseTaxRefunded());
                 $hiddenTax      = $orderItemHiddenTax - $orderItem->getHiddenTaxRefunded();
                 $baseHiddenTax  = $baseOrderItemHiddenTax - $orderItem->getBaseHiddenTaxRefunded();
                 $availableQty = $orderItemQty - $orderItem->getQtyRefunded();
@@ -328,15 +330,17 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         }
         $hasItems = false;
         $invoiceTaxes = [];
+        $hasLineTax = $invoice && array_any($lineTaxes, static fn(array $line): bool => $line[0] != 0.0);
+        $hasBaseLineTax = $invoice && array_any($baseLineTaxes, static fn(array $line): bool => $line[0] != 0.0);
         foreach ($creditmemo->getAllItems() as $item) {
             $id = $item->getOrderItemId();
             if ($invoice && $creditmemo->getInvoice() && $item->getQty() > 0 && !$item->getOrderItem()->isDummy()) {
                 $invoiceTaxes[$id] = ['qty' => $quantities[$id] ?? 0.0, 'regular' => null, 'base' => null];
                 if ($item->getQty() <= $invoiceTaxes[$id]['qty']) {
-                    if ($positiveTax !== null || $lineTaxes[$id][0] != 0.0) {
+                    if ($positiveTax !== null || ($hasLineTax && $lineTaxes[$id][0] !== null)) {
                         $invoiceTaxes[$id]['regular'] = $this->getInvoiceLineBalance($lineTaxes[$id], (float) $item->getOrderItem()->getTaxInvoiced());
                     }
-                    if ($basePositiveTax !== null || $baseLineTaxes[$id][0] != 0.0) {
+                    if ($basePositiveTax !== null || ($hasBaseLineTax && $baseLineTaxes[$id][0] !== null)) {
                         $invoiceTaxes[$id]['base'] = $this->getInvoiceLineBalance($baseLineTaxes[$id], (float) $item->getOrderItem()->getBaseTaxInvoiced());
                     }
                 }
@@ -367,7 +371,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         foreach ($lines as $line) {
             $byMemo[$line->getParentId()][] = $line;
         }
-        $recorded = $missing = [];
+        $recorded = $missing = $unknown = $quantities = [];
         foreach ($byMemo as $memoId => $items) {
             $memo = $memos[$memoId];
             foreach ($items as $item) {
@@ -376,14 +380,18 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 if (!$orderItem || $orderItem->isDummy() || !$item->getQty()) {
                     continue;
                 }
+                $quantities[$id] = ($quantities[$id] ?? 0.0) + $item->getQty();
+                $single = count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem);
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
-                    if ($amount !== null) {
+                    $paid = $type === 'base' ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount()
+                        : $memo->getTaxAmount() - $memo->getShippingTaxAmount();
+                    if (!$single || ($amount !== null && round($paid, 4) !== $amount)
+                        || !$this->matchesInvoicedItemTax($orderItem, $type, $item->getQty(), $paid)) {
+                        $unknown[$id][$type] = true;
+                    } elseif ($amount === null) {
+                        $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $paid;
+                    } else {
                         $recorded[$id][$type] = ($recorded[$id][$type] ?? 0.0) + $amount;
-                    } elseif (count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)) {
-                        // Shipping VAT is separate. All remaining VAT on this credit belongs to its single item.
-                        $amount = $type === 'base' ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount()
-                            : $memo->getTaxAmount() - $memo->getShippingTaxAmount();
-                        $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $amount;
                     }
                 }
             }
@@ -392,6 +400,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         foreach ($missing as $id => $amounts) {
             $item = $order->getItemById($id);
             foreach ($amounts as $type => $amount) {
+                if (isset($unknown[$id][$type]) || round($quantities[$id] - $item->getQtyRefunded(), 4) != 0.0) {
+                    continue;
+                }
                 $previous = $type === 'base' ? $item->getBaseTaxRefunded() : $item->getTaxRefunded();
                 $booked = $recorded[$id][$type] ?? 0.0;
                 $paid = round($booked + $amount, 4);
@@ -400,7 +411,48 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 }
             }
         }
+        if ($confirmed) {
+            // A rate inferred from the order is usable only if every invoice actually charged it.
+            $quantities = [];
+            foreach ($order->getInvoiceCollection() as $invoice) {
+                if ($invoice->isCanceled()) {
+                    continue;
+                }
+                $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
+                $baseTax = $invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount();
+                $items = $invoice->getAllItems();
+                foreach ($items as $line) {
+                    $tax -= $line->getTaxAmount();
+                    $baseTax -= $line->getBaseTaxAmount();
+                }
+                foreach ($items as $line) {
+                    $id = $line->getOrderItemId();
+                    if (isset($confirmed[$id])) {
+                        $quantities[$id] = ($quantities[$id] ?? 0.0) + $line->getQty();
+                        foreach ($confirmed[$id] as $type => $amount) {
+                            $lineTax = $type === 'base' ? $line->getBaseTaxAmount() : $line->getTaxAmount();
+                            if (round($type === 'base' ? $baseTax : $tax, 4) != 0.0
+                                || !$this->matchesInvoicedItemTax($order->getItemById($id), $type, $line->getQty(), $lineTax)) {
+                                unset($confirmed[$id][$type]);
+                            }
+                        }
+                    }
+                }
+            }
+            foreach ($confirmed as $id => $amounts) {
+                if (round(($quantities[$id] ?? 0.0) - $order->getItemById($id)->getQtyInvoiced(), 4) != 0.0) {
+                    unset($confirmed[$id]);
+                }
+            }
+        }
         return $confirmed;
+    }
+
+    private function matchesInvoicedItemTax(Mage_Sales_Model_Order_Item $item, string $type, float $qty, ?float $tax): bool
+    {
+        $invoiced = $type === 'base' ? $item->getBaseTaxInvoiced() : $item->getTaxInvoiced();
+        return $tax !== null && $item->getQtyInvoiced() > 0
+            && round($invoiced * $qty / $item->getQtyInvoiced(), 4) === round($tax, 4);
     }
 
     /**
@@ -411,8 +463,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
     private function getSharedTaxBalances(Mage_Sales_Model_Order_Invoice $invoice, array $credits, array $source): array
     {
         $order = $invoice->getOrder();
-        $balances = array_fill_keys(array_keys($source), ['remaining' => [0.0, 0.0], 'unpaid' => [0.0, 0.0]]);
-        foreach ([1 => $order->getInvoiceCollection(), -1 => $credits] as $direction => $documents) {
+        $history = array_fill_keys(array_keys($source), [
+            'invoices' => [], 'credits' => [], 'invoices_qty' => 0.0, 'credits_qty' => 0.0, 'unpaid' => [0.0, 0.0],
+        ]);
+        foreach (['invoices' => $order->getInvoiceCollection(), 'credits' => $credits] as $kind => $documents) {
             foreach ($documents as $document) {
                 if ($document instanceof Mage_Sales_Model_Order_Invoice && $document->isCanceled()) {
                     continue;
@@ -423,22 +477,19 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     if (!isset($source[$id])) {
                         continue;
                     }
-                    $paid = null;
+                    $amounts = [$item->getTaxAmount(), $item->getBaseTaxAmount()];
+                    $history[$id][$kind][] = $amounts;
+                    $history[$id][$kind . '_qty'] += $item->getQty();
                     if ($document instanceof Mage_Sales_Model_Order_Creditmemo && $document->getInvoiceId() != $invoice->getId()
                         && count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($order->getItemById($id))) {
                         $paid = [
                             $document->getTaxAmount() - $document->getShippingTaxAmount(),
                             $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount(),
                         ];
-                    }
-                    foreach ([$item->getTaxAmount(), $item->getBaseTaxAmount()] as $currency => $amount) {
-                        if ($direction === 1 && $amount === null) {
-                            $balances[$id]['remaining'][$currency] = null;
-                        } elseif ($balances[$id]['remaining'][$currency] !== null && $amount * $source[$id][$currency] > 0.0) {
-                            $balances[$id]['remaining'][$currency] += $direction * $amount;
-                            if ($paid !== null) {
+                        foreach ($amounts as $currency => $amount) {
+                            if ($amount * $source[$id][$currency] > 0.0) {
                                 // A line can record VAT that the historic credit never paid to the customer.
-                                $balances[$id]['unpaid'][$currency] += $amount < 0.0
+                                $history[$id]['unpaid'][$currency] += $amount < 0.0
                                     ? min(0.0, $amount - min(0.0, $paid[$currency]))
                                     : max(0.0, $amount - max(0.0, $paid[$currency]));
                             }
@@ -447,7 +498,37 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 }
             }
         }
-        return $balances;
+        $result = [];
+        foreach ($source as $id => $taxes) {
+            $rows = $history[$id];
+            $item = $order->getItemById($id);
+            $billed = [$item->getTaxInvoiced(), $item->getBaseTaxInvoiced()];
+            $credited = [$item->getTaxRefunded(), $item->getBaseTaxRefunded()];
+            $allBilled = round($rows['invoices_qty'] - $item->getQtyInvoiced(), 4) == 0.0;
+            $allCredited = round($rows['credits_qty'] - $item->getQtyRefunded(), 4) == 0.0;
+            $remaining = [];
+            foreach ($taxes as $currency => $tax) {
+                $charged = $this->getTaxWithSign(array_column($rows['invoices'], $currency), $tax, $allBilled ? $billed[$currency] : null);
+                $refunded = $this->getTaxWithSign(array_column($rows['credits'], $currency), $tax, $allCredited ? $credited[$currency] : null);
+                $remaining[$currency] = $charged !== null && $refunded !== null ? $charged - $refunded : null;
+            }
+            $result[$id] = ['remaining' => [$remaining[0], $remaining[1]], 'unpaid' => [$rows['unpaid'][0], $rows['unpaid'][1]]];
+        }
+        return $result;
+    }
+
+    /** @param list<?float> $amounts */
+    private function getTaxWithSign(array $amounts, ?float $source, ?float $total): ?float
+    {
+        $missing = count(array_keys($amounts, null, true));
+        if ($missing) {
+            if ($missing > 1 || $total === null) {
+                return null;
+            }
+            // All the item's units are accounted for. Only one row can hold this difference.
+            $amounts[] = round($total - array_sum($amounts), 4);
+        }
+        return array_sum(array_filter($amounts, static fn(?float $amount): bool => $amount * $source > 0.0));
     }
 
     /** @param array{?float, ?float} $line */
@@ -522,10 +603,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             if ($refunded === null && $quantities[$id] > 0) {
                 return null;
             }
-            if ($invoiced != 0.0) {
+            if ($invoiced != 0.0 || $refunded != 0.0) {
                 $positive ??= 0.0;
                 if ($quantities[$id] > 0) {
-                    $positive += max(0.0, $invoiced - max(0.0, $refunded));
+                    $positive += max(0.0, $invoiced - $refunded);
                 }
             }
         }
