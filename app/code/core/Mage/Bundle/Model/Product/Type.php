@@ -520,7 +520,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * @param array<int, Mage_Sales_Model_Quote_Item_Option> $options
      */
     #[\Override]
-    public function updateQtyOption(array $options, \Maho\DataObject $option, int|float|null $value, ?Mage_Catalog_Model_Product $product = null): static
+    public function updateQtyOption(array $options, \Maho\DataObject $option, float $value, ?Mage_Catalog_Model_Product $product = null): static
     {
         $optionProduct      = $option->getProduct();
         $optionUpdateFlag   = $option->getHasQtyOptionUpdate();
@@ -535,7 +535,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                         if ($optionUpdateFlag) {
                             $option->setValue((string) (int) $option->getValue());
                         } else {
-                            $option->setValue($value === null ? null : (string) $value);
+                            $option->setValue((string) $value);
                         }
                     }
                 }

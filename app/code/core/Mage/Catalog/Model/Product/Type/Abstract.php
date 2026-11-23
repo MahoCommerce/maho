@@ -792,7 +792,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *
      * @param array<int, Mage_Sales_Model_Quote_Item_Option> $options
      */
-    public function updateQtyOption(array $options, \Maho\DataObject $option, int|float|null $value, ?Mage_Catalog_Model_Product $product = null): static
+    public function updateQtyOption(array $options, \Maho\DataObject $option, float $value, ?Mage_Catalog_Model_Product $product = null): static
     {
         return $this;
     }
