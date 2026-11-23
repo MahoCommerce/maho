@@ -70,6 +70,13 @@ it('refunds the shipping discount that was charged to another invoice', function
         ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
         [['replacement', 0.02, 4.99, -5.01], ['shipping', 0.02, 6.0, -5.0]],
     ],
+    'fee on the invoice that charged the shipping discount' => [
+        ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.02,
+        [
+            ['replacement', 0.02, 4.97, -5.02, 'options' => ['adjustment_negative' => 0.01]],
+            ['shipping', 0.02, 6.0, -5.0],
+        ], [], 0.01,
+    ],
     'two partial shipping refunds on the invoice that charged it' => [
         ['shipping' => 10.0, 'replacement' => 10.0], 0.004, 1.0, 0.01,
         [
@@ -178,7 +185,7 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
             ['shipping' => 10.0, 'replacement' => 10.0],
             0.004,
             1.0,
-            0.01,
+            $gatewayScenario === 'source fee' ? 0.02 : 0.01,
             split: $gatewayScenario !== 'ordinary port',
             decimalQuantities: $gatewayScenario === 'partial balance',
         );
@@ -231,6 +238,11 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
                 ->and($order->getCreditmemosCollection()->getSize())->toBe(1);
             $offline = $documents->refund($order, $data, invoice: $invoice);
             expect($offline->getBaseGrandTotal())->toBe(5.0)->and($calls->getData('amount'))->toBeNull();
+        } elseif ($gatewayScenario === 'source fee') {
+            expect($documents->prepareCreditmemo($order, $data, [], $invoice)->getBaseGrandTotal())->toBe(4.98);
+            $memo = $documents->refund($order, $data + ['adjustment_negative' => 0.01], offlineRefund: false, invoice: $invoice);
+            expect($memo->getBaseGrandTotal())->toEqualWithDelta(4.97, 0.000001)
+                ->and($calls->getData('amount'))->toEqualWithDelta(4.97, 0.000001);
         } elseif ($gatewayScenario === 'partial balance') {
             $half = ['qtys' => [(int) $items['replacement']->getId() => 0.5]];
             $first = $documents->refund($order, $half, offlineRefund: false, invoice: $invoice);
@@ -262,6 +274,7 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
     'discount already used on the historic port invoice' => 'historical',
     'discount already used on an unlinked historic port refund' => 'unlinked historical',
     'remaining port balance with a positive adjustment' => 'port adjustment',
+    'fee on its source invoice' => 'source fee',
     'balance after a linked partial refund and an adjustment' => 'partial balance',
     'no prior memo moved the discount' => 'matching',
     'explicitly requested shipping on an ordinary order' => 'ordinary port',

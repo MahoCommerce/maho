@@ -130,21 +130,23 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         }
 
         $shippingLeft = round($shipping - (float) $order->getBaseShippingRefunded(), 4);
-        if (($invoice && $refundedShipping !== min($shippingLeft, (float) $invoice->getBaseShippingAmount()))
-            || $memo->getBaseAdjustmentPositive() || $memo->getBaseAdjustmentNegative()
-            || $memo->getAdjustmentPositive() || $memo->getAdjustmentNegative()
-        ) {
+        if ($invoice && $refundedShipping !== min($shippingLeft, (float) $invoice->getBaseShippingAmount())) {
             return $default;
         }
 
+        $adjusted = $memo->getBaseAdjustmentPositive() || $memo->getBaseAdjustmentNegative()
+            || $memo->getAdjustmentPositive() || $memo->getAdjustmentNegative();
         $capacity = max(0.0, round((float) $memo->getBaseGrandTotal() - $itemDiscount, 4));
         if (($invoice && $invoice->getId() === $source->getId())
-            || (!$invoice && $refundedShipping === 0.0 && $shippingLeft === 0.0)
+            || (!$invoice && !$adjusted && $refundedShipping === 0.0 && $shippingLeft === 0.0)
         ) {
             $share = $this->getRefundedItemDiscount($memo, $source, $previous, $shippingDiscount, $used);
             if ($share !== null) {
                 return max(0.0, min($share, $remaining, $capacity));
             }
+        }
+        if ($adjusted) {
+            return $default;
         }
         if ($refundedShipping === $shippingLeft && $this->refundsRemainingItems($memo)) {
             return min($remaining, $capacity);
