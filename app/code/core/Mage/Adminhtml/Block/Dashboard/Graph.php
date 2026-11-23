@@ -126,7 +126,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     {
         $this->_allSeries = $this->getRowsData($this->_dataRows);
         foreach ($this->_axisMaps as $axis => $attr) {
-            $this->setAxisLabels($axis, $this->getRowsData([$attr])[$attr] ?? []);
+            $this->setAxisLabels($axis, $this->getColumnValues($attr));
         }
 
         $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
@@ -214,7 +214,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      * Get the values of each attribute in the collection rows, with negative values set to 0
      *
      * @param list<string> $attributes
-     * @return array<string, list<float|int|string>>
+     * @return array<string, list<float>>
      */
     protected function getRowsData(array $attributes): array
     {
@@ -222,10 +222,24 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         $options = [];
         foreach ($items as $item) {
             foreach ($attributes as $attr) {
-                $options[$attr][] = max(0, $item->getData($attr));
+                $options[$attr][] = max(0.0, (float) $item->getData($attr));
             }
         }
         return $options;
+    }
+
+    /**
+     * Get the value of one attribute in each collection row, such as the date of the row
+     *
+     * @return list<string>
+     */
+    protected function getColumnValues(string $attribute): array
+    {
+        $values = [];
+        foreach ($this->getCollection()->getItems() as $item) {
+            $values[] = (string) $item->getData($attribute);
+        }
+        return $values;
     }
 
     /**
