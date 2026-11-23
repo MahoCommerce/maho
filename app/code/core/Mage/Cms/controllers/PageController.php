@@ -14,7 +14,7 @@ class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
     public function viewAction(): void
     {
         $pageId = $this->getRequest()
-            ->getParam('page_id', $this->getRequest()->getParam('id', false));
+            ->getParam('page_id', $this->getRequest()->getParam('id'));
         $page = Mage::getSingleton('cms/page')
             ->setStoreId(Mage::app()->getStore()->getId())
             ->load($pageId);

@@ -75,11 +75,9 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     }
 
     /**
-     * load self (load by flag code)
-     *
-     * @return $this
+     * Load the flag by its flag code
      */
-    public function loadSelf()
+    public function loadSelf(): static
     {
         if (is_null($this->_flagCode)) {
             Mage::throwException(Mage::helper('core')->__('Please define flag code.'));

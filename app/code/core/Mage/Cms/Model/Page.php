@@ -73,7 +73,7 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
     }
 
     #[\Override]
-    public function load($id, $field = null)
+    public function load(int|string|null $id, ?string $field = null): static
     {
         if (is_null($id)) {
             return $this->noRoutePage();
@@ -83,10 +83,8 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
 
     /**
      * Load No-Route Page
-     *
-     * @return $this
      */
-    public function noRoutePage()
+    public function noRoutePage(): static
     {
         return $this->load(self::NOROUTE_PAGE_ID, $this->getIdFieldName());
     }

@@ -257,17 +257,12 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Load object data. A value that is not an int or a string, such as an array from a request parameter, loads
-     * nothing.
-     *
-     * @param mixed $id
-     * @param string|null $field
-     * @return $this
+     * Load object data
      */
-    public function load($id, $field = null)
+    public function load(int|string|null $id, ?string $field = null): static
     {
         $this->_beforeLoad($id, $field);
-        $this->_getResource()->load($this, is_int($id) || is_string($id) ? $id : null, $field);
+        $this->_getResource()->load($this, $id, $field);
         $this->_afterLoad();
         $this->setOrigData();
         $this->_hasDataChanges = false;

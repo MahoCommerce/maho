@@ -88,7 +88,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/api_role/delete')]
     public function deleteAction(): void
     {
-        $rid = $this->getRequest()->getParam('role_id', false);
+        $rid = $this->getRequest()->getParam('role_id');
 
         //Validate current admin password
         $currentPassword = $this->getRequest()->getParam('current_password');
@@ -116,7 +116,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/api_role/saveRole')]
     public function saveRoleAction(): void
     {
-        $rid        = $this->getRequest()->getParam('role_id', false);
+        $rid        = $this->getRequest()->getParam('role_id');
         $role = Mage::getModel('api/roles')->load($rid);
         if (!$role->getId() && $rid) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('This Role no longer exists'));

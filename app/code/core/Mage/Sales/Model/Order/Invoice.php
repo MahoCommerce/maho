@@ -119,11 +119,8 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
     /**
      * Load invoice by increment id
-     *
-     * @param string $incrementId
-     * @return $this
      */
-    public function loadByIncrementId($incrementId)
+    public function loadByIncrementId(string $incrementId): static
     {
         return $this->load($incrementId, 'increment_id');
     }
