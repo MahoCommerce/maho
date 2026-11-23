@@ -75,11 +75,11 @@ class Mage_ProductAlert_Helper_Data extends Mage_Core_Helper_Url
     }
 
     /**
-     * @param string $block
-     * @return Mage_ProductAlert_Block_Email_Price|Mage_ProductAlert_Block_Email_Stock
+     * Create the block $block outside the layout
+     *
      * @throws Mage_Core_Exception
      */
-    public function createBlock($block)
+    public function createBlock(string|Mage_Core_Block_Abstract $block): Mage_Core_Block_Abstract
     {
         $error = Mage::helper('core')->__('Invalid block type: %s', $block);
         if (is_string($block)) {
