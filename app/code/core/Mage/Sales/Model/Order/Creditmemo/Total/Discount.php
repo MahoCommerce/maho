@@ -227,6 +227,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             }
         }
         $history = [];
+        $paidTaxes = $includeTax ? $this->getRefundedTaxWithoutShipping($previous, $order, true) : [];
         if ($includeTax) {
             usort($previous, static fn(Mage_Sales_Model_Order_Creditmemo $first, Mage_Sales_Model_Order_Creditmemo $second): int
                 => $first->getId() <=> $second->getId());
@@ -235,7 +236,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             if ($row->getInvoiceId() && $row->getInvoiceId() !== (int) $source->getId()) {
                 continue;
             }
-            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax, $source, $history), $invoiced);
+            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax, $source, $history, $paidTaxes[$row->getId()] ?? null), $invoiced);
             if (!$row->getInvoiceId() && $amounts) {
                 $otherItems ??= $this->getItemsOnOtherInvoices($order, $source);
                 if (array_intersect_key($amounts, $otherItems)) {
@@ -350,6 +351,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         bool $includeTax = false,
         ?Mage_Sales_Model_Order_Invoice $source = null,
         array &$history = [],
+        ?float $paidTax = null,
     ): array {
         $amounts = [];
         $taxes = [];
@@ -368,7 +370,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                     && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)
                 ) {
                     [$priorQty, $priorTax] = $history[$id] ?? [0.0, 0.0];
-                    $tax = $this->getHistoricItemTax($document, $source, $item, $priorQty, $priorTax, count($items) === 1);
+                    $tax = $this->getHistoricItemTax($document, $source, $item, $priorQty, $priorTax, count($items) === 1, $paidTax);
                 }
                 if ($source) {
                     $taxes[$id] = ($taxes[$id] ?? 0.0) + $tax;
@@ -382,8 +384,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             ];
         }
         if ($taxes && $document instanceof Mage_Sales_Model_Order_Creditmemo) {
-            $paid = $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount();
-            $known = $known && $document->getBaseTaxAmount() !== null && round(array_sum($taxes) - $paid, 4) === 0.0;
+            $known = $known && $paidTax !== null && round(array_sum($taxes) - $paidTax, 4) === 0.0;
             foreach ($taxes as $id => $tax) {
                 [$qty, $priorTax] = $history[$id] ?? [0.0, 0.0];
                 $history[$id] = [$qty + $amounts[$id]['qty'], $known && $priorTax !== null ? $priorTax + $tax : null];
@@ -399,8 +400,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         float $priorQty,
         ?float $priorTax,
         bool $singleItem,
+        ?float $paidTax,
     ): ?float {
-        if ($priorTax === null || $memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
+        if ($priorTax === null || ($singleItem && $paidTax === null) || $memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
             return null;
         }
         $expected = null;
@@ -424,7 +426,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             }
         }
         // On a multi-item credit only an exempt invoice line proves its own tax independently of the header.
-        $paid = $singleItem ? round($memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount(), 4) : 0.0;
+        $paid = $singleItem ? $paidTax : 0.0;
         return round($outsideItems, 4) === 0.0 && $expected !== null
             && ($paid === round($expected, 4) || $paid === $memo->getStore()->roundPrice($expected)) ? $paid : null;
     }

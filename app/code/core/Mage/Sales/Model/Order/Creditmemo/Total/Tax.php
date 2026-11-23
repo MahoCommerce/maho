@@ -379,6 +379,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         }
         $recorded = $missing = $unknown = $quantities = $inferred = [];
         $invoices = $order->getInvoiceCollection()->getItems();
+        $paidTaxes = [
+            'regular' => $this->getRefundedTaxWithoutShipping($memos, $order, false),
+            'base' => $this->getRefundedTaxWithoutShipping($memos, $order, true),
+        ];
         foreach ($memos as $memoId => $memo) {
             $items = $byMemo[$memoId] ?? [];
             foreach ($items as $item) {
@@ -396,12 +400,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $sourceLine = count($source) === 1 && $source[0]->getOrderItemId() == $id && round($linked[$id] - $source[0]->getQty(), 4) <= 0.0
                     ? $source[0] : null;
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
-                    $header = $type === 'base' ? $memo->getBaseTaxAmount() : $memo->getTaxAmount();
-                    if (!$single || $qtyLeft < $item->getQty() || $header === null) {
+                    $paid = $paidTaxes[$type][$memoId];
+                    if (!$single || $qtyLeft < $item->getQty() || $paid === null) {
                         $unknown[$id][$type] = true;
                         continue;
                     }
-                    $paid = round($header - ($type === 'base' ? $memo->getBaseShippingTaxAmount() : $memo->getShippingTaxAmount()), 4);
                     if ($amount !== null) {
                         if ($amount !== $paid) {
                             $unknown[$id][$type] = true;

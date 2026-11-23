@@ -30,6 +30,39 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
     }
 
     /**
+     * @param array<Mage_Sales_Model_Order_Creditmemo> $credits
+     * @return array<int, ?float>
+     */
+    protected function getRefundedTaxWithoutShipping(array $credits, Mage_Sales_Model_Order $order, bool $base): array
+    {
+        $amounts = $missing = [];
+        $shipping = $knownTax = 0.0;
+        foreach ($credits as $credit) {
+            $id = $credit->getId();
+            $header = $base ? $credit->getBaseTaxAmount() : $credit->getTaxAmount();
+            $shippingTax = $base ? $credit->getBaseShippingTaxAmount() : $credit->getShippingTaxAmount();
+            $shipping += $base ? $credit->getBaseShippingAmount() : $credit->getShippingAmount();
+            $knownTax += $shippingTax;
+            if ($shippingTax === null && ($credit->getBaseShippingAmount() || $credit->getShippingAmount())) {
+                $missing[$id] = $header;
+                $amounts[$id] = null;
+            } else {
+                $amounts[$id] = $header === null ? null : round($header - $shippingTax, 4);
+            }
+        }
+        // Only one shipping credit can own the difference from the order's refunded shipping VAT.
+        if (count($missing) === 1) {
+            $id = array_key_first($missing);
+            $refunded = $base ? $order->getBaseShippingRefunded() : $order->getShippingRefunded();
+            $tax = $base ? $order->getBaseShippingTaxRefunded() : $order->getShippingTaxRefunded();
+            if ($missing[$id] !== null && $refunded !== null && $tax !== null && round($shipping - $refunded, 4) === 0.0) {
+                $amounts[$id] = round($missing[$id] - ($tax - $knownTax), 4);
+            }
+        }
+        return $amounts;
+    }
+
+    /**
      * Return the part of $amount that a refund of $baseShipping more shipping takes.
      * It counts on all the shipping refunded so far, so the parts of all the credit memos add up to $amount.
      */
