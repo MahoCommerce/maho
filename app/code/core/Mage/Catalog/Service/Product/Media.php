@@ -180,9 +180,7 @@ class Mage_Catalog_Service_Product_Media
 
     private function getBackend(Product $product): MediaBackend
     {
-        /** @var MediaBackend $backend */
-        $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
-        return $backend;
+        return $product->getResource()->getMediaGalleryBackend();
     }
 
     /**
