@@ -57,7 +57,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends \Maho\Data\
     }
 
     #[\Override]
-    public function getEscapedValue(int|string|null $index = null): string
+    public function getEscapedValue(?int $index = null): string
     {
         $value = $this->getValue();
 

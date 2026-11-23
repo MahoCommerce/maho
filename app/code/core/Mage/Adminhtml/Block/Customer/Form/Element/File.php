@@ -169,14 +169,11 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\El
     }
 
     #[\Override]
-    public function getEscapedValue(int|string|null $index = null): string
+    public function getEscapedValue(?int $index = null): string
     {
-        $value = $this->getValue();
-        if (is_array($value)) {
+        if (is_array($this->getValue())) {
             return '';
         }
-
-        $index ??= 'value';
 
         return parent::getEscapedValue($index);
     }
