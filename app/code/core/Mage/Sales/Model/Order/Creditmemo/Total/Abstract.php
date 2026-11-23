@@ -37,26 +37,42 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
     {
         $amounts = $missing = [];
         $shipping = $knownTax = 0.0;
+        $tax = $base ? $order->getBaseShippingTaxRefunded() : $order->getShippingTaxRefunded();
+        $consistent = $tax !== null;
         foreach ($credits as $credit) {
             $id = $credit->getId();
             $header = $base ? $credit->getBaseTaxAmount() : $credit->getTaxAmount();
             $shippingTax = $base ? $credit->getBaseShippingTaxAmount() : $credit->getShippingTaxAmount();
-            $shipping += $base ? $credit->getBaseShippingAmount() : $credit->getShippingAmount();
-            $knownTax += $shippingTax;
+            $principal = $base ? $credit->getBaseShippingAmount() : $credit->getShippingAmount();
+            $shipping += $principal;
+            if ($shippingTax === null && $principal > 0.0 && $header !== null) {
+                $total = $base ? $credit->getBaseGrandTotal() : $credit->getGrandTotal();
+                if ($total !== null && round($total - $principal, 4) === $header
+                    && !($base ? $credit->getBaseSubtotal() : $credit->getSubtotal())
+                    && !($base ? $credit->getBaseDiscountAmount() : $credit->getDiscountAmount())
+                    && !($base ? $credit->getBaseAdjustmentPositive() : $credit->getAdjustmentPositive())
+                    && !($base ? $credit->getBaseAdjustmentNegative() : $credit->getAdjustmentNegative())
+                    && !$credit->getAllItems()) {
+                    $shippingTax = $header;
+                }
+            }
             if ($shippingTax === null && ($credit->getBaseShippingAmount() || $credit->getShippingAmount())) {
                 $missing[$id] = $header;
                 $amounts[$id] = null;
             } else {
                 $amounts[$id] = $header === null ? null : round($header - $shippingTax, 4);
+                $knownTax += $shippingTax;
+                $consistent = $consistent && (float) $shippingTax >= min(0.0, $tax) && (float) $shippingTax <= max(0.0, $tax);
             }
         }
         // Only one shipping credit can own the difference from the order's refunded shipping VAT.
-        if (count($missing) === 1) {
+        if (count($missing) === 1 && $consistent) {
             $id = array_key_first($missing);
             $refunded = $base ? $order->getBaseShippingRefunded() : $order->getShippingRefunded();
-            $tax = $base ? $order->getBaseShippingTaxRefunded() : $order->getShippingTaxRefunded();
-            if ($missing[$id] !== null && $refunded !== null && $tax !== null && round($shipping - $refunded, 4) === 0.0) {
-                $amounts[$id] = round($missing[$id] - ($tax - $knownTax), 4);
+            $remainder = round($tax - $knownTax, 4);
+            if ($missing[$id] !== null && $refunded !== null && round($shipping - $refunded, 4) === 0.0
+                && $remainder >= min(0.0, $tax) && $remainder <= max(0.0, $tax)) {
+                $amounts[$id] = round($missing[$id] - $remainder, 4);
             }
         }
         return $amounts;

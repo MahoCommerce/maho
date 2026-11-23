@@ -620,7 +620,7 @@ it('keeps the historical tax cent left after the first unit was refunded', funct
     'header-only tax on the unlinked credit for a unique invoice item' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.49, 0.10, true, [0.03, 0.03], 'header only'],
 ]);
 
-it('keeps shipping VAT outside the historic merchandise amount used for the split discount', function (float $itemTax): void {
+it('keeps shipping VAT outside the historic merchandise amount used for the split discount', function (float $itemTax, bool $staleLedger = false): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
@@ -643,25 +643,37 @@ it('keeps shipping VAT outside the historic merchandise amount used for the spli
         $order->setBaseDiscountAmount(-6.26)->setBaseDiscountInvoiced(-6.26)->setBaseShippingTaxAmount(0.03)
             ->setBaseTaxAmount(0.29)->setBaseTaxInvoiced(0.29)->setBaseGrandTotal(15.23)->setBaseTotalPaid(15.23)->setBaseTotalInvoiced(15.23)->save();
         $documents = Mage::getService('sales/order_document');
+        if ($staleLedger) {
+            $documents->refund($order, ['qtys' => [], 'shipping_amount' => 5.0], beforeRegister: static function ($memo): void {
+                $memo->setBaseShippingAmount(5.0)->setBaseShippingTaxAmount(0.02)->setBaseTaxAmount(0.02)
+                    ->setBaseDiscountAmount(0.0)->setBaseGrandTotal(5.02);
+            });
+        }
+        $shipping = $staleLedger ? 5.0 : 10.0;
+        $shippingTax = $staleLedger ? 0.01 : 0.03;
         $previous = $documents->refund(
             $order,
-            ['qtys' => [$items['first']->getId() => 1], 'shipping_amount' => 10.0],
-            beforeRegister: static function ($memo) use ($itemTax): void {
+            ['qtys' => [$items['first']->getId() => 1], 'shipping_amount' => $shipping],
+            beforeRegister: static function ($memo) use ($shipping, $shippingTax, $itemTax): void {
                 $memo->getAllItems()[0]->setBaseTaxAmount(null);
-                $memo->setBaseShippingAmount(10.0)->setBaseShippingTaxAmount(0.03)->setBaseTaxAmount(0.03 + $itemTax)
-                    ->setBaseDiscountAmount(-0.10)->setBaseGrandTotal(10.03 + $itemTax);
+                $memo->setBaseShippingAmount($shipping)->setBaseShippingTaxAmount($shippingTax)->setBaseTaxAmount($shippingTax + $itemTax)
+                    ->setBaseDiscountAmount(-0.10)->setBaseGrandTotal($shipping + $shippingTax + $itemTax);
             },
         );
         $previous->setBaseShippingTaxAmount(null)->save();
         $order = Mage::getModel('sales/order')->load($order->getId());
         expect([$order->getBaseShippingRefunded(), $order->getBaseShippingTaxRefunded()])->toBe([10.0, 0.03]);
+        if ($staleLedger) {
+            $order->setBaseShippingTaxRefunded(0.0)->save();
+        }
         $memo = $documents->refund($order, ['qtys' => [$items['second']->getId() => 1], 'adjustment_negative' => 0.01], invoice: $source);
         $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
         expect([$memo->getBaseDiscountAmount(), $memo->getBaseGrandTotal()])->toBe($itemTax ? [-0.53, 0.06] : [-0.50, 0.09]);
     } finally {
         $connection->rollBack();
     }
-})->with(['only the shipping tax was paid' => 0.0, 'merchandise and shipping tax were paid' => 0.03]);
+})->with(['only the shipping tax was paid' => [0.0], 'merchandise and shipping tax were paid' => [0.03],
+    'a recorded shipping tax exceeds the order counter' => [0.0, true]]);
 
 it('limits the deferred shipping discount to the tax actually refunded', function (): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
