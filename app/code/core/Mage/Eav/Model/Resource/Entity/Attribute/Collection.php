@@ -10,9 +10,6 @@
 
 /**
  * @method Mage_Eav_Model_Resource_Entity_Attribute getResource()
- * @method Mage_Eav_Model_Entity_Attribute getItemById(int $value)
- * @method Mage_Eav_Model_Entity_Attribute[] getItems()
- * @method Mage_Eav_Model_Entity_Attribute getFirstItem()
  * @template TItem of Mage_Eav_Model_Entity_Attribute = Mage_Eav_Model_Entity_Attribute
  * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<TItem>
  */

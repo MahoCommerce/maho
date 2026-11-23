@@ -14,8 +14,6 @@ declare(strict_types=1);
  * Block to display downloadable links bought by customer
  *
  * @package    Mage_Downloadable
- *
- * @method Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection getItems()
  */
 class Mage_Downloadable_Block_Customer_Products_List extends Mage_Core_Block_Template
 {
@@ -127,6 +125,11 @@ class Mage_Downloadable_Block_Customer_Products_List extends Mage_Core_Block_Tem
     public function getIsOpenInNewWindow()
     {
         return Mage::getStoreConfigFlag(Mage_Downloadable_Model_Link::XML_PATH_TARGET_NEW_WINDOW);
+    }
+
+    public function getItems(): ?Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection
+    {
+        return $this->getData('items');
     }
 
     public function setItems(?Mage_Downloadable_Model_Resource_Link_Purchased_Item_Collection $value): static

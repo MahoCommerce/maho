@@ -13,7 +13,6 @@
  *
  * @package    Mage_Catalog
  *
- * @method Mage_Catalog_Model_Product_Option getItemById($value)
  * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Catalog_Model_Product_Option>
  */
 class Mage_Catalog_Model_Resource_Product_Option_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

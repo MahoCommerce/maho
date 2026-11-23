@@ -8,9 +8,6 @@
  * @package Mage_Reports
  */
 
-/**
- * @method Mage_Sales_Model_Order getFirstItem()
- */
 class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Resource_Order_Collection implements Mage_Reports_Model_Report_CollectionInterface
 {
     /**

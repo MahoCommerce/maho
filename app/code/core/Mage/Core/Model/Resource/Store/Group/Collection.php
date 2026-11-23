@@ -9,8 +9,6 @@
  */
 
 /**
- * @method Mage_Core_Model_Store_Group getItemById(int $value)
- * @method Mage_Core_Model_Store_Group[] getItems()
  * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Core_Model_Store_Group>
  */
 class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract

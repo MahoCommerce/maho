@@ -696,12 +696,9 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * Retrieve item by id
-     *
-     * @param   mixed $idValue
-     * @return  DataObject|null
+     * @return TItem|null
      */
-    public function getItemById($idValue)
+    public function getItemById(int|string|null $idValue): ?DataObject
     {
         $this->load();
         if ($idValue === null) {

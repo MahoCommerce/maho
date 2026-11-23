@@ -14,8 +14,6 @@
  * @package    Mage_Directory
  *
  * @property Mage_Directory_Model_Country[] $_items
- * @method  Mage_Directory_Model_Country getFirstItem()
- * @method  Mage_Directory_Model_Country getLastItem()
  * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Directory_Model_Country>
  */
 class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
@@ -90,23 +88,6 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
             $this->addFieldToFilter('main_table.country_id', ['in' => $allowCountries]);
         }
         return $this;
-    }
-
-    /**
-     * Loads Item By Id
-     *
-     * @param string $countryId
-     * @return Mage_Directory_Model_Resource_Country|Mage_Directory_Model_Country
-     */
-    #[\Override]
-    public function getItemById($countryId)
-    {
-        foreach ($this->_items as $country) {
-            if ($country->getCountryId() == $countryId) {
-                return $country;
-            }
-        }
-        return Mage::getResourceModel('directory/country');
     }
 
     /**

@@ -65,7 +65,6 @@ class Mage_Sales_Block_Order_Comments extends Mage_Core_Block_Template
                 Mage::throwException(Mage::helper('sales')->__('Invalid entity model'));
             }
 
-            /** @var Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract $commentCollection */
             $commentCollection = Mage::getResourceModel($collectionClass);
             $this->_commentCollection = $commentCollection;
             $this->_commentCollection->setParentFilter($entity)

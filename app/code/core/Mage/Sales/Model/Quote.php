@@ -755,24 +755,18 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return false;
     }
 
-    /**
-     * Retrieve item model object by item identifier
-     *
-     * @param   int $itemId
-     * @return  Mage_Sales_Model_Quote_Item
-     */
-    public function getItemById($itemId)
+    public function getItemById(int|string|null $itemId): ?Mage_Sales_Model_Quote_Item
     {
-        if ($quoteItem = $this->getItemsCollection()->getItemById($itemId)) {
+        $quoteItem = $this->getItemsCollection()->getItemById($itemId);
+        if ($quoteItem) {
             return $quoteItem;
         }
         foreach ($this->getItemsCollection() as $item) {
             if ($item->getId() == $itemId) {
-                $quoteItem = $item;
-                return $quoteItem;
+                return $item;
             }
         }
-        return $quoteItem;
+        return null;
     }
 
     /**
