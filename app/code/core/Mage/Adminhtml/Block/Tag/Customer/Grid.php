@@ -104,12 +104,8 @@ class Mage_Adminhtml_Block_Tag_Customer_Grid extends Mage_Adminhtml_Block_Widget
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param \Maho\DataObject $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/customer/edit', ['id' => $row->getId()]);
     }

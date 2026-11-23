@@ -99,7 +99,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
         ]);
 
         $this->addColumn('times_used', [
-            'header'    => Mage::helper('salesrule')->__('Times used'),
+            'header'    => Mage::helper('salesrule')->__('Times Used'),
             'align'     => 'left',
             'index'     => 'times_used',
             'type'      => 'number',
@@ -128,15 +128,8 @@ class Mage_Adminhtml_Block_Promo_Quote_Grid extends Mage_Adminhtml_Block_Widget_
         return $this;
     }
 
-    /**
-     * Retrieve row click URL
-     *
-     * @param \Maho\DataObject $row
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getRuleId()]);
     }

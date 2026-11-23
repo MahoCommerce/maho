@@ -86,7 +86,7 @@ class Maho_Ai_Block_Adminhtml_Usage_Grid extends Mage_Adminhtml_Block_Widget_Gri
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

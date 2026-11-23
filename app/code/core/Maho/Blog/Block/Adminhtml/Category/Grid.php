@@ -134,7 +134,7 @@ class Maho_Blog_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Block_Widge
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

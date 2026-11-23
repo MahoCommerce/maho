@@ -33,14 +33,8 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_Grid extends Mage_Adminhtml_B
         return $this->getUrl('*/sales_billing_agreement/grid', ['_current' => true]);
     }
 
-    /**
-     * Retrieve row url
-     *
-     * @param Mage_Sales_Model_Billing_Agreement $item
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($item)
+    public function getRowUrl(\Maho\DataObject $item): string
     {
         return $this->getUrl('*/sales_billing_agreement/view', ['agreement' => $item->getAgreementId()]);
     }

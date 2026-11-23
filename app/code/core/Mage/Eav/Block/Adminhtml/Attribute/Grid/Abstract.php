@@ -65,14 +65,8 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Grid_Abstract extends Mage_Adm
         return $this;
     }
 
-    /**
-     * Return url of given row
-     *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['attribute_id' => $row->getAttributeId()]);
     }

@@ -69,7 +69,7 @@ class Mage_Adminhtml_Block_Dashboard_Tab_Products_Viewed extends Mage_Adminhtml_
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         $params = ['id' => $row->getId()];
         if ($this->getRequest()->getParam('store')) {

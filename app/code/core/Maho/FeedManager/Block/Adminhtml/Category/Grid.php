@@ -148,7 +148,7 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         if (!$row->getSupportsMapping()) {
             return '';

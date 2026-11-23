@@ -85,13 +85,8 @@ class Mage_Adminhtml_Block_Report_Search_Grid extends Mage_Adminhtml_Block_Widge
         return parent::_prepareColumns();
     }
 
-    /**
-     * Retrieve Row Click callback URL
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_search/edit', ['id' => $row->getId()]);
     }

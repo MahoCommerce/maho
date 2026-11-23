@@ -65,7 +65,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

@@ -87,7 +87,7 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('adminhtml/contentversion/preview', ['version_id' => $row->getId()]);
     }

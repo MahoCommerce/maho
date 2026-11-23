@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Report_Review_Customer_Grid extends Mage_Adminhtml_Bl
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_product_review', ['customerId' => $row->getCustomerId()]);
     }

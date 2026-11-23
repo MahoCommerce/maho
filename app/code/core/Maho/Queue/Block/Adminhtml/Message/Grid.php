@@ -143,7 +143,7 @@ class Maho_Queue_Block_Adminhtml_Message_Grid extends Mage_Adminhtml_Block_Widge
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/view', ['id' => $row->getId()]);
     }

@@ -64,7 +64,7 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

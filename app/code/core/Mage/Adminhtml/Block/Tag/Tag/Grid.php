@@ -147,14 +147,8 @@ class Mage_Adminhtml_Block_Tag_Tag_Grid extends Mage_Adminhtml_Block_Widget_Grid
         return $this->getUrl('*/tag/ajaxGrid', ['_current' => true]);
     }
 
-    /**
-     * Retrieves row click URL
-     *
-     * @param  Mage_Tag_Model_Tag $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['tag_id' => $row->getId()]);
     }
