@@ -17,7 +17,7 @@
     </div>
     <div class="d-content">
         <?php if ($this->getAllowWriteReviewFlag()): ?>
-        <form action="<?= $this->getAction() ?>" method="post" id="review-form">
+        <form action="<?= $this->getFormActionUrl() ?>" method="post" id="review-form">
             <?= $this->getBlockHtml('formkey') ?>
             <?= $this->getChildHtml('form_fields_before') ?>
 
