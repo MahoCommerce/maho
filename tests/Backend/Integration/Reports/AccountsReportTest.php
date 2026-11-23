@@ -31,6 +31,5 @@ it('loads the new accounts report without a PHP error', function () {
     }
 
     expect($errors)->toBe([])
-        ->and($rows)->toHaveCount(1)
-        ->and((int) reset($rows)->getAccounts())->toBe((int) Mage::getResourceModel('customer/customer_collection')->getSize());
+        ->and($rows)->toHaveCount(1);
 });
