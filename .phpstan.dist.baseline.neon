@@ -61,12 +61,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: Binary operation "*" between string and 1 results in an error.
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Tax/Rate/Grid/Renderer/Data.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getRowUrl() expects int|string|null, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
@@ -529,54 +523,6 @@ parameters:
 			path: app/code/core/Mage/Tag/Model/Resource/Tag.php
 
 		-
-			rawMessage: 'Parameter #1 $store of method Mage_Weee_Helper_Data::validateCatalogPricesAndFptConfiguration() expects Mage_Core_Model_Store|null, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Block/Adminhtml/Notifications.php
-
-		-
-			rawMessage: 'Parameter #1 $shippingAddress of method Mage_Tax_Model_Calculation::getRateRequest() expects Mage_Sales_Model_Quote_Address|false|null, Mage_Customer_Model_Address|null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #2 $billingAddress of method Mage_Tax_Model_Calculation::getRateRequest() expects Mage_Sales_Model_Quote_Address|false|null, Mage_Customer_Model_Address|null given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #2 $format of method Mage_Core_Model_Store::convertPrice() expects bool, string|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #1 $request of method Mage_Tax_Model_Resource_Calculation::getCalculationProcess() expects Maho\DataObject, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Calculation.php
-
-		-
-			rawMessage: 'Parameter #1 $tags of method Mage_Core_Model_App::cleanCache() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
-
-		-
-			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Shipping::_round() expects string, float given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Shipping.php
-
-		-
-			rawMessage: 'Parameter #2 $rate of method Mage_Tax_Model_Sales_Total_Quote_Subtotal::_deltaRound() expects string, float given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Tax/Model/Sales/Total/Quote/Subtotal.php
-
-		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
@@ -589,46 +535,10 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Parameter #1 $array of function usort contains unresolvable type.'
-			identifier: argument.unresolvableType
-			count: 1
-			path: app/code/core/Mage/Weee/Block/Renderer/Weee/Tax.php
-
-		-
-			rawMessage: 'Parameter #2 $shipping of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Maho\DataObject|false|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #3 $billing of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Maho\DataObject|false|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Helper/Data.php
-
-		-
 			rawMessage: 'Parameter #1 $product of method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax::deleteProductData() expects Mage_Catalog_Model_Product, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
-
-		-
-			rawMessage: 'Parameter #2 $shipping of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Mage_Customer_Model_Address_Abstract|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
-			rawMessage: 'Parameter #3 $billing of method Mage_Weee_Model_Tax::getProductWeeeAttributes() expects Mage_Sales_Model_Quote_Address|null, Mage_Customer_Model_Address_Abstract|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Tax.php
-
-		-
-			rawMessage: PHPDoc type Mage_Weee_Helper_Data of property Mage_Weee_Model_Total_Quote_Weee::$_helper is not the same as PHPDoc type Mage_Tax_Helper_Data of overridden property Mage_Tax_Model_Sales_Total_Quote_Tax::$_helper.
-			identifier: property.phpDocType
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Total/Quote/Weee.php
 
 		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'

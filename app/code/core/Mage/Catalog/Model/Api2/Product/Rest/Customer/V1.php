@@ -48,8 +48,8 @@ class Mage_Catalog_Model_Api2_Product_Rest_Customer_V1 extends Mage_Catalog_Mode
         $price = $this->_getPrice(
             $price,
             $withTax,
-            $customer->getPrimaryShippingAddress(),
-            $customer->getPrimaryBillingAddress(),
+            $customer->getPrimaryShippingAddress() ?: null,
+            $customer->getPrimaryBillingAddress() ?: null,
             $customer->getTaxClassId(),
         );
         $session->setCustomerId(null);
