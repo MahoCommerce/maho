@@ -53,10 +53,14 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $baseTotalTax += $share['base_gross'] - $share['base_discount'];
         }
 
+        if ($itemShares === []) {
+            return $this;
+        }
+
         $last = $invoice->isLast();
         $requestedTax = $totalTax;
         $requestedBaseTax = $baseTotalTax;
-        $included = $source === null ? null : $allocation->feeWasIncludedInSubtotal($order);
+        $included = $allocation->feeWasIncludedInSubtotal($order);
         if ($last) {
             // The subtotal and tax collectors have already booked the signed remainder.
             $totalTax = 0.0;
