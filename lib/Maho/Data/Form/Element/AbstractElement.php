@@ -89,7 +89,6 @@ abstract class AbstractElement extends AbstractForm
     }
 
     /**
-     * @param string $id
      * @return $this
      */
     #[\Override]

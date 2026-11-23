@@ -113,12 +113,15 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
     /**
      * Add Store ID filter
      *
-     * @param int|array $store
+     * @param Mage_Core_Model_Store|int|string|bool|array|null $store
      * @return $this
      */
     #[\Override]
     public function addStoreFilter($store = null)
     {
+        if ($store instanceof Mage_Core_Model_Store) {
+            $store = $store->getId();
+        }
         if (!is_null($store)) {
             $this->getSelect()->where('relation.store_id IN (?)', $store);
         }

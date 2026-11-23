@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @extends Mage_Sales_Model_Resource_Abstract<Mage_Sales_Model_Quote>
+ */
 class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 {
     #[\Override]

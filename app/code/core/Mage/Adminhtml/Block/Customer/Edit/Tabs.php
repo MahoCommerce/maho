@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tabs extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @return Mage_Adminhtml_Block_Widget_Tabs
+     * @return $this
      * @throws Exception
      */
     #[\Override]

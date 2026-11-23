@@ -81,7 +81,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Customer_Show_Customer extends 
     /**
      * Processing object after delete data
      *
-     * @return Mage_Core_Model_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterDelete()

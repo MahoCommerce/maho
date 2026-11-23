@@ -20,7 +20,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Check if module functionality is enabled
      *
-     * @return Mage_Core_Controller_Front_Action
+     * @return $this
      */
     #[\Override]
     public function preDispatch()

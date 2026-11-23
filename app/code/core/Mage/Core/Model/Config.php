@@ -560,7 +560,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Save configuration cache
      *
      * @param   array $tags cache tags
-     * @return  Mage_Core_Model_Config
+     * @return $this
      */
     #[\Override]
     public function saveCache($tags = [])
@@ -670,7 +670,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param   string $data
      * @param   string $id
      * @param   array $tags
-     * @param   false|int $lifetime
+     * @param   int|false|null $lifetime
      * @return  bool
      */
     #[\Override]

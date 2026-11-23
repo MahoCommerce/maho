@@ -14,7 +14,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Array extends Mage_Eav_Model_Entit
      * Prepare data for save
      *
      * @param \Maho\DataObject $object
-     * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @return $this
      */
     #[\Override]
     public function beforeSave($object)

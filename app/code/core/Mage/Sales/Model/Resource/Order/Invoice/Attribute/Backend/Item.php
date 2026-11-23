@@ -14,7 +14,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Attribute_Backend_Item extends Mag
      * Method is invoked after save
      *
      * @param \Maho\DataObject $object
-     * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @return $this
      */
     #[\Override]
     public function afterSave($object)

@@ -804,13 +804,14 @@ class DataObject implements ArrayAccess, JsonSerializable
      * Implementation of ArrayAccess::offsetSet()
      *
      * @link http://www.php.net/manual/en/arrayaccess.offsetset.php
-     * @param string $offset
-     * @param mixed $value
+     * @param string|null $offset
      */
     #[\Override]
-    public function offsetSet($offset, $value): void
+    public function offsetSet(mixed $offset, mixed $value): void
     {
-        $this->setData($offset, $value);
+        if ($offset !== null) {
+            $this->setData($offset, $value);
+        }
     }
 
     /**
@@ -820,7 +821,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      * @param string $offset
      */
     #[\Override]
-    public function offsetExists($offset): bool
+    public function offsetExists(mixed $offset): bool
     {
         return isset($this->_data[$offset]);
     }
@@ -832,7 +833,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      * @param string $offset
      */
     #[\Override]
-    public function offsetUnset($offset): void
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->_data[$offset]);
     }
@@ -842,11 +843,9 @@ class DataObject implements ArrayAccess, JsonSerializable
      *
      * @link http://www.php.net/manual/en/arrayaccess.offsetget.php
      * @param string $offset
-     * @return mixed
      */
-    #[\ReturnTypeWillChange]
     #[\Override]
-    public function offsetGet($offset)
+    public function offsetGet(mixed $offset): mixed
     {
         return $this->_data[$offset] ?? null;
     }

@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Eav_Model_Resource_Entity_Attribute<Mage_Catalog_Model_Resource_Eav_Attribute>
+ */
 class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Entity_Attribute
 {
     #[\Override]

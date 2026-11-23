@@ -76,7 +76,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
     /**
      * Prepare pages collection
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareCollection()
@@ -92,7 +92,7 @@ class Mage_Adminhtml_Block_Cms_Page_Widget_Chooser extends Mage_Adminhtml_Block_
     /**
      * Prepare columns for pages grid
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareColumns()

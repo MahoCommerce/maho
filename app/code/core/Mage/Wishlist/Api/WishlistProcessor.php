@@ -34,7 +34,6 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * @param WishlistItem $data
      * @return WishlistItem|null
      */
     #[\Override]

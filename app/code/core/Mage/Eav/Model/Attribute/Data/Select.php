@@ -25,8 +25,8 @@ class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data
      * Validate data
      * Return true or array of errors
      *
-     * @param array|string $value
-     * @return bool|array
+     * @param array|string|false|null $value
+     * @return true|array<string>
      */
     #[\Override]
     public function validateValue($value)

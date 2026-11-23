@@ -29,7 +29,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
      * Flag price renderers as feed output so shared templates degrade to static markup
      *
      * @param string $productType
-     * @return Mage_Core_Block_Abstract
+     * @return Mage_Core_Block_Template
      */
     #[\Override]
     public function _preparePriceRenderer($productType)
@@ -185,7 +185,7 @@ class Mage_Rss_Block_Wishlist extends Mage_Wishlist_Block_Abstract
     /**
      * Retrieve Product View URL
      *
-     * @param Mage_Catalog_Model_Product $product
+     * @param Mage_Wishlist_Model_Item|Mage_Catalog_Model_Product $product
      * @param array $additional
      * @return string
      */

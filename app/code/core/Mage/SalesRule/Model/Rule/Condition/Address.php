@@ -18,7 +18,7 @@ declare(strict_types=1);
 class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condition_Abstract
 {
     /**
-     * @return $this|Mage_Rule_Model_Condition_Abstract
+     * @return $this
      */
     #[\Override]
     public function loadAttributeOptions()
@@ -77,7 +77,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     }
 
     /**
-     * @return array|mixed
+     * @return array
      */
     #[\Override]
     public function getValueSelectOptions()
@@ -101,7 +101,6 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
 
     /**
      * Validate Address Rule Condition
-     * @param Mage_Sales_Model_Quote_Address $object
      */
     #[\Override]
     public function validate(\Maho\DataObject $object)

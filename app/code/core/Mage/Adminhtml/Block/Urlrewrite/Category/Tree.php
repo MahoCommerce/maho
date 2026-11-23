@@ -102,7 +102,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     /**
      * Returns URL for loading tree
      *
-     * @param null $expanded deprecated
+     * @param ?bool $expanded deprecated
      * @return string
      */
     #[\Override]

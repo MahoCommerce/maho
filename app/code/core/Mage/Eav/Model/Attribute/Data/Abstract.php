@@ -403,14 +403,14 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Extract data from request and return value
      *
-     * @return array|string
+     * @return array|string|false
      */
     abstract public function extractValue(Mage_Core_Controller_Request_Http $request);
 
     /**
      * Validate data
      *
-     * @param array|string $value
+     * @param array|string|false|null $value
      * @throws Mage_Core_Exception
      * @return true|array<string>
      */

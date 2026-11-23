@@ -411,7 +411,7 @@ class File extends \Maho\Io
      * If $dest is null the output will be returned.
      * Otherwise it will be saved to the file or stream and operation result is returned.
      *
-     * @param string|resource $dest
+     * @param string|resource|null $dest
      */
     #[\Override]
     public function read(string $filename, mixed $dest = null): string|bool

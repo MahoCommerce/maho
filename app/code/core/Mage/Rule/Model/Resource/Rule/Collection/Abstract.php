@@ -39,7 +39,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
     /**
      * Add website ids to rules data
      *
-     * @return Mage_Rule_Model_Resource_Rule_Collection_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterLoad()
@@ -73,7 +73,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
      *
      * @param int|array|Mage_Core_Model_Website $websiteId
      *
-     * @return Mage_Rule_Model_Resource_Rule_Collection_Abstract
+     * @return $this
      */
     public function addWebsiteFilter($websiteId)
     {
@@ -98,10 +98,10 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
     /**
      * Provide support for website id filter
      *
-     * @param string $field
+     * @param string|array $field
      * @param mixed $condition
      *
-     * @return Mage_Rule_Model_Resource_Rule_Collection_Abstract
+     * @return $this
      */
     #[\Override]
     public function addFieldToFilter($field, $condition = null)

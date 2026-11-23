@@ -26,8 +26,8 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Validate data
      * Return true or array of errors
      *
-     * @param string|bool|null $value
-     * @return bool|array
+     * @param array|string|false|null $value
+     * @return true|array<string>
      */
     #[\Override]
     public function validateValue($value)

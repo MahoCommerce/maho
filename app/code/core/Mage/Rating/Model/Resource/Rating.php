@@ -8,6 +8,9 @@
  * @package Mage_Rating
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Rating_Model_Rating>
+ */
 class Mage_Rating_Model_Resource_Rating extends Mage_Core_Model_Resource_Db_Abstract
 {
     public const string RATING_STATUS_APPROVED = 'Approved';

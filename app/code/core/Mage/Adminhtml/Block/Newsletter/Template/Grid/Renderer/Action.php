@@ -12,13 +12,11 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid_Renderer_Action extends Mage
 {
     /**
      * Renderer for "Action" column in Newsletter templates grid
-     *
-     * @param Mage_Newsletter_Model_Template $row
      */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {
-        if ($row->isValidForSend()) {
+        if ($row instanceof Mage_Newsletter_Model_Template && $row->isValidForSend()) {
             $actions[] = [
                 'url' => $this->getUrl('*/newsletter_queue/edit', ['template_id' => $row->getId()]),
                 'caption' => Mage::helper('newsletter')->__('Queue Newsletter...'),

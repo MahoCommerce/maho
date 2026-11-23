@@ -16,7 +16,7 @@
 class Mage_CatalogRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_Abstract
 {
     /**
-     * @return $this|Mage_Rule_Model_Action_Abstract
+     * @return $this
      */
     #[\Override]
     public function loadAttributeOptions()
@@ -28,7 +28,7 @@ class Mage_CatalogRule_Model_Rule_Action_Product extends Mage_Rule_Model_Action_
     }
 
     /**
-     * @return $this|Mage_Rule_Model_Action_Abstract
+     * @return $this
      */
     #[\Override]
     public function loadOperatorOptions()

@@ -8,6 +8,9 @@
  * @package Mage_Admin
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Admin_Model_User>
+ */
 class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -121,11 +124,14 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
 
     /**
      * Unserialize user extra data after user load
+     *
+     * @param Mage_Admin_Model_User $user
      */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $user)
     {
-        return parent::_afterLoad($this->_unserializeExtraData($user));
+        $this->_unserializeExtraData($user);
+        return parent::_afterLoad($user);
     }
 
     /**

@@ -418,7 +418,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * Add store availability filter. Include availability product
      * for store website
      *
-     * @param mixed $store
+     * @param Mage_Core_Model_Store|int|string|bool|null $store
      * @return $this
      */
     public function addStoreFilter($store = null)

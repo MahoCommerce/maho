@@ -77,7 +77,7 @@ class Mage_Adminhtml_Block_Cms_Block_Widget_Chooser extends Mage_Adminhtml_Block
     /**
      * Prepare Cms static blocks collection
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareCollection()
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Cms_Block_Widget_Chooser extends Mage_Adminhtml_Block
     /**
      * Prepare columns for Cms blocks grid
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareColumns()

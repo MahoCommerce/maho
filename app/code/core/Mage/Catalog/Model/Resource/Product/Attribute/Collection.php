@@ -55,7 +55,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
      * Specify attribute entity type filter.
      * Entity type is defined.
      *
-     * @param  int $typeId
+     * @param  Mage_Eav_Model_Entity_Type|int $typeId
      * @return $this
      */
     #[\Override]

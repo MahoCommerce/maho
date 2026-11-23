@@ -239,7 +239,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Check is virtual product
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return false
+     * @return bool
      */
     public function isVirtual($product = null)
     {
@@ -979,7 +979,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      *
      * @param Mage_Catalog_Model_Product $product
      * @param int $visibility
-     * @return false
+     * @return bool|null
      */
     public function isMapEnabledInOptions($product, $visibility = null)
     {

@@ -13,7 +13,7 @@ class Mage_Downloadable_Model_Product_Price extends Mage_Catalog_Model_Product_T
     /**
      * Retrieve product final price
      *
-     * @param int|null $qty
+     * @param float|null $qty
      * @param Mage_Catalog_Model_Product $product
      * @return float
      */

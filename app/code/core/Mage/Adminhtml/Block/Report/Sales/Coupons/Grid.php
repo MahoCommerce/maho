@@ -139,16 +139,16 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     /**
      * Add price rule filter
      *
-     * @param Mage_SalesRule_Model_Resource_Report_Collection $collection
+     * @param Mage_Sales_Model_Resource_Report_Collection_Abstract $collection
      * @param \Maho\DataObject $filterData
-     * @return Mage_Adminhtml_Block_Report_Grid_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _addCustomFilter($collection, $filterData)
     {
         if ($filterData->getPriceRuleType()) {
             $rulesList = $filterData->getData('rules_list');
-            if (is_array($rulesList) && $rulesList !== []) {
+            if (is_array($rulesList) && $rulesList !== [] && $collection instanceof Mage_SalesRule_Model_Resource_Report_Collection) {
                 $collection->addRuleFilter($rulesList);
             }
         }

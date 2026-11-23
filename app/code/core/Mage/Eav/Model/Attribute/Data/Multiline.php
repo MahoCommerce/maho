@@ -31,8 +31,8 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
      * Validate data
      * Return true or array of errors
      *
-     * @param array|string $value
-     * @return bool|array
+     * @param array|string|false|null $value
+     * @return true|array<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -85,18 +85,6 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
             $value = trim(implode("\n", $value));
         }
         return parent::compactValue($value);
-    }
-
-    /**
-     * Restore attribute value from SESSION to entity model
-     *
-     * @param array|string $value
-     * @return Mage_Eav_Model_Attribute_Data_Text
-     */
-    #[\Override]
-    public function restoreValue($value)
-    {
-        return $this->compactValue($value);
     }
 
     /**

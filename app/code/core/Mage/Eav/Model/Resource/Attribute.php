@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TModel of Mage_Eav_Model_Attribute = Mage_Eav_Model_Attribute
+ * @extends Mage_Eav_Model_Resource_Entity_Attribute<TModel>
+ */
 abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Entity_Attribute
 {
     /**
@@ -29,6 +33,9 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
      */
     abstract protected function _getFormAttributeTable();
 
+    /**
+     * @param TModel $object
+     */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
@@ -41,6 +48,8 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
 
     /**
      * Retrieve select object for load object data
+     *
+     * @param TModel $object
      */
     #[\Override]
     protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
@@ -73,7 +82,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Save attribute/form relations after attribute save
      *
-     * @param Mage_Eav_Model_Attribute $object
+     * @param TModel $object
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

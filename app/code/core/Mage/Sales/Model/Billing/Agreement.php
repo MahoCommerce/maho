@@ -54,7 +54,7 @@ class Mage_Sales_Model_Billing_Agreement extends Mage_Payment_Model_Billing_Agre
     /**
      * Save agreement order relations
      *
-     * @return Mage_Core_Model_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterSave()

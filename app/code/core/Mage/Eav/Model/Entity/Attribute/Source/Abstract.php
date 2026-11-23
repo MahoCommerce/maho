@@ -50,7 +50,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
      * Get a text for option value
      *
      * @param  string|int $value
-     * @return string|bool
+     * @return array|string|false
      */
     #[\Override]
     public function getOptionText($value)

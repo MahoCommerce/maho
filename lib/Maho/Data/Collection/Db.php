@@ -493,7 +493,7 @@ class Db extends Collection
      * will be built using above mentioned structure
      *
      * @param string $fieldName Field name must be already escaped with AdapterInterface::quoteIdentifier()
-     * @param integer|string|array $condition
+     * @param integer|string|array|null $condition
      * @return string
      */
     protected function _getConditionSql($fieldName, $condition)
@@ -814,11 +814,11 @@ class Db extends Collection
     /**
      * Check if cache can be used for collection data
      *
-     * @return Mage_Core_Model_Cache|false
+     * @return bool
      */
     protected function _canUseCache()
     {
-        return $this->getCache();
+        return $this->getCache() !== null;
     }
 
     /**

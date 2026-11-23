@@ -15,6 +15,8 @@
  *
  * @method Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice _getResource()
  * @method Mage_Catalog_Model_Resource_Eav_Attribute getAttribute()
+ *
+ * @extends Mage_Catalog_Model_Product_Attribute_Backend_Price<Mage_Catalog_Model_Product>
  */
 abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract extends Mage_Catalog_Model_Product_Attribute_Backend_Price
 {
@@ -238,7 +240,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      * Assign group prices to product data
      *
      * @param Mage_Catalog_Model_Product $object
-     * @return Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract
+     * @return $this
      */
     #[\Override]
     public function afterLoad($object)
@@ -278,7 +280,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
      * After Save Attribute manipulation
      *
      * @param Mage_Catalog_Model_Product $object
-     * @return Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract
+     * @return $this
      */
     #[\Override]
     public function afterSave($object)

@@ -48,7 +48,6 @@ class Mage_Core_Block_Html_Select extends Mage_Core_Block_Abstract
     /**
      * Set element's HTML ID
      *
-     * @param string $id ID
      * @return $this
      */
     #[\Override]

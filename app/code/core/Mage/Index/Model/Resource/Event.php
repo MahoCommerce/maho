@@ -8,6 +8,9 @@
  * @package Mage_Index
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Index_Model_Event>
+ */
 class Mage_Index_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

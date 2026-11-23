@@ -53,7 +53,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      * Processing object before save data
      *
      * @throws Mage_Core_Exception_Conflict when the scope changes on an attribute of configurable products
-     * @return Mage_Core_Model_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _beforeSave()

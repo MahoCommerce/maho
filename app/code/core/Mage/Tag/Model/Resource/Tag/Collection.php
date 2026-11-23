@@ -203,8 +203,8 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     /**
      * Adds field to filter
      *
-     * @param string $field
-     * @param array $condition
+     * @param string|array $field
+     * @param int|string|array|null $condition
      * @return $this
      */
     #[\Override]

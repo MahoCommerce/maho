@@ -24,7 +24,7 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     protected static ?array $_filterableRequestVars = null;
 
     /**
-     * @return $this|Mage_Core_Block_Template
+     * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]

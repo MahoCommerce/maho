@@ -39,7 +39,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_
     }
 
     /**
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]
@@ -73,7 +73,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_
     }
 
     /**
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      * @throws Mage_Core_Exception
      * @throws Mage_Core_Model_Store_Exception
      */

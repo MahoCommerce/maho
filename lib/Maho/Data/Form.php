@@ -94,7 +94,7 @@ class Form extends AbstractForm
      * Add form element
      *
      * @param string|false $after
-     * @return Form
+     * @return $this
      * @throws \Exception
      */
     #[\Override]

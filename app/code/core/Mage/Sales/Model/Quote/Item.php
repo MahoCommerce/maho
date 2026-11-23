@@ -130,7 +130,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Prepare quantity
      *
-     * @param float|int $qty
+     * @param float|int|null $qty
      * @return int|float
      */
     protected function _prepareQty($qty)
@@ -175,7 +175,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Declare quote item quantity
      *
-     * @param float $qty
+     * @param float|null $qty
      */
     #[\Override]
     public function setQty($qty): static

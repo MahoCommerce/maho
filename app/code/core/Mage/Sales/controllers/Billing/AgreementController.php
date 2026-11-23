@@ -28,14 +28,14 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      *
      * Check customer authentication
      *
-     * @return $this|void
+     * @return $this
      */
     #[\Override]
     public function preDispatch()
     {
         parent::preDispatch();
         if (!$this->getRequest()->isDispatched()) {
-            return;
+            return $this;
         }
         if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
             $this->norouteAction();

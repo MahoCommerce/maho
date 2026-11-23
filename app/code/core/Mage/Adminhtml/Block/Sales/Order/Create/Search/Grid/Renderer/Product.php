@@ -12,14 +12,12 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Product exten
 {
     /**
      * Render product name to add Configure link
-     *
-     * @param   Mage_Catalog_Model_Product $row
      */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {
         $rendered       =  parent::render($row);
-        $isConfigurable = $row->canConfigure();
+        $isConfigurable = $row instanceof Mage_Catalog_Model_Product && $row->canConfigure();
         $style          = $isConfigurable ? '' : 'style="color: #CCC;"';
         $prodAttributes = $isConfigurable ? sprintf('list_type = "product_to_add" product_id = %s', $row->getId()) : 'disabled="disabled"';
         return sprintf(

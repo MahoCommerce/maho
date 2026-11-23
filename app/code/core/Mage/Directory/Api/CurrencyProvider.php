@@ -15,6 +15,9 @@ use Maho\ApiPlatform\Service\StoreContext;
 
 class CurrencyProvider extends \Maho\ApiPlatform\Provider
 {
+    /**
+     * @return Currency[]
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {

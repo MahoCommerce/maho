@@ -161,7 +161,7 @@ class Mage_Log_Model_Resource_Visitor_Collection extends Mage_Core_Model_Resourc
      *
      * @param bool $printQuery
      * @param bool $logQuery
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
+     * @return $this
      */
     #[\Override]
     public function load($printQuery = false, $logQuery = false)

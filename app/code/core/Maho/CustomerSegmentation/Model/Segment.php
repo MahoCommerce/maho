@@ -484,15 +484,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * @param list<int> $value
-     */
-    #[\Override]
-    public function setWebsiteIds(array $value): static
-    {
-        return $this->setData('website_ids', $value);
-    }
-
-    /**
      * The customer groups of the segment. An empty list means every customer group.
      *
      * @return list<int>
@@ -501,15 +492,6 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     public function getCustomerGroupIds(): array
     {
         return self::idList($this->getData('customer_group_ids'));
-    }
-
-    /**
-     * @param list<int> $value
-     */
-    #[\Override]
-    public function setCustomerGroupIds(array $value): static
-    {
-        return $this->setData('customer_group_ids', $value);
     }
 
     public function getMatchedCustomersCount(): ?int

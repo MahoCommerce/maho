@@ -19,6 +19,9 @@ final class ConfigurableSetupProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
 
+    /**
+     * @return ConfigurableSetup[]
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {

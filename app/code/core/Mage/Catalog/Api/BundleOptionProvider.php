@@ -19,6 +19,9 @@ final class BundleOptionProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
 
+    /**
+     * @return BundleOption[]
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {

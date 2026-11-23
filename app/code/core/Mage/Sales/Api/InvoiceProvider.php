@@ -26,6 +26,9 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
 
     private const array WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel'];
 
+    /**
+     * @return Invoice[]|Invoice|TraversablePaginator<Invoice>|Response|null
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|TraversablePaginator|Response|null
     {
@@ -43,6 +46,9 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         };
     }
 
+    /**
+     * @return Invoice[]
+     */
     private function listInvoices(array $uriVariables, string $operationName): array
     {
         $orderId = (int) ($uriVariables['orderId'] ?? 0);

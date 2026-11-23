@@ -108,7 +108,6 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Caller-set rates belong to the currency being replaced, so they do not carry over.
      *
-     * @param string $id
      * @return $this
      */
     #[\Override]

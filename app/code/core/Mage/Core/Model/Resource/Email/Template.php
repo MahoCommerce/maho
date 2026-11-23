@@ -8,6 +8,9 @@
  * @package Mage_Core
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Core_Model_Email_Template>
+ */
 class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

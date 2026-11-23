@@ -36,8 +36,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
 
     /**
      * Render CMS no-route page with 404 Not Found or 410 Gone status
-     *
-     * @param string $coreRoute
      */
     #[\Override]
     #[Maho\Config\Route('/cms', name: 'cms.index')]

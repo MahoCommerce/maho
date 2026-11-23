@@ -8,6 +8,9 @@
  * @package Mage_Core
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Core_Model_Translate_String>
+ */
 class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

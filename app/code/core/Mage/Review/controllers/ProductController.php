@@ -11,7 +11,7 @@
 class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * @return $this|Mage_Core_Controller_Front_Action|void
+     * @return $this
      */
     #[\Override]
     public function preDispatch()
@@ -19,7 +19,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
         parent::preDispatch();
 
         if (!$this->getRequest()->isDispatched()) {
-            return;
+            return $this;
         }
 
         $action = strtolower($this->getRequest()->getActionName());

@@ -25,7 +25,7 @@ interface Mage_Catalog_Model_Product_Configuration_Item_Interface
      * Get item option by code
      *
      * @param   string $code
-     * @return  Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
+     * @return  Mage_Catalog_Model_Product_Configuration_Item_Option_Interface|null
      */
     public function getOptionByCode($code);
 

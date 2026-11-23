@@ -27,7 +27,7 @@ class Hidden extends AbstractElement
     }
 
     /**
-     * @return mixed|string
+     * @return string
      */
     #[\Override]
     public function getDefaultHtml()

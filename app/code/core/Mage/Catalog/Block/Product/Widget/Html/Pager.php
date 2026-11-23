@@ -104,8 +104,8 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
     /**
      * Connect collection to paging
      *
-     * @param   Mage_Core_Model_Resource_Db_Collection_Abstract $collection
-     * @return  Mage_Catalog_Block_Product_Widget_Html_Pager
+     * @param \Maho\Data\Collection $collection
+     * @return $this
      */
     #[\Override]
     public function setCollection($collection)
@@ -118,7 +118,9 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
             ? $this->getTotalNum() - $collectionOffset
             : $this->getLimit();
 
-        $this->_collection->getSelect()->limit($collectionLimit, $collectionOffset);
+        if ($this->_collection instanceof \Maho\Data\Collection\Db) {
+            $this->_collection->getSelect()->limit($collectionLimit, $collectionOffset);
+        }
         $this->_setFrameInitialized(false);
         return $this;
     }
@@ -162,7 +164,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
     /**
      * Return number of last page
      *
-     * @return float|int
+     * @return int
      */
     #[\Override]
     public function getLastPageNum()

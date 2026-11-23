@@ -73,7 +73,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Composite_Fieldset_Grouped extends Ma
     /**
      * Set preconfigured values to grouped associated products
      *
-     * @return Mage_Catalog_Block_Product_View_Type_Grouped
+     * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]

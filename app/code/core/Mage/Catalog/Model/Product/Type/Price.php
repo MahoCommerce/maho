@@ -100,7 +100,7 @@ class Mage_Catalog_Model_Product_Type_Price
      * Get product group price
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return float
+     * @return float|null
      */
     public function getGroupPrice($product)
     {

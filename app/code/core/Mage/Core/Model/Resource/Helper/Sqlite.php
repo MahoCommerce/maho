@@ -11,13 +11,13 @@ class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_He
     /**
      * Returns expression for field unification.
      *
-     * @param string $field
+     * @param Maho\Db\Expr|string $field
      * @return Maho\Db\Expr
      */
     #[\Override]
     public function castField($field)
     {
-        return new Maho\Db\Expr($field);
+        return $field instanceof Maho\Db\Expr ? $field : new Maho\Db\Expr($field);
     }
 
     /**

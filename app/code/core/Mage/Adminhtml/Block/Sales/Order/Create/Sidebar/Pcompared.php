@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract
 {
     #[\Override]

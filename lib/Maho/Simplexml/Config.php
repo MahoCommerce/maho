@@ -384,7 +384,7 @@ class Config
      * @param string $data
      * @param string $id
      * @param array $tags
-     * @param int|boolean $lifetime
+     * @param int|false|null $lifetime
      * @return bool
      */
     protected function _saveCache($data, $id, $tags = [], $lifetime = false)

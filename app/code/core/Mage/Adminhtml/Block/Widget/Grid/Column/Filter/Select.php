@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminht
     }
 
     /**
-     * @return array|null
+     * @return array|int|null
      */
     #[\Override]
     public function getCondition()

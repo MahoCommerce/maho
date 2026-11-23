@@ -7,6 +7,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @template TItem of \Maho\DataObject = \Maho\DataObject
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
     /**
@@ -29,7 +32,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve display block availability
      *
-     * @return int
+     * @return int|false|null
      */
     public function canDisplay()
     {
@@ -57,7 +60,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve identifier of block item
      *
-     * @param \Maho\DataObject $item
+     * @param TItem $item
      * @return  int
      */
     public function getIdentifierId($item)
@@ -68,7 +71,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve item identifier of block item
      *
-     * @param   mixed $item
+     * @param   TItem $item
      * @return  int
      */
     public function getItemId($item)
@@ -79,7 +82,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve product identifier linked with item
      *
-     * @param   mixed $item
+     * @param   TItem $item
      * @return  int
      */
     public function getProductId($item)

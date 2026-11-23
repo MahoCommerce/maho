@@ -19,6 +19,9 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
 
+    /**
+     * @return ProductLink[]
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {

@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default extends Mage_
     /**
      * Display susbtotal price including tax
      *
-     * @param Mage_Sales_Model_Order_Item $item
+     * @param \Maho\DataObject $item
      * @return string
      */
     #[\Override]

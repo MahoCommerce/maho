@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TModel of \Maho\DataObject = \Maho\DataObject
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<TModel>
+ */
 class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**

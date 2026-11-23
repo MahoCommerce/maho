@@ -74,7 +74,7 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
 
     /**
      * @throws Mage_Core_Exception
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _beforeDelete(Mage_Core_Model_Abstract $group)
@@ -87,7 +87,7 @@ class Mage_Customer_Model_Resource_Group extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Method set default group id to the customers collection
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterDelete(Mage_Core_Model_Abstract $group)

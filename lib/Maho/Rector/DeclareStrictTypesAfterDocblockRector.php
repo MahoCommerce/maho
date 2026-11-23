@@ -60,12 +60,12 @@ CODE_SAMPLE,
         return [FileNode::class];
     }
 
-    /**
-     * @param FileNode $node
-     */
     #[\Override]
     public function refactor(Node $node): ?FileNode
     {
+        if (!$node instanceof FileNode) {
+            return null;
+        }
         $declare = $node->stmts[0] ?? null;
         if (!$declare instanceof Declare_ || !$this->declaresStrictTypes($declare)) {
             return null;

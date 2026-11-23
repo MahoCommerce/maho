@@ -33,15 +33,17 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
     /**
      * Prepare product collection
      *
-     * @param Mage_CatalogSearch_Model_Resource_Fulltext_Collection $collection
-     * @return Mage_Catalog_Model_Layer
+     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
+     * @return $this
      */
     #[\Override]
     public function prepareProductCollection($collection)
     {
+        $collection->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes());
+        if ($collection instanceof Mage_CatalogSearch_Model_Resource_Fulltext_Collection) {
+            $collection->addSearchFilter(Mage::helper('catalogsearch')->getQuery()->getQueryText());
+        }
         $collection
-            ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
-            ->addSearchFilter(Mage::helper('catalogsearch')->getQuery()->getQueryText())
             ->setStore(Mage::app()->getStore())
             ->addPriceData()
             ->addTaxPercents()

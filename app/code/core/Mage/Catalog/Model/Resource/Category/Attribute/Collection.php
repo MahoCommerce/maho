@@ -31,7 +31,7 @@ class Mage_Catalog_Model_Resource_Category_Attribute_Collection extends Mage_Eav
     /**
      * Specify attribute entity type filter
      *
-     * @param int $typeId
+     * @param Mage_Eav_Model_Entity_Type|int $typeId
      * @return $this
      */
     #[\Override]

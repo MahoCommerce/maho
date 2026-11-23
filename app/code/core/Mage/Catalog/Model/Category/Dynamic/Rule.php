@@ -45,7 +45,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function getConditions(): ?Mage_Rule_Model_Condition_Combine
+    public function getConditions(): Mage_Rule_Model_Condition_Combine
     {
         if (!$this->_conditions) {
             $combine = $this->getConditionsInstance();
@@ -94,15 +94,13 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         }
 
         // Encode conditions as JSON
-        if ($this->getConditions()) {
-            try {
-                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
-            } catch (\JsonException $e) {
-                Mage::logException($e);
-                throw $e;
-            }
-            $this->unsConditions();
+        try {
+            $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+        } catch (\JsonException $e) {
+            Mage::logException($e);
+            throw $e;
         }
+        $this->unsConditions();
 
         parent::_beforeSave();
         return $this;
@@ -164,7 +162,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     public function validate(\Maho\DataObject $object): bool
     {
         $conditions = $this->getConditions();
-        if (!$conditions || !$conditions->getConditions()) {
+        if (!$conditions->getConditions()) {
             // No conditions means NO match, not ALL match
             return false;
         }
@@ -180,7 +178,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
             // Check if we have conditions
             $conditions = $this->getConditions();
-            if (!$conditions || !$conditions->getConditions()) {
+            if (!$conditions->getConditions()) {
                 return $this->_productIds;
             }
 

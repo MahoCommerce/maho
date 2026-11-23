@@ -57,7 +57,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     }
 
     /**
-     * @return string|null
+     * @return mixed
      */
     protected function _getValue(\Maho\DataObject $row)
     {

@@ -12,6 +12,8 @@
  * Start Date attribute backend
  *
  * @package    Mage_Catalog
+ *
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Datetime<Mage_Catalog_Model_Product>
  */
 class Mage_Catalog_Model_Product_Attribute_Backend_Startdate extends Mage_Eav_Model_Entity_Attribute_Backend_Datetime
 {

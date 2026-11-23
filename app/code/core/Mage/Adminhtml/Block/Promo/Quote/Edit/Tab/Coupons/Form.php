@@ -13,7 +13,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Form extends Mage_Adminh
     /**
      * Prepare coupon codes generation parameters form
      *
-     * @return Mage_Adminhtml_Block_Widget_Form
+     * @return $this
      */
     #[\Override]
     protected function _prepareForm()

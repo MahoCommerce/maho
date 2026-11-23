@@ -288,7 +288,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     /**
      * Retrieve user identifier
      *
-     * @return mixed
+     * @return int|null
      */
     #[\Override]
     public function getId()

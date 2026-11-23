@@ -12,7 +12,7 @@ class Mage_Core_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Hel
      * Returns expression for field unification.
      * For PostgreSQL, we cast TEXT fields to ensure consistent handling.
      *
-     * @param string $field
+     * @param Maho\Db\Expr|string $field
      * @return Maho\Db\Expr
      */
     #[\Override]

@@ -125,9 +125,9 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Validate data
      *
-     * @param array|string $value
+     * @param array|string|false|null $value
      * @throws Mage_Core_Exception
-     * @return true|array
+     * @return true|array<string>
      */
     #[\Override]
     public function validateValue($value)

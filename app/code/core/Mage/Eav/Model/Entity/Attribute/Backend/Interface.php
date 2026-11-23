@@ -14,6 +14,8 @@ declare(strict_types=1);
  * Entity attribute backend interface
  * Backend is responsible for saving the values of the attribute
  * and performing pre and post actions
+ *
+ * @template TModel of \Maho\DataObject = \Maho\DataObject
  */
 
 interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
@@ -28,31 +30,31 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
     public function getValueId(): ?int;
 
     /**
-     * @param object $object
+     * @param TModel $object
      * @return mixed
      */
     public function afterLoad($object);
 
     /**
-     * @param object $object
+     * @param TModel $object
      * @return mixed
      */
     public function beforeSave($object);
 
     /**
-     * @param object $object
+     * @param TModel $object
      * @return mixed
      */
     public function afterSave($object);
 
     /**
-     * @param object $object
+     * @param TModel $object
      * @return mixed
      */
     public function beforeDelete($object);
 
     /**
-     * @param object $object
+     * @param TModel $object
      * @return mixed
      */
     public function afterDelete($object);

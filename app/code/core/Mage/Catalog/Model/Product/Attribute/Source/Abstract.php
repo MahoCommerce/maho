@@ -41,12 +41,12 @@ abstract class Mage_Catalog_Model_Product_Attribute_Source_Abstract extends Mage
         return $this->getOptionArray()[(int) $value] ?? false;
     }
 
-    /**
-     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
-     */
     #[\Override]
     public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = Maho\Db\Select::SQL_ASC): static
     {
+        if (!$collection instanceof Mage_Catalog_Model_Resource_Collection_Abstract) {
+            return $this;
+        }
         $attributeCode  = $this->getAttribute()->getAttributeCode();
         $attributeId    = (int) $this->getAttribute()->getId();
         $attributeTable = $this->getAttribute()->getBackend()->getTable();

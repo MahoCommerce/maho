@@ -8,6 +8,9 @@
  * @package Mage_Newsletter
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Newsletter_Model_Subscriber>
+ */
 class Mage_Newsletter_Model_Resource_Subscriber extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**

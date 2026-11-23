@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
     /**
      * Retrieve escaped value
      *
-     * @param mixed $index
+     * @param ?string $index
      * @return string
      */
     public function getEscapedValue($index = null)
@@ -72,7 +72,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
     /**
      * Retrieve condition
      *
-     * @return array
+     * @return array|int|null
      */
     public function getCondition()
     {

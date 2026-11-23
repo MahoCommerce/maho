@@ -18,6 +18,9 @@ final class ProductGroupPriceProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
 
+    /**
+     * @return ProductGroupPrice[]
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {

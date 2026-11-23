@@ -258,7 +258,7 @@ class Mage_Api_Model_Config extends \Maho\Simplexml\Config
      * @param string $data
      * @param string $id
      * @param array $tags
-     * @param bool $lifetime
+     * @param int|false|null $lifetime
      * @return bool|Mage_Core_Model_App
      */
     #[\Override]

@@ -119,7 +119,7 @@ abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements Seekab
     /**
      * Return the current element.
      *
-     * @return array
+     * @return array<string, string>
      */
     #[\ReturnTypeWillChange]
     #[\Override]

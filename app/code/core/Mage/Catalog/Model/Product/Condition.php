@@ -35,7 +35,7 @@ class Mage_Catalog_Model_Product_Condition extends \Maho\DataObject implements M
     }
 
     /**
-     * @param Maho\Db\Adapter\Pdo\Mysql $dbAdapter
+     * @param Maho\Db\Adapter\AdapterInterface $dbAdapter
      * @return string|Maho\Db\Select
      */
     #[\Override]

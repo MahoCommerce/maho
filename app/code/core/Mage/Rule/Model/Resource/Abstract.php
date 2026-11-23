@@ -8,6 +8,10 @@
  * @package Mage_Rule
  */
 
+/**
+ * @template TModel of Mage_Rule_Model_Abstract = Mage_Rule_Model_Abstract
+ * @extends Mage_Core_Model_Resource_Db_Abstract<TModel>
+ */
 abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -35,7 +39,8 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     /**
      * Prepare rule's active "from" and "to" dates
      *
-     * @return Mage_Rule_Model_Resource_Abstract
+     * @param TModel $object
+     * @return $this
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)

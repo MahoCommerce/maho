@@ -43,9 +43,6 @@ final class AddSensitiveParameterAttributeRector extends AbstractRector implemen
         private readonly PhpAttributeAnalyzer $phpAttributeAnalyzer,
     ) {}
 
-    /**
-     * @param array<string, mixed> $configuration
-     */
     #[\Override]
     public function configure(array $configuration): void
     {

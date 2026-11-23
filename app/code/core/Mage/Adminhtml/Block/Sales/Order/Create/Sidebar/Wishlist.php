@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract<Mage_Wishlist_Model_Item>
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract
 {
     /**
@@ -96,7 +99,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
     }
 
     /**
-     * @return false|int
+     * @return int|false|null
      */
     #[\Override]
     public function canDisplay()

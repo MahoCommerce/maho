@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Filter_Status extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select
 {
     /**
-     * @return array
+     * @return array[]
      */
     #[\Override]
     protected function _getOptions()

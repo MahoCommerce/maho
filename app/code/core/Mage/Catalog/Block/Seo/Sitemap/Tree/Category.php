@@ -22,7 +22,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Category extends Mage_Catalog_Block_Se
     /**
      * Initialize categories collection
      *
-     * @return Mage_Catalog_Block_Seo_Sitemap_Category
+     * @return $this
      */
     #[\Override]
     protected function _prepareLayout()

@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TModel of \Maho\DataObject = \Maho\DataObject
+ */
 abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_Abstract implements Mage_Eav_Model_Entity_Interface
 {
     /**
@@ -550,7 +553,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Check whether the attribute is Applicable to the object
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @param   Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return bool
      */
@@ -777,7 +780,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Validate all object's attributes against configuration
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      * @return true|array
      */
@@ -994,7 +997,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve select object for loading base entity row
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @param   mixed $rowId
      * @return  Maho\Db\Select
      */
@@ -1037,7 +1040,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Initialize attribute value for object
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @param   array $valueRow
      * @return  $this
      */
@@ -1603,6 +1606,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * After Load Entity process
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _afterLoad(\Maho\DataObject $object)
@@ -1614,6 +1618,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Before delete Entity process
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _beforeSave(\Maho\DataObject $object)
@@ -1625,6 +1630,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * After Save Entity process
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _afterSave(\Maho\DataObject $object)

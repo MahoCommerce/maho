@@ -102,7 +102,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Prepare data before saving
      *
-     * @return Mage_Rule_Model_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _beforeSave()
