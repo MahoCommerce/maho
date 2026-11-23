@@ -16,7 +16,7 @@ interface Mage_Checkout_Model_Cart_Interface
      * Add product to shopping cart (quote)
      *
      * @param   int|Mage_Catalog_Model_Product $productInfo
-     * @param   \Maho\DataObject|array|int|float|string|null $requestInfo
+     * @param   \Maho\DataObject|array|int|float|numeric-string|null $requestInfo
      * @return  Mage_Checkout_Model_Cart_Interface
      */
     public function addProduct($productInfo, $requestInfo = null);
