@@ -285,7 +285,7 @@ it('loads the Reports Quote, Event, Customer, Wishlist, Review, Tag, and Downloa
     $customerCollection->addOrdersCount();
     expect(fn() => $customerCollection->getSize())->not->toThrow(\Throwable::class);
 
-    // Wishlist: getWishlistCustomerCount (tests internal GROUP BY)
+    // Wishlist: getWishlistCustomerCount
     $wishlistCollection = Mage::getResourceModel('reports/wishlist_collection');
     expect(fn() => $wishlistCollection->getWishlistCustomerCount())->not->toThrow(\Throwable::class);
 

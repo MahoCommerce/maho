@@ -15,7 +15,7 @@ describe('Maho\Data\Form\Element\AbstractElement::serialize() with readonly', fu
     it('writes the readonly attribute when the element is read-only', function () {
         $element = new Text(['name' => 'code', 'readonly' => true]);
 
-        expect($element->serialize($element->getHtmlAttributes()))->toContain('readonly=');
+        expect($element->serialize($element->getHtmlAttributes()))->toContain('readonly="readonly"');
     });
 
     it('writes no readonly attribute when the element is not read-only', function () {

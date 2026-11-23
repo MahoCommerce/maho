@@ -49,3 +49,18 @@ it('counts the customers that have a wishlist', function (): void {
         ->and((int) $count)->toBe($expected)
         ->and((float) $percent)->toEqualWithDelta($expected * 100 / $customers, 0.0001);
 });
+
+it('counts the customers that have a shared wishlist', function (): void {
+    foreach (array_slice($this->customers, 0, 2) as $customer) {
+        Mage::getModel('wishlist/wishlist')->loadByCustomer((int) $customer->getId())->setShared()->save();
+    }
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $expected = (int) $adapter->fetchOne($adapter->select()
+        ->from(['wt' => $resource->getTableName('wishlist/wishlist')], [new Maho\Db\Expr('COUNT(*)')])
+        ->join(['e' => $resource->getTableName('customer/entity')], 'e.entity_id = wt.customer_id', [])
+        ->where('wt.shared = ?', 1));
+
+    expect($expected)->toBeGreaterThanOrEqual(2)
+        ->and((int) Mage::getResourceModel('reports/wishlist_collection')->getSharedCount())->toBe($expected);
+});
