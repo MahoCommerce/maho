@@ -149,11 +149,9 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get product price including store conversion rate
      *
-     * @param   Mage_Catalog_Model_Product $product
-     * @param   null|string $format
-     * @return  float|string
+     * @return float|string The formatted string when $format is true
      */
-    public function getProductPrice($product, $format = null)
+    public function getProductPrice(Mage_Catalog_Model_Product $product, bool $format = false): float|string
     {
         try {
             $value = $product->getPrice();
@@ -754,10 +752,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         $pseudoProduct = new \Maho\DataObject();
         $pseudoProduct->setTaxClassId($this->getShippingTaxClass($store));
 
-        $billingAddress = false;
-        if ($shippingAddress && $shippingAddress->getQuote() && $shippingAddress->getQuote()->getBillingAddress()) {
-            $billingAddress = $shippingAddress->getQuote()->getBillingAddress();
-        }
+        $billingAddress = $shippingAddress?->getQuote()?->getBillingAddress();
 
         $price = $this->getPrice(
             $pseudoProduct,

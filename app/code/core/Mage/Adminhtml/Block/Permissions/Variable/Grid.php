@@ -56,12 +56,8 @@ class Mage_Adminhtml_Block_Permissions_Variable_Grid extends Mage_Adminhtml_Bloc
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param Mage_Admin_Model_Variable $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['variable_id' => $row->getId()]);
     }

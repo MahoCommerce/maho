@@ -59,12 +59,8 @@ class Mage_Adminhtml_Block_Permissions_Block_Grid extends Mage_Adminhtml_Block_W
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param Mage_Admin_Model_Block $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['block_id' => $row->getId()]);
     }

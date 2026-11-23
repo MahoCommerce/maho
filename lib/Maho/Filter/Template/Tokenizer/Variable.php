@@ -72,7 +72,8 @@ class Variable extends AbstractTokenizer
     public function getString()
     {
         $value = '';
-        if ($this->isWhiteSpace()) {
+        $isEmpty = $this->isWhiteSpace();
+        if ($isEmpty) {
             return $value;
         }
         $qouteStart = $this->isQuote();

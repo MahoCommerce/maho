@@ -21,13 +21,8 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Transactions extends Mage_Adminh
         return $this->getUrl('*/sales_order/transactions', ['_current' => true]);
     }
 
-    /**
-     * Retrieve grid row url
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($item)
+    public function getRowUrl(\Maho\DataObject $item): string
     {
         return $this->getUrl('*/sales_transactions/view', ['_current' => true, 'txn_id' => $item->getId()]);
     }

@@ -241,11 +241,9 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
 
     /**
      * Gets number of rows
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         if ($this->getFlag('group_tag') || $this->getFlag('group_customer')) {
             // The select is grouped by a multi-column key ((tag, customer) or

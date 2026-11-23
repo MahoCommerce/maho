@@ -139,11 +139,9 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Get select count sql
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         if ($this->_selectCountSqlType == self::SELECT_COUNT_SQL_TYPE_CART) {
             $countSelect = clone $this->getSelect();

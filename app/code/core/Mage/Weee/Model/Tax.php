@@ -74,23 +74,15 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
 
     /**
      * Calculate weee amount for a product
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param Mage_Customer_Model_Address_Abstract $shipping
-     * @param Mage_Customer_Model_Address_Abstract $billing
-     * @param mixed $website
-     * @param bool $calculateTax
-     * @param bool $ignoreDiscount
-     * @return float
      */
     public function getWeeeAmount(
-        $product,
-        $shipping = null,
-        $billing = null,
-        $website = null,
-        $calculateTax = false,
-        $ignoreDiscount = false,
-    ) {
+        Mage_Catalog_Model_Product $product,
+        ?Mage_Sales_Model_Quote_Address $shipping = null,
+        ?Mage_Sales_Model_Quote_Address $billing = null,
+        Mage_Core_Model_Website|int|null $website = null,
+        bool $calculateTax = false,
+        bool $ignoreDiscount = false,
+    ): float {
         $amount = 0;
         $attributes = $this->getProductWeeeAttributes(
             $product,

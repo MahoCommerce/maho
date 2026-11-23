@@ -8,6 +8,41 @@
  * @package Mage_Tax
  */
 
+/**
+ * @phpstan-type TaxRateRow array{
+ *     code: string,
+ *     title: string,
+ *     position: int,
+ *     priority: int,
+ *     value?: string,
+ *     percent?: string,
+ *     tax_calculation_rule_id?: int,
+ *     process?: int,
+ *     calculate_subtotal?: int,
+ *     hidden?: int,
+ *     amount?: string,
+ *     base_amount?: string,
+ *     base_real_amount?: string,
+ *     ...
+ * }
+ * @phpstan-type AppliedRate array{
+ *     code: string,
+ *     title: string,
+ *     percent: float,
+ *     position: int,
+ *     priority: int,
+ *     rule_id?: int,
+ * }
+ * @phpstan-type CalculationStep array{
+ *     rates: list<AppliedRate>,
+ *     percent: float,
+ *     id: string,
+ *     hidden?: bool,
+ *     amount?: string,
+ *     base_amount?: string,
+ *     base_real_amount?: string,
+ * }
+ */
 class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -72,7 +107,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     {
         $rates = $this->_getRates($request);
         return [
-            'process' => $this->getCalculationProcess($request, $rates),
+            'process' => $this->buildCalculationProcess($rates),
             'value'   => $this->_calculateRate($rates),
         ];
     }
@@ -91,14 +126,21 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Retrieve Calculation Process
      *
-     * @param \Maho\DataObject $request
-     * @param array $rates
-     * @return array
+     * @return list<CalculationStep>
      */
-    public function getCalculationProcess($request, $rates = null)
+    public function getCalculationProcess(\Maho\DataObject $request): array
     {
-        $rates ??= $this->_getRates($request);
+        return $this->buildCalculationProcess($this->_getRates($request));
+    }
 
+    /**
+     * Group the rates by priority into the steps of the calculation process
+     *
+     * @param list<TaxRateRow> $rates
+     * @return list<CalculationStep>
+     */
+    public function buildCalculationProcess(array $rates): array
+    {
         $result = [];
         $row = [];
         $ids = [];
@@ -107,7 +149,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
         $countedRates = count($rates);
         for ($i = 0; $i < $countedRates; $i++) {
             $rate = $rates[$i];
-            $value = ($rate['value'] ?? $rate['percent']) * 1;
+            $value = (float) ($rate['value'] ?? $rate['percent']);
 
             $oneRate = [
                 'code' => $rate['code'],
@@ -121,7 +163,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             }
 
             if (isset($rate['hidden'])) {
-                $row['hidden'] = $rate['hidden'];
+                $row['hidden'] = (bool) $rate['hidden'];
             }
 
             if (isset($rate['amount'])) {

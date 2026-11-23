@@ -94,7 +94,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Customers exten
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('adminhtml/customer/edit', [
             'id' => $row->getId(),

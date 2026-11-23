@@ -24,14 +24,11 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract extends Mage_Usa_Mod
 
     /**
      * Get shipping date
-     *
-     * @param bool $domestic
-     * @return string
      */
-    protected function _getShipDate($domestic = true)
+    protected function _getShipDate(bool $domestic = true): string
     {
         return $this->_determineShippingDay(
-            $this->getConfigData($domestic ? 'shipment_days' : 'intl_shipment_days'),
+            $this->getConfigData($domestic ? 'shipment_days' : 'intl_shipment_days') ?: '',
             date(self::REQUEST_DATE_FORMAT),
         );
     }
@@ -39,13 +36,11 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Dhl_Abstract extends Mage_Usa_Mod
     /**
      * Determine shipping day according to configuration settings
      *
-     * @param array $shippingDays
-     * @param string $date
-     * @return string
+     * $shippingDays is a comma separated list of weekdays, such as "Mon,Tue".
      */
-    protected function _determineShippingDay($shippingDays, $date)
+    protected function _determineShippingDay(string $shippingDays, string $date): string
     {
-        if (empty($shippingDays)) {
+        if ($shippingDays === '') {
             return $date;
         }
 

@@ -117,15 +117,10 @@ class Mage_Adminhtml_Block_Notification_Window extends Mage_Adminhtml_Block_Noti
 
     /**
      * Check if current block allowed in ACL
-     *
-     * @return bool
      */
-    protected function _isAllowed()
+    protected function _isAllowed(): bool
     {
-        if (!is_null($this->_aclResourcePath)) {
-            return Mage::getSingleton('admin/session')
-                ->isAllowed('admin/system/adminnotification/show_toolbar');
-        }
-        return true;
+        return Mage::getSingleton('admin/session')
+            ->isAllowed('admin/system/adminnotification/show_toolbar');
     }
 }

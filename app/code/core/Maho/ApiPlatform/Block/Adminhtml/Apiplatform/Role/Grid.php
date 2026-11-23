@@ -54,7 +54,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Grid extends Mage_Adminh
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['role_id' => $row->getData('role_id')]);
     }

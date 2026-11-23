@@ -79,14 +79,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Cart extends Mage_Adminhtml_Bl
         return parent::_prepareColumns();
     }
 
-    /**
-     * Retrieve row url
-     *
-     * @param Mage_Sales_Model_Quote_Item $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_product/edit', ['id' => $row->getProductId()]);
     }

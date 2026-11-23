@@ -649,7 +649,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             $rate->setCarrier('usps');
             $rate->setCarrierTitle($this->getConfigData('title'));
             $rate->setMethod($methodCode);
-            $rate->setMethodTitle($this->getCode('method', $methodCode) ?: $rateData['description']);
+            $rate->setMethodTitle($this->getCodeValue('method', $methodCode) ?? $rateData['description']);
             $rate->setCost($rateData['totalPrice']);
             $rate->setPrice($this->getMethodPrice($rateData['totalPrice'], $methodCode));
 
@@ -682,14 +682,8 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $r->setService($freeMethod);
     }
 
-    /**
-     * Get configuration data of carrier
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|bool
-     */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
             'method' => [
@@ -1040,15 +1034,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                 'False'  => Mage::helper('usa')->__('Required'),
             ],
         ];
-        if (!isset($codes[$type])) {
-            return false;
-        }
-
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        return $codes[$type][$code] ?? false;
+        return $codes[$type] ?? [];
     }
 
     /**
@@ -1223,7 +1209,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $allowed = explode(',', $this->getConfigData('allowed_methods'));
         $arr = [];
         foreach ($allowed as $k) {
-            $arr[$k] = $this->getCode('method', $k);
+            $arr[$k] = $this->getCodeValue('method', $k);
         }
         return $arr;
     }
@@ -1836,7 +1822,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     #[\Override]
     public function getContainerTypesAll(): array
     {
-        return $this->getCode('container') ?: [];
+        return $this->getCodes('container');
     }
 
     /**
@@ -1845,7 +1831,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     #[\Override]
     public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter') ?: [];
+        return $this->getCodes('containers_filter');
     }
 
     /**
@@ -1861,7 +1847,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         }
         $countryRecipient = $params->getCountryRecipient();
         if ($this->_isUSCountry($countryRecipient)) {
-            return $this->getCode('delivery_confirmation_types');
+            return $this->getCodes('delivery_confirmation_types');
         }
         return [];
     }

@@ -44,7 +44,8 @@ class Parameter extends AbstractTokenizer
     {
         $this->next();
         $value = '';
-        if ($this->isWhiteSpace()) {
+        $isEmpty = $this->isWhiteSpace();
+        if ($isEmpty) {
             return $value;
         }
         $quoteStart = $this->char() == "'" || $this->char() == '"';

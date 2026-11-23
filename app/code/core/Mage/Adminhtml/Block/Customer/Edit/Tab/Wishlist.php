@@ -239,13 +239,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Wishlist extends Mage_Adminhtml_Blo
         return $this->fetchView((string) $templateName);
     }
 
-    /**
-     * Retrieve Row click URL
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_product/edit', ['id' => $row->getProductId()]);
     }

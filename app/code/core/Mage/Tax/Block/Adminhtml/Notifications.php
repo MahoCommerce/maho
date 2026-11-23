@@ -89,17 +89,15 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
 
     /**
      * Return boolean determining if FPT/ Catalog Price settings is conflicting or not.
-     *
-     * @return bool
      */
-    public function isDefaultStoreWithConflictingFptTaxConfigurationSettings()
+    public function isDefaultStoreWithConflictingFptTaxConfigurationSettings(): bool
     {
         /** @var Mage_Weee_Helper_Data $weeeTaxHelper */
         $weeeTaxHelper = $this->_factory->getHelper('weee');
-        $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
+        $defaultStore = $this->_app->getStore(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID);
 
         //check default store first
-        return $weeeTaxHelper->validateCatalogPricesAndFptConfiguration($defaultStoreId);
+        return $weeeTaxHelper->validateCatalogPricesAndFptConfiguration($defaultStore);
     }
 
     /**

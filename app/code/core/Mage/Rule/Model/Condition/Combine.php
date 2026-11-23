@@ -267,24 +267,6 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     }
 
     /**
-     * @param string|SimpleXMLElement $xml
-     * @return $this
-     */
-    #[\Override]
-    public function loadXml($xml)
-    {
-        if (is_string($xml)) {
-            $xml = simplexml_load_string($xml);
-        }
-        $arr = parent::loadXml($xml);
-        foreach ($xml->conditions->children() as $condition) {
-            $arr['conditions'] = parent::loadXml($condition);
-        }
-        $this->loadArray($arr);
-        return $this;
-    }
-
-    /**
      * @return string
      */
     #[\Override]

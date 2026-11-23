@@ -26,10 +26,8 @@ abstract class AbstractTokenizer
      * Move current index to next char.
      *
      * If index out of bounds returns false
-     *
-     * @return boolean
      */
-    public function next()
+    public function next(): bool
     {
         if ($this->_currentIndex + 1 >= strlen($this->_string)) {
             return false;
@@ -43,10 +41,8 @@ abstract class AbstractTokenizer
      * Move current index to previous char.
      *
      * If index out of bounds returns false
-     *
-     * @return boolean
      */
-    public function prev()
+    public function prev(): bool
     {
         if ($this->_currentIndex - 1 < 0) {
             return false;

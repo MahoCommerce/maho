@@ -131,14 +131,8 @@ class Mage_Adminhtml_Block_Customer_Online_Grid extends Mage_Adminhtml_Block_Wid
         return parent::_prepareColumns();
     }
 
-    /**
-     * Retrieve Row URL
-     *
-     * @param Mage_Core_Model_Abstract $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return ($this->isAllowed('customer/manage') && $row->getCustomerId())
             ? $this->getUrl('*/customer/edit', ['id' => $row->getCustomerId()]) : '';

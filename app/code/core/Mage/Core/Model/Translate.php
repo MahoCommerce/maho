@@ -215,13 +215,11 @@ class Mage_Core_Model_Translate
 
     /**
      * Loading current theme translation
-     *
-     * @return $this
      */
-    protected function _loadThemeTranslation()
+    protected function _loadThemeTranslation(): static
     {
         $file = Mage::getDesign()->getLocaleFileName('translate.csv');
-        $this->_addData($this->_getFileData($file), false);
+        $this->_addData($this->_getFileData($file), '');
         return $this;
     }
 
