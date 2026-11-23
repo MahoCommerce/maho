@@ -144,12 +144,21 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Standard resource collection initialization
+     *
+     * @throws \UnexpectedValueException when the entity model alias names a class that is not a Mage_Eav_Model_Entity_Abstract
      */
     protected function _init(string $model, ?string $entityModel = null): static
     {
         $this->setItemObjectClass(Mage::getConfig()->getModelClassName($model));
         $entityModel ??= $model;
         $entity = Mage::getResourceSingleton($entityModel);
+        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
+            throw new \UnexpectedValueException(sprintf(
+                'The entity model "%s" of %s must extend Mage_Eav_Model_Entity_Abstract.',
+                $entityModel,
+                static::class,
+            ));
+        }
         $this->setEntity($entity);
 
         return $this;
@@ -157,19 +166,13 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Set entity to use for attributes
-     *
-     * @param Mage_Eav_Model_Entity_Abstract $entity
-     * @throws Mage_Eav_Exception
-     * @return $this
      */
-    public function setEntity($entity)
+    public function setEntity(Mage_Eav_Model_Entity_Abstract|Mage_Core_Model_Config_Element|string $entity): static
     {
         if ($entity instanceof Mage_Eav_Model_Entity_Abstract) {
             $this->_entity = $entity;
-        } elseif (is_string($entity) || $entity instanceof Mage_Core_Model_Config_Element) {
-            $this->_entity = Mage::getModel('eav/entity')->setType($entity);
         } else {
-            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid entity supplied: %s', print_r($entity, true)));
+            $this->_entity = Mage::getModel('eav/entity')->setType($entity);
         }
         return $this;
     }
