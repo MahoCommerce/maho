@@ -630,7 +630,10 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                 // A cart discount can cover a fractional line up to its rounded billable total.
                 $discountLimit = max($discountLimit, $previousDiscountAmount);
                 $baseDiscountLimit = max($baseDiscountLimit, $previousBaseDiscountAmount);
-            } elseif ($rule->getSimpleAction() === Mage_SalesRule_Model_Rule::BY_FIXED_ACTION) {
+            } elseif (in_array($rule->getSimpleAction(), [
+                Mage_SalesRule_Model_Rule::BY_FIXED_ACTION,
+                Mage_SalesRule_Model_Rule::BUY_X_GET_Y_ACTION,
+            ], true)) {
                 // This rule's quantity limit cannot reduce discounts already applied to the line.
                 $discountLimit = max($discountLimit, $itemDiscountAmount);
                 $baseDiscountLimit = max($baseDiscountLimit, $itemBaseDiscountAmount);

@@ -315,6 +315,16 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
         1.00, 1.00, 'USD', 1.00, [0.01],
     ],
+    'a buy one get one rule preserves cart credit below its minimum quantity' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.01],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.02]],
+    ],
+    'a buy one get one rule stays within the amount left by the cart credit' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.06],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.12]],
+    ],
     'a percentage preserves cart credit on fully discounted fractional lines' => [
         [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
         1.00, 1.00, 'USD', 1.00, [0.01, 0.01],
