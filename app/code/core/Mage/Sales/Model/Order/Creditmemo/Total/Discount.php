@@ -226,11 +226,16 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 return null;
             }
         }
+        $history = [];
+        if ($includeTax) {
+            usort($previous, static fn(Mage_Sales_Model_Order_Creditmemo $first, Mage_Sales_Model_Order_Creditmemo $second): int
+                => $first->getId() <=> $second->getId());
+        }
         foreach ($previous as $row) {
             if ($row->getInvoiceId() && $row->getInvoiceId() !== (int) $source->getId()) {
                 continue;
             }
-            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax, $source), $invoiced);
+            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax, $source, $history), $invoiced);
             if (!$row->getInvoiceId() && $amounts) {
                 $otherItems ??= $this->getItemsOnOtherInvoices($order, $source);
                 if (array_intersect_key($amounts, $otherItems)) {
@@ -335,14 +340,20 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         return $shares;
     }
 
-    /** @return array<int, array{net: float, qty: float}> */
+    /**
+     * @param array<int, array{float, ?float}> $history
+     * @return array<int, array{net: float, qty: float}>
+     */
     private function getItemAmounts(
         Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo $document,
         Mage_Sales_Model_Order $order,
         bool $includeTax = false,
         ?Mage_Sales_Model_Order_Invoice $source = null,
+        array &$history = [],
     ): array {
         $amounts = [];
+        $taxes = [];
+        $known = true;
         $items = $document->getAllItems();
         foreach ($items as $item) {
             $id = $item->getOrderItemId();
@@ -357,7 +368,12 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                     && $document->getInvoiceId() === (int) $source->getId() && count($items) === 1
                     && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)
                 ) {
-                    $tax = $this->getHistoricItemTax($document, $source, $item);
+                    [$priorQty, $priorTax] = $history[$id] ?? [0.0, 0.0];
+                    $tax = $this->getHistoricItemTax($document, $source, $item, $priorQty, $priorTax);
+                }
+                if ($source) {
+                    $taxes[$id] = ($taxes[$id] ?? 0.0) + $tax;
+                    $known = $known && $tax !== null;
                 }
                 $net += $tax + $item->getBaseHiddenTaxAmount();
             }
@@ -366,6 +382,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 'qty' => (float) $item->getQty() + ($amounts[$id]['qty'] ?? 0.0),
             ];
         }
+        if ($taxes && $document instanceof Mage_Sales_Model_Order_Creditmemo) {
+            $paid = $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount();
+            $known = $known && $document->getInvoiceId() && $document->getBaseTaxAmount() !== null && round(array_sum($taxes) - $paid, 4) === 0.0;
+            foreach ($taxes as $id => $tax) {
+                [$qty, $priorTax] = $history[$id] ?? [0.0, 0.0];
+                $history[$id] = [$qty + $amounts[$id]['qty'], $known && $priorTax !== null ? $priorTax + $tax : null];
+            }
+        }
         return $amounts;
     }
 
@@ -373,8 +397,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         Mage_Sales_Model_Order_Creditmemo $memo,
         Mage_Sales_Model_Order_Invoice $source,
         Mage_Sales_Model_Order_Creditmemo_Item $item,
+        float $priorQty,
+        ?float $priorTax,
     ): ?float {
-        if ($memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
+        if ($priorTax === null || $memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
             return null;
         }
         $expected = null;
@@ -385,10 +411,15 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             }
             $outsideItems -= $line->getBaseTaxAmount();
             if ($line->getOrderItemId() === $item->getOrderItemId()) {
-                if ($expected !== null || $line->getQty() < $item->getQty() || $this->hasFixedTax($line)) {
+                $qtyLeft = round($line->getQty() - $priorQty, 4);
+                $invoicedTax = $line->getBaseTaxAmount();
+                $priorTax = round($priorTax, 4);
+                if ($expected !== null || $qtyLeft < $item->getQty() || $this->hasFixedTax($line)
+                    || $priorTax < min(0.0, $invoicedTax) || $priorTax > max(0.0, $invoicedTax)
+                ) {
                     return null;
                 }
-                $expected = $line->getBaseTaxAmount() * $item->getQty() / $line->getQty();
+                $expected = ($invoicedTax - $priorTax) * $item->getQty() / $qtyLeft;
             }
         }
         $paid = round($memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount(), 4);
