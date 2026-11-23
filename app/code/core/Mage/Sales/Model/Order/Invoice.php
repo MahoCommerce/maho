@@ -424,6 +424,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $price;
     }
 
+    public function clearItemsCollection(): void
+    {
+        $this->_items = null;
+    }
+
     /**
      * Get invoice items collection
      *
@@ -866,7 +871,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     {
         $this->unsetData();
         $this->_origData = null;
-        $this->_items = null;
+        $this->clearItemsCollection();
         $this->_comments = null;
         $this->_order = null;
         $this->_saveBeforeDestruct = false;

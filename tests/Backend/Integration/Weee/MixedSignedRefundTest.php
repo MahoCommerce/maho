@@ -96,8 +96,14 @@ it('refunds opposite signed tax components in the order their units are returned
     'positive net tax with the negative line first' => [[15.0, -5.0], [[[1], -5.0], [[0], 15.0]]],
     'zero net tax with the positive line first' => [[5.0, -5.0], [[[0], 5.0], [[1], -5.0]]],
     'zero net tax with the negative line first' => [[5.0, -5.0], [[[1], -5.0], [[0], 5.0]]],
+    'order refund with positive net tax and the positive line first' => [[15.0, -5.0], [[[0], 15.0], [[1], -5.0]], 0.0, false],
+    'order refund with positive net tax and the negative line first' => [[15.0, -5.0], [[[1], -5.0], [[0], 15.0]], 0.0, false],
+    'order refund with zero net tax and the positive line first' => [[5.0, -5.0], [[[0], 5.0], [[1], -5.0]], 0.0, false],
+    'order refund with zero net tax and the negative line first' => [[5.0, -5.0], [[[1], -5.0], [[0], 5.0]], 0.0, false],
     'negative VAT before the positive fee' => [[-15.0, 0.0], [[[0], -15.0], [[1], 5.0]], 5.0],
     'positive fee before the negative VAT' => [[-15.0, 0.0], [[[1], 5.0], [[0], -15.0]], 5.0],
+    'unlinked negative VAT before a larger positive fee' => [[-5.0, 0.0], [[[0], -5.0], [[1], 15.0]], 15.0, false],
+    'unlinked positive fee before a smaller negative VAT' => [[-5.0, 0.0], [[[1], 15.0], [[0], -5.0]], 15.0, false],
 ]);
 
 it('refunds the cent of item tax on the invoice that billed it', function (bool $reverse): void {

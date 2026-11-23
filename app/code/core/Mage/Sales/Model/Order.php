@@ -1753,6 +1753,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
 
     public function clearRefundDocumentCollections(): void
     {
+        $this->_items = null;
         $this->_invoices = null;
         $this->_creditmemos = null;
     }
@@ -2136,7 +2137,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
         $this->unsetData();
         $this->_actionFlag = [];
         $this->_addresses = null;
-        $this->_items = null;
         $this->_payments = null;
         $this->_statusHistory = null;
         $this->clearRefundDocumentCollections();

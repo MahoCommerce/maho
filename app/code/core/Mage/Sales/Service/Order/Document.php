@@ -557,6 +557,7 @@ class Mage_Sales_Service_Order_Document
                 if (!$invoice->getId() || (int) $invoice->getOrderId() !== (int) $order->getId()) {
                     throw new Mage_Core_Exception_Input()->addError('invoice_id', Mage::helper('sales')->__('The invoice does not belong to this order'));
                 }
+                $invoice->clearItemsCollection();
                 $invoice->load((int) $invoice->getId())->setOrder($order);
             }
             $creditmemo = $this->prepareCreditmemo($order, $data, $backToStockItemIds, $invoice);
