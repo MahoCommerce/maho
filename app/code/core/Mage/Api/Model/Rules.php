@@ -33,11 +33,8 @@ class Mage_Api_Model_Rules extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    /**
-     * @return Mage_Api_Model_Resource_Permissions_Collection
-     */
     #[\Override]
-    public function getCollection()
+    public function getCollection(): Mage_Api_Model_Resource_Permissions_Collection
     {
         return Mage::getResourceModel('api/permissions_collection');
     }

@@ -71,7 +71,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Translations_Grid extends M
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

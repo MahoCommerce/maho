@@ -97,7 +97,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     protected $_removeDefaultTitle = false;
 
-    public function __construct(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response, array $invokeArgs = [])
+    public function __construct(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response)
     {
         $this->_request = $request;
         $this->_response = $response;

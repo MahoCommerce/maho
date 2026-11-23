@@ -41,9 +41,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
     public function __construct()
     {
         parent::__construct();
-        foreach ($this->getCode('condition_name') as $k => $v) {
-            $this->_conditionNames[] = $k;
-        }
+        $this->_conditionNames = array_keys($this->getCodes('condition_name'));
     }
 
     /**
@@ -194,13 +192,10 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
     }
 
     /**
-     * Get code
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|string
+     * @return array<string, string>
      */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
 
@@ -218,19 +213,7 @@ class Mage_Shipping_Model_Carrier_Tablerate extends Mage_Shipping_Model_Carrier_
 
         ];
 
-        if (!isset($codes[$type])) {
-            throw Mage::exception('Mage_Shipping', Mage::helper('shipping')->__('Invalid Table Rate code type: %s', $type));
-        }
-
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        if (!isset($codes[$type][$code])) {
-            throw Mage::exception('Mage_Shipping', Mage::helper('shipping')->__('Invalid Table Rate code for type %s: %s', $type, $code));
-        }
-
-        return $codes[$type][$code];
+        return $codes[$type] ?? [];
     }
 
     /**

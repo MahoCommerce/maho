@@ -113,7 +113,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
     }
 
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($this->getCollection()) {
             if ($column->getId() === 'websites') {
@@ -374,12 +374,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
         return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
-    /**
-     * @param Mage_Catalog_Model_Product $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', [
             'store' => $this->getRequest()->getParam('store'),

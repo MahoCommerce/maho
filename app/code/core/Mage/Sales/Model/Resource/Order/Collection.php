@@ -52,11 +52,9 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
 
     /**
      * Minimize usual count select
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = parent::getSelectCountSql();
         $countSelect->resetJoinLeft();
@@ -163,22 +161,20 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
     }
 
     /**
-     * Specify collection select filter by attribute value
+     * Filter by one attribute code, or by a list of conditions joined with OR
      *
-     * @param array $attributes
-     * @param array|int|string|null $condition
-     * @return $this
+     * Each condition in the list has an "attribute" key and the keys of a field condition.
+     * $condition applies only to one attribute code.
      */
-    public function addAttributeToSearchFilter($attributes, $condition = null)
+    public function addAttributeToSearchFilter(array|string $attributes, array|int|string|null $condition = null): static
     {
-        if (is_array($attributes) && !empty($attributes)) {
-            $this->_addAddressFields();
+        if (is_string($attributes)) {
+            return $this->addAttributeToFilter($attributes, $condition);
+        }
 
-            foreach ($attributes as $attribute) {
-                $this->addFieldToSearchFilter($this->_attributeToField($attribute['attribute']), $attribute);
-            }
-        } else {
-            $this->addAttributeToFilter($attributes, $condition);
+        $this->_addAddressFields();
+        foreach ($attributes as $attribute) {
+            $this->addFieldToSearchFilter($this->_attributeToField($attribute['attribute']), $attribute);
         }
 
         return $this;

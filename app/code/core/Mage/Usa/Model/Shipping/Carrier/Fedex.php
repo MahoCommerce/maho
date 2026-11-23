@@ -442,7 +442,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 $rate->setCarrier($this->_code);
                 $rate->setCarrierTitle($this->getConfigData('title'));
                 $rate->setMethod($method);
-                $rate->setMethodTitle($this->getCode('method', $method));
+                $rate->setMethodTitle($this->getCodeValue('method', $method));
                 $rate->setCost($costArr[$method]);
                 $rate->setPrice($price);
                 $result->append($rate);
@@ -500,14 +500,8 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $r->setService($freeMethod);
     }
 
-    /**
-     * Get configuration data of carrier
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|bool
-     */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
             'method' => [
@@ -670,15 +664,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 'KG'   =>  Mage::helper('usa')->__('Kilograms'),
             ],
         ];
-        if (!isset($codes[$type])) {
-            return false;
-        }
-
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        return $codes[$type][$code] ?? false;
+        return $codes[$type] ?? [];
     }
 
     /**
@@ -916,7 +902,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $allowed = explode(',', $this->getConfigData('allowed_methods'));
         $arr = [];
         foreach ($allowed as $k) {
-            $arr[$k] = $this->getCode('method', $k);
+            $arr[$k] = $this->getCodeValue('method', $k);
         }
         return $arr;
     }
@@ -1238,7 +1224,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     #[\Override]
     public function getContainerTypesAll(): array
     {
-        return $this->getCode('packaging') ?: [];
+        return $this->getCodes('packaging');
     }
 
     /**
@@ -1247,7 +1233,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     #[\Override]
     public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter') ?: [];
+        return $this->getCodes('containers_filter');
     }
 
     /**
@@ -1258,6 +1244,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     #[\Override]
     public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
-        return $this->getCode('delivery_confirmation_types');
+        return $this->getCodes('delivery_confirmation_types');
     }
 }

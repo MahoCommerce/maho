@@ -96,16 +96,10 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         return $this->getUrl('*/*/usersGrid', ['_current' => true]);
     }
 
-    /**
-     * Get row URL
-     *
-     * @param Mage_Api2_Model_Acl_Global_Role $row
-     * @return string|null
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
-        return null;
+        return '';
     }
 
     /**
@@ -166,12 +160,8 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Wid
         return '';
     }
 
-    /**
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
     #[\Override]
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         if ($column->getId() == 'filter_in_role_users') {
             $inRoleIds = $this->getUsers();

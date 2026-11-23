@@ -70,7 +70,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Grid extends Mage_Adminh
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['user_id' => $row->getId()]);
     }

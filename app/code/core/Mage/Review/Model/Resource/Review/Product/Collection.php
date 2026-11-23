@@ -281,11 +281,9 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
 
     /**
      * Render SQL for retrieve product count
-     *
-     * @return Maho\Db\Select|null
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $select = parent::getSelectCountSql();
         $select->reset(Maho\Db\Select::COLUMNS)

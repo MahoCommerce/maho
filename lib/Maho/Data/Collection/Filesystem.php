@@ -603,14 +603,9 @@ class Filesystem extends Collection
 
     /**
      * Does nothing. Intentionally disabled parent method
-     *
-     * @param string $field
-     * @param string|array $value
-     * @param string $type and|or|string
-     * @return $this
      */
     #[\Override]
-    public function addFilter($field, $value, $type = 'and')
+    public function addFilter(string $field, int|string|array $value, string $type = 'and'): static
     {
         return $this;
     }

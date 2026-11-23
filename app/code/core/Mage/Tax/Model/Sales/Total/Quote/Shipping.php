@@ -93,12 +93,13 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
         $shipping           = $address->getShippingAmount();
         $baseShipping       = $address->getBaseShippingAmount();
         $rate               = $calc->getRate($addressTaxRequest);
+        $rateKey            = (string) $rate;
         if ($priceIncludesTax) {
             if ($this->_areTaxRequestsSimilar) {
-                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, true, false), $rate, true);
+                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, true, false), $rateKey, true);
                 $baseTax        = $this->_round(
                     $calc->calcTaxAmount($baseShipping, $rate, true, false),
-                    $rate,
+                    $rateKey,
                     true,
                     'base',
                 );
@@ -117,10 +118,10 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
                 $baseStoreTax   = $calc->calcTaxAmount($baseShipping, $storeRate, true, false);
                 $shipping       = $calc->round($shipping - $storeTax);
                 $baseShipping   = $calc->round($baseShipping - $baseStoreTax);
-                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, false, false), $rate, true);
+                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, false, false), $rateKey, true);
                 $baseTax        = $this->_round(
                     $calc->calcTaxAmount($baseShipping, $rate, false, false),
-                    $rate,
+                    $rateKey,
                     true,
                     'base',
                 );
@@ -172,13 +173,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
     /**
      * Round price based on tax rounding settings
      *
-     * @param float $price
-     * @param string $rate
-     * @param bool $direction
-     * @param string $type
-     * @return float
+     * $rateKey is the tax rate as a string, or the ID of the applied rates.
      */
-    protected function _round($price, $rate, $direction, $type = 'regular')
+    protected function _round(float $price, string $rateKey, bool $direction, string $type = 'regular'): float
     {
         if (!$price) {
             return $this->_calculator->round($price);
@@ -186,8 +183,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
 
         $deltas = $this->_address->getRoundingDeltas();
         $key = $type . $direction;
-        $rate = (string) $rate;
-        $delta = $deltas[$key][$rate] ?? 0;
+        $delta = $deltas[$key][$rateKey] ?? 0;
         return $this->_calculator->round($price + $delta);
     }
 }

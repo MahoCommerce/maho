@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Collection object
      *
-     * @var \Maho\Data\Collection\Db|null
+     * @var \Maho\Data\Collection|null
      */
     protected $_collection = null;
 
@@ -319,22 +319,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $html;
     }
 
-    /**
-     * set collection object
-     *
-     * @param Mage_Core_Model_Resource_Db_Collection_Abstract|\Maho\Data\Collection\Db $collection
-     */
-    public function setCollection($collection): void
+    public function setCollection(\Maho\Data\Collection $collection): void
     {
         $this->_collection = $collection;
     }
 
-    /**
-     * get collection object
-     *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|\Maho\Data\Collection\Db
-     */
-    public function getCollection()
+    public function getCollection(): ?\Maho\Data\Collection
     {
         return $this->_collection;
     }
@@ -566,27 +556,22 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    /**
-     * Add filter
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
-     */
-    protected function _addColumnFilterToCollection($column)
+    protected function _addColumnFilterToCollection(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
-        if ($this->getCollection()) {
+        $collection = $this->getCollection();
+        if ($collection) {
             $field = $column->getFilterIndex() ?: $column->getIndex();
             $conditionCallback = $column->getFilterConditionCallback();
             if (Mage_Adminhtml_Block_Widget_Grid_Column::isBoundCallback($conditionCallback)) {
-                call_user_func($conditionCallback, $this->getCollection(), $column);
-            } else {
+                call_user_func($conditionCallback, $collection, $column);
+            } elseif ($collection instanceof \Maho\Data\Collection\Db) {
                 $cond = $column->getFilter()->getCondition();
                 if ($field && $cond !== null) {
                     $filtered = array_map(static fn($value) => is_object($value) ? $value->__toString() : $value, is_array($cond) ? array_values($cond) : [$cond]);
                     if (in_array('\'%NULL%\'', $filtered, true) || in_array('NULL', $filtered, true)) {
-                        $this->getCollection()->addFieldToFilter($field, ['null' => true]);
+                        $collection->addFieldToFilter($field, ['null' => true]);
                     } else {
-                        $this->getCollection()->addFieldToFilter($field, $cond);
+                        $collection->addFieldToFilter($field, $cond);
                     }
                 }
             }
@@ -613,11 +598,8 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * Sets sorting order by some column
-     *
-     * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
-     * @return $this
      */
-    protected function _setCollectionOrder($column)
+    protected function _setCollectionOrder(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         $collection = $this->getCollection();
         if ($collection) {
@@ -786,11 +768,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 
     protected function _storeNavigationQuery(): void
     {
-        if (!$this->getCollection()) {
+        $collection = $this->getCollection();
+        if (!$collection instanceof \Maho\Data\Collection\Db) {
             return;
         }
 
-        $select = clone $this->getCollection()->getSelect();
+        $select = clone $collection->getSelect();
         $orderParts = $select->getPart(\Maho\Db\Select::ORDER);
 
         $terms = [];
@@ -1275,6 +1258,18 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
+     * Load every row for an export. A collection method can put a LIMIT on the select, which a page size of 0 does not remove.
+     */
+    private function removeExportLimit(): void
+    {
+        $collection = $this->getCollection();
+        if ($collection instanceof \Maho\Data\Collection\Db) {
+            $collection->getSelect()->limit();
+        }
+        $collection?->setPageSize(0);
+    }
+
+    /**
      * Retrieve Grid data as CSV
      *
      * @throws Exception
@@ -1284,8 +1279,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $csv = '';
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->getSelect()->limit();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1337,15 +1331,13 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @return string
      * @throws Exception
      */
-    public function getXml()
+    public function getXml(): string
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->getSelect()->limit();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1452,8 +1444,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     {
         $this->_isExport = true;
         $this->_prepareGrid();
-        $this->getCollection()->getSelect()->limit();
-        $this->getCollection()->setPageSize(0);
+        $this->removeExportLimit();
         $this->_beforeLoadCollection();
         $this->getCollection()->load();
         $this->_afterLoadCollection();
@@ -1954,15 +1945,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * Return row url for js event handlers
-     *
-     * @param \Maho\DataObject $row
-     * @return string
+     * Return the URL that a click on the row opens, or an empty string for no URL.
+     * The default '#' highlights the row on hover, but a click on it does not navigate.
      */
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
-        $res = parent::getRowUrl($row);
-        return $res ?: '#';
+        return '#';
     }
 
     /**

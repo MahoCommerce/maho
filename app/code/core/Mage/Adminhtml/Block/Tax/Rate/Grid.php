@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
     }
 
     #[\Override]
-    protected function _setCollectionOrder($column)
+    protected function _setCollectionOrder(Mage_Adminhtml_Block_Widget_Grid_Column $column): static
     {
         $collection = $this->getCollection();
         if ($collection) {
@@ -38,7 +38,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
             $collection->setOrder($columnIndex, strtoupper($column->getDir()));
 
             if ($columnIndex === 'region_table.code') {
-                $collection->addOrder('code', strtoupper($column->getDir()));
+                $collection->setOrder('code', strtoupper($column->getDir()));
             }
         }
         return $this;
@@ -95,12 +95,8 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid extends Mage_Adminhtml_Block_Widget_Gri
         return parent::_prepareColumns();
     }
 
-    /**
-     * @param Mage_Tax_Model_Calculation_Rate $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['rate' => $row->getTaxCalculationRateId()]);
     }

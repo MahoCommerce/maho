@@ -129,14 +129,8 @@ class Mage_Adminhtml_Block_Catalog_Search_Grid extends Mage_Adminhtml_Block_Widg
         return parent::_prepareMassaction();
     }
 
-    /**
-     * Retrieve Row Click callback URL
-     *
-     * @param Mage_CatalogSearch_Model_Query $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

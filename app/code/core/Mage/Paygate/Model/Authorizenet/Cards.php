@@ -48,18 +48,15 @@ class Mage_Paygate_Model_Authorizenet_Cards
 
     /**
      * Add based on $cardInfo card to payment and return Id of new item
-     *
-     * @param mixed $cardInfo
-     * @return \Maho\DataObject
      */
-    public function registerCard($cardInfo = [])
+    public function registerCard(array $cardInfo = []): \Maho\DataObject
     {
         $this->_isPaymentValid();
-        $cardId = md5(microtime(true));
+        $cardId = md5(microtime());
         $cardInfo[self::CARD_ID_KEY] = $cardId;
         $this->_cards[$cardId] = $cardInfo;
         $this->_payment->setAdditionalInformation(self::CARDS_NAMESPACE, $this->_cards);
-        return $this->getCard($cardId);
+        return new \Maho\DataObject($cardInfo);
     }
 
     /**

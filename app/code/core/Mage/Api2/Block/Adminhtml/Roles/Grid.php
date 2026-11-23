@@ -83,19 +83,13 @@ class Mage_Api2_Block_Adminhtml_Roles_Grid extends Mage_Adminhtml_Block_Widget_G
         return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
-    /**
-     * Get row URL
-     *
-     * @param Mage_Api2_Model_Acl_Global_Role $row
-     * @return string|null
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         if ($this->isAllowed('system/api/roles/edit')) {
             return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
         }
-        return null;
+        return '';
     }
 
     /**

@@ -49,7 +49,7 @@ function translatorWithFixtureFiles(): Mage_Core_Model_Translate
         }
 
         #[\Override]
-        protected function _loadThemeTranslation()
+        protected function _loadThemeTranslation(): static
         {
             return $this;
         }
@@ -113,7 +113,7 @@ describe('Translator sets', function () {
             }
 
             #[\Override]
-            protected function _loadThemeTranslation()
+            protected function _loadThemeTranslation(): static
             {
                 return $this;
             }

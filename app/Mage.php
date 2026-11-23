@@ -521,18 +521,18 @@ final class Mage
     /**
      * Retrieve Controller instance by ClassName
      *
-     * @param class-string $class
-     * @param Mage_Core_Controller_Request_Http $request
-     * @param Mage_Core_Controller_Response_Http $response
-     * @return Mage_Core_Controller_Front_Action
+     * @param class-string<Mage_Core_Controller_Varien_Action> $class
      * @throws Mage_Core_Exception
      */
-    public static function getControllerInstance($class, $request, $response, array $invokeArgs = [])
-    {
+    public static function getControllerInstance(
+        string $class,
+        Mage_Core_Controller_Request_Http $request,
+        Mage_Core_Controller_Response_Http $response,
+    ): Mage_Core_Controller_Varien_Action {
         if (!class_exists($class)) {
             self::throwException("Invalid controller class: $class");
         }
-        return new $class($request, $response, $invokeArgs);
+        return new $class($request, $response);
     }
 
     /**

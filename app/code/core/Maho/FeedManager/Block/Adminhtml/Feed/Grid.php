@@ -172,7 +172,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid extends Mage_Adminhtml_Block_Wi
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }
