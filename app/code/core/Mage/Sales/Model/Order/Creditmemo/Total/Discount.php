@@ -357,7 +357,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                     && $document->getInvoiceId() === (int) $source->getId() && count($items) === 1
                     && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)
                 ) {
-                    $tax = $this->getHistoricItemTax($document, $source);
+                    $tax = $this->getHistoricItemTax($document, $source, $item);
                 }
                 $net += $tax + $item->getBaseHiddenTaxAmount();
             }
@@ -369,16 +369,31 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         return $amounts;
     }
 
-    private function getHistoricItemTax(Mage_Sales_Model_Order_Creditmemo $memo, Mage_Sales_Model_Order_Invoice $source): ?float
-    {
+    private function getHistoricItemTax(
+        Mage_Sales_Model_Order_Creditmemo $memo,
+        Mage_Sales_Model_Order_Invoice $source,
+        Mage_Sales_Model_Order_Creditmemo_Item $item,
+    ): ?float {
+        if ($memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
+            return null;
+        }
+        $expected = null;
         $outsideItems = $source->getBaseTaxAmount() - $source->getBaseShippingTaxAmount();
         foreach ($source->getAllItems() as $line) {
             if ($line->getBaseTaxAmount() === null) {
                 return null;
             }
             $outsideItems -= $line->getBaseTaxAmount();
+            if ($line->getOrderItemId() === $item->getOrderItemId()) {
+                if ($expected !== null || $line->getQty() < $item->getQty() || $this->hasFixedTax($line)) {
+                    return null;
+                }
+                $expected = $line->getBaseTaxAmount() * $item->getQty() / $line->getQty();
+            }
         }
-        return round($outsideItems, 4) === 0.0 ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount() : null;
+        $paid = round($memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount(), 4);
+        return round($outsideItems, 4) === 0.0 && $expected !== null
+            && ($paid === round($expected, 4) || $paid === $memo->getStore()->roundPrice($expected)) ? $paid : null;
     }
 
     /** @return array<int, true> */

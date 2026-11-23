@@ -452,6 +452,70 @@ it('refunds the tax charged by the split invoice when the same items were also o
     }
 });
 
+it('ignores historical header VAT above the share charged for the returned item', function (
+    array $firstLine,
+    float $taxOnSecondItem,
+    float $shippingDiscount,
+    float $priorDiscount,
+    float $fee,
+    float $expectedDiscount,
+    float $expectedRefund,
+): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        [$price, $firstDiscount, $taxOnFirstItem, $historicTax] = $firstLine;
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 10.0, 'first' => $price, 'second' => 10.0],
+            0.004,
+            10.0,
+            $shippingDiscount,
+            ['first' => 2, 'second' => 2],
+        );
+        $invoice = $invoices['discount'];
+        foreach ($invoice->getAllItems() as $line) {
+            $item = $order->getItemById($line->getOrderItemId());
+            [$discount, $tax] = $item->getSku() === 'first' ? [$firstDiscount, $taxOnFirstItem] : [20.0, $taxOnSecondItem];
+            $item->setBaseDiscountAmount($discount)->setBaseDiscountInvoiced($discount)
+                ->setBaseTaxAmount($tax)->setBaseTaxInvoiced($tax)->save();
+            $line->setBaseDiscountAmount($discount)->setBaseTaxAmount($tax)->save();
+        }
+        $discount = 20.0 + $firstDiscount + $shippingDiscount;
+        $tax = $taxOnFirstItem + $taxOnSecondItem;
+        $amount = 2 * $price - $firstDiscount + $tax - $shippingDiscount;
+        $invoice->setBaseDiscountAmount(-$discount)->setBaseTaxAmount($tax)->setBaseGrandTotal($amount)->save();
+        $order->setBaseDiscountAmount(-5.0 - $discount)->setBaseDiscountInvoiced(-5.0 - $discount)
+            ->setBaseTaxAmount($tax)->setBaseTaxInvoiced($tax)
+            ->setBaseGrandTotal(15.0 + $amount)->setBaseTotalPaid(15.0 + $amount)->setBaseTotalInvoiced(15.0 + $amount)->save();
+        $documents = Mage::getService('sales/order_document');
+        $first = $documents->refund(
+            $order,
+            ['qtys' => [$items['first']->getId() => 1]],
+            invoice: $invoice,
+            beforeRegister: static function (Mage_Sales_Model_Order_Creditmemo $memo) use ($historicTax, $priorDiscount, $price, $firstDiscount): void {
+                $memo->getAllItems()[0]->setBaseTaxAmount(null);
+                $memo->setBaseTaxAmount($historicTax)->setBaseDiscountAmount(-$firstDiscount / 2 - $priorDiscount)
+                    ->setBaseGrandTotal($price - $firstDiscount / 2 - $priorDiscount + $historicTax);
+            },
+        );
+        expect($first->getAllItems()[0]->getBaseTaxAmount())->toBeNull();
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
+        $data = ['qtys' => [$items['second']->getId() => 1], 'adjustment_negative' => $fee];
+        $credit = $documents->refund($order, $data, invoice: $invoice);
+        $saved = Mage::getModel('sales/order_creditmemo')->load($credit->getId());
+        expect($saved->getBaseTaxAmount())->toBe($taxOnSecondItem / 2)
+            ->and($saved->getBaseDiscountAmount())->toBe($expectedDiscount)
+            ->and($saved->getBaseGrandTotal())->toBe($expectedRefund);
+    } finally {
+        $connection->rollBack();
+    }
+})->with([
+    'exempt item' => [[1.0, 0.0, 0.0, 1.0], 10.0, 3.0, 0.25, 0.10, -11.25, 3.65],
+    'two units charged one dollar of tax together' => [[1.0, 0.0, 1.0, 1.0], 10.0, 3.0, 0.25, 0.10, -11.13, 3.77],
+    'discounted exempt item' => [[10.0, 19.80, 0.0, 0.10], 1.0, 0.24, 0.02, 0.01, -10.10, 0.39],
+]);
+
 it('limits the deferred shipping discount to the tax actually refunded', function (): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
