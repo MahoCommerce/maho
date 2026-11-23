@@ -13,7 +13,7 @@ declare(strict_types=1);
 /**
  * New products widget pager block
  *
- * @package    Mage_Catalog
+ * @extends Mage_Page_Block_Html_Pager<\Maho\Data\Collection\Db>
  */
 class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_Pager
 {
@@ -104,7 +104,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
     /**
      * Connect collection to paging
      *
-     * @param \Maho\Data\Collection $collection
+     * @param \Maho\Data\Collection\Db $collection
      * @return $this
      */
     #[\Override]
@@ -118,9 +118,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
             ? $this->getTotalNum() - $collectionOffset
             : $this->getLimit();
 
-        if ($this->_collection instanceof \Maho\Data\Collection\Db) {
-            $this->_collection->getSelect()->limit($collectionLimit, $collectionOffset);
-        }
+        $this->_collection->getSelect()->limit($collectionLimit, $collectionOffset);
         $this->_setFrameInitialized(false);
         return $this;
     }

@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TCollection of Mage_Eav_Model_Entity_Collection_Abstract = Mage_Eav_Model_Entity_Collection_Abstract
+ */
 abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_Eav_Model_Entity_Attribute_Source_Interface
 {
     /**
@@ -93,6 +96,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
 
     /**
      * Add Value Sort To Collection Select
+     *
+     * @param TCollection $collection
      */
     public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = \Maho\Data\Collection::SORT_ORDER_DESC): static
     {
