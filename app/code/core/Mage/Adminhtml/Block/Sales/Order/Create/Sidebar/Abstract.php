@@ -57,9 +57,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
      * Retrieve identifier of block item
      *
      * @param TItem $item
-     * @return  int
      */
-    public function getIdentifierId($item)
+    public function getIdentifierId(\Maho\DataObject $item): ?int
     {
         return $item->getProductId();
     }

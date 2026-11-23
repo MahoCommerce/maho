@@ -88,12 +88,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
 
     /**
      * Retrieve identifier of block item
-     *
-     * @param \Maho\DataObject $item
-     * @return  int
      */
     #[\Override]
-    public function getIdentifierId($item)
+    public function getIdentifierId(\Maho\DataObject $item): ?int
     {
         return $item->getId();
     }
