@@ -527,63 +527,97 @@ it('keeps the historical tax cent left after the first unit was refunded', funct
     float $expectedDiscount,
     float $expectedRefund,
     bool $firstTaxReconciles = true,
+    array $firstUnitTaxes = [0.03, 0.02],
+    string $firstHistory = 'linked',
 ): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
+    $store = Mage::app()->getStore();
+    $paymentPath = 'payment/checkmo/model';
+    $previousPaymentModel = $store->getConfig($paymentPath);
     try {
         $prices = ['shipping' => 10.0, 'first' => $firstPrice, 'second' => $secondPrice];
-        [$order, $items, $invoices] = createSplitShippingRefundOrder($prices, 0.004, 10.0, $shippingDiscount, ['first' => 2, 'second' => $secondQty]);
+        if ($firstHistory === 'two items') {
+            $prices['extra'] = 0.0;
+        }
+        [$order, $items, $invoices] = createSplitShippingRefundOrder($prices, 0.02, 10.0, $shippingDiscount, ['first' => 2, 'second' => $secondQty]);
         $source = $invoices['discount'];
         foreach ($source->getAllItems() as $line) {
             $item = $order->getItemById($line->getOrderItemId());
-            $tax = $item->getSku() === 'first' ? 0.05 : $secondTax;
+            $tax = ['first' => array_sum($firstUnitTaxes), 'second' => $secondTax, 'extra' => 0.0][$item->getSku()];
             $item->setBaseDiscountAmount(0.0)->setBaseDiscountInvoiced(0.0)->setBaseTaxAmount($tax)->setBaseTaxInvoiced($tax)->save();
             $line->setBaseDiscountAmount(0.0)->setBaseTaxAmount($tax)->save();
         }
-        $tax = 0.05 + $secondTax;
+        $tax = array_sum($firstUnitTaxes) + $secondTax;
         $capture = $firstPrice * 2 + $secondPrice * $secondQty + $tax - $shippingDiscount;
         $source->setBaseDiscountAmount(-$shippingDiscount)->setBaseTaxAmount($tax)->setBaseGrandTotal($capture)->save();
         $order->setBaseDiscountAmount(-5.0 - $shippingDiscount)->setBaseDiscountInvoiced(-5.0 - $shippingDiscount)
             ->setBaseTaxAmount($tax)->setBaseTaxInvoiced($tax)
             ->setBaseGrandTotal(15.0 + $capture)->setBaseTotalPaid(15.0 + $capture)->setBaseTotalInvoiced(15.0 + $capture)->save();
         $documents = Mage::getService('sales/order_document');
-        $data = ['qtys' => [$items['first']->getId() => 1]];
-        foreach ([0.03, 0.02] as $tax) {
+        if ($firstHistory === 'after shipping') {
+            $documents->refund($order, ['qtys' => [$items['shipping']->getId() => 1]], invoice: $invoices['shipping']);
+        }
+        foreach ($firstUnitTaxes as $index => $tax) {
             $order = Mage::getModel('sales/order')->load($order->getId());
             $source = Mage::getModel('sales/order_invoice')->load($source->getId());
+            $data = ['qtys' => [$items['first']->getId() => 1], 'shipping_amount' => 0.0];
+            if ($index === 0 && $firstHistory === 'two items') {
+                $data['qtys'][$items['extra']->getId()] = 1;
+            }
             $historic = $documents->refund(
                 $order,
                 $data,
-                invoice: $source,
+                invoice: $index === 0 && $firstHistory !== 'linked' ? null : $source,
                 beforeRegister: static function (Mage_Sales_Model_Order_Creditmemo $memo) use ($firstPrice, $historicRefund, $tax): void {
                     $memo->setBaseDiscountAmount($historicRefund - $firstPrice - $tax)->setBaseGrandTotal($historicRefund);
                 },
             );
             $historic = Mage::getModel('sales/order_creditmemo')->load($historic->getId());
-            $line = $historic->getAllItems()[0];
+            $line = $historic->getItemByOrderId($items['first']->getId());
             expect($historic->getBaseTaxAmount())->toBe($tax)
                 ->and($line->getBaseTaxAmount())->toBe($tax);
-            if ($tax === 0.03 && !$firstTaxReconciles) {
+            if ($index === 0 && $firstHistory === 'two items') {
+                $extra = $historic->getItemByOrderId($items['extra']->getId());
+                expect($extra->getBaseTaxAmount())->toBeNull();
+            }
+            if ($index === 0 && !$firstTaxReconciles) {
                 $historic->setBaseTaxAmount(0.04)->save();
-            } elseif ($tax === 0.02) {
+            } elseif ($index === 1 || $firstHistory === 'header only') {
                 $line->setBaseTaxAmount(null)->save();
             }
         }
         $order = Mage::getModel('sales/order')->load($order->getId());
         $source = Mage::getModel('sales/order_invoice')->load($source->getId());
+        $capture = 'historical-item-tax-' . uniqid();
+        $source->setTransactionId($capture)->save();
+        Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
+            ->setTxnId($capture)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
+        $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
+        $calls = new Maho\DataObject(['requests' => []]);
+        Mage::register('split_shipping_refund_payment_calls', $calls);
         $data = ['qtys' => [$items['second']->getId() => 1], 'adjustment_negative' => $fee];
-        $credit = $documents->refund($order, $data, invoice: $source);
+        $credit = $documents->refund($order, $data, offlineRefund: false, invoice: $source);
         $saved = Mage::getModel('sales/order_creditmemo')->load($credit->getId());
-        expect($saved->getBaseDiscountAmount())->toBe($expectedDiscount)
+        expect(array_column($calls->getData('requests'), 'capture'))->toBe([$capture])
+            ->and(round($calls->getData('requests')[0]['amount'], 4))->toBe($expectedRefund)
             ->and($saved->getBaseGrandTotal())->toBe($expectedRefund)
-            ->and(Mage::getModel('sales/order_invoice')->load($source->getId())->getBaseTotalRefunded())->toBe(round(2 * $historicRefund + $expectedRefund, 2));
+            ->and($saved->getBaseDiscountAmount())->toBe($expectedDiscount)
+            ->and(Mage::getModel('sales/order_invoice')->load($source->getId())->getBaseTotalRefunded())
+            ->toBe(round(($firstHistory === 'linked' ? 2 : 1) * $historicRefund + $expectedRefund, 2));
     } finally {
+        Mage::unregister('split_shipping_refund_payment_calls');
+        $store->setConfig($paymentPath, $previousPaymentModel);
         $connection->rollBack();
     }
 })->with([
     'final item' => [1.0, 1.0, 1, 1.0, 3.10, 0.25, 0.0, -1.55, 0.45],
     'one unit left on the other item' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.50, 0.09],
     'the earlier credit paid tax outside the recorded row' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.48, 0.11, false],
+    'unlinked first credit' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.49, 0.10, true, [0.03, 0.03], 'unlinked'],
+    'unlinked first credit after returning the shipping invoice' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.51, 0.08, true, [0.02, 0.02], 'after shipping'],
+    'an unlinked credit with a taxed item and a free untaxed item' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.49, 0.10, true, [0.03, 0.03], 'two items'],
+    'header-only tax on the unlinked credit for a unique invoice item' => [0.10, 0.50, 2, 0.20, 1.21, 0.02, 0.01, -0.49, 0.10, true, [0.03, 0.03], 'header only'],
 ]);
 
 it('limits the deferred shipping discount to the tax actually refunded', function (): void {

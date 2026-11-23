@@ -365,11 +365,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             if ($includeTax) {
                 $tax = $item->getBaseTaxAmount();
                 if ($tax === null && $source && $document instanceof Mage_Sales_Model_Order_Creditmemo
-                    && $document->getInvoiceId() === (int) $source->getId() && count($items) === 1
                     && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)
                 ) {
                     [$priorQty, $priorTax] = $history[$id] ?? [0.0, 0.0];
-                    $tax = $this->getHistoricItemTax($document, $source, $item, $priorQty, $priorTax);
+                    $tax = $this->getHistoricItemTax($document, $source, $item, $priorQty, $priorTax, count($items) === 1);
                 }
                 if ($source) {
                     $taxes[$id] = ($taxes[$id] ?? 0.0) + $tax;
@@ -384,7 +383,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         }
         if ($taxes && $document instanceof Mage_Sales_Model_Order_Creditmemo) {
             $paid = $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount();
-            $known = $known && $document->getInvoiceId() && $document->getBaseTaxAmount() !== null && round(array_sum($taxes) - $paid, 4) === 0.0;
+            $known = $known && $document->getBaseTaxAmount() !== null && round(array_sum($taxes) - $paid, 4) === 0.0;
             foreach ($taxes as $id => $tax) {
                 [$qty, $priorTax] = $history[$id] ?? [0.0, 0.0];
                 $history[$id] = [$qty + $amounts[$id]['qty'], $known && $priorTax !== null ? $priorTax + $tax : null];
@@ -399,6 +398,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         Mage_Sales_Model_Order_Creditmemo_Item $item,
         float $priorQty,
         ?float $priorTax,
+        bool $singleItem,
     ): ?float {
         if ($priorTax === null || $memo->getBaseTaxAmount() === null || $source->getBaseTaxAmount() === null || $item->getQty() <= 0.0) {
             return null;
@@ -415,6 +415,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 $invoicedTax = $line->getBaseTaxAmount();
                 $priorTax = round($priorTax, 4);
                 if ($expected !== null || $qtyLeft < $item->getQty() || $this->hasFixedTax($line)
+                    || (!$singleItem && $invoicedTax !== 0.0)
                     || $priorTax < min(0.0, $invoicedTax) || $priorTax > max(0.0, $invoicedTax)
                 ) {
                     return null;
@@ -422,7 +423,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 $expected = ($invoicedTax - $priorTax) * $item->getQty() / $qtyLeft;
             }
         }
-        $paid = round($memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount(), 4);
+        // On a multi-item credit only an exempt invoice line proves its own tax independently of the header.
+        $paid = $singleItem ? round($memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount(), 4) : 0.0;
         return round($outsideItems, 4) === 0.0 && $expected !== null
             && ($paid === round($expected, 4) || $paid === $memo->getStore()->roundPrice($expected)) ? $paid : null;
     }
