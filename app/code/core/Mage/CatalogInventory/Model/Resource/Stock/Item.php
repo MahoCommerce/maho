@@ -81,14 +81,14 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
     /**
      * Use qty correction for qty column update
      *
-     * @param string $table
+     * @param Mage_CatalogInventory_Model_Stock_Item $object
      * @return array
      */
     #[\Override]
-    protected function _prepareDataForTable(\Maho\DataObject $object, $table)
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
     {
-        $data = parent::_prepareDataForTable($object, $table);
-        if ($object instanceof Mage_CatalogInventory_Model_Stock_Item && !$object->isObjectNew() && $object->getQtyCorrection()) {
+        $data = parent::_prepareDataForSave($object);
+        if (!$object->isObjectNew() && $object->getQtyCorrection()) {
             $qty = abs($object->getQtyCorrection());
             if ($object->getQtyCorrection() < 0) {
                 $data['qty'] = new Maho\Db\Expr('qty-' . $qty);

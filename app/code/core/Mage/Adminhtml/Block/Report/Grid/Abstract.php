@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @template TCollection of Mage_Sales_Model_Resource_Report_Collection_Abstract = Mage_Sales_Model_Resource_Report_Collection_Abstract
+ */
 class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Widget_Grid
 {
     /**
@@ -311,7 +314,7 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
      * Adds custom filter to resource collection
      * Can be overridden in child classes if custom filter needed
      *
-     * @param Mage_Sales_Model_Resource_Report_Collection_Abstract $collection
+     * @param TCollection $collection
      * @param \Maho\DataObject $filterData
      * @return $this
      */

@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @template TCollection of Mage_Catalog_Model_Resource_Product_Collection = Mage_Catalog_Model_Resource_Product_Collection
+ */
 class Mage_Catalog_Model_Layer extends \Maho\DataObject
 {
     public const string XML_PATH_MAX_SELECTED_FILTERS = 'catalog/layered_navigation/max_selected_filters';
@@ -89,7 +92,7 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
     /**
      * Initialize product collection
      *
-     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
+     * @param TCollection $collection
      * @return $this
      */
     public function prepareProductCollection($collection)

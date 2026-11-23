@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Report_Grid_Abstract<Mage_SalesRule_Model_Resource_Report_Collection>
+ */
 class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Block_Report_Grid_Abstract
 {
     #[\Override]
@@ -139,7 +142,7 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     /**
      * Add price rule filter
      *
-     * @param Mage_Sales_Model_Resource_Report_Collection_Abstract $collection
+     * @param Mage_SalesRule_Model_Resource_Report_Collection $collection
      * @param \Maho\DataObject $filterData
      * @return $this
      */
@@ -148,7 +151,7 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     {
         if ($filterData->getPriceRuleType()) {
             $rulesList = $filterData->getData('rules_list');
-            if (is_array($rulesList) && $rulesList !== [] && $collection instanceof Mage_SalesRule_Model_Resource_Report_Collection) {
+            if (is_array($rulesList) && $rulesList !== []) {
                 $collection->addRuleFilter($rulesList);
             }
         }
