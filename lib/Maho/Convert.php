@@ -13,6 +13,9 @@ use Maho\Convert\Action;
 
 class Convert
 {
+    /**
+     * @param array<string, string> $vars
+     */
     public static function convert(string $class, string $method, mixed $data, array $vars = []): mixed
     {
         $action = new Action();

@@ -14,6 +14,9 @@ namespace Maho\Rector;
  */
 final class VarienToMahoClassMap
 {
+    /**
+     * @return array<string, class-string>
+     */
     public static function getMap(): array
     {
         return [

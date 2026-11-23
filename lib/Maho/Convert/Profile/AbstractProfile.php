@@ -16,8 +16,10 @@ use Maho\Convert\Exception;
 
 abstract class AbstractProfile
 {
+    /** @var list<ActionInterface> */
     protected array $_actions = [];
     protected ?object $_containers = null;
+    /** @var list<Exception> */
     protected array $_exceptions = [];
     protected ?bool $_dryRun = null;
 
@@ -61,6 +63,9 @@ abstract class AbstractProfile
         return $container;
     }
 
+    /**
+     * @return list<Exception>
+     */
     public function getExceptions(): array
     {
         return $this->_exceptions;

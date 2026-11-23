@@ -81,7 +81,7 @@ class Mage_Core_Model_File_Uploader extends \Maho\File\Uploader
      *
      * @param string $destinationFolder
      * @param string|null $newFileName
-     * @return array|false
+     * @return array<string, string|int>|false
      * @throws Exception
      */
     #[\Override]

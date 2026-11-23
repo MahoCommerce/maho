@@ -24,7 +24,7 @@ class Ftp extends \Maho\Io
     /**
      * Connection config
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $_config;
 
@@ -57,6 +57,8 @@ class Ftp extends \Maho\Io
      * - passive     default false
      * - path        default empty
      * - file_mode   default FTP_BINARY
+     *
+     * @param array<string, string|int|bool|null> $args
      */
     #[\Override]
     public function open(array $args = []): bool
@@ -265,6 +267,9 @@ class Ftp extends \Maho\Io
         return @ftp_chmod($this->_conn, $mode, $filename);
     }
 
+    /**
+     * @return list<array{text: string, id: string}>
+     */
     #[\Override]
     public function ls(?string $grep = null): array
     {

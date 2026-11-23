@@ -188,6 +188,8 @@ class File extends \Maho\Io
 
     /**
      * Gets line from file pointer and parse for CSV fields
+     *
+     * @return list<string|null>|false
      */
     public function streamReadCsv(string $delimiter = ',', string $enclosure = '"'): array|false
     {
@@ -214,6 +216,7 @@ class File extends \Maho\Io
     /**
      * Format line as CSV and write to file pointer
      *
+     * @param array<int|string, string|int|float|bool|null> $row
      * @param string $delimiter
      * @param string $enclosure
      * @return bool|int
@@ -253,9 +256,9 @@ class File extends \Maho\Io
     /**
      * Retrieve open file statistic
      *
-     * @param string $part the part of statistic
-     * @param mixed $default default value for part
-     * @return array|bool
+     * @param int|string|null $part the part of statistic
+     * @param int|null $default default value for part
+     * @return array<int|string, int>|int|false|null
      */
     public function streamStat($part = null, $default = null)
     {
@@ -284,6 +287,8 @@ class File extends \Maho\Io
      *
      * Possible arguments:
      * - path     default current path
+     *
+     * @param array<string, string|int|bool|null> $args
      */
     #[\Override]
     public function open(array $args = []): bool
@@ -720,6 +725,7 @@ class File extends \Maho\Io
      * $grep is self::GREP_DIRS, self::GREP_FILES, or null for both.
      *
      * @access public
+     * @return list<array{text: string, mod_date: string, permissions: string, owner: string, size?: int|false, leaf: bool, is_image?: bool, filetype?: string, id?: string}>
      */
     #[\Override]
     public function ls(?string $grep = null): array

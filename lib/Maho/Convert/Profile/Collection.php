@@ -18,6 +18,7 @@ class Collection
 {
     protected ?\SimpleXMLElement $_xml = null;
     protected ?object $_containers = null;
+    /** @var array<string, AbstractProfile> */
     protected array $_profiles = [];
 
     protected string $_simplexmlDefaultClass = \Maho\Simplexml\Element::class;
@@ -49,6 +50,9 @@ class Collection
         return $container;
     }
 
+    /**
+     * @return array<string, AbstractProfile>
+     */
     public function getProfiles(): array
     {
         return $this->_profiles;

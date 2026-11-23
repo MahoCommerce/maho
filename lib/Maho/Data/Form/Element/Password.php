@@ -17,7 +17,7 @@ class Password extends AbstractElement
 {
     /**
      * Password constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

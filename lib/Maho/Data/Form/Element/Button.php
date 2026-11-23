@@ -17,7 +17,7 @@ class Button extends AbstractElement
 {
     /**
      * Button constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

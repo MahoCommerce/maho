@@ -113,7 +113,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Map of price fields
      *
-     * @var array|null
+     * @var array<string, array<string, string|\Maho\Db\Expr>>|null
      */
     #[\Override]
     protected $_map = ['fields' => [

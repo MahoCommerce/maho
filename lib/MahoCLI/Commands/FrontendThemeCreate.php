@@ -384,6 +384,9 @@ class FrontendThemeCreate extends BaseMahoCommand
         return is_dir($designPath) || is_dir($skinPath);
     }
 
+    /**
+     * @return list<string>
+     */
     private function getAvailableThemes(): array
     {
         $themes = [];
@@ -403,12 +406,18 @@ class FrontendThemeCreate extends BaseMahoCommand
         return $themes;
     }
 
+    /**
+     * @return list<string>
+     */
     private function formatAvailableThemes(): array
     {
         $themes = $this->getAvailableThemes();
         return array_map(fn($theme) => "  • {$theme}", $themes);
     }
 
+    /**
+     * @return list<string>
+     */
     private function createTheme(string $packageName, string $themeName, string $parentTheme, bool $withBuild): array
     {
         $createdFiles = [];
@@ -601,6 +610,9 @@ class FrontendThemeCreate extends BaseMahoCommand
         return sprintf($format, "../../../{$parentTheme}/css/theme.css") . "\n";
     }
 
+    /**
+     * @return list<string>
+     */
     private function buildInheritanceChain(string $packageName, string $themeName, string $parentTheme): array
     {
         $chain = ["{$packageName}/{$themeName}"];

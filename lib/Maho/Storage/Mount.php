@@ -32,7 +32,7 @@ use League\Flysystem\UrlGeneration\TemporaryUrlGenerator;
 final class Mount extends Filesystem
 {
     /**
-     * @param array<string, mixed> $config Flysystem defaults for every write, such as `visibility`
+     * @param array<mixed> $config Flysystem defaults for every write, such as `visibility`
      */
     public function __construct(
         private readonly string $name,
@@ -63,6 +63,9 @@ final class Mount extends Filesystem
         return $mount;
     }
 
+    /**
+     * @param array<mixed> $config
+     */
     #[\Override]
     public function write(string $location, string $contents, array $config = []): void
     {
@@ -70,6 +73,9 @@ final class Mount extends Filesystem
         $this->dispatchChange([$location]);
     }
 
+    /**
+     * @param array<mixed> $config
+     */
     #[\Override]
     public function writeStream(string $location, $contents, array $config = []): void
     {
@@ -77,6 +83,9 @@ final class Mount extends Filesystem
         $this->dispatchChange([$location]);
     }
 
+    /**
+     * @param array<mixed> $config
+     */
     #[\Override]
     public function move(string $source, string $destination, array $config = []): void
     {
@@ -84,6 +93,9 @@ final class Mount extends Filesystem
         $this->dispatchChange([$source, $destination]);
     }
 
+    /**
+     * @param array<mixed> $config
+     */
     #[\Override]
     public function copy(string $source, string $destination, array $config = []): void
     {
@@ -150,7 +162,7 @@ final class Mount extends Filesystem
      * delete, slower and not atomic.
      *
      * @param string|resource $contents
-     * @param array<string, mixed> $config
+     * @param array<mixed> $config
      */
     public function moveAtomic(string $path, mixed $contents, array $config = []): void
     {
@@ -262,7 +274,7 @@ final class Mount extends Filesystem
 
     /**
      * @param string|resource $contents
-     * @param array<string, mixed> $config
+     * @param array<mixed> $config
      */
     private function writeAny(string $path, mixed $contents, array $config): void
     {

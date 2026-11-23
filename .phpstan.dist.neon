@@ -37,4 +37,6 @@ parameters:
         - public
 
     ignoreErrors:
-        - identifier: missingType.iterableValue
+        -
+            identifier: missingType.iterableValue
+            path: app/code/*

@@ -12,9 +12,12 @@ namespace Maho\Filter;
 class ObjectFilter
 {
     /**
-     * @var array
+     * @var list<callable|object>
      */
     protected $_filters = [];
+    /**
+     * @var array<string, list<callable|object>>
+     */
     protected array $_columnFilters = [];
 
     /**
@@ -32,6 +35,9 @@ class ObjectFilter
 
     /**
      * Filter \Maho\DataObject properties
+     *
+     * @param \Maho\DataObject|array<array-key, mixed> $object
+     * @return \Maho\DataObject|array<array-key, mixed>
      */
     public function filter(\Maho\DataObject|array $object): \Maho\DataObject|array
     {

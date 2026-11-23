@@ -17,6 +17,12 @@ use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Helper;
 
+/**
+ * @phpstan-import-type BindValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnInfo from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
+ */
 class Mysql extends AbstractPdoAdapter
 {
     // MySQL-specific constants
@@ -54,6 +60,8 @@ class Mysql extends AbstractPdoAdapter
 
     /**
      * MySQL column - Table DDL type pairs
+     *
+     * @var array<string, string>
      */
     #[\Override]
     protected array $_ddlColumnTypes = [
@@ -351,7 +359,7 @@ class Mysql extends AbstractPdoAdapter
      * Run RAW query and Fetch First row
      *
      * @param string|int $field
-     * @return array|string|int|false
+     * @return array<string, DbValue>|string|int|false
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function raw_fetchRow(string $sql, string|int|null $field = null): array|string|int|false
@@ -490,7 +498,7 @@ class Mysql extends AbstractPdoAdapter
      * This method writes to $_bindParams, where query bind parameters are kept.
      * This method requires further normalizing, if bind array is positional.
      *
-     * @param array $matches
+     * @param array<int, string> $matches
      * @return string
      */
     public function proccessBindCallback($matches)
@@ -534,7 +542,7 @@ class Mysql extends AbstractPdoAdapter
      * '?' placeholders.
      *
      * @param string $sql
-     * @param array $bind
+     * @param array<int|string, BindValue> $bind
      * @return $this
      */
     protected function _convertMixedBind(&$sql, &$bind)
@@ -589,7 +597,7 @@ class Mysql extends AbstractPdoAdapter
      * $hook must be either array with 'object' and 'method' entries, or null to remove hook.
      * Previous hook is returned.
      *
-     * @param array|null $hook
+     * @param array{object: object, method: string}|null $hook
      * @return mixed
      */
     public function setQueryHook($hook)
@@ -614,7 +622,7 @@ class Mysql extends AbstractPdoAdapter
      * Run Multi Query
      *
      * @param string $sql
-     * @return array
+     * @return list<\Maho\Db\Statement\Pdo\Mysql>
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function multi_query($sql)
@@ -643,7 +651,7 @@ class Mysql extends AbstractPdoAdapter
      * Split multi statement query
      *
      * @param string $sql
-     * @return array
+     * @return list<string>
      */
     protected function _splitMultiQuery($sql)
     {
@@ -1038,7 +1046,7 @@ class Mysql extends AbstractPdoAdapter
                     'SCHEMA_NAME'       => $schemaName,
                     'TABLE_NAME'        => $tableName,
                     'COLUMN_NAME'       => $match[2],
-                    'REF_SHEMA_NAME'    => strlen($match[3]) ? $match[3] : $schemaName,
+                    'REF_SCHEMA_NAME'   => strlen($match[3]) ? $match[3] : $schemaName,
                     'REF_TABLE_NAME'    => $match[4],
                     'REF_COLUMN_NAME'   => $match[5],
                     'ON_DELETE'         => isset($match[6]) ? $match[7] : '',
@@ -1393,6 +1401,9 @@ class Mysql extends AbstractPdoAdapter
 
     /**
      * Decorate a table info by detecting and parsing the binary/varbinary fields
+     *
+     * @param ColumnDescription $tableColumnInfo
+     * @return ColumnDescription
      */
     public function decorateTableInfo(array $tableColumnInfo): array
     {
@@ -1572,7 +1583,8 @@ class Mysql extends AbstractPdoAdapter
      * Format described column to definition, ready to be added to ddl table.
      * Return array with keys: name, type, length, options, comment
      *
-     * @return array{name: string, type: ?string, length: ?int, options: array<string, mixed>, comment: string}
+     * @param ColumnDescription $columnData
+     * @return array{name: string, type: ?string, length: int|string|null, options: array<string, bool|int|string>, comment: string}
      */
     #[\Override]
     public function getColumnCreateByDescribe(array $columnData): array
@@ -2030,6 +2042,7 @@ class Mysql extends AbstractPdoAdapter
      * Batched insert of specified select
      *
      * @param string $table
+     * @param array<int|string, string|\Maho\Db\Expr> $fields
      * @param bool $mode
      * @param int $step
      * @return int
@@ -2063,7 +2076,7 @@ class Mysql extends AbstractPdoAdapter
      *
      * @param string $entityIdField
      * @param int $step
-     * @return array
+     * @return list<\Maho\Db\Select>
      */
     public function splitSelect(\Maho\Db\Select $select, $entityIdField = '*', $step = 10000)
     {
@@ -2161,7 +2174,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Retrieve columns and primary keys definition array for create table
      *
-     * @return array
+     * @return list<string>
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnsDefinition(\Maho\Db\Ddl\Table $table)
@@ -2199,7 +2212,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Retrieve table indexes definition array for create table
      *
-     * @return array
+     * @return list<string>
      */
     protected function _getIndexesDefinition(\Maho\Db\Ddl\Table $table)
     {
@@ -2245,7 +2258,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Retrieve table foreign keys definition array for create table
      *
-     * @return array
+     * @return list<string>
      */
     protected function _getForeignKeysDefinition(\Maho\Db\Ddl\Table $table)
     {
@@ -2275,7 +2288,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Retrieve table options definition array for create table
      *
-     * @return array
+     * @return list<string>
      * @throws \Maho\Db\Exception
      */
     protected function _getOptionsDefinition(\Maho\Db\Ddl\Table $table)
@@ -2323,7 +2336,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Get column definition from description
      *
-     * @param  array $options
+     * @param  ColumnDescription $options
      * @param  null|string $ddlType
      * @return string
      */
@@ -2339,7 +2352,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Retrieve column definition fragment
      *
-     * @param array $options
+     * @param array<string, scalar|\Maho\Db\Expr|array<string, bool|int|string>|null> $options
      * @param string $ddlType Table DDL Column type constant
      * @return string
      * @throws \Maho\Exception
@@ -2826,6 +2839,8 @@ class Mysql extends AbstractPdoAdapter
      *
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
+     *
+     * @param string|array<string> $fieldName
      */
     #[\Override]
     public function prepareSqlCondition(string|array $fieldName, int|string|array|null $condition): string
@@ -2926,7 +2941,7 @@ class Mysql extends AbstractPdoAdapter
      * Prepare value for save in column
      * Return converted to column data type value
      *
-     * @param array $column     the column describe array
+     * @param ColumnInfo $column     the column describe array
      */
     #[\Override]
     public function prepareColumnValue(array $column, mixed $value): mixed
@@ -3091,7 +3106,7 @@ class Mysql extends AbstractPdoAdapter
      * and return different result depends on them
      *
      * @param string $valueName Name of value to check
-     * @param array $casesResults Cases and results
+     * @param array<int|string, string|int|float|\Maho\Db\Expr> $casesResults Cases and results
      * @param string $defaultValue value to use if value doesn't conform to any cases
      */
     #[\Override]
@@ -3113,6 +3128,7 @@ class Mysql extends AbstractPdoAdapter
      * Generate fragment of SQL, that combine together (concatenate) the results from data array
      * All arguments in data must be quoted
      *
+     * @param array<string|\Maho\Db\Expr> $data
      * @param string $separator concatenate with separator
      */
     #[\Override]
@@ -3290,7 +3306,7 @@ class Mysql extends AbstractPdoAdapter
      * Retrieve valid index name
      * Check index name length and allowed symbols
      *
-     * @param string|array $fields  the columns list
+     * @param string|array<string> $fields  the columns list
      */
     #[\Override]
     public function getIndexName(string $tableName, string|array $fields, string $indexType = ''): string
@@ -3720,7 +3736,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Get delete from select object query
      *
-     * @param string $table the table name or alias used in select
+     * @param string|array<string> $table the table name or alias used in select
      */
     #[\Override]
     public function deleteFromSelect(\Maho\Db\Select $select, string|array $table): string
@@ -3768,7 +3784,7 @@ class Mysql extends AbstractPdoAdapter
     /**
      * Calculate checksum for table or for group of tables
      *
-     * @param array|string $tableNames array of tables names | table name
+     * @param list<string>|string $tableNames array of tables names | table name
      * @param string $schemaName schema name
      */
     #[\Override]
@@ -3828,6 +3844,9 @@ class Mysql extends AbstractPdoAdapter
 
     /**
      * Return insert sql query
+     *
+     * @param array<string> $columns
+     * @param array<string> $values
      */
     #[\Override]
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string

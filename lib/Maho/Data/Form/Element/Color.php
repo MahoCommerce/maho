@@ -18,7 +18,7 @@ class Color extends AbstractElement
     public const string VALIDATION_REGEX_WITHOUT_HASH = '/^[a-f0-9]{6}$/i';
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -28,7 +28,7 @@ class Color extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

@@ -20,7 +20,7 @@ abstract class AbstractAction implements ActionInterface
      *
      * Hold information about action container
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_params;
 
@@ -48,6 +48,8 @@ abstract class AbstractAction implements ActionInterface
 
     /**
      * Set action parameter, or all parameters when $key is an array
+     *
+     * @param array<string, string>|string $key
      */
     #[\Override]
     public function setParam(array|string $key, mixed $value = null): static
@@ -63,7 +65,7 @@ abstract class AbstractAction implements ActionInterface
     /**
      * Get all action parameters
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getParams()
     {
@@ -73,7 +75,7 @@ abstract class AbstractAction implements ActionInterface
     /**
      * Set all action parameters
      *
-     * @param array $params
+     * @param array<string, string> $params
      * @return AbstractAction
      */
     public function setParams($params)

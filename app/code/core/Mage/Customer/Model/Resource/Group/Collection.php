@@ -73,6 +73,9 @@ class Mage_Customer_Model_Resource_Group_Collection extends Mage_Core_Model_Reso
         return $this;
     }
 
+    /**
+     * @return list<array{value: mixed, label: mixed}>
+     */
     #[\Override]
     public function toOptionArray(): array
     {

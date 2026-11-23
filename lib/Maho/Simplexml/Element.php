@@ -73,7 +73,7 @@ class Element extends SimpleXMLElement
     /**
      * Find a descendant of a node by path
      *
-     * @param   array|string $path Example: "child/grand@attrName=attrValue/subGrand" (to make it faster without regex)
+     * @param   array<string>|string $path Example: "child/grand@attrName=attrValue/subGrand" (to make it faster without regex)
      * @return  Element|false
      */
     public function descend($path)
@@ -132,7 +132,7 @@ class Element extends SimpleXMLElement
     /**
      * Returns the node and children as an array
      *
-     * @return array
+     * @return array<int|string, array<mixed>|string>
      */
     public function asArray()
     {
@@ -141,7 +141,7 @@ class Element extends SimpleXMLElement
 
     /**
      * asArray() analog, but without attributes
-     * @return array|string
+     * @return array<int|string, array<mixed>|string>|string
      */
     public function asCanonicalArray()
     {
@@ -152,7 +152,7 @@ class Element extends SimpleXMLElement
      * Returns the node and children as an array
      *
      * @param bool $isCanonical - whether to ignore attributes
-     * @return array|string
+     * @return array<int|string, array<mixed>|string>|string
      */
     protected function _asArray($isCanonical = false)
     {

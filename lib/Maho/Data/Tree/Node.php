@@ -47,7 +47,7 @@ class Node extends \Maho\DataObject
     /**
      * Data tree node constructor
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      * @param string $idField
      * @param Tree $tree
      * @param Node $parent
@@ -197,8 +197,8 @@ class Node extends \Maho\DataObject
     }
 
     /**
-     * @param array $nodes
-     * @return Node[]
+     * @param array<array-key, Node> $nodes
+     * @return array<array-key, Node>
      */
     public function getAllChildNodes(&$nodes = [])
     {
@@ -270,8 +270,8 @@ class Node extends \Maho\DataObject
     }
 
     /**
-     * @param array $prevNodes
-     * @return array
+     * @param list<Node> $prevNodes
+     * @return list<Node>
      */
     public function getPath(&$prevNodes = [])
     {

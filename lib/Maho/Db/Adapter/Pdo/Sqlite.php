@@ -13,6 +13,11 @@ use Maho\Db\Adapter\AbstractPdoAdapter;
 use Maho\Db\Adapter\AdapterInterface;
 use Maho\Db\Helper;
 
+/**
+ * @phpstan-import-type BindValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
+ */
 class Sqlite extends AbstractPdoAdapter
 {
     // SQLite-specific constants
@@ -35,6 +40,8 @@ class Sqlite extends AbstractPdoAdapter
      *
      * SQLite uses dynamic typing with type affinity. These mappings
      * provide reasonable defaults while respecting SQLite's flexibility.
+     *
+     * @var array<string, string>
      */
     #[\Override]
     protected array $_ddlColumnTypes = [
@@ -57,6 +64,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * SQLite interval units mapping (for strftime)
+     *
+     * @var array<string, string>
      */
     #[\Override]
     protected array $_intervalUnits = [
@@ -304,7 +313,7 @@ class Sqlite extends AbstractPdoAdapter
      * Run RAW query and Fetch First row
      *
      * @param string|int $field
-     * @return array|string|int|false
+     * @return array<string, DbValue>|string|int|false
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function raw_fetchRow(string $sql, string|int|null $field = null): array|string|int|false
@@ -424,7 +433,7 @@ class Sqlite extends AbstractPdoAdapter
      * Normalizes mixed positional-named bind to positional bind
      *
      * @param string $sql
-     * @param array $bind
+     * @param array<int|string, BindValue> $bind
      * @return $this
      */
     protected function _convertMixedBind(&$sql, &$bind)
@@ -474,7 +483,7 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Sets (removes) query hook.
      *
-     * @param array|null $hook
+     * @param array{object: object, method: string}|null $hook
      * @return mixed
      */
     public function setQueryHook($hook)
@@ -575,6 +584,8 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Generate fragment of SQL for concatenation with separator
      * SQLite doesn't have CONCAT_WS, use nested replace with || operator
+     *
+     * @param array<string|\Maho\Db\Expr> $data
      */
     #[\Override]
     protected function getConcatWithSeparatorSql(array $data, string $separator): \Maho\Db\Expr
@@ -967,7 +978,10 @@ class Sqlite extends AbstractPdoAdapter
      * being violated. We check for unique indexes that match the insert columns
      * first, then fall back to primary key.
      *
+     * @param string|array<string>|\Maho\Db\Select $table
+     * @param list<string> $insertCols
      * @param bool $allowRetry If true and no unique index is found, will reset DDL cache and retry
+     * @return list<string>
      */
     protected function _getPrimaryKeyColumns(string|array|\Maho\Db\Select $table, array $insertCols = [], bool $allowRetry = true): array
     {
@@ -1518,6 +1532,8 @@ class Sqlite extends AbstractPdoAdapter
      * SQLite-specific override to correctly handle INTEGER PRIMARY KEY columns.
      * In SQLite, INTEGER PRIMARY KEY columns are aliases to rowid and are effectively
      * NOT NULL, but PRAGMA table_info reports notnull=0 for them.
+     *
+     * @return array<string, ColumnDescription>
      */
     #[\Override]
     protected function _loadTableDescription(string $tableName, ?string $schemaName = null): array
@@ -1971,6 +1987,7 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Retrieve column definition fragment for SQLite
      *
+     * @param array<string, scalar|\Maho\Db\Expr|array<string, bool|int|string>|null> $options
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnDefinition(array $options, ?string $ddlType = null): string
@@ -2070,6 +2087,7 @@ class Sqlite extends AbstractPdoAdapter
     /**
      * Retrieve columns and primary keys definition array for create table
      *
+     * @return list<string>
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnsDefinition(\Maho\Db\Ddl\Table $table): array
@@ -2126,6 +2144,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Retrieve table indexes definition array for create table
+     *
+     * @return list<string>
      */
     protected function _getIndexesDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2138,6 +2158,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Retrieve table foreign keys definition array for create table
+     *
+     * @return list<string>
      */
     protected function _getForeignKeysDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2165,6 +2187,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Retrieve table options definition array for create table
+     *
+     * @return list<string>
      */
     protected function _getOptionsDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2534,6 +2558,8 @@ class Sqlite extends AbstractPdoAdapter
      *
      * SQLite doesn't support ALTER TABLE ADD PRIMARY KEY, so DBAL's alterTable
      * method automatically handles table recreation for such changes.
+     *
+     * @param array<string> $primaryKeyColumns
      */
     protected function _recreateTableWithPrimaryKey(
         string $tableName,
@@ -2676,6 +2702,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Build SQL statement for condition
+     *
+     * @param string|array<string> $fieldName
      */
     #[\Override]
     public function prepareSqlCondition(string|array $fieldName, int|string|array|null $condition): string
@@ -2742,6 +2770,8 @@ class Sqlite extends AbstractPdoAdapter
 
     /**
      * Prepare Sql condition
+     *
+     * @param string|array<string> $fieldName
      */
     protected function _prepareQuotedSqlCondition(string $text, mixed $value, string|array $fieldName): string
     {

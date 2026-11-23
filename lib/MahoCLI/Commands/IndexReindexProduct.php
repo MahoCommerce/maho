@@ -24,6 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexReindexProduct extends BaseMahoCommand
 {
+    /**
+     * @param list<string> $specificIndexers
+     */
     public function __invoke(
         OutputInterface $output,
         #[Argument(description: 'Product ID(s) to reindex (comma-separated)', name: 'product_ids')]

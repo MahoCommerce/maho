@@ -17,7 +17,7 @@ class Text extends AbstractElement
 {
     /**
      * Text constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -37,7 +37,7 @@ class Text extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

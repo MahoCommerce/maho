@@ -96,7 +96,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Option_Collection extends Mage_Co
      * Convert collection items to select options array
      *
      * @param string $valueKey
-     * @return array
+     * @return list<array{value: mixed, label: mixed}>
      */
     #[\Override]
     public function toOptionArray($valueKey = 'value')

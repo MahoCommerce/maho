@@ -17,7 +17,7 @@ class Time extends AbstractElement
 {
     /**
      * Time constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

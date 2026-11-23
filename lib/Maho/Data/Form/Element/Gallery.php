@@ -17,7 +17,7 @@ class Gallery extends AbstractElement
 {
     /**
      * Gallery constructor.
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function __construct($data)
     {

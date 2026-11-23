@@ -11,6 +11,9 @@ declare(strict_types=1);
 
 namespace Maho\Db;
 
+/**
+ * @phpstan-import-type BindValue from Adapter\AdapterInterface
+ */
 class Select implements \Stringable
 {
     // Query part constants
@@ -58,6 +61,8 @@ class Select implements \Stringable
     /**
      * The component parts of a SELECT statement
      * Maintained for backward compatibility with getPart()/setPart()
+     *
+     * @var array<string, mixed>
      */
     protected array $_parts = [
         self::DISTINCT     => false,
@@ -76,6 +81,8 @@ class Select implements \Stringable
 
     /**
      * Tracks which columns are being select from each table and join
+     *
+     * @var list<string>
      */
     protected array $_tableCols = [];
 
@@ -108,6 +115,9 @@ class Select implements \Stringable
 
     /**
      * Adds a FROM table and optional columns to the query.
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     public function from(array|string|Expr|Select $name, array|string|Expr $cols = '*', ?string $schema = null): self
     {
@@ -125,6 +135,9 @@ class Select implements \Stringable
 
     /**
      * Adds a JOIN table and columns to the query.
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     public function join(array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
@@ -133,6 +146,9 @@ class Select implements \Stringable
 
     /**
      * Add an INNER JOIN table and columns to the query
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     public function joinInner(array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
@@ -141,6 +157,9 @@ class Select implements \Stringable
 
     /**
      * Add a LEFT OUTER JOIN table and columns to the query
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     public function joinLeft(array|string|Expr|Select $name, string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
@@ -149,6 +168,9 @@ class Select implements \Stringable
 
     /**
      * Add a RIGHT OUTER JOIN table and columns to the query
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     public function joinRight(array|string|Expr|Select $name, string $cond, array|string|Expr $cols = self::SQL_WILDCARD, ?string $schema = null): self
     {
@@ -158,6 +180,9 @@ class Select implements \Stringable
 
     /**
      * Populate the {@link $_parts} 'join' key
+     *
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols
      */
     protected function _join(string $type, array|string|Expr|Select $name, ?string $cond, array|string|Expr $cols, ?string $schema = null): self
     {
@@ -214,7 +239,7 @@ class Select implements \Stringable
     /**
      * Generate a unique correlation name
      *
-     * @param string|array|Expr|Select $name A qualified identifier.
+     * @param array<int|string, string|Expr|Select>|string|Expr|Select $name A qualified identifier.
      * @return string A unique correlation name.
      */
     protected function _uniqueCorrelation($name)
@@ -244,7 +269,7 @@ class Select implements \Stringable
      * Add columns to the query
      *
      * @param  string $correlationName Correlation name or table name
-     * @param  array|string $cols The columns to add
+     * @param  array<int|string, string|Expr|Select|null>|string|Expr $cols The columns to add
      * @param  string $afterCorrelationName OPTIONAL place the columns after this correlation
      * @return void
      */
@@ -335,6 +360,8 @@ class Select implements \Stringable
 
     /**
      * Internal function for creating WHERE conditions
+     *
+     * @return array<string, string>
      */
     protected function _where(string $cond, mixed $value = null, mixed $type = null, bool $bool = true): array
     {
@@ -367,7 +394,7 @@ class Select implements \Stringable
     /**
      * Adds grouping to the query.
      *
-     * @param  array|string|Expr $spec The column(s) to group by.
+     * @param  array<string|Expr>|string|Expr $spec The column(s) to group by.
      */
     public function group(array|string|Expr $spec): self
     {
@@ -473,7 +500,7 @@ class Select implements \Stringable
     /**
      * Adds a row order to the query.
      *
-     * @param array|string|Expr $spec The column(s) and direction to order by.
+     * @param array<string|Expr>|string|Expr $spec The column(s) and direction to order by.
      */
     public function order(array|string|Expr $spec): self
     {
@@ -585,7 +612,7 @@ class Select implements \Stringable
     /**
      * Adds columns to the current query.
      *
-     * @param array|string $cols The columns to select.
+     * @param array<int|string, string|Expr|Select|null>|string|Expr $cols The columns to select.
      * @param string $correlationName Correlation name or table alias
      * @return $this
      */
@@ -655,6 +682,8 @@ class Select implements \Stringable
 
     /**
      * Cross Table Update From Current select
+     *
+     * @param string|array<string, string> $table
      */
     public function crossUpdateFromSelect(string|array $table): string
     {
@@ -663,6 +692,8 @@ class Select implements \Stringable
 
     /**
      * Insert to table from current select
+     *
+     * @param array<int|string, string|Expr> $fields
      */
     public function insertFromSelect(string $tableName, array $fields = [], bool $onDuplicate = true): string
     {
@@ -672,6 +703,8 @@ class Select implements \Stringable
 
     /**
      * Generate INSERT IGNORE query to the table from current select
+     *
+     * @param array<int|string, string|Expr> $fields
      */
     public function insertIgnoreFromSelect(string $tableName, array $fields = []): string
     {
@@ -1157,6 +1190,8 @@ class Select implements \Stringable
 
     /**
      * Adds a UNION clause to the query
+     *
+     * @param array<Select|Expr|string>|Select $select
      */
     public function union(array|Select $select = [], ?string $type = null): self
     {
@@ -1199,6 +1234,8 @@ class Select implements \Stringable
 
     /**
      * Executes the current select object and returns the result statement
+     *
+     * @param array<int|string, BindValue> $bind
      */
     public function query(array $bind = []): Statement\StatementInterface
     {

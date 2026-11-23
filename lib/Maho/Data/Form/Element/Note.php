@@ -17,7 +17,7 @@ class Note extends AbstractElement
 {
     /**
      * Note constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

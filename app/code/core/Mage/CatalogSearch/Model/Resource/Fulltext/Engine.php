@@ -51,7 +51,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
      *
      * @param int $entityId
      * @param int $storeId
-     * @param array $index
+     * @param string $index
      * @param string $entity 'product'|'cms'
      * @return $this
      */

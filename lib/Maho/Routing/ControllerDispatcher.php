@@ -445,6 +445,9 @@ class ControllerDispatcher
         }
     }
 
+    /**
+     * @param array<string, mixed> $params Route parameters from UrlMatcher::match()
+     */
     protected function setRequestParams(array $params, Mage_Core_Controller_Request_Http $request): void
     {
         foreach ($params as $key => $value) {

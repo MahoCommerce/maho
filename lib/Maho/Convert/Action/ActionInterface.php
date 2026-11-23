@@ -24,6 +24,9 @@ interface ActionInterface
 
     public function getParam(string $key, mixed $default = null): mixed;
 
+    /**
+     * @param array<string, string>|string $key
+     */
     public function setParam(array|string $key, mixed $value = null): static;
 
     public function getContainer(string|int|null $name = null): \Maho\Convert\Container\ContainerInterface;

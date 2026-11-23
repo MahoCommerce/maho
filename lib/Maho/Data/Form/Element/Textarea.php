@@ -17,7 +17,7 @@ class Textarea extends AbstractElement
 {
     /**
      * Textarea constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -29,7 +29,7 @@ class Textarea extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

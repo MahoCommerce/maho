@@ -20,7 +20,7 @@ class Multiline extends AbstractElement
 {
     /**
      * Multiline constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -30,7 +30,7 @@ class Multiline extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

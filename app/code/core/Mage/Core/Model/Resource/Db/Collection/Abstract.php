@@ -11,6 +11,7 @@
 /**
  * @template TItem of \Maho\DataObject = Mage_Core_Model_Abstract
  * @extends \Maho\Data\Collection\Db<TItem>
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Data\Collection\Db
 {
@@ -462,7 +463,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Retrieve all ids for collection
      *
-     * @return array
+     * @return list<mixed>
      */
     #[\Override]
     public function getAllIds()
@@ -478,7 +479,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     }
 
     /**
-     * @return array
+     * @return list<array<string, DbValue>>
      */
     #[\Override]
     public function getData()
@@ -665,7 +666,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Redeclared for processing cache tags throw application object
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     protected function _getCacheTags()

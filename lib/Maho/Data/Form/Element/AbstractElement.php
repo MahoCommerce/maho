@@ -37,7 +37,7 @@ abstract class AbstractElement extends AbstractForm
 
     /**
      * AbstractElement constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -148,7 +148,7 @@ abstract class AbstractElement extends AbstractForm
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getHtmlAttributes()
     {
@@ -296,6 +296,9 @@ abstract class AbstractElement extends AbstractForm
         return $this->getHtml();
     }
 
+    /**
+     * @param list<string> $attributes
+     */
     #[\Override]
     public function serialize($attributes = [], $valueSeparator = '=', $fieldSeparator = ' ', $quote = '"')
     {
@@ -341,7 +344,7 @@ abstract class AbstractElement extends AbstractForm
     /**
      * Add specified values to element values
      *
-     * @param string|int|array $values
+     * @param string|int|array<array-key, string> $values
      * @param bool $overwrite
      * @return $this
      */
@@ -417,11 +420,17 @@ abstract class AbstractElement extends AbstractForm
         return $value === null ? null : (bool) $value;
     }
 
+    /**
+     * @return array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|null
+     */
     public function getValues(): ?array
     {
         return $this->getData('values');
     }
 
+    /**
+     * @param array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|null $value
+     */
     public function setValues(?array $value): static
     {
         return $this->setData('values', $value);

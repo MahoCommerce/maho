@@ -858,7 +858,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @param int $limit
      * @param int $offset
-     * @return array
+     * @return list<mixed>
      */
     #[\Override]
     public function getAllIds($limit = null, $offset = null)
@@ -1336,8 +1336,8 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Retrieve array of attributes
      *
-     * @param array $arrAttributes
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return array<array-key, array<array-key, mixed>>
      */
     #[\Override]
     public function toArray($arrAttributes = [])

@@ -18,7 +18,7 @@ class Label extends AbstractElement
     /**
      * Assigns attributes for Element
      *
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

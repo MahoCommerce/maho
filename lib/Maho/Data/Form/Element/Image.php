@@ -21,7 +21,7 @@ class Image extends AbstractElement
     /**
      * Constructor
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      */
     public function __construct($data)
     {

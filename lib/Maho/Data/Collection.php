@@ -43,14 +43,14 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Order configuration
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_orders = [];
 
     /**
      * Filters configuration
      *
-     * @var array
+     * @var array<int, DataObject|array{field: string, value: mixed, is_and: bool, callback: callable, is_inverted: bool}>
      */
     protected $_filters = [];
 
@@ -93,6 +93,9 @@ class Collection implements IteratorAggregate, Countable
 
     protected ?string $_cacheKey = null;
 
+    /**
+     * @var list<string>
+     */
     protected array $_cacheTags = [];
 
     protected int $_cacheLifetime = 86400;
@@ -100,7 +103,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Additional collection flags
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $_flags = [];
 
@@ -109,6 +112,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Add collection filter
      *
+     * @param int|string|array<mixed> $value
      * @param string $type and|or|string|public
      */
     public function addFilter(string $field, int|string|array $value, string $type = 'and'): static
@@ -132,8 +136,8 @@ class Collection implements IteratorAggregate, Countable
      * - array('foo', 'bar') -- get all filters with field name 'foo' or 'bar'
      * - array() -- get all filters
      *
-     * @param string|array $field
-     * @return DataObject|array|null
+     * @param string|list<string> $field
+     * @return DataObject|array<int, DataObject|array{field: string, value: mixed, is_and: bool, callback: callable, is_inverted: bool}>|null
      */
     public function getFilter($field)
     {
@@ -278,7 +282,7 @@ class Collection implements IteratorAggregate, Countable
      * Retrieve field values from all items
      *
      * @param   string $colName
-     * @return  array
+     * @return  list<mixed>
      */
     public function getColumnValues($colName)
     {
@@ -370,7 +374,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve ids of all tems
      *
-     * @return array
+     * @return list<mixed>
      */
     public function getAllIds()
     {
@@ -414,7 +418,8 @@ class Collection implements IteratorAggregate, Countable
      * Returns array with results of callback for each item
      *
      * @param string|callable $callback
-     * @return array
+     * @param list<mixed> $args
+     * @return array<array-key, mixed>
      */
     public function walk($callback, array $args = [])
     {
@@ -613,8 +618,8 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Convert collection to array
      *
-     * @param array $arrRequiredFields
-     * @return array
+     * @param list<string> $arrRequiredFields
+     * @return array{totalRecords: int, items: list<array<array-key, mixed>>}|array<array-key, array<array-key, mixed>>
      */
     public function toArray($arrRequiredFields = [])
     {
@@ -641,27 +646,26 @@ class Collection implements IteratorAggregate, Countable
      *
      * @param string $valueField
      * @param string $labelField
-     * @param array $additional
-     * @return array
+     * @param array<string, string> $additional
+     * @return ($additional is array{} ? list<array{value: mixed, label: mixed}> : list<array{value: mixed, label: mixed, ...<string, mixed>}>)
      */
     protected function _toOptionArray($valueField = 'id', $labelField = 'name', $additional = [])
     {
-        $data = [];
         $res = [];
-        $additional['value'] = $valueField;
-        $additional['label'] = $labelField;
-
         foreach ($this as $item) {
+            $data = [];
             foreach ($additional as $code => $field) {
                 $data[$code] = $item->getData($field);
             }
+            $data['value'] = $item->getData($valueField);
+            $data['label'] = $item->getData($labelField);
             $res[] = $data;
         }
         return $res;
     }
 
     /**
-     * @return array
+     * @return list<array{value: mixed, label: mixed, ...<string, mixed>}>
      */
     public function toOptionArray()
     {
@@ -669,7 +673,7 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @return array
+     * @return array<array-key, mixed>
      */
     public function toOptionHash()
     {
@@ -684,7 +688,7 @@ class Collection implements IteratorAggregate, Countable
      *
      * @param   string $valueField
      * @param   string $labelField
-     * @return  array
+     * @return  array<array-key, mixed>
      */
     protected function _toOptionHash($valueField = 'id', $labelField = 'name')
     {
@@ -749,7 +753,7 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @param array $tags
+     * @param list<string> $tags
      * @return $this
      */
     public function setCacheTags($tags)
@@ -759,7 +763,7 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getCacheTags()
     {

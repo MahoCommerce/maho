@@ -17,7 +17,7 @@ class Radio extends AbstractElement
 {
     /**
      * Radio constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

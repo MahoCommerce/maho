@@ -42,7 +42,7 @@ final class Mage
     /**
      * Registry collection
      *
-     * @var array
+     * @var array<string, mixed>
      */
     private static $_registry = [];
 
@@ -376,7 +376,7 @@ final class Mage
      * Generate url by route and parameters
      *
      * @param   null|string $route
-     * @param   array $params
+     * @param   array<string, mixed> $params
      * @return  string
      */
     public static function getUrl($route = '', $params = [])
@@ -409,7 +409,7 @@ final class Mage
      *
      * @param string $eventName
      * @param callable $callback
-     * @param array $data
+     * @param array<string, mixed> $data
      * @param string $observerName
      * @param class-string|'' $observerClass
      * @return \Maho\Event\Collection
@@ -435,6 +435,7 @@ final class Mage
      * and multiple observers matching event name pattern
      *
      * @param string $name
+     * @param array<string, mixed> $data
      * @return Mage_Core_Model_App
      */
     public static function dispatchEvent($name, array $data = [])
@@ -670,7 +671,7 @@ final class Mage
      *
      * @param string $code
      * @param string $type
-     * @param string|array $options
+     * @param string|array<string, mixed> $options
      */
     public static function app($code = '', $type = 'store', $options = []): Mage_Core_Model_App
     {
@@ -693,8 +694,8 @@ final class Mage
      * @static
      * @param string $code
      * @param string $type
-     * @param array $options
-     * @param string|array $modules
+     * @param array<string, mixed> $options
+     * @param string|list<string> $modules
      */
     public static function init($code = '', $type = 'store', $options = [], $modules = []): void
     {
@@ -724,7 +725,7 @@ final class Mage
      *
      * @param string $code
      * @param string $type
-     * @param string|array $options
+     * @param string|array<string, mixed> $options
      */
     public static function run($code = '', $type = 'store', $options = []): void
     {
@@ -775,7 +776,7 @@ final class Mage
     /**
      * Set application isInstalled flag based on given options
      *
-     * @param array $options
+     * @param array<string, mixed> $options
      */
     protected static function _setIsInstalled($options = []): void
     {
@@ -787,7 +788,7 @@ final class Mage
     /**
      * Set application Config model
      *
-     * @param array $options
+     * @param array<string, mixed> $options
      */
     protected static function _setConfigModel($options = []): void
     {
@@ -809,7 +810,7 @@ final class Mage
     /**
      * Retrieve application installation flag
      *
-     * @param string|array $options
+     * @param string|array<string, mixed> $options
      * @return bool
      */
     public static function isInstalled($options = [])
@@ -852,7 +853,7 @@ final class Mage
     /**
      * log facility (??)
      *
-     * @param array|object|string $message
+     * @param array<mixed>|object|string $message
      * @param Level|int|null $level
      * @param string|null $file
      * @param bool $forceLog
@@ -980,7 +981,7 @@ final class Mage
      * Shorthand for Mage::getTracer()?->startSpan($name, $attributes)
      *
      * @param string $name Span name (e.g., 'SELECT catalog_product', 'GET')
-     * @param array $attributes Initial span attributes
+     * @param array<string, string|int|float|bool|null> $attributes Initial span attributes
      * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
     public static function startSpan(string $name, array $attributes = [], ?string $kind = null): ?Maho_OpenTelemetry_Model_Span

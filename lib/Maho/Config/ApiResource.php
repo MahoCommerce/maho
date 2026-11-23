@@ -126,7 +126,42 @@ class ApiResource extends BaseApiResource
      *   Only set this when the write processors ignore the provider result:
      *   with the read pass off, a PUT no longer merges the body into loaded state.
      *
+     * @param string[]|string|null $types
      * @param mixed $operations
+     * @param array<int|string, string|string[]>|string|null $formats
+     * @param array<int|string, string|string[]>|string|null $inputFormats
+     * @param array<int|string, string|string[]>|string|null $outputFormats
+     * @param array<string, string|int|float|bool|null>|null $defaults
+     * @param array<string, string>|null $requirements
+     * @param array<string, string|int|float|bool|null>|null $options
+     * @param string[]|null $schemes
+     * @param array{
+     *     max_age?: int,
+     *     vary?: string|string[],
+     *     public?: bool,
+     *     shared_max_age?: int,
+     *     stale_while_revalidate?: int,
+     *     stale_if_error?: int,
+     *     must_revalidate?: bool,
+     *     proxy_revalidate?: bool,
+     *     no_cache?: bool,
+     *     no_store?: bool,
+     *     no_transform?: bool,
+     *     immutable?: bool,
+     * }|null $cacheHeaders
+     * @param array<string, mixed>|null $normalizationContext
+     * @param array<string, mixed>|null $denormalizationContext
+     * @param array<string, mixed>|null $hydraContext
+     * @param array<string, mixed>|null $jsonldContext
+     * @param array<string, mixed>|null $validationContext
+     * @param string[]|null $filters
+     * @param array<int|string, string>|null $order
+     * @param list<array{field: string, direction: string}>|null $paginationViaCursor
+     * @param array<class-string, int>|null $exceptionToStatus
+     * @param \ApiPlatform\Metadata\Link[]|null $links
+     * @param \ApiPlatform\Metadata\GraphQl\Operation[]|null $graphQlOperations
+     * @param string[]|string|null $middleware
+     * @param array<string, mixed> $extraProperties
      *
      * @phpstan-param mixed $rules
      */

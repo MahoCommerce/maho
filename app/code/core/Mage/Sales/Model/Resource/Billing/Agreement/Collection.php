@@ -16,7 +16,7 @@ class Mage_Sales_Model_Resource_Billing_Agreement_Collection extends Mage_Core_M
     /**
      * Mapping for fields
      *
-     * @var array|null
+     * @var array<string, array<string, string|\Maho\Db\Expr>>|null
      */
     #[\Override]
     protected $_map = ['fields' => [

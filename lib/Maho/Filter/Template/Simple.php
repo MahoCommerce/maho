@@ -47,7 +47,7 @@ class Simple extends DataObject
     /**
      * Return result of getData method for matched variables
      *
-     * @param array $matches
+     * @param array<int, string> $matches
      * @return mixed
      */
     protected function _filterDataItem($matches)

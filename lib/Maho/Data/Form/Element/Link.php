@@ -17,7 +17,7 @@ class Link extends AbstractElement
 {
     /**
      * Link constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -42,7 +42,7 @@ class Link extends AbstractElement
     /**
      * Prepare array of anchor attributes
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

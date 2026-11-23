@@ -116,7 +116,7 @@ abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_M
      *
      * @param int $limit
      * @param int $offset
-     * @return array
+     * @return list<mixed>
      */
     #[\Override]
     public function getAllIds($limit = null, $offset = null)

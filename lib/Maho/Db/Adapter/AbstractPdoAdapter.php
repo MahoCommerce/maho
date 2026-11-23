@@ -24,6 +24,15 @@ use Maho\Db\Statement\Pdo\Mysql as Statement;
  *
  * This class provides a platform-agnostic base for database adapters.
  * Platform-specific functionality is implemented in concrete adapter classes.
+ *
+ * @phpstan-import-type BindValue from AdapterInterface
+ * @phpstan-import-type InsertRow from AdapterInterface
+ * @phpstan-import-type SqlCondition from AdapterInterface
+ * @phpstan-import-type ColumnInfo from AdapterInterface
+ * @phpstan-import-type ColumnDescription from AdapterInterface
+ * @phpstan-import-type IndexDescription from AdapterInterface
+ * @phpstan-import-type ForeignKeyDescription from AdapterInterface
+ * @phpstan-import-type DdlCacheValue from AdapterInterface
  */
 abstract class AbstractPdoAdapter implements AdapterInterface
 {
@@ -64,6 +73,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Adapter configuration
+     *
+     * @var array<string, mixed>
      */
     protected array $_config = [];
 
@@ -74,6 +85,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Numeric data types mapping
+     *
+     * @var array<string, int>
      */
     protected array $_numericDataTypes = [
         'INT' => self::INT_TYPE,
@@ -98,11 +111,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Tables DDL cache
+     *
+     * @var array<int|string, array<int|string, DdlCacheValue>>
      */
     protected array $_ddlCache = [];
 
     /**
      * SQL bind params. Used temporarily by regexp callback.
+     *
+     * @var array<string, string>
      */
     protected array $_bindParams = [];
 
@@ -148,11 +165,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * DDL column types mapping (abstract - defined in concrete adapters)
+     *
+     * @var array<string, string>
      */
     protected array $_ddlColumnTypes = [];
 
     /**
      * All possible DDL statements - First 3 symbols for each statement
+     *
+     * @var list<string>
      */
     protected array $_ddlRoutines = ['alt', 'cre', 'ren', 'dro', 'tru'];
 
@@ -163,6 +184,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Allowed interval units array
+     *
+     * @var array<string, string>
      */
     protected array $_intervalUnits = [
         self::INTERVAL_YEAR     => 'YEAR',
@@ -175,6 +198,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Hook callback to modify queries
+     *
+     * @var array{object: object, method: string}|null
      */
     protected ?array $_queryHook = null;
 
@@ -185,6 +210,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Constructor
+     *
+     * @param array<string, mixed> $config
      */
     public function __construct(array $config)
     {
@@ -412,6 +439,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Quote an identifier and an optional alias.
+     *
+     * @param string|array<string|Expr|null>|Expr|Select $ident
      */
     protected function _quoteIdentifierAs(string|array|Expr|Select $ident, ?string $alias = null, bool $auto = false, string $as = ' AS '): string
     {
@@ -507,6 +536,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * Columns for the ON CONFLICT target of an upsert. MySQL reacts to every unique key,
      * PostgreSQL and SQLite to one, so prefer the unique index the caller does not update.
      *
+     * @param string|array<string>|Select $table
      * @param array<int|string, mixed> $insertCols
      * @param array<int|string, mixed> $updateFields
      * @return list<string>
@@ -825,6 +855,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Generate CONCAT with separator SQL expression (platform-specific)
      * MySQL uses CONCAT_WS(), PostgreSQL uses || with separator
+     *
+     * @param array<string|Expr> $data
      */
     abstract protected function getConcatWithSeparatorSql(array $data, string $separator): Expr;
 
@@ -1105,6 +1137,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Log debug statistics
+     *
+     * @param array<int|string, BindValue> $bind
      */
     protected function _debugStat(int $type, string $sql, array $bind = [], mixed $result = null): static
     {
@@ -1369,7 +1403,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * $data is one row (column => value) or a list of rows. The SQL takes its column list from
      * the first row and binds the values by position, so every row must have the same keys.
      *
-     * @return list<array<string, mixed>>
+     * @param InsertRow|array<int, InsertRow> $data
+     * @return list<InsertRow>
      * @throws Exception when $data is empty, or when a row does not have the same keys as the first row
      */
     protected function _alignInsertRows(array $data): array
@@ -1404,8 +1439,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Prepare row data for insert
      *
-     * @param mixed $row Row data
-     * @param array $bind Bind array (passed by reference)
+     * @param BindValue|array<int|string, BindValue> $row Row data
+     * @param array<int, BindValue> $bind Bind array (passed by reference)
      * @return string Prepared value string
      */
     protected function _prepareInsertData(mixed $row, array &$bind): string
@@ -1435,8 +1470,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * Return insert sql query
      *
      * @param string $tableName Table name
-     * @param array $columns Column names
-     * @param array $values Value strings
+     * @param array<string> $columns Column names
+     * @param array<string> $values Value strings
      * @return string SQL query
      */
     protected function _getInsertSqlQuery(string $tableName, array $columns, array $values): string
@@ -1485,6 +1520,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Return the number of bits of the integer column $column, or null when the column does not hold integers.
+     *
+     * @param ColumnInfo $column
      */
     protected function _getIntegerColumnBits(array $column): ?int
     {
@@ -1520,6 +1557,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Internal method to load table description from database
+     *
+     * @return array<string, ColumnDescription>
      */
     protected function _loadTableDescription(string $tableName, ?string $schemaName = null): array
     {
@@ -1600,6 +1639,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Internal method to load index list from database
+     *
+     * @return array<string, IndexDescription>
      */
     protected function _loadIndexList(string $tableName, ?string $schemaName = null): array
     {
@@ -1683,6 +1724,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Internal method to load foreign keys from database
+     *
+     * @return array<string, ForeignKeyDescription>
      */
     protected function _loadForeignKeys(string $tableName, ?string $schemaName = null): array
     {
@@ -1770,6 +1813,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Return DDL type from column options
+     *
+     * @param ColumnInfo $options
      */
     protected function _getDdlType(array $options): ?string
     {
@@ -1798,6 +1843,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
     /**
      * Prepare SQL date condition
+     *
+     * @param SqlCondition $condition
      */
     protected function _prepareSqlDateCondition(array $condition, string $key): \Maho\Db\Expr|int|string
     {
@@ -1865,7 +1912,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Convert column data from describe table to column create options
      *
-     * @return array{name: string, type: ?string, length: ?int, options: array<string, mixed>, comment: string}
+     * @param ColumnDescription $columnData
+     * @return array{name: string, type: ?string, length: int|string|null, options: array<string, bool|int|string>, comment: string}
      */
     public function getColumnCreateByDescribe(array $columnData): array
     {
@@ -1916,6 +1964,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Retrieve column data type by data from describe table
      * This method should be overridden in platform-specific adapters
+     *
+     * @param ColumnInfo $column
      */
     protected function _getColumnTypeByDdl(array $column): ?string
     {
@@ -2057,6 +2107,8 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      *
      * Call after _prepareQuery() so $sql is a string and $bind is normalized.
      * The recording check comes first so an untraced query costs a null check.
+     *
+     * @param array<int|string, BindValue> $bind
      */
     protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
     {

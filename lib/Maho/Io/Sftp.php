@@ -24,6 +24,7 @@ class Sftp extends \Maho\Io
     /**
      * Open a SFTP connection to a remote site. $args takes the keys host, username, password and timeout.
      *
+     * @param array<string, string|int|bool|null> $args
      * @throws \Exception
      */
     #[\Override]
@@ -180,6 +181,8 @@ class Sftp extends \Maho\Io
 
     /**
      * Get list of cwd subdirectories and files
+     *
+     * @return list<array{text: string, id: string}>
      */
     #[\Override]
     public function ls(?string $grep = null): array
@@ -196,6 +199,9 @@ class Sftp extends \Maho\Io
         return $result;
     }
 
+    /**
+     * @return array<string, array<string, int|string>>|false
+     */
     public function rawls(): array|false
     {
         $list = $this->_connection->rawlist(); // @phpstan-ignore class.notFound

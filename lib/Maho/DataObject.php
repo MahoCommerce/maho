@@ -21,7 +21,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Object attributes
      *
-     * @var array|null
+     * @var array<array-key, mixed>|null
      */
     protected $_data = [];
 
@@ -40,7 +40,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Setter/Getter underscore transformation cache
      *
-     * @var array
+     * @var array<string, string>
      */
     protected static $_underscoreCache = [];
 
@@ -54,17 +54,19 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Map short fields names to its full names
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_oldFieldsMap = [];
 
     /**
      * Map of fields to sync to other fields upon changing their data
+     *
+     * @var array<string, string>
      */
     protected array $_syncFieldsMap = [];
 
     /**
-     * @var array
+     * @var array<string, true>
      */
     protected $_dirty;
 
@@ -211,6 +213,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      *
      * Retains previous data in the object.
      *
+     * @param array<array-key, mixed> $arr
      * @return $this
      */
     public function addData(array $arr)
@@ -229,7 +232,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      *
      * If $key is an array, it will overwrite all the data in the object.
      *
-     * @param string|array $key
+     * @param array-key|array<array-key, mixed> $key
      * @param mixed $value
      * @return $this
      */
@@ -447,8 +450,8 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Convert object attributes to array
      *
-     * @param  array $arrAttributes array of required attributes
-     * @return array
+     * @param  list<string> $arrAttributes array of required attributes
+     * @return array<array-key, mixed>
      */
     public function __toArray(array $arrAttributes = [])
     {
@@ -470,7 +473,8 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Public wrapper for __toArray
      *
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return array<array-key, mixed>
      */
     public function toArray(array $arrAttributes = [])
     {
@@ -480,8 +484,9 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Set required array elements
      *
-     * @param   array $arr
-     * @return  array
+     * @param   array<string, mixed> $arr
+     * @param   list<string> $elements
+     * @return  array<string, mixed>
      */
     protected function _prepareArray(&$arr, array $elements = [])
     {
@@ -494,7 +499,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Convert object attributes to XML
      *
-     * @param array $arrAttributes array of required attributes
+     * @param list<string> $arrAttributes array of required attributes
      * @param string $rootName name of the root element
      * @param bool $addOpenTag
      * @param bool $addCdata
@@ -528,6 +533,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Public wrapper for __toXml
      *
+     * @param list<string> $arrAttributes
      * @param string $rootName
      * @param bool $addOpenTag
      * @param bool $addCdata
@@ -541,7 +547,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Convert object attributes to JSON
      *
-     * @param  array $arrAttributes array of required attributes
+     * @param  list<string> $arrAttributes array of required attributes
      * @return string
      */
     protected function __toJson(array $arrAttributes = [])
@@ -554,6 +560,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Public wrapper for __toJson
      *
+     * @param list<string> $arrAttributes
      * @return string
      */
     public function toJson(array $arrAttributes = [])
@@ -572,6 +579,8 @@ class DataObject implements ArrayAccess, JsonSerializable
      * - If a nested DataObject uses only the base implementations, it's excluded from output
      *
      * This prevents infinite recursion and circular references when serializing object hierarchies.
+     *
+     * @return array<array-key, mixed>
      */
     #[\Override]
     public function jsonSerialize(): array
@@ -627,7 +636,7 @@ class DataObject implements ArrayAccess, JsonSerializable
      * Set/Get attribute wrapper
      *
      * @param   string $method
-     * @param   array $args
+     * @param   list<mixed> $args
      * @return  mixed
      */
     public function __call($method, $args)
@@ -737,7 +746,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * serialize object attributes
      *
-     * @param   array $attributes
+     * @param   list<string> $attributes
      * @param   string $valueSeparator
      * @param   string $fieldSeparator
      * @param   string $quote
@@ -774,8 +783,8 @@ class DataObject implements ArrayAccess, JsonSerializable
      * Present object data as string in debug mode
      *
      * @param mixed $data
-     * @param array $objects
-     * @return string|array
+     * @param array<int, true> $objects
+     * @return string|array<array-key, mixed>
      */
     public function debug($data = null, &$objects = [])
     {

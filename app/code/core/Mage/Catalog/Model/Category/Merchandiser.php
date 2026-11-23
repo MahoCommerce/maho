@@ -226,7 +226,7 @@ class Mage_Catalog_Model_Category_Merchandiser
 
     /**
      * @param list<int> $ids
-     * @return array<int, array{qty_ordered: string, revenue: string}>
+     * @return array<int|string, array<string, string|int|float|bool|resource|null>>
      */
     protected function getSales(array $ids, int $storeId): array
     {

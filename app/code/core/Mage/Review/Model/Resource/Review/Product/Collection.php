@@ -378,7 +378,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
      * Retrieves column values
      *
      * @param string $colName
-     * @return array
+     * @return list<mixed>
      */
     #[\Override]
     public function getColumnValues($colName)

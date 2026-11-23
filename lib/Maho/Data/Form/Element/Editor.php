@@ -17,7 +17,7 @@ class Editor extends Textarea
 {
     /**
      * Editor constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -161,8 +161,8 @@ class Editor extends Textarea
     /**
      * Prepare button options array to create button html
      *
-     * @param array $options
-     * @return array
+     * @param array<string, string|array{search: list<string>, subject: string}> $options
+     * @return array<string, string|array{search: list<string>, subject: string}>
      */
     protected function _prepareButtonOptions($options)
     {
@@ -172,7 +172,7 @@ class Editor extends Textarea
     /**
      * Check if plugin button options have required values
      *
-     * @param array $pluginOptions
+     * @param array<string, string|array{search: list<string>, subject: string}> $pluginOptions
      * @return bool
      */
     protected function _checkPluginButtonOptions($pluginOptions)
@@ -187,8 +187,8 @@ class Editor extends Textarea
      * Convert options by replacing template constructions ( like {{var_name}} )
      * with data from this element object
      *
-     * @param array $options
-     * @return array
+     * @param array<string, string|array{search: list<string>, subject: string}> $options
+     * @return array<string, string|array{search: list<string>, subject: string}>
      */
     protected function _prepareOptions($options)
     {
@@ -210,7 +210,7 @@ class Editor extends Textarea
     /**
      * Return custom button HTML
      *
-     * @param array $data Button params
+     * @param array<string, string|array{search: list<string>, subject: string}> $data Button params
      * @return string
      */
     protected function _getButtonHtml($data)
@@ -227,6 +227,8 @@ class Editor extends Textarea
 
     /**
      * Return custom button HTML
+     *
+     * @param array<string, int|string|null>|null $params
      */
     protected function _getButtonUrl(string $url, ?array $params): string
     {

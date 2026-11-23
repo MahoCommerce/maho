@@ -15,7 +15,7 @@ use Maho\Data\Form\Element\AbstractElement;
 class Info extends AbstractElement
 {
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {

@@ -36,7 +36,7 @@ class Obscure extends Password
     /**
      * Returns list of html attributes possible to output in HTML
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

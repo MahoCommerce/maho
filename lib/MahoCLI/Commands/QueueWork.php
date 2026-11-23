@@ -33,6 +33,10 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
     #[\Override]
     protected bool $traceWholeCommand = false;
 
+    /**
+     * @param list<string> $queues
+     * @param list<string> $excludeQueue
+     */
     public function __invoke(
         OutputInterface $output,
         #[Option(description: 'Consume as this configured worker pool, taking its queues and limits as defaults', name: 'pool')]

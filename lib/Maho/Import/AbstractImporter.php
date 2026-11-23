@@ -90,6 +90,9 @@ abstract class AbstractImporter implements ImporterInterface
         }
     }
 
+    /**
+     * @param array<string, string> $row
+     */
     protected function requireValue(CsvFile $file, int $line, array $row, string $column): string
     {
         if (($row[$column] ?? '') === '') {

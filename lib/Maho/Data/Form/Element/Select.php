@@ -17,7 +17,7 @@ class Select extends AbstractElement
 {
     /**
      * Select constructor.
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -69,8 +69,8 @@ class Select extends AbstractElement
     }
 
     /**
-     * @param array $option
-     * @param string|array $selected
+     * @param array<string, mixed> $option
+     * @param string|array<mixed> $selected
      * @return string
      */
     protected function _optionToHtml($option, $selected)
@@ -111,7 +111,7 @@ class Select extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()
@@ -119,6 +119,9 @@ class Select extends AbstractElement
         return ['title', 'class', 'style', 'onclick', 'onchange', 'disabled', 'readonly', 'tabindex'];
     }
 
+    /**
+     * @return array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|string|null
+     */
     public function getOptions(): array|string|null
     {
         return $this->getData('options');

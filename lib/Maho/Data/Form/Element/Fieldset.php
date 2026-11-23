@@ -31,7 +31,7 @@ class Fieldset extends AbstractElement
     protected $_sortChildrenDirection = SORT_ASC;
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -98,7 +98,7 @@ class Fieldset extends AbstractElement
     /**
      * @param string $elementId
      * @param string $type
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param string|false $after
      * @return AbstractElement
      */
@@ -129,7 +129,7 @@ class Fieldset extends AbstractElement
     /**
      * Get sorted elements as array
      *
-     * @return array
+     * @return list<AbstractElement>
      */
     public function getSortedElements()
     {

@@ -33,12 +33,12 @@ abstract class AbstractForm extends \Maho\DataObject
     /**
      * Element type classes
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_types = [];
 
     /**
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      */
     public function __construct($attributes = [])
     {
@@ -109,7 +109,7 @@ abstract class AbstractForm extends \Maho\DataObject
      *
      * @param   string $elementId
      * @param   string $type
-     * @param   array  $config
+     * @param   array<string, mixed>  $config
      * @param   string|false $after
      * @return AbstractElement
      */
@@ -145,7 +145,7 @@ abstract class AbstractForm extends \Maho\DataObject
 
     /**
      * @param string $elementId
-     * @param array $config
+     * @param array<string, mixed> $config
      * @param bool|string|null $after
      *
      * @return Element\Fieldset
@@ -160,7 +160,7 @@ abstract class AbstractForm extends \Maho\DataObject
 
     /**
      * @param string $elementId
-     * @param array $config
+     * @param array<string, mixed> $config
      * @return Element\Column
      */
     public function addColumn($elementId, $config)
@@ -173,7 +173,8 @@ abstract class AbstractForm extends \Maho\DataObject
     }
 
     /**
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return array{config: mixed, formElements: list<array<array-key, mixed>>}
      */
     #[\Override]
     public function __toArray(array $arrAttributes = [])

@@ -559,7 +559,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Save configuration cache
      *
-     * @param   array $tags cache tags
+     * @param   list<string>|null $tags cache tags
      * @return $this
      */
     #[\Override]
@@ -568,6 +568,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!Mage::app()->useCache('config')) {
             return $this;
         }
+        $tags ??= [];
         if (!in_array(self::CACHE_TAG, $tags)) {
             $tags[] = self::CACHE_TAG;
         }

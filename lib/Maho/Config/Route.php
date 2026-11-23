@@ -28,8 +28,8 @@ readonly class Route
      * @param string      $path         URL path pattern (e.g. '/catalog/product/view/{id}')
      * @param ?string     $name         Route name for URL generation, auto-generated from class::method if omitted
      * @param string[]    $methods      Allowed HTTP methods (e.g. ['GET', 'POST']). Empty = any method.
-     * @param array       $defaults     Default parameter values
-     * @param array       $requirements Regex constraints for parameters (e.g. ['id' => '\d+'])
+     * @param array<string, string|int|float|bool|null> $defaults Default parameter values
+     * @param array<string, string> $requirements Regex constraints for parameters (e.g. ['id' => '\d+'])
      * @param ?string     $area         Area scope: 'frontend' or 'adminhtml'. Auto-detected from controller class if omitted.
      */
     public function __construct(
