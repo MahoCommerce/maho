@@ -13,11 +13,31 @@ declare(strict_types=1);
  *
  * Tests CMS page and blog post queries via GraphQL.
  * Includes regression tests for custom QueryCollection operations.
- * All tests are READ-ONLY (safe for synced database).
  *
  * @group read
  * @group graphql
  */
+
+// The sample data has no blog post in the default store view, so the file creates its own
+beforeAll(function (): void {
+    $create = apiPost('/api/rest/v2/blog-posts', [
+        'title' => 'GraphQL Blog Post Fixture',
+        'urlKey' => 'test-pest-graphql-blog-post',
+        'content' => '<p>Created by Pest test suite</p>',
+        'isActive' => true,
+        'publishedAt' => '2026-01-15 10:00:00',
+        'stores' => ['all'],
+    ], serviceToken(['blog-posts/write']));
+
+    if (!in_array($create['status'], [200, 201], true)) {
+        throw new RuntimeException("Could not create the blog post fixture: HTTP {$create['status']}");
+    }
+    trackCreated('blog_post', (int) $create['json']['id']);
+});
+
+afterAll(function (): void {
+    cleanupTestData();
+});
 
 describe('GraphQL CMS Pages', function (): void {
 
