@@ -83,10 +83,9 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      *
      * @param Mage_Catalog_Model_Product $product
      * @param Mage_Catalog_Model_Product $parent
-     * @return array
      */
     #[\Override]
-    public function getTierPrices($product = null, $parent = null)
+    public function getTierPrices($product = null, $parent = null): array
     {
         $product ??= $this->getProduct();
         $prices = $product->getFormatedTierPrice();
@@ -139,7 +138,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
                         $product->setPrice($tierPrice);
                         $product->setFinalPrice($tierPrice);
 
-                        $this->getLayout()->getBlock('product.info')->getPriceHtml($product);
+                        $this->getPriceHtml($product);
                         $product->setPriceCalculation(true);
 
                         $price['real_price_html'] = $product->getRealPriceHtml();
