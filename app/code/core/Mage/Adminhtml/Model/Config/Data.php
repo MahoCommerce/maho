@@ -497,7 +497,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                         $fieldConfig = $node[0];
                     }
                 }
-                if (($groupConfig ? !$groupConfig->dynamic_group : true) && !$this->_isValidField($fieldConfig)) {
+                if (($groupConfig ? !$groupConfig->dynamic_group : true) && (!$fieldConfig || !$this->_isValidField($fieldConfig))) {
                     $message = Mage::helper('adminhtml')->__('Wrong field specified.') . ' ' . Mage::helper('adminhtml')->__('(%s/%s/%s)', $section, $group, $field);
                     Mage::throwException($message);
                 }
@@ -513,11 +513,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Check field visibility by scope
      */
-    protected function _isValidField(\Maho\Simplexml\Element|false $field): bool
+    protected function _isValidField(\Maho\Simplexml\Element $field): bool
     {
-        if (!$field) {
-            return false;
-        }
         $scope = $this->getScope();
         if (!in_array($scope, [self::SCOPE_DEFAULT, self::SCOPE_WEBSITES, self::SCOPE_STORES], true)) {
             return true;
