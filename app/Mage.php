@@ -452,11 +452,10 @@ final class Mage
      * $model = Mage::getModel('core/store'); // Mage_Core_Model_Store
      * ```
      *
-     * @param string $modelAlias
-     * @param array|string|object $arguments
+     * @param mixed $arguments The one argument of the model constructor.
      * @return Mage_Core_Model_Abstract|false
      */
-    public static function getModel($modelAlias, $arguments = [])
+    public static function getModel(string $modelAlias, mixed $arguments = []): object|false
     {
         return self::getConfig()->getModelInstance($modelAlias, $arguments);
     }
@@ -509,11 +508,10 @@ final class Mage
      * $model = Mage::getResourceModel('core/store_collection'); // Mage_Core_Model_Resource_Store_Collection
      * ```
      *
-     * @param string $modelAlias
-     * @param array $arguments
+     * @param mixed $arguments The one argument of the resource model constructor.
      * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
-    public static function getResourceModel($modelAlias, $arguments = [])
+    public static function getResourceModel(string $modelAlias, mixed $arguments = []): object|false
     {
         return self::getConfig()->getResourceModelInstance($modelAlias, $arguments);
     }
