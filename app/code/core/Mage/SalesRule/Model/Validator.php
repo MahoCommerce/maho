@@ -361,7 +361,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
     {
         $appliedIds = array_fill_keys(explode(',', $ruleIds), true);
         $itemKey = spl_object_id($item);
-        foreach (self::_getRules() ?? [] as $rule) {
+        foreach ($this->_getRules() ?? [] as $rule) {
             if (!isset($appliedIds[$rule->getRuleId()])) {
                 continue;
             }

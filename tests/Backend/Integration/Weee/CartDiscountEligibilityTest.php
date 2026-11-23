@@ -309,10 +309,10 @@ it('uses the existing amount when a discount observer replaces a rule result', f
         ->and($this->quote->getGrandTotal())->toBe(20.0);
 });
 
-it('discounts fixed product taxes for only the current rule ids recorded by a rewritten process', function (bool $callParent): void {
+it('discounts fixed product taxes for only the current rule ids recorded by a rewritten process', function (bool $callParent, bool $rewriteRules = false): void {
     $rule = cartFeeEligibilityRule(
         $this->websiteId,
-        $this->groupId,
+        $rewriteRules ? Mage_Customer_Model_Group::NOT_LOGGED_IN_ID : $this->groupId,
         50.0,
         0,
         sku: 'rewrite-only-item',
@@ -320,7 +320,7 @@ it('discounts fixed product taxes for only the current rule ids recorded by a re
         step: 2,
     );
     $foreignRule = cartFeeEligibilityRule($this->websiteId, Mage_Customer_Model_Group::NOT_LOGGED_IN_ID, 50.0, 1);
-    $validator = new class ((string) $rule->getId(), (string) $foreignRule->getId(), $callParent) extends Mage_SalesRule_Model_Validator {
+    $validator = new class ((string) $rule->getId(), (string) $foreignRule->getId(), $callParent, $rewriteRules) extends Mage_SalesRule_Model_Validator {
         public ?string $sku = null;
         public bool $recordRules = true;
 
@@ -328,6 +328,7 @@ it('discounts fixed product taxes for only the current rule ids recorded by a re
             private readonly string $ruleId,
             private readonly string $foreignRuleId,
             private readonly bool $callParent,
+            private readonly bool $rewriteRules,
         ) {}
 
         #[\Override]
@@ -343,6 +344,14 @@ it('discounts fixed product taxes for only the current rule ids recorded by a re
                 $item->setAppliedRuleIds($this->ruleId . ',' . $this->foreignRuleId);
             }
             return $this;
+        }
+
+        #[\Override]
+        protected function _getRules()
+        {
+            return $this->rewriteRules
+                ? Mage::getResourceModel('salesrule/rule_collection')->addFieldToFilter('rule_id', $this->ruleId)
+                : parent::_getRules();
         }
 
         #[\Override]
@@ -387,6 +396,7 @@ it('discounts fixed product taxes for only the current rule ids recorded by a re
 })->with([
     'rewrite declares currently applied rules without invoking the parent' => [false],
     'rewrite calls the parent, which checks and rejects the percentage rule' => [true],
+    'rewrite supplies the active rule collection' => [false, true],
 ]);
 
 it('consults the fixed tax helper rewrite when applying a cart rule', function (): void {
