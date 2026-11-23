@@ -25,8 +25,8 @@ class Mage_Core_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Hel
      * Returns analytic expression for database column
      *
      * @param string $column
-     * @param string|array<string|Maho\Db\Expr>|null $groupAliasName OPTIONAL
-     * @param string $orderBy OPTIONAL
+     * @param string|array<string|Maho\Db\Expr>|null $groupAliasName
+     * @param string $orderBy
      * @return Maho\Db\Expr
      */
     public function prepareColumn($column, $groupAliasName = null, $orderBy = null)
