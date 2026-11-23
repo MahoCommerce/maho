@@ -342,7 +342,6 @@ class Mage_CatalogRule_Model_Observer
         foreach ($collection as $rule) {
             /** @var Mage_CatalogRule_Model_Rule $rule */
             $rule->setIsActive(false);
-            /** @var $rule->getConditions() Mage_CatalogRule_Model_Rule_Condition_Combine */
             $this->_removeAttributeFromConditions($rule->getConditions(), $attributeCode);
             $rule->save();
 
@@ -361,16 +360,12 @@ class Mage_CatalogRule_Model_Observer
 
     /**
      * Remove catalog attribute condition by attribute code from rule conditions
-     *
-     * @param Mage_CatalogRule_Model_Rule_Condition_Combine $combine
-     *
-     * @param string $attributeCode
      */
-    protected function _removeAttributeFromConditions($combine, $attributeCode): void
+    protected function _removeAttributeFromConditions(Mage_Rule_Model_Condition_Combine $combine, string $attributeCode): void
     {
         $conditions = $combine->getConditions();
         foreach ($conditions as $conditionId => $condition) {
-            if ($condition instanceof Mage_CatalogRule_Model_Rule_Condition_Combine) {
+            if ($condition instanceof Mage_Rule_Model_Condition_Combine) {
                 $this->_removeAttributeFromConditions($condition, $attributeCode);
             }
             if ($condition instanceof Mage_Rule_Model_Condition_Product_Abstract) {

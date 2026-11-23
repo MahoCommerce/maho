@@ -1125,7 +1125,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             ->setPrefix('conditions');
 
         if (!empty($typeArr[1])) {
-            /** @phpstan-ignore argument.type (Condition models expect string attribute code) */
             $model->setAttribute($typeArr[1]);
         }
 
