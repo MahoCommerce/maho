@@ -91,11 +91,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Address extends Mage_Admi
 
     /**
      * Return customer address id
-     *
-     * @return int|null
      */
     #[\Override]
-    public function getAddressId()
+    public function getAddressId(): ?int
     {
         return $this->getAddress()->getCustomerAddressId();
     }

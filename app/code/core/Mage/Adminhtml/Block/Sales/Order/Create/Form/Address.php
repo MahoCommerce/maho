@@ -190,12 +190,10 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Address extends Mage_Adminhtm
 
     /**
      * Return customer address id
-     *
-     * @return int|false|null
      */
-    public function getAddressId()
+    public function getAddressId(): ?int
     {
-        return false;
+        return null;
     }
 
     /**
