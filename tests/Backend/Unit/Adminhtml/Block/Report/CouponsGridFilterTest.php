@@ -14,25 +14,11 @@ uses(Tests\MahoBackendTestCase::class);
  * user picked. It used to read the first entry only and split it on commas.
  */
 
-/** A stand-in for the report collection that records the rule ids the grid gives it. */
-function couponsRuleFilterSpy(): object
-{
-    return new class {
-        public ?array $rulesList = null;
-
-        public function addRuleFilter(array $rulesList): static
-        {
-            $this->rulesList = $rulesList;
-            return $this;
-        }
-    };
-}
-
-/** Run the grid's custom filter over $filterData and return what the collection received. */
+/** Run the grid's custom filter over $filterData and return the rule ids that the report collection received. */
 function couponsRuleFilter(array $filterData): ?array
 {
     $grid = Mage::app()->getLayout()->createBlock('adminhtml/report_sales_coupons_grid');
-    $collection = couponsRuleFilterSpy();
+    $collection = Mage::getResourceModel('salesrule/report_collection');
 
     Closure::bind(
         function ($collection, $filterData) {
@@ -42,7 +28,7 @@ function couponsRuleFilter(array $filterData): ?array
         $grid::class,
     )($collection, new Maho\DataObject($filterData));
 
-    return $collection->rulesList;
+    return Closure::bind(fn() => $this->_rulesIdsFilter, $collection, $collection::class)();
 }
 
 describe('Mage_Adminhtml_Block_Report_Sales_Coupons_Grid::_addCustomFilter', function () {
