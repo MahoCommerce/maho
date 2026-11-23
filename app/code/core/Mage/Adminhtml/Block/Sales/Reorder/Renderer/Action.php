@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
     public function render(\Maho\DataObject $row): string
     {
         $this->_actions = [];
-        if (Mage::helper('sales/reorder')->canReorder($row)) {
+        if ($row instanceof Mage_Sales_Model_Order && Mage::helper('sales/reorder')->canReorder($row)) {
             $reorderAction = [
                 '@' => ['href' => $this->getUrl('*/sales_order_create/reorder', ['order_id' => $row->getId()])],
                 '#' =>  Mage::helper('sales')->__('Reorder'),
