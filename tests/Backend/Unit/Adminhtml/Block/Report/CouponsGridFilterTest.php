@@ -18,7 +18,16 @@ uses(Tests\MahoBackendTestCase::class);
 function couponsRuleFilter(array $filterData): ?array
 {
     $grid = Mage::app()->getLayout()->createBlock('adminhtml/report_sales_coupons_grid');
-    $collection = Mage::getResourceModel('salesrule/report_collection');
+    $collection = new class extends Mage_SalesRule_Model_Resource_Report_Collection {
+        public ?array $rulesList = null;
+
+        #[\Override]
+        public function addRuleFilter($rulesList)
+        {
+            $this->rulesList = $rulesList;
+            return $this;
+        }
+    };
 
     Closure::bind(
         function ($collection, $filterData) {
@@ -28,7 +37,7 @@ function couponsRuleFilter(array $filterData): ?array
         $grid::class,
     )($collection, new Maho\DataObject($filterData));
 
-    return Closure::bind(fn() => $this->_rulesIdsFilter, $collection, $collection::class)();
+    return $collection->rulesList;
 }
 
 describe('Mage_Adminhtml_Block_Report_Sales_Coupons_Grid::_addCustomFilter', function () {
