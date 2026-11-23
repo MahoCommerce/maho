@@ -16,11 +16,11 @@ abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Mode
     protected ?array $_attributeSetsByName = null;
 
     /**
-     * Return the IDs of a comma separated list of store IDs and codes, or false for an unknown code
+     * Return the IDs of a comma separated list of store IDs and codes, or an empty list for an unknown code
      *
-     * @return list<int|string>|false
+     * @return list<int>
      */
-    public function getStoreIds(?string $stores): array|false
+    public function getStoreIds(?string $stores): array
     {
         if (empty($stores)) {
             $storeIds = [0];
@@ -28,11 +28,11 @@ abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Mode
             $storeIds = [];
             foreach (explode(',', $stores) as $store) {
                 if (is_numeric($store)) {
-                    $storeIds[] = $store;
+                    $storeIds[] = (int) $store;
                 } else {
                     $storeNode = Mage::getConfig()->getNode('stores/' . $store);
                     if (!$storeNode) {
-                        return false;
+                        return [];
                     }
                     $storeIds[] = (int) $storeNode->system->store->id;
                 }
