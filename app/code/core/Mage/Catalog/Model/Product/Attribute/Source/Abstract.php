@@ -32,21 +32,17 @@ abstract class Mage_Catalog_Model_Product_Attribute_Source_Abstract extends Mage
         return $options;
     }
 
-    /**
-     * @param string|int|null $value
-     */
     #[\Override]
-    public function getOptionText($value): string|false
+    public function getOptionText(mixed $value): string|false
     {
         return $this->getOptionArray()[(int) $value] ?? false;
     }
 
     /**
      * @param Mage_Catalog_Model_Resource_Product_Collection $collection
-     * @param string $dir
      */
     #[\Override]
-    public function addValueSortToCollection($collection, $dir = Maho\Db\Select::SQL_ASC): static
+    public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = Maho\Db\Select::SQL_ASC): static
     {
         $attributeCode  = $this->getAttribute()->getAttributeCode();
         $attributeId    = (int) $this->getAttribute()->getId();
