@@ -292,26 +292,33 @@ it('keeps a known VAT amount when an earlier credit memo has an ambiguous fixed 
         ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([20.0 + $tax, (20.0 + $tax) * 0.8]);
 })->with(['positive merchandise VAT' => [15.0, 0.0], 'zero merchandise VAT with a fixed tax' => [0.0, 5.0]]);
 
-it('uses the amount attributable to a historic single-line credit', function (float $firstTax, float $paidTax, ?float $recorded = null, float $extra = 0.0, bool $zeroFee = false): void {
+it('uses the amount attributable to a historic single-line credit', function (float $firstTax, float $paidTax, ?float $recorded = null, float $extra = 0.0, string $evidence = ''): void {
     $order = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0]]);
     [$item] = array_values($order->getAllVisibleItems());
     $service = Mage::getService('sales/order_document');
     $qty = [$item->getId() => 1];
     $invoice = $service->invoice($order, $qty, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
-    $second = $service->invoice(Mage::getModel('sales/order')->load($order->getId()), captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    $conflict = $evidence === 'conflicting header';
+    $headerOnly = $evidence === 'header only' || $conflict;
+    $second = $service->invoice(Mage::getModel('sales/order')->load($order->getId()), $headerOnly ? $qty : [], captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    if ($headerOnly) {
+        $service->invoice(Mage::getModel('sales/order')->load($order->getId()), captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    }
     $left = 20.0 - $firstTax + $extra;
     foreach ([[$invoice, $firstTax], [$second, $left]] as [$document, $tax]) {
         $row = array_find($document->getAllItems(), static fn($row): bool => $row->getOrderItemId() === $item->getId());
-        $row->setBaseTaxAmount($tax)->setTaxAmount($tax * 0.8)->save();
-        if ($document === $invoice && $zeroFee) {
-            Mage::helper('weee')->setApplied($row, [['title' => 'Unused fee', 'row_amount' => 0.0, 'base_row_amount' => 0.0,
-                'amount' => 0.0, 'base_amount' => 0.0, 'weee_discount' => 0.0, 'base_weee_discount' => 0.0]]);
+        $missing = $document === $second && $headerOnly;
+        $row->setBaseTaxAmount($missing ? null : $tax)->setTaxAmount($missing ? null : $tax * 0.8)->save();
+        if ($document === $invoice && in_array($evidence, ['zero fee', 'legacy zero fee'], true)) {
+            $fee = ['title' => 'Unused fee', 'row_amount' => 0.0, 'base_row_amount' => 0.0, 'amount' => 0.0, 'base_amount' => 0.0];
+            Mage::helper('weee')->setApplied($row, [$evidence === 'legacy zero fee' ? $fee : $fee + ['weee_discount' => 0.0, 'base_weee_discount' => 0.0]]);
             $row->save();
         }
     }
-    $secondTax = $left - 5.0;
+    $secondTax = $headerOnly ? $left : $left - 5.0;
+    $secondTotal = ($headerOnly ? 20.0 : 40.0) + $secondTax + ($conflict ? 1.0 : 0.0);
     $second->setBaseTaxAmount($secondTax)->setTaxAmount($secondTax * 0.8)
-        ->setBaseGrandTotal(40.0 + $secondTax)->setGrandTotal((40.0 + $secondTax) * 0.8)->save();
+        ->setBaseGrandTotal($secondTotal)->setGrandTotal($secondTotal * 0.8)->save();
     $invoice->setBaseTaxAmount($paidTax)->setTaxAmount($paidTax * 0.8)
         ->setBaseGrandTotal(20.0 + $paidTax)->setGrandTotal((20.0 + $paidTax) * 0.8)->save();
     $previous = $service->refund($order, ['qtys' => $qty], invoice: $invoice, beforeRegister: static function ($memo) use ($paidTax): void {
@@ -326,6 +333,9 @@ it('uses the amount attributable to a historic single-line credit', function (fl
     $memo = $service->refund($order, ['qtys' => $qty]);
     $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
     $row = $memo->getAllItems()[0];
+    if ($conflict) {
+        $left = 20.0 - $recorded;
+    }
     expect([$row->getBaseTaxAmount(), $row->getTaxAmount()])->toBe([$left, round($left * 0.8, 2)])
         ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([20.0 + $left, round((20.0 + $left) * 0.8, 2)]);
 })->with([
@@ -333,8 +343,38 @@ it('uses the amount attributable to a historic single-line credit', function (fl
     'paid tax happens to match the order average' => [8.0, 10.0],
     'the whole linked invoice paid its own rate' => [4.0, 4.0, 0.0],
     'the other invoice disagrees with the order tax' => [4.0, 4.0, 0.0, 4.0],
-    'the linked invoice row has a zero fee record' => [4.0, 4.0, 0.0, 0.0, true],
+    'the linked invoice row has a zero fee record' => [4.0, 4.0, 0.0, 0.0, 'zero fee'],
+    'a zero invoice fee without discount keys' => [4.0, 4.0, 0.0, 0.0, 'legacy zero fee'],
+    'the other single-row invoice only saved header VAT' => [4.0, 4.0, 0.0, 0.0, 'header only'],
+    'the other single-row invoice has conflicting totals' => [4.0, 4.0, 0.0, 0.0, 'conflicting header'],
 ]);
+
+it('checks the historical fee on the invoice that the credit actually returned', function (bool $linked): void {
+    $order = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -2.0, -1.6]]);
+    [$item] = array_values($order->getAllVisibleItems());
+    $order->setBaseTaxAmount(14.0)->setTaxAmount(11.2)->setBaseGrandTotal(94.0)->setGrandTotal(75.2)->save();
+    $service = Mage::getService('sales/order_document');
+    $first = $service->invoice($order, [$item->getId() => 2], captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    $second = $service->invoice(Mage::getModel('sales/order')->load($order->getId()), captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    $row = array_find($second->getAllItems(), static fn($row): bool => $row->getOrderItemId() == $item->getId());
+    $row->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)->setWeeeTaxAppliedRowAmount(0.8)->setBaseWeeeTaxAppliedRowAmount(1.0);
+    Mage::helper('weee')->setApplied($row, [['title' => 'Invoice fee', 'row_amount' => 0.8, 'base_row_amount' => 1.0,
+        'weee_discount' => 0.0, 'base_weee_discount' => 0.0, 'weee_document_gross_allocated' => true]]);
+    $row->save();
+    expect([$first->getBaseTaxAmount(), $second->getBaseTaxAmount(), $row->getBaseTaxAmount()])->toBe([10.0, 4.0, 5.0]);
+    $qty = ['qtys' => [$item->getId() => 1]];
+    $prior = $service->refund($order, $qty, invoice: $linked ? $first : null, beforeRegister: static function ($memo): void {
+        $memo->getAllItems()[0]->setBaseTaxAmount(null)->setTaxAmount(null);
+    });
+    $prior = Mage::getModel('sales/order_creditmemo')->load($prior->getId());
+    expect([$prior->getBaseTaxAmount(), $prior->getBaseGrandTotal()])->toBe([5.0, 25.0]);
+    Mage::getModel('sales/order_item')->load($item->getId())->setBaseTaxRefunded(4.0)->setTaxRefunded(3.2)->save();
+    $memo = $service->refund($order, $qty);
+    $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+    $line = $memo->getAllItems()[0];
+    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe($linked ? [5.0, 4.0] : [5.5, 4.4])
+        ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe($linked ? [25.0, 20.0] : [25.5, 20.4]);
+})->with(['linked to the fee-free invoice' => true, 'unlinked credit' => false]);
 
 it('keeps the order item VAT when another historic credit has missing VAT on more than one row', function (): void {
     $order = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -1.0, -0.8], [1, -1.0, -0.8]]);
