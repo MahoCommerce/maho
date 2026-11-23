@@ -374,7 +374,7 @@ class Mage_Catalog_Service_Product
             } catch (Mage_Core_Exception $e) {
                 throw new Mage_Core_Exception_Input()->addError($code, $label . ': ' . $e->getMessage());
             }
-            if ($valid === false) {
+            if ($valid === false || $data[$code] === '' && Mage::helper('eav')->isRequired($values, $attribute)) {
                 throw new Mage_Core_Exception_Input()->addError($code, Mage::helper('eav')->__('"%s" is a required value.', $label));
             }
         }
