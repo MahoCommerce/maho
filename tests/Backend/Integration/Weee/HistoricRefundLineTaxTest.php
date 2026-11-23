@@ -216,7 +216,48 @@ it('caps the saved line and total tax when a previous credit used a cent from th
     'previous VAT saved on the line alone' => [true, true, 0.0, 0.0],
     'one missing invoice row tax' => [true, false, 0.0, 0.01, true],
     'one missing credit row tax' => [true, false, 0.0, 0.01, false, true],
+    'unpaid VAT missing on the historic credit row' => [true, true, 0.0, 0.0, false, true],
 ]);
+
+it('keeps a known tax payment when later credit memos have missing item VAT', function (float $vat): void {
+    $order = historicRefundLineTaxOrder([[4, $vat, $vat], [1, -0.03, -0.02], [1, 0.0, 0.0]]);
+    [$shared, $negative, $untaxed] = array_values($order->getAllVisibleItems());
+    $service = Mage::getService('sales/order_document');
+    $invoices = [];
+    foreach ([$untaxed, $negative, null, null] as $index => $other) {
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        $qtys = [$shared->getId() => 1];
+        if ($other) {
+            $qtys[$other->getId()] = 1;
+        }
+        $invoice = $service->prepareInvoice($order, $qtys);
+        $row = array_find($invoice->getAllItems(), static fn($line): bool => $line->getOrderItemId() === $shared->getId());
+        $itemTax = $index === 3 ? $vat : 0.0;
+        $row->setBaseTaxAmount($itemTax)->setTaxAmount($itemTax);
+        $baseTax = $itemTax + $other?->getBaseTaxAmount();
+        $tax = $itemTax + $other?->getTaxAmount();
+        $invoice->setBaseTaxAmount($baseTax)->setTaxAmount($tax)
+            ->setBaseGrandTotal($invoice->getBaseSubtotal() + $baseTax)->setGrandTotal($invoice->getSubtotal() + $tax)
+            ->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)->register();
+        Mage::getModel('core/resource_transaction')->addObject($invoice)->addObject($order)->save();
+        $invoices[] = $invoice;
+    }
+    foreach ([$vat, null, null] as $index => $booked) {
+        $memo = $service->refund($order, ['qtys' => [$shared->getId() => 1]], invoice: $invoices[$index], beforeRegister: static function ($memo) use ($booked): void {
+            $memo->getAllItems()[0]->setBaseTaxAmount($booked)->setTaxAmount($booked);
+            $paid = $booked ?? 0.0;
+            $memo->setBaseTaxAmount($paid)->setTaxAmount($paid)->setBaseGrandTotal(20.0 + $paid)->setGrandTotal(16.0 + $paid);
+        });
+        $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+        expect([$memo->getAllItems()[0]->getBaseTaxAmount(), $memo->getBaseTaxAmount()])->toBe([$booked, $booked ?? 0.0]);
+    }
+    $memo = $service->refund($order, ['qtys' => [$shared->getId() => 1]], invoice: $invoices[3]);
+    $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+    $row = $memo->getAllItems()[0];
+    expect([$row->getBaseTaxAmount(), $row->getTaxAmount()])->toBe([0.0, 0.0])
+        ->and([$memo->getBaseTaxAmount(), $memo->getTaxAmount()])->toBe([0.0, 0.0])
+        ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([20.0, 16.0]);
+})->with(['positive VAT' => 0.01, 'negative VAT' => -0.01]);
 
 it('keeps a known VAT amount when an earlier credit memo has an ambiguous fixed tax on a different item', function (float $vat, float $fee): void {
     $order = historicRefundLineTaxOrder([[1, $vat, $vat * 0.8], [2, -12.0, -9.6]]);

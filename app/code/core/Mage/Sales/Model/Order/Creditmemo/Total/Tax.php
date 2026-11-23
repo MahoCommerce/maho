@@ -498,7 +498,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
     {
         $order = $invoice->getOrder();
         $history = array_fill_keys(array_keys($source), [
-            'invoices' => [], 'credits' => [], 'invoices_qty' => 0.0, 'credits_qty' => 0.0, 'unpaid' => [0.0, 0.0],
+            'invoices' => [], 'credits' => [], 'invoices_qty' => 0.0, 'credits_qty' => 0.0, 'paid' => [],
         ]);
         foreach (['invoices' => $order->getInvoiceCollection(), 'credits' => $credits] as $kind => $documents) {
             foreach ($documents as $document) {
@@ -514,20 +514,16 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     $amounts = [$item->getTaxAmount(), $item->getBaseTaxAmount()];
                     $history[$id][$kind][] = $amounts;
                     $history[$id][$kind . '_qty'] += $item->getQty();
-                    if ($document instanceof Mage_Sales_Model_Order_Creditmemo && $document->getInvoiceId() != $invoice->getId()
-                        && count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($order->getItemById($id))) {
-                        $paid = [
-                            $document->getTaxAmount() - $document->getShippingTaxAmount(),
-                            $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount(),
-                        ];
-                        foreach ($amounts as $currency => $amount) {
-                            if ($amount * $source[$id][$currency] > 0.0) {
-                                // A line can record VAT that the historic credit never paid to the customer.
-                                $history[$id]['unpaid'][$currency] += $amount < 0.0
-                                    ? min(0.0, $amount - min(0.0, $paid[$currency]))
-                                    : max(0.0, $amount - max(0.0, $paid[$currency]));
-                            }
+                    if ($document instanceof Mage_Sales_Model_Order_Creditmemo) {
+                        $paid = [null, null];
+                        if ($document->getInvoiceId() != $invoice->getId() && count($items) === 1
+                            && !$this->hasFixedTax($item) && !$this->hasFixedTax($order->getItemById($id))) {
+                            $paid = [
+                                $document->getTaxAmount() === null ? null : $document->getTaxAmount() - $document->getShippingTaxAmount(),
+                                $document->getBaseTaxAmount() === null ? null : $document->getBaseTaxAmount() - $document->getBaseShippingTaxAmount(),
+                            ];
                         }
+                        $history[$id]['paid'][] = $paid;
                     }
                 }
             }
@@ -540,29 +536,54 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             $credited = [$item->getTaxRefunded(), $item->getBaseTaxRefunded()];
             $allBilled = round($rows['invoices_qty'] - $item->getQtyInvoiced(), 4) == 0.0;
             $allCredited = round($rows['credits_qty'] - $item->getQtyRefunded(), 4) == 0.0;
-            $remaining = [];
+            $remaining = $unpaid = [];
             foreach ($taxes as $currency => $tax) {
-                $charged = $this->getTaxWithSign(array_column($rows['invoices'], $currency), $tax, $allBilled ? $billed[$currency] : null);
-                $refunded = $this->getTaxWithSign(array_column($rows['credits'], $currency), $tax, $allCredited ? $credited[$currency] : null);
+                [$charged] = $this->getTaxWithSign(array_column($rows['invoices'], $currency), $tax, $allBilled ? $billed[$currency] : null);
+                [$refunded, $unpaid[$currency]] = $this->getTaxWithSign(
+                    array_column($rows['credits'], $currency),
+                    $tax,
+                    $allCredited ? $credited[$currency] : null,
+                    array_column($rows['paid'], $currency),
+                );
                 $remaining[$currency] = $charged !== null && $refunded !== null ? $charged - $refunded : null;
             }
-            $result[$id] = ['remaining' => [$remaining[0], $remaining[1]], 'unpaid' => [$rows['unpaid'][0], $rows['unpaid'][1]]];
+            $result[$id] = ['remaining' => [$remaining[0], $remaining[1]], 'unpaid' => [$unpaid[0], $unpaid[1]]];
         }
         return $result;
     }
 
-    /** @param list<?float> $amounts */
-    private function getTaxWithSign(array $amounts, ?float $source, ?float $total): ?float
+    /**
+     * @param list<?float> $amounts
+     * @param list<?float> $paid VAT paid on each independently attributable credit
+     * @return array{?float, float} Recorded VAT and the part the credit did not pay
+     */
+    private function getTaxWithSign(array $amounts, ?float $source, ?float $total, array $paid = []): array
     {
-        $missing = count(array_keys($amounts, null, true));
+        $missing = array_keys($amounts, null, true);
         if ($missing) {
-            if ($missing > 1 || $total === null) {
-                return null;
+            if ($total === null) {
+                return [null, 0.0];
             }
-            // All the item's units are accounted for. Only one row can hold this difference.
-            $amounts[] = round($total - array_sum($amounts), 4);
+            $difference = round($total - array_sum($amounts), 4);
+            if (count($missing) === 1) {
+                // Keep the recovered amount with the payment on that same credit.
+                $amounts[$missing[0]] = $difference;
+            } elseif ($difference != 0.0 || !array_all($missing, static fn(int $index): bool => ($paid[$index] ?? null) === 0.0)) {
+                return [null, 0.0];
+            }
         }
-        return array_sum(array_filter($amounts, static fn(?float $amount): bool => $amount * $source > 0.0));
+        $recorded = $unpaid = 0.0;
+        foreach ($amounts as $index => $amount) {
+            if ($amount * $source > 0.0) {
+                $recorded += $amount;
+                if (isset($paid[$index])) {
+                    $unpaid += $amount < 0.0
+                        ? min(0.0, $amount - min(0.0, $paid[$index]))
+                        : max(0.0, $amount - max(0.0, $paid[$index]));
+                }
+            }
+        }
+        return [$recorded, $unpaid];
     }
 
     /** @param array{?float, ?float} $line */
