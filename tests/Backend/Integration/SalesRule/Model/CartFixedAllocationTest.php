@@ -120,12 +120,16 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         }
 
         if (isset($expectedPersisted['callback']) || isset($expectedPersisted['item_callback'])) {
-            $observer = new readonly class ($expectedPersisted['callback'] ?? null, $expectedPersisted['item_callback'] ?? null) {
-                public function __construct(private ?array $resultAmounts, private ?array $itemAmounts) {}
+            $observer = new readonly class (
+                $expectedPersisted['callback_action'] ?? Rule::CART_FIXED_ACTION,
+                $expectedPersisted['callback'] ?? null,
+                $expectedPersisted['item_callback'] ?? null,
+            ) {
+                public function __construct(private string $action, private ?array $resultAmounts, private ?array $itemAmounts) {}
 
                 public function record(Maho\Event\Observer $observer): void
                 {
-                    if ($observer->getRule()->getSimpleAction() === Rule::CART_FIXED_ACTION) {
+                    if ($observer->getRule()->getSimpleAction() === $this->action) {
                         if ($this->resultAmounts !== null) {
                             $observer->getResult()->setBaseDiscountAmount($this->resultAmounts[0])->setDiscountAmount($this->resultAmounts[1]);
                         }
@@ -326,6 +330,16 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
         [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
         0.0, 0.0, 'EUR', null, [0.06],
         ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.12]],
+    ],
+    'a buy one get one observer cannot increase the item discount beyond the line' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.06],
+        ['remaining' => [0.0, 0.0], 'lines' => [0.12], 'callback_action' => Rule::BUY_X_GET_Y_ACTION, 'item_callback' => [0.03, 0.06]],
+    ],
+    'a buy one get one observer can replace the rule result without changing the cart credit' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.01, 0.02, 'EUR', null, [0.05],
+        ['remaining' => [0.0, 0.0], 'lines' => [0.10], 'callback_action' => Rule::BUY_X_GET_Y_ACTION, 'callback' => [0.0, 0.0]],
     ],
     'a percentage preserves cart credit on fully discounted fractional lines' => [
         [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
