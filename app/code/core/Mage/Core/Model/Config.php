@@ -1458,7 +1458,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Retrieve model instance
      *
      * @param mixed $constructArguments The one argument of the model constructor.
-     * @return Mage_Core_Model_Abstract|false
      */
     public function getModelInstance(string $modelAlias, mixed $constructArguments = []): object|false
     {
@@ -1504,7 +1503,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Retrieve resource model instance
      *
      * @param mixed $constructArguments The one argument of the resource model constructor.
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
     public function getResourceModelInstance(string $modelAlias, mixed $constructArguments = []): object|false
     {

@@ -32,7 +32,7 @@ class Mage_Catalog_Model_Product_Type
     /**
      * Product type instance factory
      */
-    public static function factory(\Maho\DataObject $product, bool $singleton = false): Mage_Catalog_Model_Product_Type_Abstract
+    public static function factory(Mage_Catalog_Model_Product $product, bool $singleton = false): Mage_Catalog_Model_Product_Type_Abstract
     {
         $types = self::getTypes();
         $typeId = (string) $product->getTypeId();
@@ -57,8 +57,6 @@ class Mage_Catalog_Model_Product_Type
 
     /**
      * Product type price model factory
-     *
-     * @throws \UnexpectedValueException when the price model of the product type does not extend Mage_Catalog_Model_Product_Type_Price
      */
     public static function priceFactory(?string $productType): Mage_Catalog_Model_Product_Type_Price
     {
@@ -75,10 +73,8 @@ class Mage_Catalog_Model_Product_Type
             $priceModelName = self::DEFAULT_PRICE_MODEL;
         }
 
+        /** @var Mage_Catalog_Model_Product_Type_Price $priceModel */
         $priceModel = Mage::getModel($priceModelName);
-        if (!$priceModel instanceof Mage_Catalog_Model_Product_Type_Price) {
-            throw new \UnexpectedValueException("The price model {$priceModelName} of the product type {$productType} must extend Mage_Catalog_Model_Product_Type_Price.");
-        }
         self::$_priceModels[$productType] = $priceModel;
         return $priceModel;
     }

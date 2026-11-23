@@ -15,7 +15,7 @@ it('rejects a type model that does not extend the product type abstract', functi
     $types->setValue(null, ['broken' => ['model' => 'catalog/product']]);
 
     try {
-        expect(fn() => Mage_Catalog_Model_Product_Type::factory(new Maho\DataObject(['type_id' => 'broken'])))
+        expect(fn() => Mage_Catalog_Model_Product_Type::factory(Mage::getModel('catalog/product')->setTypeId('broken')))
             ->toThrow(UnexpectedValueException::class);
     } finally {
         $types->setValue(null, $original);

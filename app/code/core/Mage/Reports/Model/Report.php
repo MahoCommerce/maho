@@ -21,15 +21,10 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
      */
     protected $_reportModel;
 
-    /**
-     * @throws \UnexpectedValueException when $modelClass names a class that is not a report collection
-     */
     public function initCollection(string $modelClass): static
     {
+        /** @var Maho\Data\Collection&Mage_Reports_Model_Report_CollectionInterface $collection */
         $collection = Mage::getResourceModel($modelClass);
-        if (!$collection instanceof Maho\Data\Collection || !$collection instanceof Mage_Reports_Model_Report_CollectionInterface) {
-            throw new \UnexpectedValueException("The report collection {$modelClass} must be a Maho\\Data\\Collection that implements Mage_Reports_Model_Report_CollectionInterface.");
-        }
         $this->_reportModel = $collection;
 
         return $this;

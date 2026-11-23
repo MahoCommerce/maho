@@ -437,20 +437,12 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
 
     /**
      * Get resource instance
-     *
-     * @throws \UnexpectedValueException when the resource model alias names a class that is not a Mage_Core_Model_Resource_Db_Abstract
      */
     public function getResource(): Mage_Core_Model_Resource_Db_Abstract
     {
         if (empty($this->_resource)) {
+            /** @var Mage_Core_Model_Resource_Db_Abstract $resource */
             $resource = Mage::getResourceModel($this->getResourceModelName());
-            if (!$resource instanceof Mage_Core_Model_Resource_Db_Abstract) {
-                throw new \UnexpectedValueException(sprintf(
-                    'The resource model "%s" of %s must extend Mage_Core_Model_Resource_Db_Abstract.',
-                    $this->getResourceModelName(),
-                    static::class,
-                ));
-            }
             $this->_resource = $resource;
         }
         return $this->_resource;

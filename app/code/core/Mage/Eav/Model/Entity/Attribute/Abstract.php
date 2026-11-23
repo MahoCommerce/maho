@@ -376,7 +376,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Retrieve backend instance
      *
-     * @throws Mage_Eav_Exception when the backend model does not extend Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @throws Mage_Eav_Exception when the backend model does not exist
      */
     public function getBackend(): Mage_Eav_Model_Entity_Attribute_Backend_Abstract
     {
@@ -384,8 +384,12 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             if (!$this->getBackendModel()) {
                 $this->setBackendModel($this->_getDefaultBackendModel());
             }
-            $this->_backend = $this->createModel('backend', $this->getBackendModel(), Mage_Eav_Model_Entity_Attribute_Backend_Abstract::class)
-                ->setAttribute($this);
+            /** @var Mage_Eav_Model_Entity_Attribute_Backend_Abstract|false $backend */
+            $backend = Mage::getModel($this->getBackendModel());
+            if (!$backend) {
+                throw Mage::exception('Mage_Eav', 'Invalid backend model specified: ' . $this->getBackendModel());
+            }
+            $this->_backend = $backend->setAttribute($this);
         }
 
         return $this->_backend;
@@ -393,8 +397,6 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
 
     /**
      * Retrieve frontend instance
-     *
-     * @throws Mage_Eav_Exception when the frontend model does not extend Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
      */
     public function getFrontend(): Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
     {
@@ -402,8 +404,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             if (!$this->getFrontendModel()) {
                 $this->setFrontendModel($this->_getDefaultFrontendModel());
             }
-            $this->_frontend = $this->createModel('frontend', $this->getFrontendModel(), Mage_Eav_Model_Entity_Attribute_Frontend_Abstract::class)
-                ->setAttribute($this);
+            /** @var Mage_Eav_Model_Entity_Attribute_Frontend_Abstract $frontend */
+            $frontend = Mage::getModel($this->getFrontendModel());
+            $this->_frontend = $frontend->setAttribute($this);
         }
 
         return $this->_frontend;
@@ -412,7 +415,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Retrieve source instance
      *
-     * @throws Mage_Eav_Exception when the source model does not extend Mage_Eav_Model_Entity_Attribute_Source_Abstract
+     * @throws Mage_Eav_Exception when the source model does not exist
      */
     public function getSource(): Mage_Eav_Model_Entity_Attribute_Source_Abstract
     {
@@ -420,33 +423,21 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
             if (!$this->getSourceModel()) {
                 $this->setSourceModel($this->getDefaultSourceModel());
             }
-            $this->_source = $this->createModel('source', $this->getSourceModel(), Mage_Eav_Model_Entity_Attribute_Source_Abstract::class)
-                ->setAttribute($this);
+            /** @var Mage_Eav_Model_Entity_Attribute_Source_Abstract|false $source */
+            $source = Mage::getModel($this->getSourceModel());
+            if (!$source) {
+                throw Mage::exception(
+                    'Mage_Eav',
+                    Mage::helper('eav')->__(
+                        'Source model "%s" not found for attribute "%s"',
+                        $this->getSourceModel(),
+                        $this->getAttributeCode(),
+                    ),
+                );
+            }
+            $this->_source = $source->setAttribute($this);
         }
         return $this->_source;
-    }
-
-    /**
-     * Create the $role model $alias of the attribute
-     *
-     * @template T of object
-     * @param class-string<T> $expectedClass
-     * @return T
-     * @throws Mage_Eav_Exception when $alias names no class, or a class that does not extend $expectedClass
-     */
-    private function createModel(string $role, string $alias, string $expectedClass): object
-    {
-        $model = Mage::getModel($alias);
-        if (!$model instanceof $expectedClass) {
-            throw Mage::exception('Mage_Eav', sprintf(
-                'The %s model "%s" of the attribute "%s" must extend %s.',
-                $role,
-                $alias,
-                $this->getAttributeCode(),
-                $expectedClass,
-            ));
-        }
-        return $model;
     }
 
     /**

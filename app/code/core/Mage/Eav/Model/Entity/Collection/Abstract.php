@@ -148,21 +148,13 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Standard resource collection initialization
-     *
-     * @throws \UnexpectedValueException when the entity model alias names a class that is not a Mage_Eav_Model_Entity_Abstract
      */
     protected function _init(string $model, ?string $entityModel = null): static
     {
         $this->setItemObjectClass(Mage::getConfig()->getModelClassName($model));
         $entityModel ??= $model;
+        /** @var Mage_Eav_Model_Entity_Abstract $entity */
         $entity = Mage::getResourceSingleton($entityModel);
-        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
-            throw new \UnexpectedValueException(sprintf(
-                'The entity model "%s" of %s must extend Mage_Eav_Model_Entity_Abstract.',
-                $entityModel,
-                static::class,
-            ));
-        }
         $this->setEntity($entity);
 
         return $this;

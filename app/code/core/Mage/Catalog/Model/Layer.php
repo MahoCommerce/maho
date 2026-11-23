@@ -308,9 +308,9 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
     {
         $filters = [Mage::getModel('catalog/layer_filter_category')->setLayer($this)];
         foreach ($this->getFilterableAttributes() as $attribute) {
-            $filters[] = Mage::getModel($this->_getFilterModelName($attribute))
-                ->setLayer($this)
-                ->setAttributeModel($attribute);
+            /** @var Mage_Catalog_Model_Layer_Filter_Abstract $filter */
+            $filter = Mage::getModel($this->_getFilterModelName($attribute));
+            $filters[] = $filter->setLayer($this)->setAttributeModel($attribute);
         }
 
         return $filters;

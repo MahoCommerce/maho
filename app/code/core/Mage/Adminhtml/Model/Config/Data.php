@@ -80,6 +80,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
             if ($clonedFields = !empty($groupConfig->clone_fields)) {
                 if ($groupConfig->clone_model) {
+                    /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                     $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                 } else {
                     Mage::throwException('Config form fieldset clone model required to be able to clone fields');
@@ -478,6 +479,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                 $fieldName = $field;
                 if ($groupConfig && $groupConfig->clone_fields) {
                     if ($groupConfig->clone_model) {
+                        /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                         $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                     } else {
                         Mage::throwException(

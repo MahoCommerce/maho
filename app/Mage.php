@@ -453,7 +453,6 @@ final class Mage
      * ```
      *
      * @param mixed $arguments The one argument of the model constructor.
-     * @return Mage_Core_Model_Abstract|false
      */
     public static function getModel(string $modelAlias, mixed $arguments = []): object|false
     {
@@ -466,11 +465,8 @@ final class Mage
      * ```php
      * $model = Mage::getModel('core/session'); // Mage_Core_Model_Session
      * ```
-     *
-     * @param string $modelAlias
-     * @return Mage_Core_Model_Abstract|false
      */
-    public static function getSingleton($modelAlias, array $arguments = [])
+    public static function getSingleton(string $modelAlias, array $arguments = []): object|false
     {
         $registryKey = "_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {
@@ -509,7 +505,6 @@ final class Mage
      * ```
      *
      * @param mixed $arguments The one argument of the resource model constructor.
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
     public static function getResourceModel(string $modelAlias, mixed $arguments = []): object|false
     {
@@ -539,11 +534,8 @@ final class Mage
      * ```php
      * $model = Mage::getResourceSingleton('core/session'); // Mage_Core_Model_Resource_Session
      * ```
-     *
-     * @param string $modelAlias
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
      */
-    public static function getResourceSingleton($modelAlias, array $arguments = [])
+    public static function getResourceSingleton(string $modelAlias, array $arguments = []): object|false
     {
         $registryKey = "_resource_singleton/$modelAlias";
         if (!isset(self::$_registry[$registryKey])) {

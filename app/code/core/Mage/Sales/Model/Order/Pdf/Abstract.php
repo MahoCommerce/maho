@@ -165,6 +165,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                     );
                 }
             } else {
+                /** @var Mage_Sales_Model_Order_Pdf_Total_Default $totalModel */
                 $totalModel = Mage::getModel($this->_defaultTotalModel);
             }
             $totalModel->setData($totalInfo);

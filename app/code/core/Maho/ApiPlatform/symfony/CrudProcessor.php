@@ -113,7 +113,9 @@ class CrudProcessor extends Processor
             // to the in-memory saved model if the reload comes back empty (e.g. a
             // store-scoped load() filtering it out), so the response is never a DTO
             // of nulls for a row that was just persisted.
-            $reloaded = \Mage::getModel($this->modelAlias)->load($model->getId());
+            /** @var \Mage_Core_Model_Abstract $reloaded */
+            $reloaded = \Mage::getModel($this->modelAlias);
+            $reloaded->load($model->getId());
             return $this->resourceClass::fromModel($reloaded->getId() ? $reloaded : $model);
         }
 

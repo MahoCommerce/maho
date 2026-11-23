@@ -109,6 +109,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
     protected function _getAttributeCollection()
     {
         $collectionClass = $this->getEntityAttributeCollection();
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
         $collection = Mage::getResourceModel($collectionClass);
         $objectsModel = $this->getAttributeModel();
         if ($objectsModel) {
@@ -200,8 +201,9 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
                 $row = $connection->fetchRow($select);
             }
 
-            $incrementId = Mage::getModel($this->getIncrementModel())
-                ->setPrefix($row['increment_prefix'])
+            /** @var Mage_Eav_Model_Entity_Increment_Abstract $increment */
+            $increment = Mage::getModel($this->getIncrementModel());
+            $incrementId = $increment->setPrefix($row['increment_prefix'])
                 ->setPadLength($this->getIncrementPadLength())
                 ->setPadChar($this->getIncrementPadChar())
                 ->setLastId($row['increment_last_id'])

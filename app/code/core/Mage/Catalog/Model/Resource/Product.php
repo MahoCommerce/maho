@@ -49,16 +49,13 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
 
     /**
      * Return the backend model of the media_gallery attribute
-     *
-     * @throws \UnexpectedValueException when the attribute does not exist or its backend does not extend Mage_Catalog_Model_Product_Attribute_Backend_Media
      */
     public function getMediaGalleryBackend(): Mage_Catalog_Model_Product_Attribute_Backend_Media
     {
+        /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         $attribute = $this->getAttribute('media_gallery');
-        $backend = $attribute ? $attribute->getBackend() : null;
-        if (!$backend instanceof Mage_Catalog_Model_Product_Attribute_Backend_Media) {
-            throw new \UnexpectedValueException('The backend model of the media_gallery attribute must extend Mage_Catalog_Model_Product_Attribute_Backend_Media.');
-        }
+        /** @var Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
+        $backend = $attribute->getBackend();
         return $backend;
     }
 

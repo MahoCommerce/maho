@@ -40,5 +40,5 @@ it('refuses a source model that does not extend the source base class', function
         ->setAttributeCode('pest_status')
         ->setSourceModel('catalog/product_status');
 
-    expect(fn() => $attribute->getSource())->toThrow(Mage_Eav_Exception::class, 'catalog/product_status');
+    expect(fn() => $attribute->getSource())->toThrow(TypeError::class);
 });

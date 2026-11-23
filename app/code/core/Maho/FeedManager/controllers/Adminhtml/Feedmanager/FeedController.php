@@ -1118,21 +1118,19 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
         $type = $typeArr[0];
 
-        $model = Mage::getModel($type)
-            ->setId($id)
-            ->setType($type)
-            ->setRule(Mage::getModel('feedmanager/feed'))
-            ->setPrefix('conditions');
-
-        if (!empty($typeArr[1])) {
-            $model->setAttribute($typeArr[1]);
-        }
-
+        $model = Mage::getModel($type);
+        $html = '';
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setId($id)
+                ->setType($type)
+                ->setRule(Mage::getModel('feedmanager/feed'))
+                ->setPrefix('conditions');
+
+            if (!empty($typeArr[1])) {
+                $model->setAttribute($typeArr[1]);
+            }
             $model->setJsFormObject($this->getRequest()->getParam('form'));
             $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
         }
 
         $this->getResponse()->setBody($html);

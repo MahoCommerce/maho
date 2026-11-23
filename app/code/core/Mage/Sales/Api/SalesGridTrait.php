@@ -34,6 +34,7 @@ trait SalesGridTrait
     protected function loadGridPage(string $modelClass, string $collectionAlias, string $gridTable, string $nameColumn, array $states, array $context): array
     {
         $filters = $context['filters'] ?? [];
+        /** @var \Mage_Core_Model_Resource_Db_Collection_Abstract<T> $collection */
         $collection = \Mage::getResourceModel($collectionAlias);
         $collection->getSelect()->joinLeft(
             ['grid' => $collection->getTable($gridTable)],

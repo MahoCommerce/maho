@@ -170,6 +170,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
             if ($group->clone_fields) {
                 if ($group->clone_model) {
+                    /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                     $cloneModel = Mage::getModel((string) $group->clone_model);
                 } else {
                     Mage::throwException($this->__('Config form fieldset clone model required to be able to clone fields'));

@@ -128,7 +128,9 @@ class Mage_Core_Service_Store
      */
     private function load(string $alias, int $id, string $message): Mage_Core_Model_Abstract
     {
-        $model = Mage::getModel($alias)->load($id);
+        /** @var Mage_Core_Model_Abstract $model */
+        $model = Mage::getModel($alias);
+        $model->load($id);
         if ($model->getId() === null) {
             throw new Mage_Core_Exception_NoSuchEntity($message);
         }

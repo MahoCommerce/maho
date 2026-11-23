@@ -402,8 +402,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     {
         $entityTypeId = $this->getEntityType()->getId();
         if (!isset(self::$_defaultAttributes[$entityTypeId][$attributeCode])) {
-            $attribute = Mage::getModel($this->getEntityType()->getAttributeModel())
-                ->setAttributeCode($attributeCode)
+            /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
+            $attribute = Mage::getModel($this->getEntityType()->getAttributeModel());
+            $attribute->setAttributeCode($attributeCode)
                 ->setBackendType(Mage_Eav_Model_Entity_Attribute_Abstract::TYPE_STATIC)
                 ->setIsGlobal(1)
                 ->setEntityType($this->getEntityType())
