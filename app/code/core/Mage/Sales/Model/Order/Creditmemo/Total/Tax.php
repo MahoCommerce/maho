@@ -359,7 +359,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         if (!array_any($order->getAllItems(), static fn($item): bool => $item->getQtyRefunded() > 0)) {
             return [];
         }
-        $memos = Mage::getResourceModel('sales/order_creditmemo_collection')->setOrderFilter($order)
+        $memos = Mage::getResourceModel('sales/order_creditmemo_collection')->setOrderFilter($order)->setOrder('entity_id', 'ASC')
             ->addFieldToFilter('state', ['neq' => Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED])->getItems();
         unset($memos[$creditmemo->getId()]);
         if (!$memos) {
@@ -371,22 +371,42 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         foreach ($lines as $line) {
             $byMemo[$line->getParentId()][] = $line;
         }
-        $recorded = $missing = $unknown = $quantities = [];
-        foreach ($byMemo as $memoId => $items) {
-            $memo = $memos[$memoId];
+        $recorded = $missing = $unknown = $quantities = $inferred = [];
+        $invoices = $order->getInvoiceCollection()->getItems();
+        $creditsByInvoice = array_count_values(array_filter(array_map(static fn($memo) => $memo->getInvoiceId(), $memos)));
+        foreach ($memos as $memoId => $memo) {
+            $items = $byMemo[$memoId] ?? [];
             foreach ($items as $item) {
                 $id = $item->getOrderItemId();
                 $orderItem = $order->getItemById($id);
                 if (!$orderItem || $orderItem->isDummy() || !$item->getQty()) {
                     continue;
                 }
+                $qtyLeft = round($orderItem->getQtyInvoiced() - ($quantities[$id] ?? 0.0), 4);
                 $quantities[$id] = ($quantities[$id] ?? 0.0) + $item->getQty();
                 $single = count($items) === 1 && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem);
+                $invoice = $invoices[$memo->getInvoiceId()] ?? null;
+                $source = $single && $invoice && !$invoice->isCanceled() && $creditsByInvoice[$invoice->getId()] === 1
+                    ? $invoice->getAllItems() : [];
+                $whole = count($source) === 1 && $source[0]->getOrderItemId() == $id && $source[0]->getQty() == $item->getQty();
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
                     $paid = $type === 'base' ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount()
                         : $memo->getTaxAmount() - $memo->getShippingTaxAmount();
-                    if (!$single || ($amount !== null && round($paid, 4) !== $amount)
-                        || !$this->matchesInvoicedItemTax($orderItem, $type, $item->getQty(), $paid)) {
+                    $invoiced = $type === 'base' ? $orderItem->getBaseTaxInvoiced() : $orderItem->getTaxInvoiced();
+                    $taxLeft = round($invoiced - ($recorded[$id][$type] ?? 0.0) - ($missing[$id][$type] ?? 0.0), 4);
+                    $expected = $qtyLeft > $item->getQty()
+                        ? $order->getStore()->roundPrice($taxLeft / $qtyLeft * $item->getQty())
+                        : $taxLeft;
+                    $direct = $whole && ($type === 'base'
+                        ? $source[0]->getBaseTaxAmount() === round($paid, 4) && $invoice->getBaseGrandTotal() === $memo->getBaseGrandTotal()
+                            && round($invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount(), 4) === round($paid, 4)
+                        : $source[0]->getTaxAmount() === round($paid, 4) && $invoice->getGrandTotal() === $memo->getGrandTotal()
+                            && round($invoice->getTaxAmount() - $invoice->getShippingTaxAmount(), 4) === round($paid, 4));
+                    if (!$direct) {
+                        $inferred[$id][$type] = true;
+                    }
+                    if (!$single || $qtyLeft < $item->getQty() || ($amount !== null && round($paid, 4) !== $amount)
+                        || (!$direct && round($paid, 4) !== $expected)) {
                         $unknown[$id][$type] = true;
                     } elseif ($amount === null) {
                         $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $paid;
@@ -414,25 +434,39 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         if ($confirmed) {
             // A rate inferred from the order is usable only if every invoice actually charged it.
             $quantities = [];
-            foreach ($order->getInvoiceCollection() as $invoice) {
+            foreach ($invoices as $invoice) {
                 if ($invoice->isCanceled()) {
                     continue;
                 }
                 $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
                 $baseTax = $invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount();
                 $items = $invoice->getAllItems();
+                $fees = $baseFees = 0.0;
+                $subtotal = $invoice->getSubtotal();
+                $baseSubtotal = $invoice->getBaseSubtotal();
                 foreach ($items as $line) {
                     $tax -= $line->getTaxAmount();
                     $baseTax -= $line->getBaseTaxAmount();
+                    $subtotal -= $line->getRowTotal();
+                    $baseSubtotal -= $line->getBaseRowTotal();
+                    $applied = Mage::helper('core/string')->unserialize($line->getWeeeTaxApplied());
+                    if (is_array($applied) && $applied && array_all($applied, static fn($fee): bool => isset($fee['weee_document_gross_allocated']))) {
+                        $fees += $line->getWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'weee_discount'));
+                        $baseFees += $line->getBaseWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'base_weee_discount'));
+                    }
                 }
+                $unexplained = [
+                    'regular' => round($tax, 4) != 0.0 && (round($subtotal, 4) != 0.0 || round($tax - $fees, 4) != 0.0),
+                    'base' => round($baseTax, 4) != 0.0 && (round($baseSubtotal, 4) != 0.0 || round($baseTax - $baseFees, 4) != 0.0),
+                ];
                 foreach ($items as $line) {
                     $id = $line->getOrderItemId();
                     if (isset($confirmed[$id])) {
                         $quantities[$id] = ($quantities[$id] ?? 0.0) + $line->getQty();
                         foreach ($confirmed[$id] as $type => $amount) {
                             $lineTax = $type === 'base' ? $line->getBaseTaxAmount() : $line->getTaxAmount();
-                            if (round($type === 'base' ? $baseTax : $tax, 4) != 0.0
-                                || !$this->matchesInvoicedItemTax($order->getItemById($id), $type, $line->getQty(), $lineTax)) {
+                            if (isset($inferred[$id][$type]) && ($unexplained[$type]
+                                || !$this->matchesInvoicedItemTax($order->getItemById($id), $type, $line->getQty(), $lineTax))) {
                                 unset($confirmed[$id][$type]);
                             }
                         }
