@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @template TRow of \Maho\DataObject = \Maho\DataObject
+ */
 interface Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
 {
     /**
@@ -29,5 +32,8 @@ interface Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
      */
     public function getColumn();
 
+    /**
+     * @param TRow $row
+     */
     public function render(\Maho\DataObject $row): string;
 }

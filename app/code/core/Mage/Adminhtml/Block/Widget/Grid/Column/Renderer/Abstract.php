@@ -9,6 +9,10 @@
  */
 
 
+/**
+ * @template TRow of \Maho\DataObject = \Maho\DataObject
+ * @implements Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface<TRow>
+ */
 abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends Mage_Adminhtml_Block_Abstract implements Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface
 {
     protected ?int $_defaultWidth = null;
@@ -34,6 +38,9 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
         return $this->_column;
     }
 
+    /**
+     * @param TRow $row
+     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

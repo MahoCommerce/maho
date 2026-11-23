@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract<Mage_Sales_Model_Order>
+ */
 class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     /**
@@ -17,11 +20,14 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
      */
     protected $_actions = [];
 
+    /**
+     * @param Mage_Sales_Model_Order $row
+     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {
         $this->_actions = [];
-        if ($row instanceof Mage_Sales_Model_Order && Mage::helper('sales/reorder')->canReorder($row)) {
+        if (Mage::helper('sales/reorder')->canReorder($row)) {
             $reorderAction = [
                 '@' => ['href' => $this->getUrl('*/sales_order_create/reorder', ['order_id' => $row->getId()])],
                 '#' =>  Mage::helper('sales')->__('Reorder'),

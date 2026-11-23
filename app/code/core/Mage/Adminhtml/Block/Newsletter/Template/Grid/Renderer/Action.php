@@ -8,15 +8,20 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action<Mage_Newsletter_Model_Template>
+ */
 class Mage_Adminhtml_Block_Newsletter_Template_Grid_Renderer_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action
 {
     /**
      * Renderer for "Action" column in Newsletter templates grid
+     *
+     * @param Mage_Newsletter_Model_Template $row
      */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {
-        if ($row instanceof Mage_Newsletter_Model_Template && $row->isValidForSend()) {
+        if ($row->isValidForSend()) {
             $actions[] = [
                 'url' => $this->getUrl('*/newsletter_queue/edit', ['template_id' => $row->getId()]),
                 'caption' => Mage::helper('newsletter')->__('Queue Newsletter...'),

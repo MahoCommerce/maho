@@ -393,6 +393,10 @@ All Zend Framework and Varien components have been deleted:
   (including `void`, `never`, nullable, union, and intersection types). A class constant takes the
   one type of its value (`public const string XML_PATH_ENABLED = '...'`), never a union. Reserve docblock `@param`/`@return` for what
   the type system can't express (array shapes, generics, `@throws`); don't restate a native type
+- An override never narrows a parameter of its parent, not even in PHPDoc: PHPStan fails on it. When
+  a subclass handles one model class, the parent declares `@template TModel of X = X` and the
+  subclass declares `@extends Parent<Model>`, as the collections, the resource models, the attribute
+  backends and the grid column renderers do. An abstract class between them forwards the template
 - Default to **no comments**. Add one only when the code can't carry the information itself: a
   non-obvious *why*, a workaround, a subtle invariant. Keep it to one line where possible. Never
   narrate what the code already says, and don't leave section banners, changelog notes, or
