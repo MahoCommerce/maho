@@ -98,14 +98,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         if ($signedTax || $signedBaseTax) {
             // A signed item tax can reach zero before all invoice quantities have been returned.
             $itemInvoice = $invoice ?: $this->getWholeItemInvoice($creditmemo, $order);
-            [$taxLeft, $baseTaxLeft, $last] = $this->getSignedItemTaxLeft($creditmemo, $itemInvoice);
+            [$taxLeft, $baseTaxLeft, $positiveTax, $basePositiveTax, $last] = $this->getSignedItemTaxLeft($creditmemo, $itemInvoice);
             if ($signedTax) {
                 $allowedTax = $taxLeft + $shippingTaxAmount - $creditmemo->getTaxAmount();
-                $taxRefund = $this->getSignedRefundTax($totalTax, $allowedTax, $shippingTaxAmount, $last);
+                $taxRefund = $this->getSignedRefundTax($totalTax, $allowedTax, $shippingTaxAmount, $positiveTax, $last);
             }
             if ($signedBaseTax) {
                 $allowedBaseTax = $baseTaxLeft + $baseShippingTaxAmount - $creditmemo->getBaseTaxAmount();
-                $baseTaxRefund = $this->getSignedRefundTax($baseTotalTax, $allowedBaseTax, $baseShippingTaxAmount, $last);
+                $baseTaxRefund = $this->getSignedRefundTax($baseTotalTax, $allowedBaseTax, $baseShippingTaxAmount, $basePositiveTax, $last);
             }
         }
         // The invoiced and refunded hidden tax of the order both include the shipping hidden tax.
@@ -128,27 +128,34 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         return $this;
     }
 
-    private function getSignedRefundTax(float $tax, float $allowed, float $shippingTax, bool $last): float
+    private function getSignedRefundTax(float $tax, float $allowed, float $shippingTax, ?float $positiveItemTax, bool $last): float
     {
         if ($last) {
             return $allowed;
         }
         // Shipping tax can make the memo positive even when its returned item has a negative tax.
         if ($tax < $shippingTax) {
-            return max($tax, min($allowed, $shippingTax));
+            return max($tax, min($allowed - ($positiveItemTax ?? 0.0), $shippingTax));
+        }
+        if ($positiveItemTax !== null) {
+            return min($tax, $shippingTax + $positiveItemTax);
         }
         return min($tax, $allowed);
     }
 
-    /** @return array{float, float, bool} */
+    /** @return array{float, float, ?float, ?float, bool} */
     private function getSignedItemTaxLeft(Mage_Sales_Model_Order_Creditmemo $creditmemo, ?Mage_Sales_Model_Order_Invoice $invoice): array
     {
         $quantities = [];
+        $lineTaxes = $baseLineTaxes = [];
         $order = $creditmemo->getOrder();
         if ($invoice) {
             foreach ($invoice->getAllItems() as $item) {
                 if (!$item->getOrderItem()->isDummy()) {
-                    $quantities[$item->getOrderItemId()] = (float) $item->getQty();
+                    $id = $item->getOrderItemId();
+                    $quantities[$id] = (float) $item->getQty();
+                    $lineTaxes[$id] = [(float) $item->getTaxAmount(), 0.0];
+                    $baseLineTaxes[$id] = [(float) $item->getBaseTaxAmount(), 0.0];
                 }
             }
             $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
@@ -192,8 +199,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $tax -= $memo->getTaxAmount() - $memo->getShippingTaxAmount();
                 $baseTax -= $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount();
                 foreach ($memo->getAllItems() as $item) {
-                    if (isset($quantities[$item->getOrderItemId()])) {
-                        $quantities[$item->getOrderItemId()] -= $item->getQty();
+                    $id = $item->getOrderItemId();
+                    if (isset($quantities[$id])) {
+                        $quantities[$id] -= $item->getQty();
+                        $lineTaxes[$id][1] += max(0.0, (float) $item->getTaxAmount());
+                        $baseLineTaxes[$id][1] += max(0.0, (float) $item->getBaseTaxAmount());
                     }
                 }
             }
@@ -208,10 +218,15 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             }
             foreach ($order->getAllItems() as $item) {
                 if (!$item->isDummy()) {
-                    $quantities[$item->getId()] = $item->getQtyToRefund();
+                    $id = $item->getId();
+                    $quantities[$id] = $item->getQtyToRefund();
+                    $lineTaxes[$id] = [(float) $item->getTaxInvoiced(), (float) $item->getTaxRefunded()];
+                    $baseLineTaxes[$id] = [(float) $item->getBaseTaxInvoiced(), (float) $item->getBaseTaxRefunded()];
                 }
             }
         }
+        $positiveTax = $this->getPositiveLineTaxLeft($lineTaxes, $quantities);
+        $basePositiveTax = $this->getPositiveLineTaxLeft($baseLineTaxes, $quantities);
         $hasItems = false;
         foreach ($creditmemo->getAllItems() as $item) {
             if ($item->getQty() > 0 && isset($quantities[$item->getOrderItemId()])) {
@@ -219,7 +234,27 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $hasItems = true;
             }
         }
-        return $hasItems ? [$tax, $baseTax, round(max($quantities), 4) <= 0.0] : [0.0, 0.0, true];
+        return $hasItems ? [$tax, $baseTax, $positiveTax, $basePositiveTax, round(max($quantities), 4) <= 0.0] : [0.0, 0.0, 0.0, 0.0, true];
+    }
+
+    /**
+     * Positive VAT on units still refundable, or null when a historic document recorded tax only on the total.
+     *
+     * @param array<int, array{float, float}> $taxes
+     * @param array<int, float> $quantities
+     */
+    private function getPositiveLineTaxLeft(array $taxes, array $quantities): ?float
+    {
+        $positive = null;
+        foreach ($taxes as $id => [$invoiced, $refunded]) {
+            if ($invoiced != 0.0) {
+                $positive ??= 0.0;
+                if ($quantities[$id] > 0) {
+                    $positive += max(0.0, $invoiced - max(0.0, $refunded));
+                }
+            }
+        }
+        return $positive;
     }
 
     private function getWholeItemInvoice(Mage_Sales_Model_Order_Creditmemo $memo, Mage_Sales_Model_Order $order): ?Mage_Sales_Model_Order_Invoice
