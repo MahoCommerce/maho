@@ -66,7 +66,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     public function __construct()
     {
         $this->_elementClass = Mage::getConfig()->getModelClassName('core/layout_element');
-        $this->setXml(simplexml_load_string('<layout/>', $this->_elementClass));
+        $this->loadString('<layout/>');
         $this->_update = Mage::getModel('core/layout_update');
         parent::__construct();
     }
@@ -127,12 +127,13 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
 
     /**
      * Loyout xml generation
-     *
-     * @return $this
      */
-    public function generateXml()
+    public function generateXml(): static
     {
-        $xml = $this->getUpdate()->asSimplexml();
+        if (!$this->loadString('<layout>' . trim($this->getUpdate()->asString()) . '</layout>')) {
+            throw new \RuntimeException('The layout updates are not valid XML.');
+        }
+        $xml = $this->getNode();
         $removeInstructions = $xml->xpath('//remove');
         if (is_array($removeInstructions)) {
             foreach ($removeInstructions as $infoNode) {
@@ -163,7 +164,6 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
                 }
             }
         }
-        $this->setXml($xml);
         return $this;
     }
 
