@@ -604,6 +604,28 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         return [];
     }
 
+    /**
+     * Return the codes of one type, such as 'method', with the value of each code.
+     *
+     * Most values are labels. Some types hold a code of the carrier API or a nested array.
+     * An unknown type returns an empty array.
+     *
+     * @return array<int|string, mixed>
+     */
+    public function getCodes(string $type): array
+    {
+        return [];
+    }
+
+    /**
+     * Return the value of one code of a type, or null when the type has no string value for the code.
+     */
+    public function getCodeValue(string $type, string $code): ?string
+    {
+        $value = $this->getCodes($type)[$code] ?? null;
+        return is_string($value) ? $value : null;
+    }
+
     public function setActiveFlag(string $value): static
     {
         return $this->setData('active_flag', $value);

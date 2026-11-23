@@ -433,12 +433,6 @@ parameters:
 			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string|null, array|bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Parameter #1 $product of method Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax::deleteProductData() expects Mage_Catalog_Model_Product, Maho\DataObject given.'
 			identifier: argument.type
 			count: 1

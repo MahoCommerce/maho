@@ -17,12 +17,14 @@ class Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure extends Mage_Adminhtml_Block_Sy
 
         $carrierModel = Mage::getSingleton('usa/shipping_carrier_dhl_international');
 
-        $this->setInch($this->jsQuoteEscape($carrierModel->getCode('unit_of_dimension_cut', 'I')));
-        $this->setCm($this->jsQuoteEscape($carrierModel->getCode('unit_of_dimension_cut', 'C')));
+        $units = $carrierModel->getCodes('unit_of_dimension_cut');
+        $this->setInch($this->jsQuoteEscape($units['I']));
+        $this->setCm($this->jsQuoteEscape($units['C']));
 
-        $this->setHeight($this->jsQuoteEscape($carrierModel->getCode('dimensions', 'height')));
-        $this->setDepth($this->jsQuoteEscape($carrierModel->getCode('dimensions', 'depth')));
-        $this->setWidth($this->jsQuoteEscape($carrierModel->getCode('dimensions', 'width')));
+        $dimensions = $carrierModel->getCodes('dimensions');
+        $this->setHeight($this->jsQuoteEscape($dimensions['HEIGHT']));
+        $this->setDepth($this->jsQuoteEscape($dimensions['DEPTH']));
+        $this->setWidth($this->jsQuoteEscape($dimensions['WIDTH']));
 
         $kgWeight = 70;
 

@@ -110,10 +110,10 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
-            $r->setAction($this->getCode('action', 'single'));
+            $r->setAction($this->getCodeValue('action', 'single'));
             $r->setProduct($request->getLimitMethod());
         } else {
-            $r->setAction($this->getCode('action', 'all'));
+            $r->setAction($this->getCodeValue('action', 'all'));
             $r->setProduct('GND' . $this->getConfigData('dest_type'));
         }
 
@@ -122,21 +122,21 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $pickup = $this->getConfigData('pickup');
         }
-        $r->setPickup($this->getCode('pickup', $pickup));
+        $r->setPickup($this->getCodes('pickup')[$pickup] ?? null);
 
         if ($request->getUpsContainer()) {
             $container = $request->getUpsContainer();
         } else {
             $container = $this->getConfigData('container');
         }
-        $r->setContainer($this->getCode('container', $container));
+        $r->setContainer($this->getCodeValue('container', (string) $container));
 
         if ($request->getUpsDestType()) {
             $destType = $request->getUpsDestType();
         } else {
             $destType = $this->getConfigData('dest_type');
         }
-        $r->setDestType($this->getCode('dest_type', $destType));
+        $r->setDestType($this->getCodeValue('dest_type', (string) $destType));
 
         if ($request->getOrigCountry()) {
             $origCountry = $request->getOrigCountry();
@@ -292,7 +292,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $weight = $this->getTotalNumOfBoxes($r->getFreeMethodWeight());
         $weight = $this->_getCorrectWeight($weight);
         $r->setWeight($weight);
-        $r->setAction($this->getCode('action', 'single'));
+        $r->setAction($this->getCodeValue('action', 'single'));
         $r->setProduct($freeMethod);
     }
 
@@ -302,18 +302,11 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     public function getShipmentByCode(string $code, ?string $origin = null): ?string
     {
         $origin ??= $this->getConfigData('origin_shipment');
-        $arr = $this->getCode('originShipment', $origin);
-        return $arr[$code] ?? null;
+        return $this->getCodes('originShipment')[$origin][$code] ?? null;
     }
 
-    /**
-     * Get configuration data of carrier
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|false
-     */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
             'action' => [
@@ -598,15 +591,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                 ],
             ],
         ];
-        if (!isset($codes[$type])) {
-            return false;
-        }
-
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        return $codes[$type][$code] ?? false;
+        return $codes[$type] ?? [];
     }
 
     /**
@@ -843,7 +828,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     public function getAllowedMethods()
     {
         $allowedMethods = explode(',', (string) $this->getConfigData('allowed_methods'));
-        $availableByTypeMethods = $this->getCode('originShipment', $this->getConfigData('origin_shipment'));
+        $availableByTypeMethods = $this->getCodes('originShipment')[$this->getConfigData('origin_shipment')] ?? [];
 
         $methods = [];
         foreach ($availableByTypeMethods as $methodCode => $methodData) {
@@ -1163,7 +1148,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $shipParams['ShipmentRequest']['Shipment']['PaymentInformation']['ShipmentCharge']['BillShipper']
         ['AccountNumber'] = $this->getConfigData('shipper_number');
 
-        if ($this->getCode('container', 'ULE') != $request->getPackagingType()
+        if ($this->getCodeValue('container', 'ULE') != $request->getPackagingType()
             && $request->getShipperAddressCountryCode() == self::USA_COUNTRY_ID
             && ($request->getRecipientAddressCountryCode() == 'CA'
                 || $request->getRecipientAddressCountryCode() == 'PR')
@@ -1257,8 +1242,8 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     #[\Override]
     public function getContainerTypesAll(): array
     {
-        $codes        = $this->getCode('container');
-        $descriptions = $this->getCode('container_description');
+        $codes        = $this->getCodes('container');
+        $descriptions = $this->getCodes('container_description');
         $result       = [];
         foreach ($codes as $key => &$code) {
             $result[$code] = $descriptions[$key];
@@ -1272,7 +1257,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     #[\Override]
     public function getContainerTypesFilter(): array
     {
-        return $this->getCode('containers_filter') ?: [];
+        return $this->getCodes('containers_filter');
     }
 
     /**
@@ -1313,7 +1298,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     public function getCustomizableContainerTypes()
     {
         $result = [];
-        $containerTypes = $this->getCode('container');
+        $containerTypes = $this->getCodes('container');
         foreach (parent::getCustomizableContainerTypes() as $containerType) {
             $result[$containerType] = $containerTypes[$containerType];
         }
