@@ -102,10 +102,10 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     /**
      * Save customer addresses and set default addresses in attributes backend
      *
-     * @return Mage_Eav_Model_Entity_Abstract
+     * @param Mage_Customer_Model_Customer $customer
      */
     #[\Override]
-    protected function _afterSave(\Maho\DataObject $customer)
+    protected function _afterSave(\Maho\DataObject $customer): static
     {
         $this->_saveAddresses($customer);
         return parent::_afterSave($customer);
