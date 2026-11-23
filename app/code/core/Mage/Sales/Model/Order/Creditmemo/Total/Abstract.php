@@ -47,11 +47,13 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
             $shipping += $principal;
             if ($shippingTax === null && $principal > 0.0 && $header !== null) {
                 $total = $base ? $credit->getBaseGrandTotal() : $credit->getGrandTotal();
-                if ($total !== null && round($total - $principal, 4) === $header
+                $refund = $base ? $credit->getBaseAdjustmentPositive() : $credit->getAdjustmentPositive();
+                $fee = $base ? $credit->getBaseAdjustmentNegative() : $credit->getAdjustmentNegative();
+                $knownAdjustments = ($refund !== null || !($base ? $credit->getAdjustmentPositive() : $credit->getBaseAdjustmentPositive()))
+                    && ($fee !== null || !($base ? $credit->getAdjustmentNegative() : $credit->getBaseAdjustmentNegative()));
+                if ($total !== null && $knownAdjustments && round($total - $principal - $refund + $fee, 4) === $header
                     && !($base ? $credit->getBaseSubtotal() : $credit->getSubtotal())
                     && !($base ? $credit->getBaseDiscountAmount() : $credit->getDiscountAmount())
-                    && !($base ? $credit->getBaseAdjustmentPositive() : $credit->getAdjustmentPositive())
-                    && !($base ? $credit->getBaseAdjustmentNegative() : $credit->getAdjustmentNegative())
                     && !$credit->getAllItems()) {
                     $shippingTax = $header;
                 }
@@ -71,11 +73,28 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
             $refunded = $base ? $order->getBaseShippingRefunded() : $order->getShippingRefunded();
             $remainder = round($tax - $knownTax, 4);
             if ($missing[$id] !== null && $refunded !== null && round($shipping - $refunded, 4) === 0.0
-                && $remainder >= min(0.0, $tax) && $remainder <= max(0.0, $tax)) {
+                && $remainder >= min(0.0, $tax) && $remainder <= max(0.0, $tax) && $this->invoicesCoverShippingTax($order, $base, $tax)) {
                 $amounts[$id] = round($missing[$id] - $remainder, 4);
             }
         }
         return $amounts;
+    }
+
+    private function invoicesCoverShippingTax(Mage_Sales_Model_Order $order, bool $base, float $tax): bool
+    {
+        $minimum = $maximum = 0.0;
+        foreach ($order->getInvoiceCollection() as $invoice) {
+            if ($invoice->isCanceled()) {
+                continue;
+            }
+            $charged = $base ? $invoice->getBaseShippingTaxAmount() : $invoice->getShippingTaxAmount();
+            if ($charged === null && ($base ? $invoice->getBaseShippingAmount() : $invoice->getShippingAmount())) {
+                return false;
+            }
+            $minimum += min(0.0, (float) $charged);
+            $maximum += max(0.0, (float) $charged);
+        }
+        return $tax >= round($minimum, 4) && $tax <= round($maximum, 4);
     }
 
     /**

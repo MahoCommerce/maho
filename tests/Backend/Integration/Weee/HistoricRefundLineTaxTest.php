@@ -432,21 +432,26 @@ it('preserves the VAT proved by a linked credit after a fully recorded return', 
     'contradictory base amount' => 'different base payment', 'unattributable order refund' => 'missing row',
     'the credit returning all shipping omitted its shipping tax' => 'missing shipping tax']);
 
-it('uses a shipping-only credit to separate the remaining item VAT from shipping', function (bool $shippingOnly): void {
+it('uses a shipping-only credit to separate the remaining item VAT from shipping', function (bool $shippingOnly, float $fee = 0.0, float $refund = 0.0): void {
     [$order, [$item, $other]] = historicRefundLineTaxOrder([[3, 0.06, 0.06], [1, -0.01, -0.01]]);
-    $order->setBaseShippingAmount(3.0)->setShippingAmount(3.0)->setBaseShippingTaxAmount(0.01)->setShippingTaxAmount(0.01)
+    $order->setStoreToOrderRate(0.8)->setBaseShippingAmount(3.0)->setShippingAmount(3.0)->setBaseShippingTaxAmount(0.01)->setShippingTaxAmount(0.01)
         ->setBaseTaxAmount(0.06)->setTaxAmount(0.06)->setBaseGrandTotal(83.06)->setGrandTotal(67.06)->save();
     $service = Mage::getService('sales/order_document');
     $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $data = ['qtys' => $shippingOnly ? [] : [$other->getId() => 1], 'shipping_amount' => 2.0];
-    $first = $service->refund($order, $data, beforeRegister: static function ($memo): void {
+    $first = $service->refund($order, $data, beforeRegister: static function ($memo) use ($fee, $refund): void {
         foreach ($memo->getAllItems() as $row) {
             $row->setBaseTaxAmount(null)->setTaxAmount(null);
         }
         $memo->setBaseShippingAmount(2.0)->setShippingAmount(2.0)->setBaseShippingTaxAmount(0.01)->setShippingTaxAmount(0.01)
-            ->setBaseTaxAmount(0.01)->setTaxAmount(0.01)->setBaseGrandTotal(2.01 + $memo->getBaseSubtotal())->setGrandTotal(2.01 + $memo->getSubtotal());
+            ->setAdjustmentNegative($fee)->setAdjustmentPositive($refund)
+            ->setBaseTaxAmount(0.01)->setTaxAmount(0.01)->setBaseGrandTotal(2.01 + $memo->getBaseSubtotal() + $refund - $fee)
+            ->setGrandTotal(2.01 + $memo->getSubtotal() + ($refund - $fee) * 0.8);
     });
     $first->setBaseShippingTaxAmount(null)->setShippingTaxAmount(null)->save();
+    $first = Mage::getModel('sales/order_creditmemo')->load($first->getId());
+    expect([$first->getBaseAdjustmentNegative(), $first->getAdjustmentNegative()])->toBe([$fee, round($fee * 0.8, 2)])
+        ->and([$first->getBaseAdjustmentPositive(), $first->getAdjustmentPositive()])->toBe([$refund, round($refund * 0.8, 2)]);
     $qty = ['qtys' => [$item->getId() => 1]];
     $second = $service->refund($order, $qty + ['shipping_amount' => 1.0], beforeRegister: static function ($memo): void {
         $memo->getAllItems()[0]->setBaseTaxAmount(null)->setTaxAmount(null);
@@ -461,7 +466,8 @@ it('uses a shipping-only credit to separate the remaining item VAT from shipping
     $tax = $shippingOnly ? 0.02 : 0.03;
     expect([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([20.0 + $tax, 16.0 + $tax])
         ->and([$memo->getBaseTaxAmount(), $memo->getTaxAmount()])->toBe([$tax, $tax]);
-})->with(['shipping was all the credit paid' => true, 'both historic credits also paid merchandise' => false]);
+})->with(['shipping was all the credit paid' => [true], 'both historic credits also paid merchandise' => [false],
+    'a separate fee reduced the payment' => [true, 0.50], 'both adjustment fields were used' => [true, 0.50, 0.70]]);
 
 it('keeps the order item VAT when another historic credit has missing VAT on more than one row', function (): void {
     [$order, [$item, $feeItem, $other]] = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -1.0, -0.8], [1, -1.0, -0.8]]);
