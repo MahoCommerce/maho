@@ -129,14 +129,14 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $container = $this->getConfigData('container');
         }
-        $r->setContainer($this->getCodeValue('container', $container));
+        $r->setContainer($this->getCodeValue('container', (string) $container));
 
         if ($request->getUpsDestType()) {
             $destType = $request->getUpsDestType();
         } else {
             $destType = $this->getConfigData('dest_type');
         }
-        $r->setDestType($this->getCodeValue('dest_type', $destType));
+        $r->setDestType($this->getCodeValue('dest_type', (string) $destType));
 
         if ($request->getOrigCountry()) {
             $origCountry = $request->getOrigCountry();
