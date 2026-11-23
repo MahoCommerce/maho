@@ -13,13 +13,15 @@
  *
  * @package    Mage_Bundle
  * @module     Catalog
+ *
+ * @phpstan-import-type FormattedTierPrice from Mage_Catalog_Block_Product_Abstract
  */
 class Mage_Bundle_Block_Catalog_Product_View extends Mage_Catalog_Block_Product_View
 {
     /**
      * Get tier prices (formatted)
      *
-     * @return list<array<string, mixed>>
+     * @return list<FormattedTierPrice>
      */
     #[\Override]
     public function getTierPrices(?Mage_Catalog_Model_Product $product = null): array

@@ -16,6 +16,8 @@ declare(strict_types=1);
  * @package    Mage_Catalog
  *
  * @method bool hasRealPriceHtml()
+ *
+ * @phpstan-import-type FormattedTierPrice from Mage_Catalog_Block_Product_Abstract
  */
 class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstract
 {
@@ -82,7 +84,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
      * Get tier prices (formatted)
      *
      * @param Mage_Catalog_Model_Product|null $parent The bundle product of a bundle selection
-     * @return list<array<string, mixed>>
+     * @return list<FormattedTierPrice>
      */
     #[\Override]
     public function getTierPrices(?Mage_Catalog_Model_Product $product = null, ?Mage_Catalog_Model_Product $parent = null): array
