@@ -126,6 +126,7 @@ it('applies a fixed coupon up to the billable value of fractional lines', functi
             }
             expect((float) $totals['invoice_discount'][0])->toEqualWithDelta(-$applied[0], 0.000001)
                 ->and((float) $totals['invoice_discount'][1])->toEqualWithDelta(-$applied[1], 0.000001);
+            expect($totals['rows'])->toHaveCount(count($lines));
             foreach ($totals['rows'] as $line => [$baseRow, $row, $baseDiscount, $discount]) {
                 [$expectedBaseDiscount, $expectedDiscount] = $index === 0 ? [0.0, 0.0] : $lineDiscounts[$line];
                 expect($baseDiscount)->toBeLessThanOrEqual($baseRow + 0.000001)

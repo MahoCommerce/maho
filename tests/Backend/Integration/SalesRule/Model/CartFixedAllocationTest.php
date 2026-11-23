@@ -175,7 +175,9 @@ it('uses the fixed cart budget within the remaining capacity of every eligible l
 
                 $reloaded = $cart->getById((int) $quote->getId());
                 foreach ([$quote, $reloaded] as $currentQuote) {
-                    foreach ($currentQuote->getAllVisibleItems() as $index => $item) {
+                    $items = $currentQuote->getAllVisibleItems();
+                    expect($items)->toHaveCount(count($lines));
+                    foreach ($items as $index => $item) {
                         expect($item->getBaseDiscountAmount())->toEqualWithDelta($expectedLineDiscounts[$index], 0.000000001)
                             ->and($item->getDiscountAmount())->toEqualWithDelta($expectedPersisted['lines'][$index], 0.000000001);
                     }

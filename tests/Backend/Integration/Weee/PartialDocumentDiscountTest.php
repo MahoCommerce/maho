@@ -546,19 +546,26 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
         $itemIds = array_map(static fn(string $sku): int => $idsBySku[$sku], $skus);
         $documents = Mage::getService('sales/order_document');
         $feeHelper = Mage::helper('weee');
-        $checkFees = static function (array $items) use ($feeHelper, $taxOnGross): void {
+        $checkFees = static function (array $items, array $expectedItemIds) use ($feeHelper, $taxOnGross): void {
+            $actualItemIds = array_map(
+                static fn(Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item): int => (int) $item->getOrderItemId(),
+                $items,
+            );
+            expect($actualItemIds)->toEqualCanonicalizing($expectedItemIds);
+
             foreach ($items as $item) {
-                foreach ($feeHelper->getAppliedToItem($item) as $fee) {
-                    if ($taxOnGross) {
-                        expect((float) $fee['weee_discount'])->toBe(0.01)
-                            ->and((float) $fee['base_weee_discount'])->toBe(0.01);
-                        continue;
-                    }
-                    expect((float) $fee['weee_discount'])->toBeGreaterThanOrEqual(0.0)
-                        ->toBeLessThanOrEqual((float) $fee['row_amount'])
-                        ->and((float) $fee['base_weee_discount'])->toBeGreaterThanOrEqual(0.0)
-                        ->toBeLessThanOrEqual((float) $fee['base_row_amount']);
+                $fees = array_values($feeHelper->getAppliedToItem($item));
+                expect($fees)->toHaveCount(1);
+                $fee = $fees[0];
+                if ($taxOnGross) {
+                    expect((float) $fee['weee_discount'])->toBe(0.01)
+                        ->and((float) $fee['base_weee_discount'])->toBe(0.01);
+                    continue;
                 }
+                expect((float) $fee['weee_discount'])->toBeGreaterThanOrEqual(0.0)
+                    ->toBeLessThanOrEqual((float) $fee['row_amount'])
+                    ->and((float) $fee['base_weee_discount'])->toBeGreaterThanOrEqual(0.0)
+                    ->toBeLessThanOrEqual((float) $fee['base_row_amount']);
             }
         };
         $sumLines = static fn(array $amounts, array $lines): float => round(array_sum(array_intersect_key($amounts, array_fill_keys($lines, true))), 2);
@@ -572,7 +579,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
                 ->and($invoice->getBaseGrandTotal())->toBe($sumLines($baseAmounts, $lines))
                 ->and($invoice->getTaxAmount())->toBe($sumLines($taxes, $lines))
                 ->and($invoice->getBaseTaxAmount())->toBe($sumLines($baseTaxes, $lines));
-            $checkFees($invoice->getAllItems());
+            $checkFees($invoice->getAllItems(), array_keys($quantities));
             $invoices[] = (int) $invoice->getId();
         }
 
@@ -587,7 +594,7 @@ it('preserves payment and refunds when fixed taxes round across invoice lines', 
                     ->and($creditmemo->getBaseGrandTotal())->toBe($baseAmounts[$line])
                     ->and($creditmemo->getTaxAmount())->toBe($taxes[$line])
                     ->and($creditmemo->getBaseTaxAmount())->toBe($baseTaxes[$line]);
-                $checkFees($creditmemo->getAllItems());
+                $checkFees($creditmemo->getAllItems(), [$itemIds[$line]]);
             }
         }
 
