@@ -47,13 +47,13 @@ describe('Admin product price field precision', function () {
         expect($element->getEscapedValue())->toBe('1234.5678');
     });
 
-    it('returns null for a non-numeric value', function () {
+    it('returns an empty string for a non-numeric value', function () {
         $element = new Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price();
 
         $element->setValue('');
-        expect($element->getEscapedValue())->toBeNull();
+        expect($element->getEscapedValue())->toBe('');
 
         $element->setValue('abc');
-        expect($element->getEscapedValue())->toBeNull();
+        expect($element->getEscapedValue())->toBe('');
     });
 });

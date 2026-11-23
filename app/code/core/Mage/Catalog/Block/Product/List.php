@@ -93,7 +93,10 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
         return Mage::getSingleton('catalog/layer');
     }
 
-    public function getLoadedProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
+    /**
+     * @return \Maho\Data\Collection<Mage_Catalog_Model_Product>
+     */
+    public function getLoadedProductCollection(): \Maho\Data\Collection
     {
         return $this->_getProductCollection();
     }
