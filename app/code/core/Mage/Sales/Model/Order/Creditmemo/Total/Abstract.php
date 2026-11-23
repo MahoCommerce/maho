@@ -22,7 +22,7 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
         return $this;
     }
 
-    protected function hasFixedTax(Mage_Sales_Model_Order_Creditmemo_Item|Mage_Sales_Model_Order_Item $item): bool
+    protected function hasFixedTax(Mage_Sales_Model_Order_Creditmemo_Item|Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Item $item): bool
     {
         return (bool) ($item->getWeeeTaxAppliedRowAmount() || $item->getBaseWeeeTaxAppliedRowAmount()
             || $item->getWeeeTaxAppliedAmount() || $item->getBaseWeeeTaxAppliedAmount()

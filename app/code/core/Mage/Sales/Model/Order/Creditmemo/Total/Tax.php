@@ -388,7 +388,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $invoice = $invoices[$memo->getInvoiceId()] ?? null;
                 $source = $single && $invoice && !$invoice->isCanceled() && $creditsByInvoice[$invoice->getId()] === 1
                     ? $invoice->getAllItems() : [];
-                $whole = count($source) === 1 && $source[0]->getOrderItemId() == $id && $source[0]->getQty() == $item->getQty();
+                $whole = count($source) === 1 && $source[0]->getOrderItemId() == $id && $source[0]->getQty() == $item->getQty()
+                    && !$this->hasFixedTax($source[0]);
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
                     $paid = $type === 'base' ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount()
                         : $memo->getTaxAmount() - $memo->getShippingTaxAmount();
@@ -450,7 +451,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     $subtotal -= $line->getRowTotal();
                     $baseSubtotal -= $line->getBaseRowTotal();
                     $applied = Mage::helper('core/string')->unserialize($line->getWeeeTaxApplied());
-                    if (is_array($applied) && $applied && array_all($applied, static fn($fee): bool => isset($fee['weee_document_gross_allocated']))) {
+                    if (is_array($applied) && $applied && array_all($applied, static fn($fee): bool => ($fee['weee_document_gross_allocated'] ?? false) === true
+                        && is_numeric($fee['row_amount'] ?? null) && is_numeric($fee['base_row_amount'] ?? null)
+                        && is_numeric($fee['weee_discount'] ?? null) && is_numeric($fee['base_weee_discount'] ?? null))
+                        && round(array_sum(array_column($applied, 'row_amount')) - $line->getWeeeTaxAppliedRowAmount(), 4) == 0.0
+                        && round(array_sum(array_column($applied, 'base_row_amount')) - $line->getBaseWeeeTaxAppliedRowAmount(), 4) == 0.0) {
                         $fees += $line->getWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'weee_discount'));
                         $baseFees += $line->getBaseWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'base_weee_discount'));
                     }
