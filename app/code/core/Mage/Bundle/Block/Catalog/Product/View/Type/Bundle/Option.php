@@ -169,14 +169,11 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
     /**
      * Returns the formatted string for the quantity chosen for the given selection
      *
-     * @param Mage_Catalog_Model_Product $selection
-     * @param bool $includeContainer
-     * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getSelectionQtyTitlePrice($selection, $includeContainer = true)
+    public function getSelectionQtyTitlePrice(Mage_Catalog_Model_Product $selection, bool $includeContainer = true): string
     {
-        $price = $this->getProduct()->getPriceModel()->getSelectionPreFinalPrice($this->getProduct(), $selection);
+        $price = Mage::helper('bundle')->getPriceModel($this->getProduct())->getSelectionPreFinalPrice($this->getProduct(), $selection);
         $this->setFormatProduct($selection);
         $priceTitle = $selection->getSelectionQty() * 1 . ' x ' . $this->escapeHtml($selection->getName());
 
@@ -189,21 +186,15 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
 
     /**
      * Get price for selection product
-     *
-     * @param Mage_Catalog_Model_Product $selection
-     * @return int|float
      */
-    public function getSelectionPrice($selection)
+    public function getSelectionPrice(Mage_Catalog_Model_Product $selection): int|float
     {
-        $price = 0;
         $store = $this->getProduct()->getStore();
-        if ($selection) {
-            $price = $this->getProduct()->getPriceModel()->getSelectionPreFinalPrice($this->getProduct(), $selection);
-            if (is_numeric($price)) {
-                /** @var Mage_Core_Helper_Data $helper */
-                $helper = $this->helper('core');
-                $price = $helper::currencyByStore($price, $store, false);
-            }
+        $price = Mage::helper('bundle')->getPriceModel($this->getProduct())->getSelectionPreFinalPrice($this->getProduct(), $selection);
+        if (is_numeric($price)) {
+            /** @var Mage_Core_Helper_Data $helper */
+            $helper = $this->helper('core');
+            $price = $helper::currencyByStore($price, $store, false);
         }
         return is_numeric($price) ? $price : 0;
     }
@@ -211,14 +202,11 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle_Option extends Mage_Bun
     /**
      * Get title price for selection product
      *
-     * @param Mage_Catalog_Model_Product $selection
-     * @param bool $includeContainer
-     * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getSelectionTitlePrice($selection, $includeContainer = true)
+    public function getSelectionTitlePrice(Mage_Catalog_Model_Product $selection, bool $includeContainer = true): string
     {
-        $price = $this->getProduct()->getPriceModel()->getSelectionPreFinalPrice($this->getProduct(), $selection, 1);
+        $price = Mage::helper('bundle')->getPriceModel($this->getProduct())->getSelectionPreFinalPrice($this->getProduct(), $selection, 1);
         $this->setFormatProduct($selection);
         $priceTitle = $this->escapeHtml($selection->getName());
         $priceTitle .= ' &nbsp; ' . ($includeContainer ? '<span class="price-notice">' : '')

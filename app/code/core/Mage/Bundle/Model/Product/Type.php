@@ -610,10 +610,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      *
      * @param Mage_Catalog_Model_Product $product
      * @param string $processMode
-     * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode): array|string
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -745,7 +744,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                  * Create extra attributes that will be converted to product options in order item
                  * for selection (not for all bundle)
                  */
-                $price = $product->getPriceModel()->getSelectionFinalTotalPrice($product, $selection, 0, $qty);
+                $price = Mage::helper('bundle')->getPriceModel($product)->getSelectionFinalTotalPrice($product, $selection, 0, $qty);
                 $attributes = [
                     'price'         => Mage::app()->getStore()->convertPrice($price),
                     'qty'           => $qty,
@@ -867,10 +866,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * created from this product
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return array
      */
     #[\Override]
-    public function getOrderOptions($product = null)
+    public function getOrderOptions($product = null): array
     {
         $optionArr = parent::getOrderOptions($product);
 
@@ -889,7 +887,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 if ($selection->isSalable()) {
                     $selectionQty = $product->getCustomOption('selection_qty_' . $selection->getSelectionId());
                     if ($selectionQty) {
-                        $price = $product->getPriceModel()->getSelectionFinalTotalPrice(
+                        $price = Mage::helper('bundle')->getPriceModel($product)->getSelectionFinalTotalPrice(
                             $product,
                             $selection,
                             0,

@@ -21,10 +21,9 @@ $_taxHelper  = $this->helper('tax');
 
 /**
  * @var Mage_Catalog_Model_Product $_product
- * @var Mage_Bundle_Model_Product_Price $_priceModel
  */
 $_product     = $this->getProduct();
-$_priceModel  = $_product->getPriceModel();
+$_priceModel  = Mage::helper('bundle')->getPriceModel($_product);
 
 list($_minimalPriceTax, $_maximalPriceTax) = $_priceModel->getTotalPrices($_product, null, null, false);
 list($_minimalPriceInclTax, $_maximalPriceInclTax) = $_priceModel->getTotalPrices($_product, null, true, false);

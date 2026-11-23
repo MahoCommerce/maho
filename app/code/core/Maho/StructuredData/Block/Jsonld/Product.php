@@ -490,8 +490,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $type = $product->getTypeId();
 
         if ($type === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-            /** @var Mage_Bundle_Model_Product_Price $priceModel */
-            $priceModel = $product->getPriceModel();
+            $priceModel = Mage::helper('bundle')->getPriceModel($product);
             $store = Mage::app()->getStore($product->getStoreId());
             $withTax = $helper->displayPriceIncludesTax($product->getStoreId());
             $min = (float) $store->convertPrice((float) $priceModel->getTotalPrices($product, 'min', $withTax));

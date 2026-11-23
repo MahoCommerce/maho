@@ -25,6 +25,7 @@ class Mage_Catalog_Model_Product_Type
 
     protected static ?array $_types = null;
     protected static ?array $_compositeTypes = null;
+    /** @var array<string, Mage_Catalog_Model_Product_Type_Price>|null */
     protected static ?array $_priceModels = null;
     protected static ?array $_typesPriority = null;
 
@@ -57,11 +58,11 @@ class Mage_Catalog_Model_Product_Type
     /**
      * Product type price model factory
      *
-     * @param   string $productType
-     * @return  Mage_Catalog_Model_Product_Type_Price
+     * @throws \UnexpectedValueException when the price model of the product type does not extend Mage_Catalog_Model_Product_Type_Price
      */
-    public static function priceFactory($productType)
+    public static function priceFactory(?string $productType): Mage_Catalog_Model_Product_Type_Price
     {
+        $productType = (string) $productType;
         if (isset(self::$_priceModels[$productType])) {
             return self::$_priceModels[$productType];
         }
@@ -74,8 +75,12 @@ class Mage_Catalog_Model_Product_Type
             $priceModelName = self::DEFAULT_PRICE_MODEL;
         }
 
-        self::$_priceModels[$productType] = Mage::getModel($priceModelName);
-        return self::$_priceModels[$productType];
+        $priceModel = Mage::getModel($priceModelName);
+        if (!$priceModel instanceof Mage_Catalog_Model_Product_Type_Price) {
+            throw new \UnexpectedValueException("The price model {$priceModelName} of the product type {$productType} must extend Mage_Catalog_Model_Product_Type_Price.");
+        }
+        self::$_priceModels[$productType] = $priceModel;
+        return $priceModel;
     }
 
     /**

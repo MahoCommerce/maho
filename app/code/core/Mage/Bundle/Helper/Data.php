@@ -25,4 +25,18 @@ class Mage_Bundle_Helper_Data extends Mage_Core_Helper_Abstract
         $config = Mage::getConfig()->getNode(self::XML_NODE_BUNDLE_PRODUCT_TYPE);
         return array_keys($config->allowed_selection_types->asArray());
     }
+
+    /**
+     * Return the price model of the bundle product $product
+     *
+     * @throws \UnexpectedValueException when the price model of the bundle product type does not extend Mage_Bundle_Model_Product_Price
+     */
+    public function getPriceModel(Mage_Catalog_Model_Product $product): Mage_Bundle_Model_Product_Price
+    {
+        $priceModel = $product->getPriceModel();
+        if (!$priceModel instanceof Mage_Bundle_Model_Product_Price) {
+            throw new \UnexpectedValueException('The price model of the bundle product type must extend Mage_Bundle_Model_Product_Price.');
+        }
+        return $priceModel;
+    }
 }

@@ -39,14 +39,13 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
      * Check if we have display prices including and excluding tax
      * With corrections for Dynamic prices
      *
-     * @return bool
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function displayBothPrices()
+    public function displayBothPrices(): bool
     {
         $product = $this->getProduct();
         if ($product->getPriceType() == Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC
-            && $product->getPriceModel()->getIsPricesCalculatedByIndex() !== false
+            && Mage::helper('bundle')->getPriceModel($product)->getIsPricesCalculatedByIndex() !== false
         ) {
             return false;
         }
@@ -58,11 +57,9 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
 
     /**
      * Convert block to html string
-     *
-     * @return string
      */
     #[\Override]
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         $product = $this->getProduct();
         if ($this->getMAPTemplate() && Mage::helper('catalog')->canApplyMsrp($product)
@@ -74,8 +71,10 @@ class Mage_Bundle_Block_Catalog_Product_Price extends Mage_Catalog_Block_Product
             }
             $realPriceHtml = parent::_toHtml();
             $this->unsWithoutPrice();
-            $addToCartUrl  = $this->getLayout()->getBlock('product.info.bundle')->getAddToCartUrl($product);
-            $product->setAddToCartUrl($addToCartUrl);
+            $bundleBlock = $this->getLayout()->getBlock('product.info.bundle');
+            $product->setAddToCartUrl($bundleBlock instanceof Mage_Catalog_Block_Product_Abstract
+                ? $bundleBlock->getAddToCartUrl($product)
+                : $this->getAddToCartUrl($product));
             $html = $this->getLayout()
                 ->createBlock('catalog/product_price')
                 ->setTemplate($this->getMAPTemplate())

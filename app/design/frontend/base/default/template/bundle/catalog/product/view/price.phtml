@@ -27,7 +27,7 @@ $canApplyMAP  = Mage::helper('catalog')->canApplyMsrp($_product);
 if (!$canApplyMAP && $_product->getCanShowPrice() !== false && !$this->getWithoutPrice()
     && $_product->getPriceType() == Mage_Bundle_Model_Product_Price::PRICE_TYPE_FIXED
 ) {
-    $_priceModel = $_product->getPriceModel();
+    $_priceModel = Mage::helper('bundle')->getPriceModel($_product);
     $_finalPrice = $_priceModel->getRoundedPriceWithTax($_product, $_finalPrice);
     $_finalPriceInclTax = $_priceModel->getRoundedPriceWithTax($_product, $_finalPriceInclTax, true);
 

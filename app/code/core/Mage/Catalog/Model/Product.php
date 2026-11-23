@@ -771,10 +771,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Get product price model
-     *
-     * @return Mage_Bundle_Model_Product_Price
      */
-    public function getPriceModel()
+    public function getPriceModel(): Mage_Catalog_Model_Product_Type_Price
     {
         return Mage::getSingleton('catalog/product_type')->priceFactory($this->getTypeId());
     }
