@@ -38,11 +38,10 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      *
      * @param string $field
      * @param mixed $value
-     * @param \Maho\DataObject $object
-     * @return  Maho\Db\Select
+     * @param Mage_Core_Model_Abstract $object
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect($field, $value, $object): \Maho\Db\Select
     {
         if ($field == 'default_state') {
             $select = $this->_getReadAdapter()->select()
