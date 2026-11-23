@@ -1,18 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			rawMessage: Access to an undefined property Mage_Adminhtml_Block_Notification_Window::$_aclResourcePath.
-			identifier: property.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Notification/Window.php
-
-		-
-			rawMessage: 'Parameter #3 $refValues of method Mage_Adminhtml_Block_Widget_Form_Element_Dependence::addFieldDependence() expects array|string, int given.'
-			identifier: argument.type
-			count: 3
-			path: app/code/core/Mage/Adminhtml/Block/Promo/Quote/Edit/Tab/Main.php
-
-		-
 			rawMessage: 'Parameter #1 $entityType of method Mage_Eav_Model_Config::getEntityAttributeCodes() expects Mage_Eav_Model_Entity_Type, string given.'
 			identifier: argument.type
 			count: 1
@@ -23,18 +11,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Reorder/Renderer/Action.php
-
-		-
-			rawMessage: 'Parameter #2 $onclick of method Mage_Adminhtml_Block_Widget::getButtonHtml() expects string, null given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Adminhtml/Block/System/Account/Edit/Form.php
-
-		-
-			rawMessage: 'Parameter #3 $refValues of method Mage_Adminhtml_Block_Widget_Form_Element_Dependence::addFieldDependence() expects array|string, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/Block/System/Account/Edit/Form.php
 
 		-
 			rawMessage: 'Parameter #1 $element of method Mage_Adminhtml_Block_System_Config_Form::_prepareGroupComment() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element given.'
@@ -71,12 +47,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Checkbox.php
-
-		-
-			rawMessage: 'Parameter #1 $tabId of method Mage_Adminhtml_Block_Widget_Tabs::_setActiveTab() expects string, int<min, -1>|int<1, max> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Tabs.php
 
 		-
 			rawMessage: 'Parameter #1 $field of method Mage_Adminhtml_Model_Config_Data::_isValidField() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element|false given.'
@@ -193,12 +163,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product.php
 
 		-
-			rawMessage: 'Parameter #1 $tags of method Mage_Core_Model_App::cleanCache() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type::priceFactory() should return Mage_Catalog_Model_Product_Type_Price but returns Mage_Core_Model_Abstract|false.'
 			identifier: return.type
 			count: 1
@@ -307,12 +271,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: 'Parameter #2 $scope of method Mage_Core_Model_Translate::_addData() expects string, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate.php
-
-		-
 			rawMessage: 'Return type (string) of method Mage_Customer_Block_Newsletter::getAction() should be compatible with return type (Mage_Core_Controller_Varien_Action) of method Mage_Core_Block_Abstract::getAction()'
 			identifier: method.childReturnType
 			count: 1
@@ -329,12 +287,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Resource/Customer.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setIsSubscribed() expects bool|null, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Customer/controllers/AccountController.php
 
 		-
 			rawMessage: 'Parameter #2 $string of function explode expects string, array given.'
@@ -379,22 +331,10 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Item::setGiftMessageAvailable() expects int|null, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/GiftMessage/Model/Observer.php
-
-		-
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/GiftMessage/data/giftmessage_setup/data-install-1.6.0.0.php
-
-		-
-			rawMessage: 'Parameter #1 $limit of method Mage_Adminhtml_Block_Widget_Grid::setDefaultLimit() expects int, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Block/Adminhtml/Export/Filter.php
 
 		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getTypeInstance() expects int|string|null, true given.'
@@ -409,12 +349,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Adapter/Abstract.php
 
 		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
 			rawMessage: 'Class Mage_ImportExport_Model_Resource_Import_Data implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
 			identifier: missingType.generics
 			count: 1
@@ -425,12 +359,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Newsletter/data/newsletter_setup/data-upgrade-1.6.0.1-1.6.0.2.php
-
-		-
-			rawMessage: 'Parameter #1 $string of function md5 expects string, float given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
 
 		-
 			rawMessage: 'Method Mage_ProductAlert_Helper_Data::createBlock() should return Mage_ProductAlert_Block_Email_Price|Mage_ProductAlert_Block_Email_Stock but returns Mage_Core_Block_Abstract.'
@@ -481,30 +409,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Product/Abstract.php
 
 		-
-			rawMessage: 'Parameter #2 $options of method Mage_Directory_Model_Currency::format() expects array, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Total/Shipping.php
-
-		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment.php
-
-		-
-			rawMessage: Instanceof between Mage_Sales_Model_Order_Status_History and Mage_Sales_Model_Order_Status_History will always evaluate to true.
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment.php
-
-		-
-			rawMessage: 'Parameter #1 $shouldSave of method Mage_Sales_Model_Order_Payment_Transaction::closeAuthorization() expects bool, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Payment/Transaction.php
-
-		-
 			rawMessage: 'Parameter #1 $item of method Mage_Sales_Model_Quote::addItem() expects Mage_Sales_Model_Quote_Item, Mage_Sales_Model_Quote_Item_Abstract given.'
 			identifier: argument.type
 			count: 1
@@ -539,12 +443,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Weee/Model/Attribute/Backend/Weee/Tax.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Wishlist/Controller/Abstract.php
 
 		-
 			rawMessage: '''
@@ -653,24 +551,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: lib/Maho/Data/Form/Element/Multiline.php
-
-		-
-			rawMessage: 'Parameter #1 $parent of method Maho\Data\Tree\Node::setParent() expects Maho\Data\Tree\Node, Maho\Data\Tree given.'
-			identifier: argument.type
-			count: 1
-			path: lib/Maho/Data/Tree/Node/Collection.php
-
-		-
-			rawMessage: Right side of && is always false.
-			identifier: booleanAnd.rightAlwaysFalse
-			count: 1
-			path: lib/Maho/Filter/Template/Tokenizer/Parameter.php
-
-		-
-			rawMessage: Left side of || is always false.
-			identifier: booleanOr.leftAlwaysFalse
-			count: 1
-			path: lib/Maho/Filter/Template/Tokenizer/Variable.php
 
 		-
 			rawMessage: '''
