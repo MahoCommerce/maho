@@ -451,6 +451,14 @@ interface AdapterInterface
     public function fetchCol(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
     /**
+     * Fetch the first column of all rows. The column must be a key that holds no NULL, such as an entity ID.
+     *
+     * @param Bind $bind Data to bind into SELECT placeholders.
+     * @return list<int|string>
+     */
+    public function fetchIds(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
+
+    /**
      * Fetches all SQL result rows as an array of key-value pairs.
      *
      * The first column is the key, the second column is the

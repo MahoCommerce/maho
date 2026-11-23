@@ -391,6 +391,13 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     #[\Override]
+    public function fetchIds(string|Select $sql, array|int|string|float $bind = []): array
+    {
+        $stmt = $this->query($sql, $bind);
+        return $stmt->getResult()->fetchFirstColumn();
+    }
+
+    #[\Override]
     public function fetchPairs(string|Select $sql, array|int|string|float $bind = []): array
     {
         $stmt = $this->query($sql, $bind);

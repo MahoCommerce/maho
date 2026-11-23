@@ -116,12 +116,12 @@ abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_M
      *
      * @param int $limit
      * @param int $offset
-     * @return list<mixed>
+     * @return list<int|string>
      */
     #[\Override]
     public function getAllIds($limit = null, $offset = null)
     {
-        return $this->getConnection()->fetchCol(
+        return $this->getConnection()->fetchIds(
             $this->_getAllIdsSelect($limit, $offset),
             $this->_bindParams,
         );

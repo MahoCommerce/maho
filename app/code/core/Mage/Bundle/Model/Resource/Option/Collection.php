@@ -20,7 +20,7 @@ class Mage_Bundle_Model_Resource_Option_Collection extends Mage_Core_Model_Resou
     /**
      * All item ids cache
      *
-     * @var array|null
+     * @var list<int|string>|null
      */
     protected $_itemIds;
 
@@ -177,7 +177,7 @@ class Mage_Bundle_Model_Resource_Option_Collection extends Mage_Core_Model_Resou
     /**
      * Retrieve all ids for collection
      *
-     * @return list<mixed>
+     * @return list<int|string>
      */
     #[\Override]
     public function getAllIds()

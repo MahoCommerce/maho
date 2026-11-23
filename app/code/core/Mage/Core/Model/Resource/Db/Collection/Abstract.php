@@ -463,7 +463,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Retrieve all ids for collection
      *
-     * @return list<mixed>
+     * @return list<int|string>
      */
     #[\Override]
     public function getAllIds()
@@ -475,7 +475,7 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
         $idsSelect->reset(Maho\Db\Select::COLUMNS);
 
         $idsSelect->columns($this->getResource()->getIdFieldName(), 'main_table');
-        return $this->getConnection()->fetchCol($idsSelect);
+        return $this->getConnection()->fetchIds($idsSelect);
     }
 
     /**

@@ -276,7 +276,7 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
         $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
         $idsSelect->reset(Maho\Db\Select::COLUMNS);
         $idsSelect->columns('rt.review_id');
-        return $this->getConnection()->fetchCol($idsSelect);
+        return $this->getConnection()->fetchIds($idsSelect);
     }
 
     /**

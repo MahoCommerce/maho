@@ -151,7 +151,7 @@ class Db extends Collection
     /**
      * Get collection item identifier
      *
-     * @return mixed
+     * @return int|string|null
      */
     #[\Override]
     protected function _getItemId(\Maho\DataObject $item)

@@ -182,7 +182,7 @@ class DataObject implements ArrayAccess, JsonSerializable
     /**
      * Retrieve object id
      *
-     * @return mixed
+     * @return int|string|null
      */
     public function getId()
     {

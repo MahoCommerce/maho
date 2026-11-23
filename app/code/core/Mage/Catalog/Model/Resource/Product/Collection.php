@@ -743,7 +743,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $idsSelect->limit($limit, $offset);
         $idsSelect->resetJoinLeft();
 
-        return $this->getConnection()->fetchCol($idsSelect, $this->_bindParams);
+        return $this->getConnection()->fetchIds($idsSelect, $this->_bindParams);
     }
 
     /**

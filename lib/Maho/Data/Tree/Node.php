@@ -65,7 +65,7 @@ class Node extends \Maho\DataObject
     /**
      * Retrieve node id
      *
-     * @return mixed
+     * @return int|string|null
      */
     #[\Override]
     public function getId()

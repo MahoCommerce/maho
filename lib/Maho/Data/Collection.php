@@ -364,7 +364,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve item id
      *
-     * @return mixed
+     * @return int|string|null
      */
     protected function _getItemId(DataObject $item)
     {
@@ -372,15 +372,18 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * Retrieve ids of all tems
+     * Retrieve the IDs of all items that have an ID
      *
-     * @return list<mixed>
+     * @return list<int|string>
      */
     public function getAllIds()
     {
         $ids = [];
         foreach ($this->getItems() as $item) {
-            $ids[] = $this->_getItemId($item);
+            $id = $this->_getItemId($item);
+            if ($id !== null) {
+                $ids[] = $id;
+            }
         }
         return $ids;
     }
