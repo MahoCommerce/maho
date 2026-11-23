@@ -15,6 +15,10 @@ use IteratorAggregate;
 use Mage;
 use Maho\DataObject;
 
+/**
+ * @template TItem of DataObject = DataObject
+ * @implements IteratorAggregate<array-key, TItem>
+ */
 class Collection implements IteratorAggregate, Countable
 {
     public const string SORT_ORDER_ASC    = 'ASC';
@@ -23,7 +27,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Collection items
      *
-     * @var array
+     * @var array<array-key, TItem>
      */
     protected $_items = [];
 
@@ -236,9 +240,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve collection first item
      *
-     * @return DataObject
+     * @return TItem
      */
-    public function getFirstItem()
+    public function getFirstItem(): DataObject
     {
         $this->load();
 
@@ -248,9 +252,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve collection last item
      *
-     * @return DataObject
+     * @return TItem
      */
-    public function getLastItem()
+    public function getLastItem(): DataObject
     {
         $this->load();
 
@@ -260,9 +264,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve collection items
      *
-     * @return array
+     * @return array<array-key, TItem>
      */
-    public function getItems()
+    public function getItems(): array
     {
         $this->load();
         return $this->_items;
@@ -288,11 +292,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Search all items by field value
      *
-     * @param   string $column
-     * @param   mixed $value
-     * @return  array
+     * @return list<TItem>
      */
-    public function getItemsByColumnValue($column, $value)
+    public function getItemsByColumnValue(string $column, int|string|null $value): array
     {
         $this->load();
 
@@ -308,11 +310,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Search first item by field value
      *
-     * @param   string $column
-     * @param   mixed $value
-     * @return  DataObject|null
+     * @return TItem|null
      */
-    public function getItemByColumnValue($column, $value)
+    public function getItemByColumnValue(string $column, int|string|null $value): ?DataObject
     {
         $this->load();
 
@@ -327,9 +327,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Adding item to item array
      *
-     * @return  $this
+     * @param TItem $item
      */
-    public function addItem(DataObject $item)
+    public function addItem(DataObject $item): static
     {
         $itemId = $this->_getItemId($item);
 
@@ -347,10 +347,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Add item that has no id to collection
      *
-     * @param DataObject $item
-     * @return $this
+     * @param TItem $item
      */
-    protected function _addItem($item)
+    protected function _addItem(DataObject $item): static
     {
         $this->_items[] = $item;
         return $this;
@@ -428,7 +427,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Replace each item with the result of $callback for that item
      *
-     * @param callable(DataObject): DataObject $callback
+     * @param callable(TItem): TItem $callback
      */
     public function each(callable $callback): void
     {
@@ -517,9 +516,9 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve collection empty item
      *
-     * @return DataObject
+     * @return TItem
      */
-    public function getNewEmptyItem()
+    public function getNewEmptyItem(): DataObject
     {
         return new $this->_itemObjectClass();
     }
@@ -710,11 +709,10 @@ class Collection implements IteratorAggregate, Countable
     }
 
     /**
-     * Implementation of IteratorAggregate::getIterator()
+     * @return ArrayIterator<array-key, TItem>
      */
-    #[\ReturnTypeWillChange]
     #[\Override]
-    public function getIterator()
+    public function getIterator(): ArrayIterator
     {
         $this->load();
         return new ArrayIterator($this->_items);

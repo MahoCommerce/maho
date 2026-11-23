@@ -17,6 +17,10 @@ use Maho\Db\Expr;
 use Maho\Db\Select;
 use Maho\Db\Statement\Pdo\Mysql;
 
+/**
+ * @template TItem of DataObject = DataObject
+ * @extends Collection<TItem>
+ */
 class Db extends Collection
 {
     /**

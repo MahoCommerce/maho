@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TItem of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
+ * @extends \Maho\Data\Collection\Db<TItem>
+ */
 abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     /**
@@ -213,7 +217,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * Add an object to the collection
      */
     #[\Override]
-    public function addItem(\Maho\DataObject $object)
+    public function addItem(\Maho\DataObject $object): static
     {
         if ($object::class !== $this->_itemObjectClass) {
             throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Attempt to add an invalid object'));

@@ -8,6 +8,10 @@
  * @package Mage_Core
  */
 
+/**
+ * @template TItem of \Maho\DataObject = Mage_Core_Model_Abstract
+ * @extends \Maho\Data\Collection\Db<TItem>
+ */
 abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     public const string CACHE_TAG = 'COLLECTION_DATA';
@@ -586,7 +590,6 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
      */
     public function resetItemsDataChanged()
     {
-        /** @var \Maho\DataObject $item */
         foreach ($this->_items as $item) {
             $item->setDataChanges(false);
         }
@@ -603,7 +606,6 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     protected function _afterLoad()
     {
         parent::_afterLoad();
-        /** @var \Maho\DataObject $item */
         foreach ($this->_items as $item) {
             $item->setOrigData();
             if ($this->_resetItemsDataChanged) {
@@ -621,12 +623,13 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
 
     /**
      * Save all the entities in the collection
-     *
-     * @return $this
      */
-    public function save()
+    public function save(): static
     {
         foreach ($this->getItems() as $item) {
+            if (!$item instanceof Mage_Core_Model_Abstract) {
+                throw new LogicException(sprintf('%s cannot save items of class %s.', static::class, $item::class));
+            }
             $item->save();
         }
         return $this;
