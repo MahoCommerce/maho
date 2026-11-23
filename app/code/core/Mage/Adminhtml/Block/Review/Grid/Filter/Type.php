@@ -11,10 +11,10 @@
 class Mage_Adminhtml_Block_Review_Grid_Filter_Type extends Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select
 {
     /**
-     * @return array
+     * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         return [
             ['label' => '', 'value' => ''],

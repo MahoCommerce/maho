@@ -10,9 +10,6 @@
 
 class Mage_Adminhtml_Block_Review_Grid_Renderer_Type extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
-    /**
-     * @param Mage_Catalog_Model_Product $row
-     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

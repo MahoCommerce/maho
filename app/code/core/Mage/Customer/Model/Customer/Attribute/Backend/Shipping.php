@@ -8,6 +8,9 @@
  * @package Mage_Customer
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Customer_Model_Customer>
+ */
 class Mage_Customer_Model_Customer_Attribute_Backend_Shipping extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**

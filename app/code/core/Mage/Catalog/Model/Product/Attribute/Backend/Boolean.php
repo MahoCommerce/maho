@@ -8,12 +8,15 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Catalog_Model_Product_Attribute_Backend_Boolean extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
      * Set attribute default value if value empty
      *
-     * @param \Maho\DataObject $object
+     * @param Mage_Catalog_Model_Product $object
      * @return $this
      */
     #[\Override]

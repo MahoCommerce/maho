@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Entity_Attribute_Group>
+ */
 class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -42,7 +45,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
      * order and the name of another group of the set. A group with no sort order goes after the last group.
      *
      * @param Mage_Eav_Model_Entity_Attribute_Group $object
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      * @throws Mage_Core_Exception_Input
      * @throws Mage_Core_Exception_Conflict
      */
@@ -82,7 +85,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
     /**
      * Perform actions after object save
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

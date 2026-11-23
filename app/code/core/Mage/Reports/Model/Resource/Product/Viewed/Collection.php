@@ -91,7 +91,7 @@ class Mage_Reports_Model_Resource_Product_Viewed_Collection extends Mage_Reports
     /**
      * Apply filters
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection
+     * @return $this
      */
     #[\Override]
     protected function _beforeLoad()

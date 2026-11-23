@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract
 {
     #[\Override]
@@ -85,10 +88,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Pcompared extends Mage_Adm
      * Get product Id
      *
      * @param Mage_Catalog_Model_Product $item
-     * @return int
      */
     #[\Override]
-    public function getIdentifierId($item)
+    public function getIdentifierId(\Maho\DataObject $item): ?int
     {
         return $item->getId();
     }

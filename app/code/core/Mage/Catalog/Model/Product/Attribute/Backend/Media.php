@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
@@ -86,7 +89,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
 
     /**
      * @param Mage_Catalog_Model_Product $object
-     * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
+     * @return $this
      * @throws Exception
      */
     #[\Override]
@@ -95,7 +98,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         $attrCode = $this->getAttribute()->getAttributeCode();
         $value = $object->getData($attrCode);
         if (!is_array($value) || !isset($value['images'])) {
-            return;
+            return $this;
         }
 
         if (!is_array($value['images']) && (string) $value['images'] !== '') {
@@ -196,7 +199,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
 
     /**
      * @param Mage_Catalog_Model_Product $object
-     * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract|void
+     * @return $this
      */
     #[\Override]
     public function afterSave($object)
@@ -205,13 +208,13 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
             if ($object->getDuplicateImages() === true) {
                 $this->duplicate($object);
             }
-            return;
+            return $this;
         }
 
         $attrCode = $this->getAttribute()->getAttributeCode();
         $value = $object->getData($attrCode);
         if (!is_array($value) || !isset($value['images']) || $object->isLockedAttribute($attrCode)) {
-            return;
+            return $this;
         }
 
         $storeId = $object->getStoreId();
@@ -270,6 +273,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         }
 
         $this->_getResource()->deleteGallery($toDelete);
+        return $this;
     }
 
     /**

@@ -8,6 +8,9 @@
  * @package Mage_Core
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Core_Model_Store_Group>
+ */
 class Mage_Core_Model_Resource_Store_Group extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

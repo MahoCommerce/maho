@@ -28,7 +28,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     ];
 
     /**
-     * @param Review $data
      * @return Review
      */
     #[\Override]

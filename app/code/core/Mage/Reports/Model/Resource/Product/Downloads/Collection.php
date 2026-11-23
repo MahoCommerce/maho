@@ -81,8 +81,8 @@ class Mage_Reports_Model_Resource_Product_Downloads_Collection extends Mage_Cata
     /**
      * Add filtering
      *
-     * @param string $field
-     * @param string $condition
+     * @param string|array $field
+     * @param int|string|array|null $condition
      * @return $this
      */
     #[\Override]

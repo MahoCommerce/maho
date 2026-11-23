@@ -270,7 +270,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         if (!empty($conditionSql)) {
             $this->getSelect()->where($conditionSql, null, Maho\Db\Select::TYPE_CONDITION);
         } else {
-            Mage::throwException('Invalid attribute identifier for filter (' . $attribute::class . ')');
+            Mage::throwException('Invalid attribute identifier for filter (' . get_debug_type($attribute) . ')');
         }
 
         return $this;

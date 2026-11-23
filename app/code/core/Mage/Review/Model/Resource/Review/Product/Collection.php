@@ -327,8 +327,8 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
     /**
      * Add attribute to filter
      *
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract|string $attribute
-     * @param array $condition
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array $attribute
+     * @param int|string|array|null $condition
      * @param string $joinType
      * @return $this
      */

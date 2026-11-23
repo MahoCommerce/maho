@@ -8,6 +8,9 @@
  * @package Mage_Customer
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Customer_Model_Customer>
+ */
 class Mage_Customer_Model_Attribute_Backend_Data_Boolean extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**

@@ -91,9 +91,6 @@ class Mage_Adminhtml_Block_Notification_Grid extends Mage_Adminhtml_Block_Widget
         return $this;
     }
 
-    /**
-     * @param Mage_AdminNotification_Model_Inbox $row
-     */
     #[\Override]
     public function getRowClass(\Maho\DataObject $row): string
     {

@@ -17,14 +17,14 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
      * Get product price
      * Returns minimum possible gift card amount for display
      *
-     * @return string|float|int|null
+     * @return float|null
      */
     #[\Override]
     public function getPrice($product)
     {
         // If custom price is set (from cart), use that
         if ($product->getCustomPrice()) {
-            return $product->getCustomPrice();
+            return (float) $product->getCustomPrice();
         }
 
         if ($product->getWebsitePriceRate() === null) {

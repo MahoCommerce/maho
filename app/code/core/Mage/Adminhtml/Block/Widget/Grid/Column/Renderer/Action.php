@@ -8,8 +8,15 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @template TRow of \Maho\DataObject = \Maho\DataObject
+ * @extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text<TRow>
+ */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text
 {
+    /**
+     * @param TRow $row
+     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

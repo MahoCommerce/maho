@@ -20,7 +20,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Extend preDispatch
      *
-     * @return $this|void
+     * @return $this
      */
     #[\Override]
     public function preDispatch()
@@ -46,7 +46,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         }
         if (!$this->wishlistService()->isEnabled((int) Mage::app()->getStore()->getId())) {
             $this->norouteAction();
-            return;
+            return $this;
         }
         return $this;
     }

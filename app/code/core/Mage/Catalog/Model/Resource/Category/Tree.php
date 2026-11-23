@@ -369,7 +369,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
     /**
      * Move tree before
      *
-     * @param Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject $category
      * @param \Maho\Data\Tree\Node $newParent
      * @param \Maho\Data\Tree\Node $prevNode
      * @return $this
@@ -388,7 +388,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
     /**
      * Executing parents move method and cleaning cache after it
      *
-     * @param Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject $category
      * @param \Maho\Data\Tree\Node $newParent
      * @param \Maho\Data\Tree\Node $prevNode
      */
@@ -409,7 +409,7 @@ class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
     /**
      * Move tree after
      *
-     * @param Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject $category
      * @param \Maho\Data\Tree\Node $newParent
      * @param \Maho\Data\Tree\Node $prevNode
      * @return $this

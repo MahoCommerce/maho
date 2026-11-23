@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Index_Block_Adminhtml_Process_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     /**
-     * @return Mage_Adminhtml_Block_Widget_Form
+     * @return $this
      */
     #[\Override]
     protected function _prepareForm()

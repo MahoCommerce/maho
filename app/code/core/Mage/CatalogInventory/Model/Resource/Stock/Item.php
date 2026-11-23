@@ -8,6 +8,9 @@
  * @package Mage_CatalogInventory
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_CatalogInventory_Model_Stock_Item>
+ */
 class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -79,13 +82,12 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
      * Use qty correction for qty column update
      *
      * @param Mage_CatalogInventory_Model_Stock_Item $object
-     * @param string $table
      * @return array
      */
     #[\Override]
-    protected function _prepareDataForTable(\Maho\DataObject $object, $table)
+    protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
     {
-        $data = parent::_prepareDataForTable($object, $table);
+        $data = parent::_prepareDataForSave($object);
         if (!$object->isObjectNew() && $object->getQtyCorrection()) {
             $qty = abs($object->getQtyCorrection());
             if ($object->getQtyCorrection() < 0) {

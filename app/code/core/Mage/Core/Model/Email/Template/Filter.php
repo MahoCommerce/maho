@@ -577,7 +577,7 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
      * Return variable value for var construction
      *
      * @param string $value raw parameters
-     * @param string $default default value
+     * @param string|null $default default value
      * @return string
      * @throws Mage_Core_Exception
      */

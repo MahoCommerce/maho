@@ -10,6 +10,7 @@
 
 /**
  * @method bool hasEntityTypes()
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Form_Type>
  */
 class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abstract
 {

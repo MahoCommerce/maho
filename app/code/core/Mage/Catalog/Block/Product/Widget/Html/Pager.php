@@ -13,7 +13,7 @@ declare(strict_types=1);
 /**
  * New products widget pager block
  *
- * @package    Mage_Catalog
+ * @extends Mage_Page_Block_Html_Pager<\Maho\Data\Collection\Db>
  */
 class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_Pager
 {
@@ -104,8 +104,8 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
     /**
      * Connect collection to paging
      *
-     * @param   Mage_Core_Model_Resource_Db_Collection_Abstract $collection
-     * @return  Mage_Catalog_Block_Product_Widget_Html_Pager
+     * @param \Maho\Data\Collection\Db $collection
+     * @return $this
      */
     #[\Override]
     public function setCollection($collection)
@@ -162,7 +162,7 @@ class Mage_Catalog_Block_Product_Widget_Html_Pager extends Mage_Page_Block_Html_
     /**
      * Return number of last page
      *
-     * @return float|int
+     * @return int
      */
     #[\Override]
     public function getLastPageNum()

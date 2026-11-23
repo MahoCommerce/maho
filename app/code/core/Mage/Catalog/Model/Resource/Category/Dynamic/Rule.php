@@ -6,6 +6,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Catalog_Model_Category_Dynamic_Rule>
+ */
 class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

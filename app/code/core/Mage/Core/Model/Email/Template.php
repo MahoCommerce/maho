@@ -192,8 +192,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Set id of template. A template from the database has an integer id, and a default template from the
      * locale files has its string code.
-     *
-     * @param int|string|null $value
      */
     #[\Override]
     public function setId($value): static

@@ -35,7 +35,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Return product base price
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return string|float|int|null
+     * @return float|null
      */
     #[\Override]
     public function getPrice($product)
@@ -43,7 +43,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         if ($product->getPriceType() == self::PRICE_TYPE_FIXED) {
             return $product->getPriceAttributeValue('price');
         }
-        return 0;
+        return 0.0;
     }
 
     /**
@@ -549,7 +549,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Apply tier price for bundle
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param float $qty
+     * @param float|null $qty
      * @param float $finalPrice
      * @return  float
      * @throws Mage_Core_Model_Store_Exception

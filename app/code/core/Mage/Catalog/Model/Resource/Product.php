@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Catalog_Model_Resource_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Abstract
 {
     /**

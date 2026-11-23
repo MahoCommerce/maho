@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract<Mage_Wishlist_Model_Item>
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract
 {
     /**
@@ -85,21 +88,15 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
 
     /**
      * Retrieve identifier of block item
-     *
-     * @param \Maho\DataObject $item
-     * @return  int
      */
     #[\Override]
-    public function getIdentifierId($item)
+    public function getIdentifierId(\Maho\DataObject $item): ?int
     {
         return $item->getId();
     }
 
-    /**
-     * @return false|int
-     */
     #[\Override]
-    public function canDisplay()
+    public function canDisplay(): bool
     {
         if (!Mage::helper('wishlist')->isAllow()) {
             return false;

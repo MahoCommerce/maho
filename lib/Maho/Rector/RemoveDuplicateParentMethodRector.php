@@ -113,13 +113,10 @@ CODE_SAMPLE,
         return [ClassMethod::class];
     }
 
-    /**
-     * @param ClassMethod $node
-     */
     #[\Override]
     public function refactor(Node $node): ?int
     {
-        if ($node->stmts === null || $node->isAbstract()) {
+        if (!$node instanceof ClassMethod || $node->stmts === null || $node->isAbstract()) {
             return null;
         }
 
@@ -149,7 +146,7 @@ CODE_SAMPLE,
             return null;
         }
 
-        if ($node->stmts === null || $parentClassMethod->stmts === null) {
+        if ($parentClassMethod->stmts === null) {
             return null;
         }
 

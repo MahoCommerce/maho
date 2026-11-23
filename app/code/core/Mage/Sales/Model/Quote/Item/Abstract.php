@@ -1039,7 +1039,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
         return $value === null ? null : (int) $value;
     }
 
-    public function setProduct(?Mage_Catalog_Model_Product $value): static
+    public function setProduct(Mage_Catalog_Model_Product $value): static
     {
         return $this->setData('product', $value);
     }

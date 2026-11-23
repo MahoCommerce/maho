@@ -42,7 +42,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
-     * @return $this|Mage_Rule_Model_Action_Abstract
+     * @return $this
      */
     #[\Override]
     public function loadArray(array $arr)
@@ -152,7 +152,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
-     * @return $this|Mage_Rule_Model_Action_Abstract
+     * @return $this
      */
     #[\Override]
     public function process()

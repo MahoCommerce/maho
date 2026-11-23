@@ -22,7 +22,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
     /**
      * Prepare related orders collection
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareCollection()
@@ -91,7 +91,7 @@ class Mage_Sales_Block_Adminhtml_Billing_Agreement_View_Tab_Orders extends Mage_
     /**
      * Remove import/export field from grid
      *
-     * @return bool
+     * @return false
      */
     #[\Override]
     public function getExportTypes()

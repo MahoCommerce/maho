@@ -7,6 +7,10 @@
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Weee
  */
+
+/**
+ * @extends Mage_Catalog_Model_Product_Attribute_Backend_Price<Mage_Catalog_Model_Product>
+ */
 class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Product_Attribute_Backend_Price
 {
     /**
@@ -101,7 +105,7 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
 
     /**
      * @param Mage_Catalog_Model_Product $object
-     * @return $this|Mage_Catalog_Model_Product_Attribute_Backend_Price
+     * @return $this
      */
     #[\Override]
     public function afterSave($object)

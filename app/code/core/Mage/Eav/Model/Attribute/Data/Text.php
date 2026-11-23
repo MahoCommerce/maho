@@ -26,8 +26,8 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Validate data
      * Return true or array of errors
      *
-     * @param string|bool|null $value
-     * @return bool|array
+     * @param array|string|false|null $value
+     * @return true|array<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -39,6 +39,10 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
         if ($value === false) {
             // try to load original value and validate it
             $value = $this->getEntity()->getDataUsingMethod($attribute->getAttributeCode());
+        }
+
+        if (is_array($value)) {
+            return [Mage::helper('eav')->__('The value of attribute "%s" contains invalid data.', $label)];
         }
 
         if ($this->isRequired() && (string) $value === '') {

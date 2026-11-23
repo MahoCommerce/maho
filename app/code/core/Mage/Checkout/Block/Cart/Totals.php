@@ -17,7 +17,7 @@ class Mage_Checkout_Block_Cart_Totals extends Mage_Checkout_Block_Cart_Abstract
     protected ?array $_totals = null;
 
     /**
-     * @return array|null
+     * @return array
      */
     #[\Override]
     public function getTotals()

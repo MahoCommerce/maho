@@ -1108,7 +1108,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Processing additional validation to check is carrier applicable.
      *
-     * @return Mage_Shipping_Model_Carrier_Abstract|Mage_Shipping_Model_Rate_Result_Error|bool
+     * @return $this|Mage_Shipping_Model_Rate_Result_Error|false
      */
     #[\Override]
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
@@ -1135,7 +1135,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Show default error
      *
-     * @return bool|Mage_Shipping_Model_Rate_Result_Error
+     * @return Mage_Shipping_Model_Rate_Result_Error|false
      */
     protected function _showError()
     {

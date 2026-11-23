@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Catalog_Model_Product>
+ */
 class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Urlkey extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**

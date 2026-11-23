@@ -17,10 +17,10 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid_Filter_Type extends Mage_A
     ];
 
     /**
-     * @return array
+     * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         $result = [];
         foreach (self::$_types as $code => $label) {

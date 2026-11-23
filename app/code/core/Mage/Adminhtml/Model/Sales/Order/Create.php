@@ -776,7 +776,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
      * $config can be either buyRequest config, or just qty
      *
      * @param   int|Mage_Catalog_Model_Product $product
-     * @param float|array|\Maho\DataObject $config
+     * @param \Maho\DataObject|array|int|float|string|null $config
      * @return  Mage_Adminhtml_Model_Sales_Order_Create
      */
     #[\Override]

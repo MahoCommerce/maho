@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TModel of \Maho\DataObject = \Maho\DataObject
+ * @implements Mage_Eav_Model_Entity_Attribute_Backend_Interface<TModel>
+ */
 abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_Eav_Model_Entity_Attribute_Backend_Interface
 {
     /**
@@ -185,7 +189,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Validate object
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this|bool
      * @throws Mage_Eav_Exception|Mage_Core_Exception
      */
@@ -229,7 +233,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After load method
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this
      */
     #[\Override]
@@ -241,7 +245,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Before save method
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this
      */
     #[\Override]
@@ -258,7 +262,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After save method
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this
      */
     #[\Override]
@@ -270,7 +274,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Before delete method
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this
      */
     #[\Override]
@@ -282,7 +286,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After delete method
      *
-     * @param \Maho\DataObject $object
+     * @param TModel $object
      * @return $this
      */
     #[\Override]

@@ -8,13 +8,17 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @template TModel of \Maho\DataObject = \Maho\DataObject
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<TModel>
+ */
 class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
      * Set Attribute instance
      * Rewrite for redefine attribute scope
      *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return $this
      */
     #[\Override]
@@ -28,7 +32,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Price extends Mage_Eav_Model_
     /**
      * Redefine Attribute scope
      *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return $this
      */
     public function setScope($attribute)

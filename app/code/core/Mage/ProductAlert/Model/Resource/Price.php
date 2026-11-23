@@ -8,6 +8,9 @@
  * @package Mage_ProductAlert
  */
 
+/**
+ * @extends Mage_ProductAlert_Model_Resource_Abstract<Mage_ProductAlert_Model_Price>
+ */
 class Mage_ProductAlert_Model_Resource_Price extends Mage_ProductAlert_Model_Resource_Abstract
 {
     #[\Override]

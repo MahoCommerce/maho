@@ -32,13 +32,13 @@ abstract class Mage_Core_Model_Resource_Abstract
 
     /**
      * Retrieve connection for read data
-     * @return Maho\Db\Adapter\AdapterInterface
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     abstract protected function _getReadAdapter();
 
     /**
      * Retrieve connection for write data
-     * @return Maho\Db\Adapter\AdapterInterface
+     * @return Maho\Db\Adapter\AdapterInterface|false
      */
     abstract protected function _getWriteAdapter();
 

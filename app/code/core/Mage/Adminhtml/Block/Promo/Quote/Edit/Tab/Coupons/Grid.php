@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Grid extends Mage_Adminh
     /**
      * Define grid columns
      *
-     * @return Mage_Adminhtml_Block_Widget_Grid
+     * @return $this
      */
     #[\Override]
     protected function _prepareColumns()

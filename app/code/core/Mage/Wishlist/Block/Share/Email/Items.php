@@ -37,7 +37,7 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
     /**
      * Retrieve Product View URL
      *
-     * @param Mage_Catalog_Model_Product $product
+     * @param Mage_Wishlist_Model_Item|Mage_Catalog_Model_Product $product
      * @param array $additional
      * @return string
      */
@@ -79,7 +79,7 @@ class Mage_Wishlist_Block_Share_Email_Items extends Mage_Wishlist_Block_Abstract
     /**
      * Check whether wishlist item has description
      *
-     * @param Mage_Wishlist_Model_Item $item
+     * @param Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
      * @return bool
      */
     #[\Override]

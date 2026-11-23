@@ -28,7 +28,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
     /**
      * Check whether method is available
      *
-     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Sales_Model_Quote|null $quote
      * @return bool
      */
     #[\Override]
@@ -53,7 +53,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
      * Assign data to info model instance
      *
      * @param mixed $data
-     * @return Mage_Payment_Model_Method_Abstract
+     * @return $this
      * @throws Mage_Core_Exception
      */
     #[\Override]

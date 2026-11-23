@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Source_Abstract<Mage_Catalog_Model_Resource_Collection_Abstract>
+ */
 abstract class Mage_Catalog_Model_Product_Attribute_Source_Abstract extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**
@@ -41,9 +44,6 @@ abstract class Mage_Catalog_Model_Product_Attribute_Source_Abstract extends Mage
         return $this->getOptionArray()[(int) $value] ?? false;
     }
 
-    /**
-     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
-     */
     #[\Override]
     public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = Maho\Db\Select::SQL_ASC): static
     {

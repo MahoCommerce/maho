@@ -173,7 +173,7 @@ abstract class Mage_Eav_Model_Resource_Attribute_Collection extends Mage_Eav_Mod
      * Specify attribute entity type filter.
      * Entity type is defined.
      *
-     * @param  int $type
+     * @param  Mage_Eav_Model_Entity_Type|int $type
      * @return $this
      */
     #[\Override]

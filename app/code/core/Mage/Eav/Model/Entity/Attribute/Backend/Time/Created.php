@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract<Mage_Core_Model_Abstract>
+ */
 class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
@@ -52,7 +55,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Mode
     /**
      * Convert create date from UTC to current store time zone
      *
-     * @param \Maho\DataObject $object
+     * @param Mage_Core_Model_Abstract $object
      * @return $this
      */
     #[\Override]

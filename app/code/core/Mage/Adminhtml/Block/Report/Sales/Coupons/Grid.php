@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @extends Mage_Adminhtml_Block_Report_Grid_Abstract<Mage_SalesRule_Model_Resource_Report_Collection>
+ */
 class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Block_Report_Grid_Abstract
 {
     #[\Override]
@@ -141,7 +144,7 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
      *
      * @param Mage_SalesRule_Model_Resource_Report_Collection $collection
      * @param \Maho\DataObject $filterData
-     * @return Mage_Adminhtml_Block_Report_Grid_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _addCustomFilter($collection, $filterData)

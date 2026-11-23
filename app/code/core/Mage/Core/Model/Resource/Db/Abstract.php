@@ -8,6 +8,9 @@
  * @package Mage_Core
  */
 
+/**
+ * @template TModel of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
+ */
 abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Resource_Abstract
 {
     /**
@@ -338,6 +341,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Load an object
      *
+     * @param TModel $object
      * @param string|null $field field to load by (defaults to model id)
      * @return $this
      */
@@ -375,6 +379,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve select object for load object data
      *
+     * @param TModel $object
      * @throws Exception
      */
     protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
@@ -395,6 +400,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Save object object data
      *
+     * @param TModel $object
      * @return $this
      */
     public function save(Mage_Core_Model_Abstract $object)
@@ -452,6 +458,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Delete the object
      *
+     * @param TModel $object
      * @return $this
      * @throws Exception
      */
@@ -496,6 +503,8 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Un-serialize serializable object fields
+     *
+     * @param TModel $object
      */
     public function unserializeFields(Mage_Core_Model_Abstract $object): void
     {
@@ -532,6 +541,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Prepare data for save
      *
+     * @param TModel $object
      * @return array
      */
     protected function _prepareDataForSave(Mage_Core_Model_Abstract $object)
@@ -543,7 +553,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
      * Check that model data fields that can be saved
      * has really changed comparing with origData
      *
-     * @param Mage_Core_Model_Abstract $object
+     * @param TModel $object
      * @return bool
      */
     public function hasDataChanged($object)
@@ -588,6 +598,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Check for unique values existence
      *
+     * @param TModel $object
      * @return $this
      * @throws Mage_Core_Exception_Conflict
      */
@@ -646,6 +657,8 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * After load
+     *
+     * @param TModel $object
      */
     public function afterLoad(Mage_Core_Model_Abstract $object): void
     {
@@ -655,6 +668,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Perform actions after object load
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
@@ -665,6 +679,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Perform actions before object save
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -675,6 +690,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Perform actions after object save
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -685,6 +701,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Perform actions before object delete
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _beforeDelete(Mage_Core_Model_Abstract $object)
@@ -695,6 +712,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Perform actions after object delete
      *
+     * @param TModel $object
      * @return $this
      */
     protected function _afterDelete(Mage_Core_Model_Abstract $object)
@@ -704,6 +722,8 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Serialize serializable fields of the object
+     *
+     * @param TModel $object
      */
     protected function _serializeFields(Mage_Core_Model_Abstract $object): void
     {

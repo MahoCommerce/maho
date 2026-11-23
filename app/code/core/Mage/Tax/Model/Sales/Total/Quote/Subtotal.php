@@ -104,7 +104,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * and subtotal including/excluding tax.
      * Determine discount price if needed
      *
-     * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
+     * @return $this
      */
     #[\Override]
     public function collect(Mage_Sales_Model_Quote_Address $address)

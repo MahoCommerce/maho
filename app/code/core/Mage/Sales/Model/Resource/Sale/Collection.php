@@ -92,7 +92,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends \Maho\Data\Collection\Db
     /**
      * Before load action
      *
-     * @return \Maho\Data\Collection\Db
+     * @return $this
      */
     #[\Override]
     protected function _beforeLoad()
@@ -137,7 +137,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends \Maho\Data\Collection\Db
      *
      * @param bool $printQuery
      * @param bool $logQuery
-     * @return \Maho\Data\Collection\Db
+     * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]

@@ -8,6 +8,10 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @template TRow of \Maho\DataObject = \Maho\DataObject
+ * @extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract<TRow>
+ */
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     /**

@@ -1034,7 +1034,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * '2'054.52' = 2054.52
      * '2,46 GB' = 2.46
      *
-     * @param string|float|int $value
+     * @param string|float|int|null $value
      */
     public function getNumber(mixed $value): ?float
     {

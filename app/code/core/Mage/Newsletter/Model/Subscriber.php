@@ -82,13 +82,13 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
     /**
      * Alias for setSubscriberId()
      *
-     * @param int $value
-     * @return static
+     * @return $this
      */
     #[\Override]
     public function setId($value)
     {
-        return $this->setSubscriberId($value);
+        $this->setSubscriberId($value);
+        return $this;
     }
 
     /**

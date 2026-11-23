@@ -8,6 +8,9 @@
  * @package Mage_Cms
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Cms_Model_Block>
+ */
 class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

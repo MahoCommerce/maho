@@ -1,12 +1,16 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Adminhtml
  */
 
+/**
+ * @template TItem of \Maho\DataObject = \Maho\DataObject
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
     /**
@@ -26,14 +30,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
         return $this->_sidebarStorageAction;
     }
 
-    /**
-     * Retrieve display block availability
-     *
-     * @return int
-     */
-    public function canDisplay()
+    public function canDisplay(): bool
     {
-        return $this->getCustomerId();
+        return (bool) $this->getCustomerId();
     }
 
     /**
@@ -57,10 +56,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve identifier of block item
      *
-     * @param \Maho\DataObject $item
-     * @return  int
+     * @param TItem $item
      */
-    public function getIdentifierId($item)
+    public function getIdentifierId(\Maho\DataObject $item): ?int
     {
         return $item->getProductId();
     }
@@ -68,7 +66,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve item identifier of block item
      *
-     * @param   mixed $item
+     * @param   TItem $item
      * @return  int
      */
     public function getItemId($item)
@@ -79,7 +77,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve product identifier linked with item
      *
-     * @param   mixed $item
+     * @param   TItem $item
      * @return  int
      */
     public function getProductId($item)

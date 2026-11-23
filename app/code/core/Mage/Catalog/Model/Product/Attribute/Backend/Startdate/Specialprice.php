@@ -37,7 +37,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
      * Prepare attribute value for save
      *
      * @param \Maho\DataObject $object
-     * @return Mage_Catalog_Model_Product_Attribute_Backend_Startdate
+     * @return $this
      */
     #[\Override]
     public function beforeSave($object)

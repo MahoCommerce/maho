@@ -17,7 +17,7 @@ interface FilterInterface
      * Returns the result of filtering $value
      *
      * @param string $value
-     * @return string
+     * @return string|null
      */
     public function inputFilter($value);
 

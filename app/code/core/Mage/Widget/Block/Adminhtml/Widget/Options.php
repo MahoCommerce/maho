@@ -106,7 +106,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Options extends Mage_Adminhtml_Block_Wi
      * Add field to Options form based on parameter configuration
      *
      * @param \Maho\DataObject $parameter
-     * @return \Maho\Data\Form\Element\AbstractElement
+     * @return \Maho\Data\Form\Element\AbstractElement|false
      */
     protected function _addField($parameter)
     {

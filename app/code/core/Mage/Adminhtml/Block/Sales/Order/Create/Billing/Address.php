@@ -61,11 +61,9 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Billing_Address extends Mage_Admin
 
     /**
      * Return customer address id
-     *
-     * @return int|bool
      */
     #[\Override]
-    public function getAddressId()
+    public function getAddressId(): ?int
     {
         return $this->getCreateOrderModel()->getBillingAddress()->getCustomerAddressId();
     }

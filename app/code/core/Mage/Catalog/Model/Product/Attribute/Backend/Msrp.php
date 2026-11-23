@@ -14,7 +14,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Msrp extends Mage_Catalog_Mod
      * Disable MAP if it's bundle with dynamic price type
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return Mage_Catalog_Model_Product_Attribute_Backend_Boolean|Mage_Catalog_Model_Product_Attribute_Backend_Msrp
+     * @return $this
      */
     #[\Override]
     public function beforeSave($product)

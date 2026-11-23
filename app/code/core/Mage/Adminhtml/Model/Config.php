@@ -83,7 +83,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
 
     /**
      * @param array|null $tags
-     * @return $this|Mage_Adminhtml_Model_Config
+     * @return $this
      */
     #[\Override]
     public function saveCache($tags = null)

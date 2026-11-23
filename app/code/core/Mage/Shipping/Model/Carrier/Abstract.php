@@ -166,7 +166,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     /**
      * Get allowed containers of carrier
      *
-     * @return array|bool
+     * @return array
      */
     protected function _getAllowedContainers(?\Maho\DataObject $params = null)
     {
@@ -272,7 +272,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
     /**
      * Processing additional validation to check is carrier applicable.
      *
-     * @return $this
+     * @return $this|Mage_Shipping_Model_Rate_Result_Error|false
      */
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
@@ -545,7 +545,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
      * Determine whether zip-code is required for the country of destination
      *
      * @param string|null $countryId
-     * @return false
+     * @return bool
      */
     public function isZipCodeRequired($countryId = null)
     {

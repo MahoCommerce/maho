@@ -100,15 +100,15 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
      *     ['attribute'=>'lastname', 'like'=>'test%'],
      * ]
      *
-     * @param string $field
-     * @param null|string|array $condition
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract
+     * @param string|array $field
+     * @param int|string|array|null $condition
+     * @return $this
      * @see self::_getConditionSql for $condition
      */
     #[\Override]
     public function addFieldToFilter($field, $condition = null)
     {
-        if (isset($this->_fields[$field])) {
+        if (is_string($field) && isset($this->_fields[$field])) {
             $field = $this->_fields[$field];
         }
 

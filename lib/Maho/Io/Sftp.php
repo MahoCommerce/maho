@@ -22,9 +22,8 @@ class Sftp extends \Maho\Io
     protected $_connection = null; // @phpstan-ignore class.notFound
 
     /**
-     * Open a SFTP connection to a remote site.
+     * Open a SFTP connection to a remote site. $args takes the keys host, username, password and timeout.
      *
-     * @param array{host?: mixed, username?: mixed, password?: mixed, timeout?: int} $args Connection arguments
      * @throws \Exception
      */
     #[\Override]

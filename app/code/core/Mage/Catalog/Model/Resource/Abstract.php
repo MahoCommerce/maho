@@ -8,6 +8,10 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @template TModel of Mage_Catalog_Model_Abstract = Mage_Catalog_Model_Abstract
+ * @extends Mage_Eav_Model_Entity_Abstract<TModel>
+ */
 abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entity_Abstract
 {
     /**
@@ -42,7 +46,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Check whether the attribute is Applicable to the object
      *
      * @param \Maho\DataObject $object
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return bool
      */
     #[\Override]
@@ -155,9 +159,9 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Initialize attribute value for object
      *
-     * @param Mage_Catalog_Model_Abstract $object
+     * @param TModel $object
      * @param array $valueRow
-     * @return Mage_Catalog_Model_Resource_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _setAttributeValue($object, $valueRow)
@@ -198,7 +202,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Mage_Catalog_Model_Abstract|\Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value
-     * @return Mage_Catalog_Model_Resource_Abstract
+     * @return $this
      * @throws \InvalidArgumentException
      */
     protected function _saveAttributeValue($object, $attribute, $value)
@@ -287,7 +291,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param \Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $value
-     * @return Mage_Catalog_Model_Resource_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _insertAttribute($object, $attribute, $value)
@@ -334,7 +338,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $valueId
      * @param mixed $value
-     * @return Mage_Catalog_Model_Resource_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _updateAttribute($object, $attribute, $valueId, $value)
@@ -398,7 +402,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * @param \Maho\DataObject $object
      * @param string $table
      * @param array $info
-     * @return Mage_Catalog_Model_Resource_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _deleteAttributes($object, $table, $info)
@@ -510,7 +514,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * In a store view, a required attribute on the default value is not missing: the default scope holds its
      * value (not verified here).
      *
-     * @param Mage_Catalog_Model_Abstract $object
+     * @param TModel $object
      * @return array|true
      */
     #[\Override]
@@ -535,7 +539,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Checks also attribute's store scope:
      * We should insert on duplicate key update values if we unchecked 'STORE VIEW' checkbox in store view.
      *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value New value of the attribute.
      * @return bool
      */
@@ -547,6 +550,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     ) {
         $result = parent::_canUpdateAttribute($attribute, $value, $origData);
         if ($result
+            && $attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute
             && ($attribute->isScopeStore() || $attribute->isScopeWebsite())
             && $value == $origData[$attribute->getAttributeCode()]
             && isset($origData['store_id']) && $origData['store_id'] != $this->getDefaultStoreId()

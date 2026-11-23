@@ -33,7 +33,7 @@ class Mage_Cms_Model_Block extends Mage_Core_Model_Abstract
      * Prevent blocks recursion
      *
      * @throws Mage_Core_Exception_Input
-     * @return Mage_Core_Model_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _beforeSave()

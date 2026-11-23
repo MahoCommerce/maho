@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @extends Mage_Eav_Model_Entity_Attribute_Source_Abstract<Mage_Catalog_Model_Resource_Collection_Abstract>
+ */
 class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**
@@ -88,8 +91,6 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
 
     /**
      * Add Value Sort To Collection Select
-     *
-     * @param Mage_Catalog_Model_Resource_Collection_Abstract $collection
      */
     #[\Override]
     public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = Maho\Db\Select::SQL_ASC): static

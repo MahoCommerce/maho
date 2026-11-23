@@ -23,7 +23,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
     /**
      * Perform actions before object save
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      * @throws Mage_Core_Exception_Input when the new code is too long
      * @throws Mage_Core_Exception_Conflict when another coupon has the new code
      */

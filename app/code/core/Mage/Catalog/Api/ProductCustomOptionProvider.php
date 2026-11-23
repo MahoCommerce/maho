@@ -21,6 +21,9 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
 {
     use ProductLoaderTrait;
 
+    /**
+     * @return ProductCustomOption[]|ProductCustomOption|Response
+     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|ProductCustomOption|Response
     {

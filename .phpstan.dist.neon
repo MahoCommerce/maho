@@ -20,8 +20,6 @@ parameters:
     treatPhpDocTypesAsCertain: false
     reportMaybesInPropertyPhpDocTypes: true
 
-    # Disable strict-rules parameters that aren't controlled by allRules
-    reportMaybesInMethodSignatures: false
     fileExtensions:
         - php
         - phtml

@@ -19,7 +19,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
     /**
      * Save options store data
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

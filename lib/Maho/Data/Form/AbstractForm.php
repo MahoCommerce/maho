@@ -110,7 +110,7 @@ abstract class AbstractForm extends \Maho\DataObject
      * @param   string $elementId
      * @param   string $type
      * @param   array  $config
-     * @param   mixed  $after
+     * @param   string|false $after
      * @return AbstractElement
      */
     public function addField($elementId, $type, $config, $after = false)

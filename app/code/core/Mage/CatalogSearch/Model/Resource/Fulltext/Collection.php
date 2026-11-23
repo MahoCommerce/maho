@@ -64,7 +64,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
     /**
      * Before load handler
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection
+     * @return $this
      */
     #[\Override]
     protected function _beforeLoad()
@@ -211,7 +211,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Collection extends Mage_Catalog
     /**
      * Render sql select orders
      *
-     * @return \Maho\Data\Collection\Db
+     * @return $this
      */
     #[\Override]
     protected function _renderOrders()

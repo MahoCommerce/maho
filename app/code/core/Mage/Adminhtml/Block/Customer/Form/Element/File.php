@@ -142,7 +142,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\El
     /**
      * Return Preview/Download URL
      *
-     * @return string
+     * @return string|false
      */
     protected function _getPreviewUrl()
     {

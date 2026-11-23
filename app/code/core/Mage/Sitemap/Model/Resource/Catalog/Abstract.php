@@ -49,7 +49,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
      * Retrieve catalog collection
      *
      * @param int $storeId
-     * @return array
+     * @return array|false
      */
     abstract public function getCollection($storeId);
 

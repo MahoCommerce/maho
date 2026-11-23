@@ -345,7 +345,8 @@ class Mage_Catalog_Service_Product
 
     /**
      * Check the value of each attribute of $data with the backend of the attribute. An unknown attribute and a
-     * static attribute are skipped.
+     * static attribute are skipped. A field that a condition of an attribute reads and that $data does not hold has
+     * no known value, so that condition does not hide the attribute and does not make it required.
      *
      * @param array<string, mixed> $data the value of each attribute, by attribute code
      * @return array<string, mixed> the values of $data that a mass change writes
@@ -353,18 +354,28 @@ class Mage_Catalog_Service_Product
      */
     public function validateAttributes(array $data): array
     {
-        $values = new \Maho\DataObject();
-        foreach ($data as $code => $value) {
+        $values = Mage::getModel('catalog/product')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)->addData($data);
+        foreach (array_keys($data) as $code) {
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Product::ENTITY, $code);
             if (!$attribute || !$attribute->getAttributeId() || $attribute->getBackend()->isStatic()) {
                 unset($data[$code]);
                 continue;
             }
-            $values->setData($code, $value);
+            foreach ([$attribute->getDependsOn(), $attribute->getRequiredWhen()] as $condition) {
+                foreach ($condition === null ? [] : \Maho\Data\Form\Condition::fields($condition) as $field) {
+                    if (!array_key_exists($field, $data)) {
+                        $values->setData($field, false);
+                    }
+                }
+            }
+            $label = (string) $attribute->getFrontendLabel();
             try {
-                $attribute->getBackend()->validate($values);
-            } catch (Mage_Eav_Model_Entity_Attribute_Exception $e) {
-                throw new Mage_Core_Exception_Input()->addError($code, $attribute->getFrontendLabel() . ': ' . $e->getMessage());
+                $valid = $attribute->getBackend()->validate($values);
+            } catch (Mage_Core_Exception $e) {
+                throw new Mage_Core_Exception_Input()->addError($code, $label . ': ' . $e->getMessage());
+            }
+            if ($valid === false || $data[$code] === '' && Mage::helper('eav')->isRequired($values, $attribute)) {
+                throw new Mage_Core_Exception_Input()->addError($code, Mage::helper('eav')->__('"%s" is a required value.', $label));
             }
         }
         return $data;

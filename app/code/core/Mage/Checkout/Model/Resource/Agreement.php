@@ -19,7 +19,7 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
     /**
      * Method to run before save
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
@@ -52,7 +52,7 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
     /**
      * Method to run after save
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
@@ -73,7 +73,7 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
     /**
      * Method to run after load
      *
-     * @return Mage_Core_Model_Resource_Db_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _afterLoad(Mage_Core_Model_Abstract $object)

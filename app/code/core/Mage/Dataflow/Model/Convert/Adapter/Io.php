@@ -11,7 +11,7 @@
 class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     /**
-     * @return \Maho\Io\IoInterface|false
+     * @return \Maho\Io\IoInterface
      */
     #[\Override]
     public function getResource(bool $forWrite = false)

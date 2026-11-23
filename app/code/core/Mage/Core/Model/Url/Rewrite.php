@@ -44,7 +44,7 @@ class Mage_Core_Model_Url_Rewrite extends Mage_Core_Model_Abstract implements Ma
     /**
      * Clean cache for front-end menu
      *
-     * @return  Mage_Core_Model_Url_Rewrite
+     * @return $this
      */
     #[\Override]
     protected function _afterSave()

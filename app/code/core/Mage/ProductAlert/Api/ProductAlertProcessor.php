@@ -20,9 +20,6 @@ use Mage_ProductAlert_Model_Type as Type;
  */
 final class ProductAlertProcessor extends \Maho\ApiPlatform\Processor
 {
-    /**
-     * @param ProductAlert|null $data
-     */
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?ProductAlert
     {

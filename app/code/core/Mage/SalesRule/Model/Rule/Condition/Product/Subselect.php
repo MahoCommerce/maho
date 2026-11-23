@@ -27,7 +27,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
     /**
      * @param array $arr
      * @param string $key
-     * @return $this|Mage_SalesRule_Model_Rule_Condition_Product_Combine
+     * @return $this
      */
     #[\Override]
     public function loadArray($arr, $key = 'conditions')
@@ -52,7 +52,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
     }
 
     /**
-     * @return $this|Mage_SalesRule_Model_Rule_Condition_Product_Combine
+     * @return $this
      */
     #[\Override]
     public function loadAttributeOptions()
@@ -65,7 +65,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
     }
 
     /**
-     * @return $this|Mage_SalesRule_Model_Rule_Condition_Product_Combine
+     * @return $this
      */
     #[\Override]
     public function loadValueOptions()
@@ -74,7 +74,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
     }
 
     /**
-     * @return $this|Mage_SalesRule_Model_Rule_Condition_Product_Combine
+     * @return $this
      */
     #[\Override]
     public function loadOperatorOptions()

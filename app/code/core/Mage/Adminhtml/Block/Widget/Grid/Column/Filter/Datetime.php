@@ -115,7 +115,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
     /**
      * Return escaped value for calendar
      *
-     * @param string $index
+     * @param ?string $index
      * @return string
      */
     #[\Override]

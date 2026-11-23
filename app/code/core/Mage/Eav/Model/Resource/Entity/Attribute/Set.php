@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Entity_Attribute_Set>
+ */
 class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

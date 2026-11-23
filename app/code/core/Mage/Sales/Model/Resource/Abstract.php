@@ -10,11 +10,16 @@
 
 declare(strict_types=1);
 
+/**
+ * @template TModel of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
+ * @extends Mage_Core_Model_Resource_Db_Abstract<TModel>
+ */
 abstract class Mage_Sales_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
      * Prepare data for save
      *
+     * @param TModel $object
      * @return array
      */
     #[\Override]

@@ -1805,7 +1805,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Return container types of carrier
      *
-     * @return array|bool
+     * @return array
      */
     #[\Override]
     public function getContainerTypes(?\Maho\DataObject $params = null)

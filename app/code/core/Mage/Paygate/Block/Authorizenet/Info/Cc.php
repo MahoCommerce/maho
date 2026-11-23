@@ -41,15 +41,32 @@ class Mage_Paygate_Block_Authorizenet_Info_Cc extends Mage_Payment_Block_Info_Cc
     /**
      * Retrieve card info object
      *
-     * @return mixed
+     * @return Mage_Payment_Model_Info
      */
     #[\Override]
     public function getInfo()
     {
-        if ($this->hasCardInfoObject()) {
-            return $this->getCardInfoObject();
+        $cardInfo = $this->getCardInfoObject();
+        if (!$cardInfo instanceof \Maho\DataObject) {
+            return parent::getInfo();
         }
-        return parent::getInfo();
+        if (!$cardInfo instanceof Mage_Payment_Model_Info) {
+            $cardInfo = Mage::getModel('payment/info')->setData($cardInfo->getData());
+            $this->setCardInfoObject($cardInfo);
+        }
+        return $cardInfo;
+    }
+
+    /**
+     * A card info object has no payment method, so it always renders in secure mode.
+     */
+    #[\Override]
+    public function getIsSecureMode()
+    {
+        if (!$this->hasIsSecureMode() && $this->getCardInfoObject() instanceof \Maho\DataObject) {
+            return true;
+        }
+        return parent::getIsSecureMode();
     }
 
     /**

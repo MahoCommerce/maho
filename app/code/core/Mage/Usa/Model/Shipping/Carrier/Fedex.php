@@ -1182,7 +1182,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Return container types of carrier
      *
-     * @return array|bool
+     * @return array
      */
     #[\Override]
     public function getContainerTypes(?\Maho\DataObject $params = null)

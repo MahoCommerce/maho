@@ -720,7 +720,7 @@ class Collection implements IteratorAggregate, Countable
     /**
      * Retrieve count of collection loaded items
      *
-     * @return int
+     * @return int<0, max>
      */
     #[\ReturnTypeWillChange]
     #[\Override]

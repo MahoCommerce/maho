@@ -176,7 +176,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
     /**
      * Sort items
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection
+     * @return $this
      */
     #[\Override]
     protected function _afterLoad()

@@ -214,7 +214,7 @@ class Mage_Catalog_Model_Resource_Collection_Abstract extends Mage_Eav_Model_Ent
      * @param array $condition
      * @param string $fieldCode
      * @param string $fieldAlias
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
+     * @return $this
      */
     #[\Override]
     protected function _joinAttributeToSelect($method, $attribute, $tableAlias, $condition, $fieldCode, $fieldAlias)

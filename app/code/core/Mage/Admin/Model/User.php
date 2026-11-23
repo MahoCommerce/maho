@@ -285,13 +285,8 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return $this->getFirstname() . $separator . $this->getLastname();
     }
 
-    /**
-     * Retrieve user identifier
-     *
-     * @return mixed
-     */
     #[\Override]
-    public function getId()
+    public function getId(): ?int
     {
         return $this->getUserId();
     }

@@ -63,35 +63,37 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Implementation of ArrayAccess:offsetSet()
      *
-     * @param mixed $key
-     * @param mixed $value
+     * @param array-key|null $key
+     * @param AbstractElement $value
      */
     #[\Override]
-    public function offsetSet($key, $value): void
+    public function offsetSet(mixed $key, mixed $value): void
     {
-        $this->_elements[$key] = $value;
+        if ($key === null) {
+            $this->_elements[] = $value;
+        } else {
+            $this->_elements[$key] = $value;
+        }
     }
 
     /**
      * Implementation of ArrayAccess:offsetGet()
      *
-     * @param mixed $key
-     * @return mixed
+     * @param array-key $key
      */
-    #[\ReturnTypeWillChange]
     #[\Override]
-    public function offsetGet($key)
+    public function offsetGet(mixed $key): ?AbstractElement
     {
-        return $this->_elements[$key];
+        return $this->_elements[$key] ?? null;
     }
 
     /**
      * Implementation of ArrayAccess:offsetUnset()
      *
-     * @param mixed $key
+     * @param array-key $key
      */
     #[\Override]
-    public function offsetUnset($key): void
+    public function offsetUnset(mixed $key): void
     {
         unset($this->_elements[$key]);
     }
@@ -99,10 +101,10 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Implementation of ArrayAccess:offsetExists()
      *
-     * @param mixed $key
+     * @param array-key $key
      */
     #[\Override]
-    public function offsetExists($key): bool
+    public function offsetExists(mixed $key): bool
     {
         return isset($this->_elements[$key]);
     }

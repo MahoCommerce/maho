@@ -437,6 +437,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /**
      * Authorize payment abstract method
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */
@@ -451,6 +452,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /**
      * Capture payment abstract method
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */
@@ -493,6 +495,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /**
      * Refund specified amount for payment
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
      * @return $this
      */
@@ -520,6 +523,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /**
      * Cancel payment abstract method
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
     public function cancel(\Maho\DataObject $payment)
@@ -530,6 +534,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     /**
      * Void payment abstract method
      *
+     * @param Mage_Sales_Model_Order_Payment $payment
      * @return $this
      */
     public function void(\Maho\DataObject $payment)
@@ -739,7 +744,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
      * Get config payment action url
      * Used to universalize payment actions when processing payment place
      *
-     * @return string
+     * @return string|null
      */
     public function getConfigPaymentAction()
     {

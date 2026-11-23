@@ -8,8 +8,12 @@
  * @package Mage_Page
  */
 
+/**
+ * @template TCollection of \Maho\Data\Collection = \Maho\Data\Collection
+ */
 class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
 {
+    /** @var TCollection|null */
     protected ?\Maho\Data\Collection $_collection = null;
     protected string $_pageVarName    = 'p';
     protected string $_limitVarName   = 'limit';
@@ -104,7 +108,7 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
     /**
      * Set collection for pagination
      *
-     * @param \Maho\Data\Collection $collection
+     * @param TCollection $collection
      * @return $this
      */
     public function setCollection($collection)
@@ -121,6 +125,9 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
         return $this;
     }
 
+    /**
+     * @return TCollection|null
+     */
     public function getCollection(): ?\Maho\Data\Collection
     {
         return $this->_collection;

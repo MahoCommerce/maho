@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
     /**
      * Returns value of the row
      *
-     * @return mixed|string
+     * @return mixed
      */
     #[\Override]
     protected function _getValue(\Maho\DataObject $row)

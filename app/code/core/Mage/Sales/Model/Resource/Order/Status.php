@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Sales_Model_Order_Status>
+ */
 class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -69,7 +72,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
     /**
      * Save status labels per store
      *
-     * @param Mage_Sales_Model_Order|Mage_Sales_Model_Order_Status $object
+     * @param Mage_Sales_Model_Order_Status $object
      */
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)

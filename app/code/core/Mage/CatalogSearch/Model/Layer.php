@@ -8,6 +8,9 @@
  * @package Mage_CatalogSearch
  */
 
+/**
+ * @extends Mage_Catalog_Model_Layer<Mage_CatalogSearch_Model_Resource_Fulltext_Collection>
+ */
 class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
 {
     public const string XML_PATH_DISPLAY_LAYER_COUNT = 'catalog/search/use_layered_navigation_count';
@@ -34,7 +37,7 @@ class Mage_CatalogSearch_Model_Layer extends Mage_Catalog_Model_Layer
      * Prepare product collection
      *
      * @param Mage_CatalogSearch_Model_Resource_Fulltext_Collection $collection
-     * @return Mage_Catalog_Model_Layer
+     * @return $this
      */
     #[\Override]
     public function prepareProductCollection($collection)

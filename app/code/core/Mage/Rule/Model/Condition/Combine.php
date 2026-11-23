@@ -145,7 +145,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /* end aggregator methods */
 
     /**
-     * @return $this|Mage_Rule_Model_Condition_Abstract
+     * @return $this
      */
     #[\Override]
     public function loadValueOptions()

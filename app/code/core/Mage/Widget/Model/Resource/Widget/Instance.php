@@ -12,6 +12,7 @@
  * @phpstan-type LayoutLink array{store_id: int, area: string, package: string, theme: string}
  * @phpstan-type LayoutUpdate array{layout_update_id: int, handle: string, sort_order: int, xml: string, links: list<LayoutLink>}
  * @phpstan-type LayoutUpdateRemoval array{layout_update_id: int, handle: string, sort_order: int, xml: string, links: list<LayoutLink>, instance_id: int, type: string, reason: string}
+ * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Widget_Model_Widget_Instance>
  */
 class Mage_Widget_Model_Resource_Widget_Instance extends Mage_Core_Model_Resource_Db_Abstract
 {

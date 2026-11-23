@@ -55,43 +55,45 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Implementation of ArrayAccess:offsetSet()
      *
-     * @param array-key $key
+     * @param array-key|null $key
      * @param Node $value
      */
     #[\Override]
     public function offsetSet(mixed $key, mixed $value): void
     {
-        $this->_nodes[$key] = $value;
+        if ($key === null) {
+            $this->_nodes[] = $value;
+        } else {
+            $this->_nodes[$key] = $value;
+        }
     }
 
     /**
      * Implementation of ArrayAccess:offsetGet()
-     * @param string $key
-     * @return mixed|Node
+     * @param array-key $key
      */
-    #[\ReturnTypeWillChange]
     #[\Override]
-    public function offsetGet($key)
+    public function offsetGet(mixed $key): ?Node
     {
-        return $this->_nodes[$key];
+        return $this->_nodes[$key] ?? null;
     }
 
     /**
      * Implementation of ArrayAccess:offsetUnset()
-     * @param string $key
+     * @param array-key $key
      */
     #[\Override]
-    public function offsetUnset($key): void
+    public function offsetUnset(mixed $key): void
     {
         unset($this->_nodes[$key]);
     }
 
     /**
      * Implementation of ArrayAccess:offsetExists()
-     * @param string $key
+     * @param array-key $key
      */
     #[\Override]
-    public function offsetExists($key): bool
+    public function offsetExists(mixed $key): bool
     {
         return isset($this->_nodes[$key]);
     }
