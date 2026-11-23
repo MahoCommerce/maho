@@ -236,33 +236,6 @@ class Db extends Collection
             $countSelect->columns('COUNT(DISTINCT ' . implode(', ', $group) . ')');
         } else {
             $countSelect->columns('COUNT(*)');
-
-            // Simple optimization - remove all joins if:
-            // - there are no where clauses using joined tables
-            // - all joins are left joins
-            // - there are no join conditions using bind params (for simplicity)
-            $leftJoins = array_filter($countSelect->getPart(Select::FROM), fn($table) => $table['joinType'] == Select::LEFT_JOIN || $table['joinType'] == Select::FROM);
-            $mainTable = array_key_first(array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM));
-            if ($mainTable !== null && count($leftJoins) == count($countSelect->getPart(Select::FROM))) {
-                $mainTable = preg_quote($mainTable, '/');
-                $pattern = "/^$mainTable\\.\\w+/";
-                $whereUsingJoin = array_filter($countSelect->getPart(Select::WHERE), function ($clause) use ($pattern): bool {
-                    $clauses = preg_split('/(^|\s+)(AND|OR)\s+/', $clause, -1, PREG_SPLIT_NO_EMPTY);
-                    return array_filter($clauses, function ($clause) use ($pattern): bool {
-                        $clause = preg_replace('/[()`\s]+/', '', $clause);
-                        return !preg_match($pattern, $clause);
-                    }) !== [];
-                });
-                if ($this->_bindParams) {
-                    $bindParams = array_map(fn($placeholder) => ltrim($placeholder, ':'), array_keys($this->_bindParams));
-                    $bindPattern = '/:(' . implode('|', $bindParams) . ')/';
-                    $joinUsingBind = array_filter($leftJoins, fn($table) => !empty($table['joinCondition']) && preg_match($bindPattern, $table['joinCondition']));
-                }
-                if (empty($whereUsingJoin) && empty($joinUsingBind)) {
-                    $from = array_slice($leftJoins, 0, 1);
-                    $countSelect->setPart(Select::FROM, $from);
-                }
-            }
         }
 
         return $countSelect;
