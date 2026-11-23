@@ -517,15 +517,12 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Example: the cataloginventory validation of decimal qty can change qty to int,
      * so need to change quote item qty option value too.
      *
-     * @param   array           $options
-     * @param   mixed           $value
-     * @param   Mage_Catalog_Model_Product $product
-     * @return  Mage_Bundle_Model_Product_Type
+     * @param array<int, Mage_Sales_Model_Quote_Item_Option> $options
      */
     #[\Override]
-    public function updateQtyOption($options, \Maho\DataObject $option, $value, $product = null)
+    public function updateQtyOption(array $options, \Maho\DataObject $option, int|float|null $value, ?Mage_Catalog_Model_Product $product = null): static
     {
-        $optionProduct      = $option->getProduct($product);
+        $optionProduct      = $option->getProduct();
         $optionUpdateFlag   = $option->getHasQtyOptionUpdate();
         $optionCollection   = $this->getOptionsCollection($product);
 
@@ -537,9 +534,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 foreach ($options as &$option) {
                     if ($option->getCode() == 'selection_qty_' . $selection->getSelectionId()) {
                         if ($optionUpdateFlag) {
-                            $option->setValue((int) $option->getValue());
+                            $option->setValue((string) (int) $option->getValue());
                         } else {
-                            $option->setValue($value);
+                            $option->setValue($value === null ? null : (string) $value);
                         }
                     }
                 }

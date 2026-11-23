@@ -793,12 +793,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Example: the cataloginventory validation of decimal qty can change qty to int,
      * so need to change configuration item qty option value too.
      *
-     * @param array $options
-     * @param mixed $value
-     * @param Mage_Catalog_Model_Product $product
-     * @return $this
+     * @param array<int, Mage_Sales_Model_Quote_Item_Option> $options
      */
-    public function updateQtyOption($options, \Maho\DataObject $option, $value, $product = null)
+    public function updateQtyOption(array $options, \Maho\DataObject $option, int|float|null $value, ?Mage_Catalog_Model_Product $product = null): static
     {
         return $this;
     }
