@@ -20,8 +20,11 @@ afterEach(function (): void {
     resetCurrencyState();
 });
 
-/** @param list<array{int, float, float}> $lines */
-function historicRefundLineTaxOrder(array $lines): Mage_Sales_Model_Order
+/**
+ * @param list<array{int, float, float}> $lines
+ * @return array{Mage_Sales_Model_Order, list<Mage_Sales_Model_Order_Item>}
+ */
+function historicRefundLineTaxOrder(array $lines): array
 {
     $order = Mage::getModel('sales/order')->setStoreId((int) Mage::app()->getStore()->getId())
         ->setIncrementId('historic-line-tax-' . uniqid())->setState(Mage_Sales_Model_Order::STATE_PROCESSING)
@@ -37,12 +40,16 @@ function historicRefundLineTaxOrder(array $lines): Mage_Sales_Model_Order
     $tax = array_sum(array_column($lines, 2));
     $order->setSubtotal(16.0 * $quantity)->setBaseSubtotal(20.0 * $quantity)->setTaxAmount($tax)->setBaseTaxAmount($baseTax)
         ->setGrandTotal(16.0 * $quantity + $tax)->setBaseGrandTotal(20.0 * $quantity + $baseTax)->save();
-    return Mage::getModel('sales/order')->load($order->getId());
+    $order = Mage::getModel('sales/order')->load($order->getId());
+    $items = [];
+    foreach (array_keys($lines) as $index) {
+        $items[] = $order->getItemsCollection()->getItemByColumnValue('sku', 'tax-' . $index);
+    }
+    return [$order, $items];
 }
 
 it('keeps VAT already refunded in a historic credit memo header on the returned units', function (?string $fees, bool $linked = true): void {
-    $order = historicRefundLineTaxOrder([[2, -12.0, -9.6], [1, 0.0, 0.0]]);
-    [$taxed, $untaxed] = array_values($order->getAllVisibleItems());
+    [$order, [$taxed, $untaxed]] = historicRefundLineTaxOrder([[2, -12.0, -9.6], [1, 0.0, 0.0]]);
     $service = Mage::getService('sales/order_document');
     $invoice = $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $qtys = ['qtys' => [$taxed->getId() => 1]];
@@ -68,10 +75,9 @@ it('keeps VAT already refunded in a historic credit memo header on the returned 
 ]);
 
 it('keeps the remaining signed VAT on its units after a linked credit and subsequent order refunds', function (array $base, array $display): void {
-    $order = historicRefundLineTaxOrder([
+    [$order, [$shared, $companion, $untaxed]] = historicRefundLineTaxOrder([
         [2, $base[0] + $base[1], $display[0] + $display[1]], [1, $base[2], $display[2]], [1, 0.0, 0.0],
     ]);
-    [$shared, $companion, $untaxed] = array_values($order->getAllVisibleItems());
     $service = Mage::getService('sales/order_document');
     $invoices = [];
     foreach ([$companion, $untaxed] as $index => $other) {
@@ -110,8 +116,7 @@ it('keeps the remaining signed VAT on its units after a linked credit and subseq
 ]);
 
 it('uses a missing historic invoice row tax when the order item belongs to that invoice alone', function (): void {
-    $order = historicRefundLineTaxOrder([[1, 15.0, 12.0], [1, -5.0, -4.0], [1, 5.0, 4.0]]);
-    [$positive, $negative, $other] = array_values($order->getAllVisibleItems());
+    [$order, [$positive, $negative, $other]] = historicRefundLineTaxOrder([[1, 15.0, 12.0], [1, -5.0, -4.0], [1, 5.0, 4.0]]);
     $service = Mage::getService('sales/order_document');
     $invoice = $service->invoice($order, [$positive->getId() => 1, $negative->getId() => 1], captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $order = Mage::getModel('sales/order')->load($order->getId());
@@ -128,8 +133,7 @@ it('uses a missing historic invoice row tax when the order item belongs to that 
 });
 
 it('refunds only the remaining item VAT on an order after a historic single-line credit', function (bool $linked, bool $split, float $recorded, float $fee): void {
-    $order = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0], [1, 5.0, 4.0]]);
-    [$taxed, $negative, $positive] = array_values($order->getAllVisibleItems());
+    [$order, [$taxed, $negative, $positive]] = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0], [1, 5.0, 4.0]]);
     $service = Mage::getService('sales/order_document');
     $quantities = $split ? [$taxed->getId() => 1, $negative->getId() => 1] : [];
     $invoice = $service->invoice($order, $quantities, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
@@ -166,8 +170,7 @@ it('refunds only the remaining item VAT on an order after a historic single-line
 ]);
 
 it('caps the saved line and total tax when a previous credit used a cent from the other invoice', function (bool $reload, bool $single, float $header = 0.0, float $priorTax = 0.01, bool $missing = false, bool $missingCredit = false): void {
-    $order = historicRefundLineTaxOrder([[2, 0.01, 0.01], [1, -0.03, -0.02], [1, 1.00, 0.80]]);
-    [$shared, $first] = array_values($order->getAllVisibleItems());
+    [$order, [$shared, $first]] = historicRefundLineTaxOrder([[2, 0.01, 0.01], [1, -0.03, -0.02], [1, 1.00, 0.80]]);
     $service = Mage::getService('sales/order_document');
     $qty = [$shared->getId() => 1];
     $firstInvoice = $service->invoice($order, $single ? $qty : $qty + [$first->getId() => 1], captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
@@ -220,8 +223,7 @@ it('caps the saved line and total tax when a previous credit used a cent from th
 ]);
 
 it('keeps a known tax payment when later credit memos have missing item VAT', function (float $vat): void {
-    $order = historicRefundLineTaxOrder([[4, $vat, $vat], [1, -0.03, -0.02], [1, 0.0, 0.0]]);
-    [$shared, $negative, $untaxed] = array_values($order->getAllVisibleItems());
+    [$order, [$shared, $negative, $untaxed]] = historicRefundLineTaxOrder([[4, $vat, $vat], [1, -0.03, -0.02], [1, 0.0, 0.0]]);
     $service = Mage::getService('sales/order_document');
     $invoices = [];
     foreach ([$untaxed, $negative, null, null] as $index => $other) {
@@ -260,8 +262,7 @@ it('keeps a known tax payment when later credit memos have missing item VAT', fu
 })->with(['positive VAT' => 0.01, 'negative VAT' => -0.01]);
 
 it('keeps a known VAT amount when an earlier credit memo has an ambiguous fixed tax on a different item', function (float $vat, float $fee): void {
-    $order = historicRefundLineTaxOrder([[1, $vat, $vat * 0.8], [2, -12.0, -9.6]]);
-    [$first, $second] = array_values($order->getAllVisibleItems());
+    [$order, [$first, $second]] = historicRefundLineTaxOrder([[1, $vat, $vat * 0.8], [2, -12.0, -9.6]]);
     foreach ([[$first, $fee], [$second, 1.0]] as [$item, $unitFee]) {
         if ($unitFee > 0.0) {
             $rowFee = $unitFee * $item->getQtyOrdered();
@@ -293,8 +294,7 @@ it('keeps a known VAT amount when an earlier credit memo has an ambiguous fixed 
 })->with(['positive merchandise VAT' => [15.0, 0.0], 'zero merchandise VAT with a fixed tax' => [0.0, 5.0]]);
 
 it('uses the amount attributable to a historic single-line credit', function (float $firstTax, float $paidTax, ?float $recorded = null, float $extra = 0.0, string $evidence = ''): void {
-    $order = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0]]);
-    [$item] = array_values($order->getAllVisibleItems());
+    [$order, [$item]] = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0]]);
     $service = Mage::getService('sales/order_document');
     $qty = [$item->getId() => 1];
     $invoice = $service->invoice($order, $qty, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
@@ -350,8 +350,7 @@ it('uses the amount attributable to a historic single-line credit', function (fl
 ]);
 
 it('checks the historical fee on the invoice that the credit actually returned', function (bool $linked): void {
-    $order = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -2.0, -1.6]]);
-    [$item] = array_values($order->getAllVisibleItems());
+    [$order, [$item]] = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -2.0, -1.6]]);
     $order->setBaseTaxAmount(14.0)->setTaxAmount(11.2)->setBaseGrandTotal(94.0)->setGrandTotal(75.2)->save();
     $service = Mage::getService('sales/order_document');
     $first = $service->invoice($order, [$item->getId() => 2], captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
@@ -377,8 +376,7 @@ it('checks the historical fee on the invoice that the credit actually returned',
 })->with(['linked to the fee-free invoice' => true, 'unlinked credit' => false]);
 
 it('keeps the order item VAT when another historic credit has missing VAT on more than one row', function (): void {
-    $order = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -1.0, -0.8], [1, -1.0, -0.8]]);
-    [$item, $feeItem, $other] = array_values($order->getAllVisibleItems());
+    [$order, [$item, $feeItem, $other]] = historicRefundLineTaxOrder([[3, 15.0, 12.0], [1, -1.0, -0.8], [1, -1.0, -0.8]]);
     $feeItem->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)
         ->setWeeeTaxAppliedRowAmount(0.8)->setBaseWeeeTaxAppliedRowAmount(1.0);
     Mage::helper('weee')->setApplied($feeItem, [['title' => 'Fixed fee', 'amount' => 0.8, 'base_amount' => 1.0, 'row_amount' => 0.8, 'base_row_amount' => 1.0]]);
@@ -415,8 +413,7 @@ it('keeps the order item VAT when another historic credit has missing VAT on mor
 });
 
 it('rounds each remaining unit after a historic credit recorded its VAT only on the header', function (int $sign): void {
-    $order = historicRefundLineTaxOrder([[3, $sign * 0.10, $sign * 0.08], [1, $sign * -0.05, $sign * -0.04]]);
-    [$item, $other] = array_values($order->getAllVisibleItems());
+    [$order, [$item, $other]] = historicRefundLineTaxOrder([[3, $sign * 0.10, $sign * 0.08], [1, $sign * -0.05, $sign * -0.04]]);
     $service = Mage::getService('sales/order_document');
     $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $qty = ['qtys' => [$item->getId() => 1]];
@@ -439,10 +436,9 @@ it('rounds each remaining unit after a historic credit recorded its VAT only on 
 })->with(['positive VAT' => 1, 'negative VAT' => -1]);
 
 it('keeps the item VAT balance when a historic credit has no tax header but records shipping VAT', function (): void {
-    $order = historicRefundLineTaxOrder([[3, -0.10, -0.10], [1, 0.10, 0.10]]);
+    [$order, [$item]] = historicRefundLineTaxOrder([[3, -0.10, -0.10], [1, 0.10, 0.10]]);
     $order->setBaseShippingAmount(1.0)->setShippingAmount(0.8)->setBaseShippingTaxAmount(0.03)->setShippingTaxAmount(0.03)
         ->setBaseTaxAmount(0.03)->setTaxAmount(0.03)->setBaseGrandTotal(81.03)->setGrandTotal(64.83)->save();
-    [$item] = array_values($order->getAllVisibleItems());
     $service = Mage::getService('sales/order_document');
     $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $qty = ['qtys' => [$item->getId() => 1]];
@@ -461,8 +457,7 @@ it('keeps the item VAT balance when a historic credit has no tax header but reco
 });
 
 it('retains a historic header that recorded the exact fractional unit VAT', function (): void {
-    $order = historicRefundLineTaxOrder([[4, 0.10, 0.10], [1, -0.05, -0.05]]);
-    [$item] = array_values($order->getAllVisibleItems());
+    [$order, [$item]] = historicRefundLineTaxOrder([[4, 0.10, 0.10], [1, -0.05, -0.05]]);
     $service = Mage::getService('sales/order_document');
     $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $prior = $service->refund($order, ['qtys' => [$item->getId() => 1]], beforeRegister: static function ($memo): void {
@@ -479,8 +474,7 @@ it('retains a historic header that recorded the exact fractional unit VAT', func
 });
 
 it('uses the documented fixed tax on a different invoice row to confirm the item VAT', function (bool $allocated, bool $onItem = false, bool $badBaseFee = false): void {
-    $order = historicRefundLineTaxOrder([[2, 10.0, 8.0], [1, -2.0, -1.6]]);
-    [$item, $other] = array_values($order->getAllVisibleItems());
+    [$order, [$item, $other]] = historicRefundLineTaxOrder([[2, 10.0, 8.0], [1, -2.0, -1.6]]);
     $charged = $onItem ? $item : $other;
     $units = $charged->getQtyOrdered();
     $charged->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)
@@ -525,8 +519,7 @@ it('uses the documented fixed tax on a different invoice row to confirm the item
 })->with(['allocated fee' => [true], 'unconfirmed fee' => [false], 'fee on the returned item' => [true, true], 'inconsistent base fee' => [true, false, true]]);
 
 it('refunds the signed VAT charged on each historic invoice for the same order item', function (bool $negativeFirst, float $negative, float $otherTax = -0.01): void {
-    $order = historicRefundLineTaxOrder([[2, 0.02 + $negative, 0.02 + $negative], [1, $otherTax, $otherTax], [1, 0.0, 0.0]]);
-    [$shared, $first, $second] = array_values($order->getAllVisibleItems());
+    [$order, [$shared, $first, $second]] = historicRefundLineTaxOrder([[2, 0.02 + $negative, 0.02 + $negative], [1, $otherTax, $otherTax], [1, 0.0, 0.0]]);
     $service = Mage::getService('sales/order_document');
     $invoices = [];
     foreach ([[$first, 0.02], [$second, $negative]] as [$other, $signedTax]) {
