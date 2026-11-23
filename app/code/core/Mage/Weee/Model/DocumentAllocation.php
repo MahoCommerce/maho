@@ -268,7 +268,7 @@ class Mage_Weee_Model_DocumentAllocation
     ): float {
         // An explicit row override determines the whole row. Otherwise keep only the unit
         // customization so that nominal amounts do not replace the persisted allocation.
-        if ((new ReflectionMethod($helper, $rowGetter))->getDeclaringClass()->getName() !== Mage_Weee_Helper_Data::class) {
+        if (new ReflectionMethod($helper, $rowGetter)->getDeclaringClass()->getName() !== Mage_Weee_Helper_Data::class) {
             return 0.0;
         }
         return ($helper->$unitGetter($item) - $native->$unitGetter($item)) * $item->getQty();
