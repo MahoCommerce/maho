@@ -191,7 +191,7 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
         );
         $documents = Mage::getService('sales/order_document');
         $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
-        $calls = new Maho\DataObject();
+        $calls = new Maho\DataObject(['requests' => []]);
         Mage::register('split_shipping_refund_payment_calls', $calls);
         $invoice = $invoices[$gatewayScenario === 'port adjustment' ? 'shipping' : 'discount'];
         $captureId = 'split-shipping-capture-' . uniqid();
@@ -206,18 +206,21 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
                 offlineRefund: false,
                 invoice: $invoice,
             );
-            expect($first->getBaseGrandTotal())->toBe(5.50)->and($calls->getData('amount'))->toBe(5.50);
-            $calls->unsetData('amount');
+            $expectedRequests = [['amount' => 5.50, 'capture' => $captureId]];
+            expect($first->getBaseGrandTotal())->toBe(5.50)
+                ->and($calls->getData('requests'))->toBe($expectedRequests);
             $order = Mage::getModel('sales/order')->load($order->getId());
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
             $portOnly = ['qtys' => [], 'shipping_amount' => 0.50];
             expect(fn() => $documents->refund($order, $portOnly + ['adjustment_positive' => 0.01], offlineRefund: false, invoice: $invoice))
                 ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
-            expect($invoice->getBaseTotalRefunded())->toBe(5.50)->and($calls->getData('amount'))->toBeNull();
+            expect($invoice->getBaseTotalRefunded())->toBe(5.50)
+                ->and($calls->getData('requests'))->toBe($expectedRequests);
             $order = Mage::getModel('sales/order')->load($order->getId());
             $documents->refund($order, $portOnly, offlineRefund: false, invoice: $invoice);
-            expect($calls->getData('amount'))->toBe(0.50);
+            $expectedRequests[] = ['amount' => 0.50, 'capture' => $captureId];
+            expect($calls->getData('requests'))->toBe($expectedRequests);
         } elseif (in_array($gatewayScenario, ['historical', 'unlinked historical'], true)) {
             $first = $documents->refund(
                 $order,
@@ -228,42 +231,52 @@ it('limits online refunds to each invoice in a recognized split shipping pair', 
                     $memo->setBaseDiscountAmount(-5.01)->setBaseGrandTotal(5.99);
                 },
             );
-            expect($first->getBaseGrandTotal())->toBe(5.99);
+            expect($first->getBaseGrandTotal())->toBe(5.99)
+                ->and($calls->getData('requests'))->toBe([]);
             $order = Mage::getModel('sales/order')->load($order->getId());
             expect(fn() => $documents->refund($order, $data, offlineRefund: false, invoice: $invoice))
                 ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
             $order = Mage::getModel('sales/order')->load($order->getId());
-            expect($calls->getData('amount'))->toBeNull()
+            expect($calls->getData('requests'))->toBe([])
                 ->and($order->getBaseTotalRefunded())->toBe(5.99)
                 ->and($order->getCreditmemosCollection()->getSize())->toBe(1);
             $offline = $documents->refund($order, $data, invoice: $invoice);
-            expect($offline->getBaseGrandTotal())->toBe(5.0)->and($calls->getData('amount'))->toBeNull();
+            expect($offline->getBaseGrandTotal())->toBe(5.0)
+                ->and($calls->getData('requests'))->toBe([]);
         } elseif ($gatewayScenario === 'source fee') {
             expect($documents->prepareCreditmemo($order, $data, [], $invoice)->getBaseGrandTotal())->toBe(4.98);
             $memo = $documents->refund($order, $data + ['adjustment_negative' => 0.01], offlineRefund: false, invoice: $invoice);
             expect($memo->getBaseGrandTotal())->toEqualWithDelta(4.97, 0.000001)
-                ->and($calls->getData('amount'))->toEqualWithDelta(4.97, 0.000001);
+                ->and($calls->getData('requests'))->toHaveCount(1)
+                ->and($calls->getData('requests')[0]['capture'])->toBe($captureId)
+                ->and($calls->getData('requests')[0]['amount'])->toEqualWithDelta(4.97, 0.000001);
         } elseif ($gatewayScenario === 'partial balance') {
             $half = ['qtys' => [(int) $items['replacement']->getId() => 0.5]];
             $first = $documents->refund($order, $half, offlineRefund: false, invoice: $invoice);
-            expect($first->getBaseGrandTotal())->toBe(2.49)->and($calls->getData('amount'))->toBe(2.49);
-            $calls->unsetData('amount');
+            $expectedRequests = [['amount' => 2.49, 'capture' => $captureId]];
+            expect($first->getBaseGrandTotal())->toBe(2.49)
+                ->and($calls->getData('requests'))->toBe($expectedRequests);
             $order = Mage::getModel('sales/order')->load($order->getId());
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
             expect(fn() => $documents->refund($order, $half + ['adjustment_positive' => 0.01], offlineRefund: false, invoice: $invoice))
                 ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.');
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
-            expect($invoice->getBaseTotalRefunded())->toBe(2.49)->and($calls->getData('amount'))->toBeNull();
+            expect($invoice->getBaseTotalRefunded())->toBe(2.49)
+                ->and($calls->getData('requests'))->toBe($expectedRequests);
             $order = Mage::getModel('sales/order')->load($order->getId());
             $documents->refund($order, $half, offlineRefund: false, invoice: $invoice);
-            expect($calls->getData('amount'))->toBe(2.50);
+            $expectedRequests[] = ['amount' => 2.50, 'capture' => $captureId];
+            $requests = $calls->getData('requests');
+            expect($requests)->toBe($expectedRequests)
+                ->and(round(array_sum(array_column($requests, 'amount')), 2))->toBe((float) $invoice->getBaseGrandTotal());
         } else {
             if ($gatewayScenario === 'ordinary port') {
                 $data['shipping_amount'] = 1.0;
             }
             $documents->refund($order, $data, offlineRefund: false, invoice: $invoice);
-            expect($calls->getData('amount'))->toBe($gatewayScenario === 'ordinary port' ? 5.99 : 4.99)
-                ->and($calls->getData('capture'))->toBe($captureId);
+            expect($calls->getData('requests'))->toBe([
+                ['amount' => $gatewayScenario === 'ordinary port' ? 5.99 : 4.99, 'capture' => $captureId],
+            ]);
         }
     } finally {
         Mage::unregister('split_shipping_refund_payment_calls');
@@ -374,7 +387,7 @@ it('uses the order shipping discount after the other invoice was already over-re
         expect($pastCreditmemo->getBaseGrandTotal())->toBe(500.0);
 
         $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
-        $calls = new Maho\DataObject();
+        $calls = new Maho\DataObject(['requests' => []]);
         Mage::register('split_shipping_refund_payment_calls', $calls);
         $order = Mage::getModel('sales/order')->load($order->getId());
         foreach ($invoices as $name => $invoice) {
@@ -387,14 +400,18 @@ it('uses the order shipping discount after the other invoice was already over-re
         $small = ['qtys' => [(int) $items['small']->getId() => 1]];
         expect(fn() => $documents->refund($order, $small, offlineRefund: false, invoice: $invoices['discount']))
             ->toThrow(Mage_Core_Exception::class, 'The refund amount exceeds the refundable balance of this invoice.')
-            ->and($calls->getData('amount'))->toBeNull();
+            ->and($calls->getData('requests'))->toBe([]);
         $offline = $documents->refund($order, $small, invoice: $invoices['discount']);
-        expect($offline->getBaseGrandTotal())->toBe(0.05);
+        expect($offline->getBaseGrandTotal())->toBe(0.05)
+            ->and($calls->getData('requests'))->toBe([]);
         $shipping = ['qtys' => [(int) $items['shipping']->getId() => 1]];
+        $shippingCapture = $invoices['shipping']->getTransactionId();
         $remainder = $documents->refund($order, $shipping, offlineRefund: $refundShippingOffline, invoice: $invoices['shipping']);
         $order = Mage::getModel('sales/order')->load($order->getId());
         expect($remainder->getBaseGrandTotal())->toBe(509.0)
-            ->and($calls->getData('amount'))->toBe($refundShippingOffline ? null : 509.0)
+            ->and($calls->getData('requests'))->toBe($refundShippingOffline ? [] : [
+                ['amount' => 509.0, 'capture' => $shippingCapture],
+            ])
             ->and($order->getBaseTotalRefunded())->toBe(1009.05)
             ->and($order->getTotalRefunded())->toBe(0.04);
     } finally {
@@ -504,9 +521,10 @@ final class SplitShippingRefundPaymentDouble extends Mage_Payment_Model_Method_C
     #[\Override]
     public function refund(Maho\DataObject $payment, $amount): static
     {
-        Mage::registry('split_shipping_refund_payment_calls')
-            ->setData('amount', (float) $amount)
-            ->setData('capture', $payment->getParentTransactionId());
+        $calls = Mage::registry('split_shipping_refund_payment_calls');
+        $requests = $calls->getData('requests');
+        $requests[] = ['amount' => (float) $amount, 'capture' => $payment->getParentTransactionId()];
+        $calls->setData('requests', $requests);
         $payment->setTransactionId('split-shipping-refund-' . uniqid());
         return $this;
     }
