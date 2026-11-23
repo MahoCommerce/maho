@@ -126,7 +126,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     }
 
     /**
-     * Loyout xml generation
+     * Generate the layout XML
      */
     public function generateXml(): static
     {

@@ -126,7 +126,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     {
         $this->_allSeries = $this->getRowsData($this->_dataRows);
         foreach ($this->_axisMaps as $axis => $attr) {
-            $this->setAxisLabels($axis, $this->getColumnValues($attr));
+            $this->setAxisLabels($axis, array_map(strval(...), $this->getCollection()->getColumnValues($attr)));
         }
 
         $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
@@ -226,20 +226,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             }
         }
         return $options;
-    }
-
-    /**
-     * Get the value of one attribute in each collection row, such as the date of the row
-     *
-     * @return list<string>
-     */
-    protected function getColumnValues(string $attribute): array
-    {
-        $values = [];
-        foreach ($this->getCollection()->getItems() as $item) {
-            $values[] = (string) $item->getData($attribute);
-        }
-        return $values;
     }
 
     /**

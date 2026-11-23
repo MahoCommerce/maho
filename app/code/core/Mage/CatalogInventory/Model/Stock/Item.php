@@ -204,15 +204,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
 
     /**
      * Adding stock data to product
-     *
-     * @return  $this
      */
-    public function assignProduct(Mage_Catalog_Model_Product $product)
+    public function assignProduct(Mage_Catalog_Model_Product $product): static
     {
         if (!$this->getId() || !$this->getProductId()) {
-            $productId = $product->getId();
-            $this->_getResource()->loadByProductId($this, $productId === null ? null : (int) $productId);
-            $this->setOrigData();
+            $this->loadByProduct($product);
         }
 
         $this->setProduct($product);
