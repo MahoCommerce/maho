@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Maho_ApiPlatform_Model_Oauth_Client>
+ */
 class Maho_ApiPlatform_Model_Resource_Oauth_Client_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

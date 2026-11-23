@@ -15,6 +15,7 @@
  *
  * @method Mage_Customer_Model_Address getItemById(int $value)
  * @method Mage_Customer_Model_Address[] getItems()
+ * @extends Mage_Eav_Model_Entity_Collection_Abstract<Mage_Customer_Model_Address>
  */
 class Mage_Customer_Model_Resource_Address_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {

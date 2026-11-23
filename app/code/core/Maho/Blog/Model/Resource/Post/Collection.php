@@ -8,6 +8,7 @@
 
 /**
  * @method Maho_Blog_Model_Resource_Post getEntity()
+ * @extends Mage_Eav_Model_Entity_Collection_Abstract<Maho_Blog_Model_Post>
  */
 class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {

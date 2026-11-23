@@ -11,6 +11,7 @@
 /**
  * @method Mage_Sales_Model_Order_Payment getItemById(int $value)
  * @method Mage_Sales_Model_Order_Payment[] getItems()
+ * @extends Mage_Sales_Model_Resource_Order_Collection_Abstract<Mage_Sales_Model_Order_Payment>
  */
 class Mage_Sales_Model_Resource_Order_Payment_Collection extends Mage_Sales_Model_Resource_Order_Collection_Abstract
 {

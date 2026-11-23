@@ -11,6 +11,7 @@
 /**
  * @method Mage_Core_Model_Website getItemById(int $value)
  * @method Mage_Core_Model_Website[] getItems()
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Core_Model_Website>
  */
 class Mage_Core_Model_Resource_Website_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

@@ -11,6 +11,7 @@
 /**
  * @method Mage_Sales_Model_Order_Shipment_Item getItemById(int $value)
  * @method Mage_Sales_Model_Order_Shipment_Item[] getItems()
+ * @extends Mage_Sales_Model_Resource_Collection_Abstract<Mage_Sales_Model_Order_Shipment_Item>
  */
 class Mage_Sales_Model_Resource_Order_Shipment_Item_Collection extends Mage_Sales_Model_Resource_Collection_Abstract
 {

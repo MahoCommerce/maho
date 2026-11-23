@@ -8,6 +8,9 @@
  * @package Mage_ProductAlert
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_ProductAlert_Model_Stock>
+ */
 class Mage_ProductAlert_Model_Resource_Stock_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

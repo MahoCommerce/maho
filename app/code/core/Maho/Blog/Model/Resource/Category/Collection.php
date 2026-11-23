@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 /**
  * @method Maho_Blog_Model_Resource_Category getEntity()
+ * @extends Mage_Eav_Model_Entity_Collection_Abstract<Maho_Blog_Model_Category>
  */
 class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {

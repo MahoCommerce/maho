@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Maho_AccessibilityScan_Model_Scan>
+ */
 class Maho_AccessibilityScan_Model_Resource_Scan_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

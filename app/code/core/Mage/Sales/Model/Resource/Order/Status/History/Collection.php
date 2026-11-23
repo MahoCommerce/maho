@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @extends Mage_Sales_Model_Resource_Order_Collection_Abstract<Mage_Sales_Model_Order_Status_History>
+ */
 class Mage_Sales_Model_Resource_Order_Status_History_Collection extends Mage_Sales_Model_Resource_Order_Collection_Abstract
 {
     /**

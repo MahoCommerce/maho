@@ -11,6 +11,8 @@
 /**
  * @method Mage_Catalog_Model_Product getItemById($value)
  * @method Mage_Catalog_Model_Product[] getItems()
+ * @template TItem of Mage_Catalog_Model_Product = Mage_Catalog_Model_Product
+ * @extends Mage_Catalog_Model_Resource_Collection_Abstract<TItem>
  */
 class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_Resource_Collection_Abstract
 {

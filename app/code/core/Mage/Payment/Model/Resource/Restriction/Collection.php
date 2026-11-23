@@ -6,6 +6,9 @@
  * @package Mage_Payment
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Payment_Model_Restriction>
+ */
 class Mage_Payment_Model_Resource_Restriction_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

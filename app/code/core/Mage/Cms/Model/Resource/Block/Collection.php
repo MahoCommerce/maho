@@ -8,6 +8,9 @@
  * @package Mage_Cms
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Cms_Model_Block>
+ */
 class Mage_Cms_Model_Resource_Block_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

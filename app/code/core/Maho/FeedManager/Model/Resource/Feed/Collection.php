@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Maho_FeedManager_Model_Feed>
+ */
 class Maho_FeedManager_Model_Resource_Feed_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

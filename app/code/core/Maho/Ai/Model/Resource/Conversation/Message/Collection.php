@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Maho_Ai_Model_Conversation_Message>
+ */
 class Maho_Ai_Model_Resource_Conversation_Message_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]
