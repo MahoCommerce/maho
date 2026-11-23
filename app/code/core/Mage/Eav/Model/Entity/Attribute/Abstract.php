@@ -376,19 +376,16 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Retrieve backend instance
      *
-     * @return Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @throws Mage_Eav_Exception when the backend model does not extend Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
-    public function getBackend()
+    public function getBackend(): Mage_Eav_Model_Entity_Attribute_Backend_Abstract
     {
         if (empty($this->_backend)) {
             if (!$this->getBackendModel()) {
                 $this->setBackendModel($this->_getDefaultBackendModel());
             }
-            $backend = Mage::getModel($this->getBackendModel());
-            if (!$backend) {
-                throw Mage::exception('Mage_Eav', 'Invalid backend model specified: ' . $this->getBackendModel());
-            }
-            $this->_backend = $backend->setAttribute($this);
+            $this->_backend = $this->createModel('backend', $this->getBackendModel(), Mage_Eav_Model_Entity_Attribute_Backend_Abstract::class)
+                ->setAttribute($this);
         }
 
         return $this->_backend;
@@ -397,15 +394,15 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Retrieve frontend instance
      *
-     * @return Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
+     * @throws Mage_Eav_Exception when the frontend model does not extend Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
      */
-    public function getFrontend()
+    public function getFrontend(): Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
     {
         if (empty($this->_frontend)) {
             if (!$this->getFrontendModel()) {
                 $this->setFrontendModel($this->_getDefaultFrontendModel());
             }
-            $this->_frontend = Mage::getModel($this->getFrontendModel())
+            $this->_frontend = $this->createModel('frontend', $this->getFrontendModel(), Mage_Eav_Model_Entity_Attribute_Frontend_Abstract::class)
                 ->setAttribute($this);
         }
 
@@ -415,28 +412,41 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Retrieve source instance
      *
-     * @return Mage_Eav_Model_Entity_Attribute_Source_Abstract
+     * @throws Mage_Eav_Exception when the source model does not extend Mage_Eav_Model_Entity_Attribute_Source_Abstract
      */
-    public function getSource()
+    public function getSource(): Mage_Eav_Model_Entity_Attribute_Source_Abstract
     {
         if (empty($this->_source)) {
             if (!$this->getSourceModel()) {
                 $this->setSourceModel($this->getDefaultSourceModel());
             }
-            $source = Mage::getModel($this->getSourceModel());
-            if (!$source) {
-                throw Mage::exception(
-                    'Mage_Eav',
-                    Mage::helper('eav')->__(
-                        'Source model "%s" not found for attribute "%s"',
-                        $this->getSourceModel(),
-                        $this->getAttributeCode(),
-                    ),
-                );
-            }
-            $this->_source = $source->setAttribute($this);
+            $this->_source = $this->createModel('source', $this->getSourceModel(), Mage_Eav_Model_Entity_Attribute_Source_Abstract::class)
+                ->setAttribute($this);
         }
         return $this->_source;
+    }
+
+    /**
+     * Create the $role model $alias of the attribute
+     *
+     * @template T of object
+     * @param class-string<T> $expectedClass
+     * @return T
+     * @throws Mage_Eav_Exception when $alias names no class, or a class that does not extend $expectedClass
+     */
+    private function createModel(string $role, string $alias, string $expectedClass): object
+    {
+        $model = Mage::getModel($alias);
+        if (!$model instanceof $expectedClass) {
+            throw Mage::exception('Mage_Eav', sprintf(
+                'The %s model "%s" of the attribute "%s" must extend %s.',
+                $role,
+                $alias,
+                $this->getAttributeCode(),
+                $expectedClass,
+            ));
+        }
+        return $model;
     }
 
     /**
