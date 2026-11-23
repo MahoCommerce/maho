@@ -61,10 +61,10 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
      * @param Mage_Tag_Model_Tag $object
      */
     #[\Override]
-    protected function _beforeSave(Mage_Core_Model_Abstract $object)
+    protected function _beforeSave(Mage_Core_Model_Abstract $object): static
     {
         if (!$object->getId() && $object->getStatus() == $object->getApprovedStatus()) {
-            $searchTag = new \Maho\DataObject();
+            $searchTag = Mage::getModel('tag/tag');
             $this->loadByName($searchTag, $object->getName());
             if ($searchTag->getData($this->getIdFieldName())
                 && $searchTag->getStatus() == $object->getPendingStatus()
