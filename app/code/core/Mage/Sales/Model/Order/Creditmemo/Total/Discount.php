@@ -230,7 +230,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             if ($row->getInvoiceId() && $row->getInvoiceId() !== (int) $source->getId()) {
                 continue;
             }
-            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax), $invoiced);
+            $amounts = array_intersect_key($this->getItemAmounts($row, $order, $includeTax, $source), $invoiced);
             if (!$row->getInvoiceId() && $amounts) {
                 $otherItems ??= $this->getItemsOnOtherInvoices($order, $source);
                 if (array_intersect_key($amounts, $otherItems)) {
@@ -266,8 +266,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         if ($total <= 0.0) {
             return null;
         }
-        $lineDiscounts = $this->getWholeUnitDiscounts($order, $store, $invoiced, $total, $discount);
-        $net = $target = $capacity = 0.0;
+        $proportional = !array_any($invoiced, static fn(array $amount): bool
+            => $amount['net'] > 0.0 && $amount['net'] * (1 - $discount / $total) < $amount['qty'] * self::MINOR_UNIT);
+        $lineDiscounts = $proportional && !$includeTax ? [] : $this->getWholeUnitDiscounts($order, $store, $invoiced, $discount);
+        $net = $target = $capacity = $futureCapacity = 0.0;
         foreach ($invoiced as $id => $amount) {
             $refundedNet = min($amount['net'], $refunded[$id]['net'] ?? 0.0);
             $net += $refundedNet;
@@ -276,14 +278,20 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 $available = $amount['net'] - $amount['qty'] * self::MINOR_UNIT;
                 if ($available > 0.0) {
                     $refundedCapacity = max(0.0, $refundedNet - $refundedQty * self::MINOR_UNIT);
+                    $futureCapacity += max(0.0, $available - $refundedCapacity);
                     $target += $store->roundPrice($lineDiscounts[$id] * min(1.0, $refundedCapacity / $available));
                 }
                 $capacity += max(0.0, ($current[$id]['net'] ?? 0.0) - ($current[$id]['qty'] ?? 0.0) * self::MINOR_UNIT);
             }
         }
-        if ($lineDiscounts === []) {
+        if ($proportional || $lineDiscounts === []) {
             $target = $store->roundPrice($discount * min(1.0, $net / $total));
-            $capacity = $discount;
+            if ($lineDiscounts === []) {
+                $capacity = $discount;
+            } else {
+                // Later units must be able to cover the rest and still refund at least one cent each.
+                $target = max($target, $store->roundPrice($discount - $futureCapacity));
+            }
         }
         // The older collector could deduct a share on a different credit memo.
         return min(round($capacity, 4), $store->roundPrice($target - $used));
@@ -297,17 +305,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         Mage_Sales_Model_Order $order,
         Mage_Core_Model_Store $store,
         array $invoiced,
-        float $total,
         float $discount,
     ): array {
         $positive = array_filter($invoiced, static fn(array $amount): bool => $amount['net'] > 0.0);
-        if (!array_any(
-            $positive,
-            static fn(array $amount): bool
-            => $amount['net'] * (1 - $discount / $total) < $amount['qty'] * self::MINOR_UNIT,
-        )) {
-            return [];
-        }
         $capacity = [];
         foreach ($positive as $id => $amount) {
             $reserve = $store->roundPrice($amount['qty'] * self::MINOR_UNIT);
@@ -340,9 +340,11 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
         Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo $document,
         Mage_Sales_Model_Order $order,
         bool $includeTax = false,
+        ?Mage_Sales_Model_Order_Invoice $source = null,
     ): array {
         $amounts = [];
-        foreach ($document->getAllItems() as $item) {
+        $items = $document->getAllItems();
+        foreach ($items as $item) {
             $id = $item->getOrderItemId();
             $orderItem = $id ? $order->getItemById($id) : null;
             if (!$orderItem || !$item->getQty() || $orderItem->isDummy()) {
@@ -350,7 +352,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             }
             $net = (float) $item->getBaseRowTotal() - (float) $item->getBaseDiscountAmount();
             if ($includeTax) {
-                $net += $item->getBaseTaxAmount() + $item->getBaseHiddenTaxAmount();
+                $tax = $item->getBaseTaxAmount();
+                if ($tax === null && $source && $document instanceof Mage_Sales_Model_Order_Creditmemo
+                    && $document->getInvoiceId() === (int) $source->getId() && count($items) === 1
+                    && !$this->hasFixedTax($item) && !$this->hasFixedTax($orderItem)
+                ) {
+                    $tax = $this->getHistoricItemTax($document, $source);
+                }
+                $net += $tax + $item->getBaseHiddenTaxAmount();
             }
             $amounts[$id] = [
                 'net' => round(($amounts[$id]['net'] ?? 0.0) + max(0.0, $net), 4),
@@ -358,6 +367,18 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
             ];
         }
         return $amounts;
+    }
+
+    private function getHistoricItemTax(Mage_Sales_Model_Order_Creditmemo $memo, Mage_Sales_Model_Order_Invoice $source): ?float
+    {
+        $outsideItems = $source->getBaseTaxAmount() - $source->getBaseShippingTaxAmount();
+        foreach ($source->getAllItems() as $line) {
+            if ($line->getBaseTaxAmount() === null) {
+                return null;
+            }
+            $outsideItems -= $line->getBaseTaxAmount();
+        }
+        return round($outsideItems, 4) === 0.0 ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount() : null;
     }
 
     /** @return array<int, true> */

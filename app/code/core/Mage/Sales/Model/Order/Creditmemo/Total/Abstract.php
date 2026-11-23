@@ -22,6 +22,13 @@ abstract class Mage_Sales_Model_Order_Creditmemo_Total_Abstract extends Mage_Sal
         return $this;
     }
 
+    protected function hasFixedTax(Mage_Sales_Model_Order_Creditmemo_Item|Mage_Sales_Model_Order_Item $item): bool
+    {
+        return (bool) ($item->getWeeeTaxAppliedRowAmount() || $item->getBaseWeeeTaxAppliedRowAmount()
+            || $item->getWeeeTaxAppliedAmount() || $item->getBaseWeeeTaxAppliedAmount()
+            || Mage::helper('core/string')->unserialize($item->getWeeeTaxApplied()));
+    }
+
     /**
      * Return the part of $amount that a refund of $baseShipping more shipping takes.
      * It counts on all the shipping refunded so far, so the parts of all the credit memos add up to $amount.

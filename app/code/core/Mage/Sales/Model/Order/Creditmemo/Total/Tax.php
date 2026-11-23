@@ -544,13 +544,6 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         return $invoiced < 0.0 ? min(0.0, $used - $unpaid) : max(0.0, $used - $unpaid);
     }
 
-    private function hasFixedTax(Mage_Sales_Model_Order_Creditmemo_Item|Mage_Sales_Model_Order_Item $item): bool
-    {
-        return (bool) ($item->getWeeeTaxAppliedRowAmount() || $item->getBaseWeeeTaxAppliedRowAmount()
-            || $item->getWeeeTaxAppliedAmount() || $item->getBaseWeeeTaxAppliedAmount()
-            || Mage::helper('core/string')->unserialize($item->getWeeeTaxApplied()));
-    }
-
     /** @param array{?float, ?float} $line */
     private function getPriorLineTax(array $line, ?float $amount, float $share, ?float $singleItemTax, Mage_Core_Model_Store $store): ?float
     {
