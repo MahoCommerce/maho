@@ -292,17 +292,22 @@ it('keeps a known VAT amount when an earlier credit memo has an ambiguous fixed 
         ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([20.0 + $tax, (20.0 + $tax) * 0.8]);
 })->with(['positive merchandise VAT' => [15.0, 0.0], 'zero merchandise VAT with a fixed tax' => [0.0, 5.0]]);
 
-it('uses the amount attributable to a historic single-line credit', function (float $firstTax, float $paidTax, ?float $recorded = null): void {
+it('uses the amount attributable to a historic single-line credit', function (float $firstTax, float $paidTax, ?float $recorded = null, float $extra = 0.0, bool $zeroFee = false): void {
     $order = historicRefundLineTaxOrder([[2, 20.0, 16.0], [1, -5.0, -4.0]]);
     [$item] = array_values($order->getAllVisibleItems());
     $service = Mage::getService('sales/order_document');
     $qty = [$item->getId() => 1];
     $invoice = $service->invoice($order, $qty, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
     $second = $service->invoice(Mage::getModel('sales/order')->load($order->getId()), captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
-    $left = 20.0 - $firstTax;
+    $left = 20.0 - $firstTax + $extra;
     foreach ([[$invoice, $firstTax], [$second, $left]] as [$document, $tax]) {
         $row = array_find($document->getAllItems(), static fn($row): bool => $row->getOrderItemId() === $item->getId());
         $row->setBaseTaxAmount($tax)->setTaxAmount($tax * 0.8)->save();
+        if ($document === $invoice && $zeroFee) {
+            Mage::helper('weee')->setApplied($row, [['title' => 'Unused fee', 'row_amount' => 0.0, 'base_row_amount' => 0.0,
+                'amount' => 0.0, 'base_amount' => 0.0, 'weee_discount' => 0.0, 'base_weee_discount' => 0.0]]);
+            $row->save();
+        }
     }
     $secondTax = $left - 5.0;
     $second->setBaseTaxAmount($secondTax)->setTaxAmount($secondTax * 0.8)
@@ -327,6 +332,8 @@ it('uses the amount attributable to a historic single-line credit', function (fl
     'more tax than the row' => [10.0, 12.0],
     'paid tax happens to match the order average' => [8.0, 10.0],
     'the whole linked invoice paid its own rate' => [4.0, 4.0, 0.0],
+    'the other invoice disagrees with the order tax' => [4.0, 4.0, 0.0, 4.0],
+    'the linked invoice row has a zero fee record' => [4.0, 4.0, 0.0, 0.0, true],
 ]);
 
 it('keeps the order item VAT when another historic credit has missing VAT on more than one row', function (): void {
@@ -391,38 +398,91 @@ it('rounds each remaining unit after a historic credit recorded its VAT only on 
     }
 })->with(['positive VAT' => 1, 'negative VAT' => -1]);
 
-it('uses the documented fixed tax on a different invoice row to confirm the item VAT', function (bool $allocated): void {
+it('keeps the item VAT balance when a historic credit has no tax header but records shipping VAT', function (): void {
+    $order = historicRefundLineTaxOrder([[3, -0.10, -0.10], [1, 0.10, 0.10]]);
+    $order->setBaseShippingAmount(1.0)->setShippingAmount(0.8)->setBaseShippingTaxAmount(0.03)->setShippingTaxAmount(0.03)
+        ->setBaseTaxAmount(0.03)->setTaxAmount(0.03)->setBaseGrandTotal(81.03)->setGrandTotal(64.83)->save();
+    [$item] = array_values($order->getAllVisibleItems());
+    $service = Mage::getService('sales/order_document');
+    $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    $qty = ['qtys' => [$item->getId() => 1]];
+    $prior = $service->refund($order, $qty, beforeRegister: static function ($memo): void {
+        $memo->getAllItems()[0]->setBaseTaxAmount(null)->setTaxAmount(null);
+        $memo->setBaseTaxAmount(0.03)->setTaxAmount(0.03)->setBaseGrandTotal(21.03)->setGrandTotal(16.83);
+    });
+    $prior->setBaseTaxAmount(null)->setTaxAmount(null)->save();
+    $prior = Mage::getModel('sales/order_creditmemo')->load($prior->getId());
+    expect([$prior->getBaseTaxAmount(), $prior->getBaseShippingTaxAmount(), $prior->getBaseGrandTotal()])->toBe([null, 0.03, 21.03]);
+    $memo = $service->refund($order, $qty);
+    $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+    $line = $memo->getAllItems()[0];
+    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe([-0.05, -0.05])
+        ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([19.95, 15.95]);
+});
+
+it('retains a historic header that recorded the exact fractional unit VAT', function (): void {
+    $order = historicRefundLineTaxOrder([[4, 0.10, 0.10], [1, -0.05, -0.05]]);
+    [$item] = array_values($order->getAllVisibleItems());
+    $service = Mage::getService('sales/order_document');
+    $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+    $prior = $service->refund($order, ['qtys' => [$item->getId() => 1]], beforeRegister: static function ($memo): void {
+        $memo->getAllItems()[0]->setBaseTaxAmount(null)->setTaxAmount(null);
+        $memo->setBaseTaxAmount(0.025)->setTaxAmount(0.025)->setBaseGrandTotal(20.025)->setGrandTotal(16.025);
+    });
+    $prior = Mage::getModel('sales/order_creditmemo')->load($prior->getId());
+    expect([$prior->getBaseTaxAmount(), $prior->getAllItems()[0]->getBaseTaxAmount()])->toBe([0.025, null]);
+    $memo = $service->refund($order, ['qtys' => [$item->getId() => 2]]);
+    $memo = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+    $line = $memo->getAllItems()[0];
+    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe([0.05, 0.05])
+        ->and([$memo->getBaseGrandTotal(), $memo->getGrandTotal()])->toBe([40.05, 32.05]);
+});
+
+it('uses the documented fixed tax on a different invoice row to confirm the item VAT', function (bool $allocated, bool $onItem = false, bool $badBaseFee = false): void {
     $order = historicRefundLineTaxOrder([[2, 10.0, 8.0], [1, -2.0, -1.6]]);
     [$item, $other] = array_values($order->getAllVisibleItems());
-    $other->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)
-        ->setWeeeTaxAppliedRowAmount(0.8)->setBaseWeeeTaxAppliedRowAmount(1.0);
-    Mage::helper('weee')->setApplied($other, [['title' => 'Fixed fee', 'amount' => 0.8, 'base_amount' => 1.0, 'row_amount' => 0.8, 'base_row_amount' => 1.0]]);
-    $other->save();
+    $charged = $onItem ? $item : $other;
+    $units = $charged->getQtyOrdered();
+    $charged->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)
+        ->setWeeeTaxAppliedRowAmount(0.8 * $units)->setBaseWeeeTaxAppliedRowAmount($units);
+    Mage::helper('weee')->setApplied($charged, [['title' => 'Fixed fee', 'amount' => 0.8, 'base_amount' => 1.0, 'row_amount' => 0.8 * $units, 'base_row_amount' => $units]]);
+    $charged->save();
     $order->getStore()->setConfig('tax/weee/include_in_subtotal', '0');
-    $order->setBaseTaxAmount(9.0)->setTaxAmount(7.2)->setBaseGrandTotal(69.0)->setGrandTotal(55.2)->save();
+    $tax = 8.0 + $units;
+    $order->setBaseTaxAmount($tax)->setTaxAmount($tax * 0.8)->setBaseGrandTotal(60.0 + $tax)->setGrandTotal((60.0 + $tax) * 0.8)->save();
     $service = Mage::getService('sales/order_document');
     $invoice = $service->invoice($order, captureCase: Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
-    expect($invoice->getBaseTaxAmount())->toBe(9.0);
+    expect($invoice->getBaseTaxAmount())->toBe($tax);
+    if ($onItem) {
+        $item = Mage::getModel('sales/order_item')->load($item->getId());
+        $item->setWeeeTaxAppliedAmount(null)->setBaseWeeeTaxAppliedAmount(null)->setWeeeTaxAppliedRowAmount(null)
+            ->setBaseWeeeTaxAppliedRowAmount(null)->setWeeeTaxApplied(null)->save();
+    }
     $qty = ['qtys' => [$item->getId() => 1]];
     $first = $service->refund($order, $qty, beforeRegister: static function ($memo): void {
         $memo->getAllItems()[0]->setBaseTaxAmount(null)->setTaxAmount(null);
     });
     $first = Mage::getModel('sales/order_creditmemo')->load($first->getId());
     expect([$first->getBaseTaxAmount(), $first->getTaxAmount()])->toBe([5.0, 4.0]);
-    if (!$allocated) {
+    if (!$allocated || $badBaseFee) {
         $feeItem = array_find($invoice->getAllItems(), static fn($row): bool => $row->getOrderItemId() == $other->getId());
         $fees = Mage::helper('weee')->getApplied($feeItem);
-        $fees[0]['weee_document_gross_allocated'] = false;
+        $fees[0]['weee_document_gross_allocated'] = $allocated;
+        $fees[0]['base_row_amount'] = $badBaseFee ? 0.99 : 1.0;
         Mage::helper('weee')->setApplied($feeItem, $fees);
         $feeItem->save();
+    }
+    $baseTax = $allocated && !$onItem && !$badBaseFee ? 5.0 : 6.0;
+    $tax = $allocated && !$onItem ? 4.0 : 4.8;
+    if ($baseTax === 6.0) {
         Mage::getModel('sales/order_item')->load($item->getId())->setBaseTaxRefunded(4.0)->setTaxRefunded(3.2)->save();
     }
     $second = $service->refund($order, $qty);
     $second = Mage::getModel('sales/order_creditmemo')->load($second->getId());
     $line = $second->getAllItems()[0];
-    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe($allocated ? [5.0, 4.0] : [6.0, 4.8])
-        ->and([$second->getBaseGrandTotal(), $second->getGrandTotal()])->toBe($allocated ? [25.0, 20.0] : [26.0, 20.8]);
-})->with(['allocated fee' => true, 'unconfirmed fee' => false]);
+    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe([$baseTax, $tax])
+        ->and([$second->getBaseGrandTotal(), $second->getGrandTotal()])->toBe([20.0 + $baseTax, 16.0 + $tax]);
+})->with(['allocated fee' => [true], 'unconfirmed fee' => [false], 'fee on the returned item' => [true, true], 'inconsistent base fee' => [true, false, true]]);
 
 it('refunds the signed VAT charged on each historic invoice for the same order item', function (bool $negativeFirst, float $negative, float $otherTax = -0.01): void {
     $order = historicRefundLineTaxOrder([[2, 0.02 + $negative, 0.02 + $negative], [1, $otherTax, $otherTax], [1, 0.0, 0.0]]);

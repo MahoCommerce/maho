@@ -388,26 +388,30 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $invoice = $invoices[$memo->getInvoiceId()] ?? null;
                 $source = $single && $invoice && !$invoice->isCanceled() && $creditsByInvoice[$invoice->getId()] === 1
                     ? $invoice->getAllItems() : [];
-                $whole = count($source) === 1 && $source[0]->getOrderItemId() == $id && $source[0]->getQty() == $item->getQty()
-                    && !$this->hasFixedTax($source[0]);
+                $whole = count($source) === 1 && $source[0]->getOrderItemId() == $id && $source[0]->getQty() == $item->getQty();
                 foreach (['regular' => $item->getTaxAmount(), 'base' => $item->getBaseTaxAmount()] as $type => $amount) {
-                    $paid = $type === 'base' ? $memo->getBaseTaxAmount() - $memo->getBaseShippingTaxAmount()
-                        : $memo->getTaxAmount() - $memo->getShippingTaxAmount();
+                    $header = $type === 'base' ? $memo->getBaseTaxAmount() : $memo->getTaxAmount();
+                    if ($header === null) {
+                        $unknown[$id][$type] = true;
+                        continue;
+                    }
+                    $paid = round($header - ($type === 'base' ? $memo->getBaseShippingTaxAmount() : $memo->getShippingTaxAmount()), 4);
                     $invoiced = $type === 'base' ? $orderItem->getBaseTaxInvoiced() : $orderItem->getTaxInvoiced();
                     $taxLeft = round($invoiced - ($recorded[$id][$type] ?? 0.0) - ($missing[$id][$type] ?? 0.0), 4);
                     $expected = $qtyLeft > $item->getQty()
-                        ? $order->getStore()->roundPrice($taxLeft / $qtyLeft * $item->getQty())
+                        ? $taxLeft / $qtyLeft * $item->getQty()
                         : $taxLeft;
-                    $direct = $whole && ($type === 'base'
-                        ? $source[0]->getBaseTaxAmount() === round($paid, 4) && $invoice->getBaseGrandTotal() === $memo->getBaseGrandTotal()
-                            && round($invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount(), 4) === round($paid, 4)
-                        : $source[0]->getTaxAmount() === round($paid, 4) && $invoice->getGrandTotal() === $memo->getGrandTotal()
-                            && round($invoice->getTaxAmount() - $invoice->getShippingTaxAmount(), 4) === round($paid, 4));
+                    $direct = $whole && $this->getInvoiceRowFee($source[0], $type) === 0.0 && ($type === 'base'
+                        ? $source[0]->getBaseTaxAmount() === $paid && $invoice->getBaseGrandTotal() === $memo->getBaseGrandTotal()
+                            && $invoice->getBaseTaxAmount() !== null && round($invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount(), 4) === $paid
+                        : $source[0]->getTaxAmount() === $paid && $invoice->getGrandTotal() === $memo->getGrandTotal()
+                            && $invoice->getTaxAmount() !== null && round($invoice->getTaxAmount() - $invoice->getShippingTaxAmount(), 4) === $paid);
                     if (!$direct) {
                         $inferred[$id][$type] = true;
                     }
-                    if (!$single || $qtyLeft < $item->getQty() || ($amount !== null && round($paid, 4) !== $amount)
-                        || (!$direct && round($paid, 4) !== $expected)) {
+                    if (!$single || $qtyLeft < $item->getQty() || ($amount !== null && $paid !== $amount)
+                        || (!$direct && $paid !== round($expected, 4)
+                            && ($qtyLeft === $item->getQty() || $paid !== $order->getStore()->roundPrice($expected)))) {
                         $unknown[$id][$type] = true;
                     } elseif ($amount === null) {
                         $missing[$id][$type] = ($missing[$id][$type] ?? 0.0) + $paid;
@@ -434,7 +438,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
         }
         if ($confirmed) {
             // A rate inferred from the order is usable only if every invoice actually charged it.
-            $quantities = [];
+            $quantities = $billed = [];
             foreach ($invoices as $invoice) {
                 if ($invoice->isCanceled()) {
                     continue;
@@ -442,7 +446,8 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                 $tax = $invoice->getTaxAmount() - $invoice->getShippingTaxAmount();
                 $baseTax = $invoice->getBaseTaxAmount() - $invoice->getBaseShippingTaxAmount();
                 $items = $invoice->getAllItems();
-                $fees = $baseFees = 0.0;
+                $fees = ['regular' => 0.0, 'base' => 0.0];
+                $lineFees = [];
                 $subtotal = $invoice->getSubtotal();
                 $baseSubtotal = $invoice->getBaseSubtotal();
                 foreach ($items as $line) {
@@ -450,19 +455,17 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     $baseTax -= $line->getBaseTaxAmount();
                     $subtotal -= $line->getRowTotal();
                     $baseSubtotal -= $line->getBaseRowTotal();
-                    $applied = Mage::helper('core/string')->unserialize($line->getWeeeTaxApplied());
-                    if (is_array($applied) && $applied && array_all($applied, static fn($fee): bool => ($fee['weee_document_gross_allocated'] ?? false) === true
-                        && is_numeric($fee['row_amount'] ?? null) && is_numeric($fee['base_row_amount'] ?? null)
-                        && is_numeric($fee['weee_discount'] ?? null) && is_numeric($fee['base_weee_discount'] ?? null))
-                        && round(array_sum(array_column($applied, 'row_amount')) - $line->getWeeeTaxAppliedRowAmount(), 4) == 0.0
-                        && round(array_sum(array_column($applied, 'base_row_amount')) - $line->getBaseWeeeTaxAppliedRowAmount(), 4) == 0.0) {
-                        $fees += $line->getWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'weee_discount'));
-                        $baseFees += $line->getBaseWeeeTaxAppliedRowAmount() - array_sum(array_column($applied, 'base_weee_discount'));
+                    foreach (['regular', 'base'] as $type) {
+                        $net = $this->getInvoiceRowFee($line, $type);
+                        $lineFees[$line->getId()][$type] = $net;
+                        $fees[$type] = $net === null || $fees[$type] === null ? null : $fees[$type] + $net;
                     }
                 }
                 $unexplained = [
-                    'regular' => round($tax, 4) != 0.0 && (round($subtotal, 4) != 0.0 || round($tax - $fees, 4) != 0.0),
-                    'base' => round($baseTax, 4) != 0.0 && (round($baseSubtotal, 4) != 0.0 || round($baseTax - $baseFees, 4) != 0.0),
+                    'regular' => $invoice->getTaxAmount() === null || (round($tax, 4) != 0.0
+                        && ($fees['regular'] === null || round($subtotal, 4) != 0.0 || round($tax - $fees['regular'], 4) != 0.0)),
+                    'base' => $invoice->getBaseTaxAmount() === null || (round($baseTax, 4) != 0.0
+                        && ($fees['base'] === null || round($baseSubtotal, 4) != 0.0 || round($baseTax - $fees['base'], 4) != 0.0)),
                 ];
                 foreach ($items as $line) {
                     $id = $line->getOrderItemId();
@@ -470,8 +473,9 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                         $quantities[$id] = ($quantities[$id] ?? 0.0) + $line->getQty();
                         foreach ($confirmed[$id] as $type => $amount) {
                             $lineTax = $type === 'base' ? $line->getBaseTaxAmount() : $line->getTaxAmount();
-                            if (isset($inferred[$id][$type]) && ($unexplained[$type]
-                                || !$this->matchesInvoicedItemTax($order->getItemById($id), $type, $line->getQty(), $lineTax))) {
+                            $billed[$id][$type] = ($billed[$id][$type] ?? 0.0) + $lineTax;
+                            if ($lineTax === null || (isset($inferred[$id][$type]) && ($unexplained[$type] || $lineFees[$line->getId()][$type] !== 0.0
+                                || !$this->matchesInvoicedItemTax($order->getItemById($id), $type, $line->getQty(), $lineTax)))) {
                                 unset($confirmed[$id][$type]);
                             }
                         }
@@ -481,10 +485,47 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
             foreach ($confirmed as $id => $amounts) {
                 if (round(($quantities[$id] ?? 0.0) - $order->getItemById($id)->getQtyInvoiced(), 4) != 0.0) {
                     unset($confirmed[$id]);
+                    continue;
+                }
+                foreach ($amounts as $type => $amount) {
+                    $item = $order->getItemById($id);
+                    $ledger = $type === 'base' ? $item->getBaseTaxInvoiced() : $item->getTaxInvoiced();
+                    if ($ledger === null || round(($billed[$id][$type] ?? 0.0) - $ledger, 4) != 0.0) {
+                        unset($confirmed[$id][$type]);
+                    }
                 }
             }
         }
         return $confirmed;
+    }
+
+    private function getInvoiceRowFee(Mage_Sales_Model_Order_Invoice_Item $line, string $type): ?float
+    {
+        $base = $type === 'base';
+        $gross = (float) ($base ? $line->getBaseWeeeTaxAppliedRowAmount() : $line->getWeeeTaxAppliedRowAmount());
+        $unit = (float) ($base ? $line->getBaseWeeeTaxAppliedAmount() : $line->getWeeeTaxAppliedAmount());
+        $details = Mage::helper('core/string')->unserialize($line->getWeeeTaxApplied());
+        if (!$details) {
+            return $gross == 0.0 && $unit == 0.0 ? 0.0 : null;
+        }
+        if (!is_array($details)) {
+            return null;
+        }
+        $rowKey = $base ? 'base_row_amount' : 'row_amount';
+        $discountKey = $base ? 'base_weee_discount' : 'weee_discount';
+        $total = $discount = 0.0;
+        foreach ($details as $fee) {
+            if (!is_numeric($fee[$rowKey] ?? null) || !is_numeric($fee[$discountKey] ?? null)) {
+                return null;
+            }
+            if (($fee['weee_document_gross_allocated'] ?? false) !== true
+                && ($fee[$rowKey] != 0.0 || $fee[$discountKey] != 0.0 || $unit != 0.0)) {
+                return null;
+            }
+            $total += $fee[$rowKey];
+            $discount += $fee[$discountKey];
+        }
+        return round($total - $gross, 4) == 0.0 ? round($gross - $discount, 4) : null;
     }
 
     private function matchesInvoicedItemTax(Mage_Sales_Model_Order_Item $item, string $type, float $qty, ?float $tax): bool
