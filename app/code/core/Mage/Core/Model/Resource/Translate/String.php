@@ -34,11 +34,6 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
         return parent::load($object, $value, $field);
     }
 
-    /**
-     * Retrieve select for load
-     *
-     * @param String $value
-     */
     #[\Override]
     protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
