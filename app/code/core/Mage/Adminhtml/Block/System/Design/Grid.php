@@ -79,14 +79,8 @@ class Mage_Adminhtml_Block_System_Design_Grid extends Mage_Adminhtml_Block_Widge
         return parent::_prepareColumns();
     }
 
-    /**
-     * Prepare row click url
-     *
-     * @param \Maho\DataObject $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

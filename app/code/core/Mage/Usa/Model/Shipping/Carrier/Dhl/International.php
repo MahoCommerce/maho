@@ -393,14 +393,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         return $methods;
     }
 
-    /**
-     * Get configuration data of carrier
-     *
-     * @param string $type
-     * @param string $code
-     * @return array|string|false
-     */
-    public function getCode($type, $code = '')
+    #[\Override]
+    public function getCodes(string $type): array
     {
         $codes = [
             'unit_of_measure'   => [
@@ -440,16 +434,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
             ],
         ];
-        if (!isset($codes[$type])) {
-            return false;
-        }
+        return $codes[$type] ?? [];
+    }
 
-        if ($code === '') {
-            return $codes[$type];
-        }
-
-        $code = strtoupper($code);
-        return $codes[$type][$code] ?? false;
+    #[\Override]
+    public function getCodeValue(string $type, string $code): ?string
+    {
+        return parent::getCodeValue($type, strtoupper($code));
     }
 
     /**
@@ -536,12 +527,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($maxWeight) {
             $configWeightUnit = Mage_Core_Model_Locale::WEIGHT_KILOGRAM;
         } elseif ($configWeightUnit) {
-            $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', $configWeightUnit);
         } else {
-            $configWeightUnit = $this->getCode('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
         }
 
-        $countryWeightUnit = $this->getCode('dimensions_variables', $this->_getWeightUnit());
+        $countryWeightUnit = $this->getCodeValue('dimensions_variables', $this->_getWeightUnit());
 
         if ($configWeightUnit != $countryWeightUnit) {
             $weight = Mage::helper('usa')->convertMeasureWeight(
@@ -717,9 +708,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     protected function _getDimension($dimension, $configWeightUnit = false)
     {
         if (!$configWeightUnit) {
-            $configWeightUnit = $this->getCode('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', (string) $this->getConfigData('unit_of_measure'));
         } else {
-            $configWeightUnit = $this->getCode('dimensions_variables', $configWeightUnit);
+            $configWeightUnit = $this->getCodeValue('dimensions_variables', $configWeightUnit);
         }
 
         if ($configWeightUnit == Mage_Core_Model_Locale::WEIGHT_POUND) {
@@ -728,7 +719,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $configDimensionUnit = Mage_Core_Model_Locale::LENGTH_CENTIMETER;
         }
 
-        $countryDimensionUnit = $this->getCode('dimensions_variables', $this->_getDimensionUnit());
+        $countryDimensionUnit = $this->getCodeValue('dimensions_variables', $this->_getDimensionUnit());
 
         if ($configDimensionUnit != $countryDimensionUnit) {
             $dimension = (float) Mage::helper('usa')->convertMeasureDimension(
@@ -1229,16 +1220,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Do rate request and handle errors
-     *
-     * @return Mage_Shipping_Model_Rate_Result|\Maho\DataObject
      */
-    protected function _doRequest()
+    protected function _doRequest(): Mage_Shipping_Model_Rate_Result|\Maho\DataObject
     {
         $rawRequest = $this->_request;
 
         $originRegion = (string) $this->getCountryParams(
             Mage::getStoreConfig(Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID, $this->getStore()),
-        )->region;
+        )->getRegion();
 
         if (!$originRegion) {
             Mage::throwException(Mage::helper('usa')->__('Wrong Region.'));
@@ -1309,7 +1298,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $nodeConsignee->addChild('CountryCode', $rawRequest->getRecipientAddressCountryCode());
         $nodeConsignee->addChild(
             'CountryName',
-            (string) $this->getCountryParams($rawRequest->getRecipientAddressCountryCode())->name,
+            (string) $this->getCountryParams($rawRequest->getRecipientAddressCountryCode())->getName(),
         );
         $nodeContact = $nodeConsignee->addChild('Contact');
         $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getRecipientContactPersonName(), 0, 34));
@@ -1371,7 +1360,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         $nodeShipper->addChild('CountryCode', $rawRequest->getShipperAddressCountryCode());
         $nodeShipper->addChild(
             'CountryName',
-            (string) $this->getCountryParams($rawRequest->getShipperAddressCountryCode())->name,
+            (string) $this->getCountryParams($rawRequest->getShipperAddressCountryCode())->getName(),
         );
         $nodeContact = $nodeShipper->addChild('Contact', '', '');
         $nodeContact->addChild('PersonName', mb_substr((string) $rawRequest->getShipperContactPersonName(), 0, 34));
@@ -1744,18 +1733,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
     /**
      * Check if shipping is domestic
-     *
-     * @param string $origCountryCode
-     * @param string $destCountryCode
-     * @return bool
      */
-    protected function _checkDomesticStatus($origCountryCode, $destCountryCode)
+    protected function _checkDomesticStatus(string $origCountryCode, string $destCountryCode): bool
     {
         $this->_isDomestic = false;
 
-        $origCountry = (string) $this->getCountryParams($origCountryCode)->name;
-        $destCountry = (string) $this->getCountryParams($destCountryCode)->name;
-        $isDomestic = (string) $this->getCountryParams($destCountryCode)->domestic;
+        $origCountry = (string) $this->getCountryParams($origCountryCode)->getName();
+        $destCountry = (string) $this->getCountryParams($destCountryCode)->getName();
+        $isDomestic = (string) $this->getCountryParams($destCountryCode)->getDomestic();
 
         if ($origCountry == $destCountry && $isDomestic) {
             $this->_isDomestic = true;

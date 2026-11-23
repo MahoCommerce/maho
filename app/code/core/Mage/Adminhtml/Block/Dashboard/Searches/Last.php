@@ -75,7 +75,7 @@ class Mage_Adminhtml_Block_Dashboard_Searches_Last extends Mage_Adminhtml_Block_
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/catalog_search/edit', ['id' => $row->getId()]);
     }

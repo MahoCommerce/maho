@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Admin options built from one of a carrier's own getCode() lists.
+ * Admin options built from one of the code lists of a carrier.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -15,7 +15,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
     /** Alias of the carrier singleton that owns the list. */
     protected string $_carrierModel;
 
-    /** Key passed to the carrier's getCode(). */
+    /** Type passed to getCodes() of the carrier. */
     protected string $_codeType;
 
     protected bool $_sortByLabel = false;
@@ -25,7 +25,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
      */
     public function toOptionArray(): array
     {
-        $codes = Mage::getSingleton($this->_carrierModel)->getCode($this->_codeType) ?: [];
+        $codes = Mage::getSingleton($this->_carrierModel)->getCodes($this->_codeType);
 
         $options = [];
         foreach ($codes as $value => $label) {

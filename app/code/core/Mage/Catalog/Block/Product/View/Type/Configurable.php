@@ -234,12 +234,10 @@ class Mage_Catalog_Block_Product_View_Type_Configurable extends Mage_Catalog_Blo
     /**
      * Validating of super product option value
      *
-     * @param array $attributeId
-     * @param array $value
-     * @param array $options
-     * @return bool
+     * @param array{value_index: int, ...} $value
+     * @param array<int, array<int, list<int>>> $options Product IDs by attribute ID and attribute value
      */
-    protected function _validateAttributeValue($attributeId, &$value, &$options)
+    protected function _validateAttributeValue(int|string $attributeId, array &$value, array &$options): bool
     {
         if (isset($options[$attributeId][$value['value_index']])) {
             return true;

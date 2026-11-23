@@ -218,12 +218,10 @@ class Node extends \Maho\DataObject
 
     /**
      * Add child node
-     *
-     * @param   Node $node
-     * @return  Node
      */
-    public function addChild($node)
+    public function addChild(Node $node): static
     {
+        $node->setParent($this);
         $this->_childNodes->add($node);
         return $this;
     }

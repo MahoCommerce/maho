@@ -760,13 +760,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Clear cache related with product id
-     *
-     * @return $this
      */
-    public function cleanCache()
+    public function cleanCache(): static
     {
         if ($this->getId()) {
-            Mage::app()->cleanCache('catalog_product_' . $this->getId());
+            Mage::app()->cleanCache(['catalog_product_' . $this->getId()]);
         }
         return $this;
     }

@@ -77,11 +77,9 @@ class Mage_Reports_Model_Resource_Review_Product_Collection extends Mage_Catalog
 
     /**
      * Get select count sql
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $this->_renderFilters();
 

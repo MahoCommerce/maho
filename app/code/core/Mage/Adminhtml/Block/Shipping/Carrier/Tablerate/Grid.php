@@ -128,7 +128,7 @@ class Mage_Adminhtml_Block_Shipping_Carrier_Tablerate_Grid extends Mage_Adminhtm
         ]);
 
         $label = Mage::getSingleton('shipping/carrier_tablerate')
-            ->getCode('condition_name_short', $this->getConditionName());
+            ->getCodeValue('condition_name_short', $this->getConditionName());
         $this->addColumn('condition_value', [
             'header'    => $label,
             'index'     => 'condition_value',

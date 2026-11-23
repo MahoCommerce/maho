@@ -186,11 +186,8 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequencesE
         return $this->getUrl('*/*/sequencesGridEnter', ['_current' => true]);
     }
 
-    /**
-     * Get row URL for editing
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/editSequence', ['id' => $row->getId(), 'trigger_event' => 'enter']);
     }

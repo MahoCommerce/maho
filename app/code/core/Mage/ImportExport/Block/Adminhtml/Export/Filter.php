@@ -38,7 +38,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
         $this->setDefaultSort('frontend_label');
         $this->setDefaultDir('ASC');
         $this->setPagerVisibility(false);
-        $this->setDefaultLimit(null);
+        $this->setDefaultLimit(0);
         $this->setUseAjax();
     }
 
@@ -280,14 +280,8 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
         return Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP . "[{$attributeCode}]";
     }
 
-    /**
-     * Get row edit URL.
-     *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $row
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

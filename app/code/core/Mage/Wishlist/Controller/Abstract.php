@@ -52,10 +52,10 @@ abstract class Mage_Wishlist_Controller_Abstract extends Mage_Core_Controller_Fr
         $collection = $wishlist->getItemsCollection()
                 ->setVisibilityFilter();
 
-        $qtysString = $this->getRequest()->getParam('qty');
-        if (isset($qtysString)) {
-            $qtys = array_filter(json_decode($qtysString), fn($tmpString) => strlen($tmpString ?? ''));
-        }
+        $qtys = json_decode((string) $this->getRequest()->getParam('qty'), true);
+        $qtys = is_array($qtys)
+            ? array_filter($qtys, static fn(mixed $qty): bool => $qty !== null && $qty !== '')
+            : [];
 
         /** @var Mage_Wishlist_Model_Item $item */
         foreach ($collection as $item) {

@@ -647,11 +647,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Get SQL for get record count without left JOINs
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         return $this->_getSelectCountSql();
     }

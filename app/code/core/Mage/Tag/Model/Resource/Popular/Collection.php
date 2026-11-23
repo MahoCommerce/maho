@@ -81,11 +81,9 @@ class Mage_Tag_Model_Resource_Popular_Collection extends Mage_Core_Model_Resourc
 
     /**
      * Get SQL for get record count
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $this->_renderFilters();
         $select = clone $this->getSelect();

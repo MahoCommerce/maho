@@ -123,7 +123,7 @@ class Mage_Adminhtml_Block_Report_Notfound_Grid extends Mage_Adminhtml_Block_Wid
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

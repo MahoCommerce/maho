@@ -86,7 +86,7 @@ class Mage_Adminhtml_Block_Report_Tag_Product_Grid extends Mage_Adminhtml_Block_
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/productDetail', ['id' => $row->getId()]);
     }

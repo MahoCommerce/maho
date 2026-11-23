@@ -69,19 +69,13 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
         return $this;
     }
 
-    /**
-     * Get row URL
-     *
-     * @param \Maho\DataObject $row
-     * @return string|null
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         if ($this->isAllowed('system/api/attributes/edit')) {
             return $this->getUrl('*/*/edit', ['type' => $row->getUserTypeCode()]);
         }
 
-        return null;
+        return '';
     }
 }

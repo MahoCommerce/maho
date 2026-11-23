@@ -105,13 +105,8 @@ class Mage_Adminhtml_Block_Cms_Block_Grid extends Mage_Adminhtml_Block_Widget_Gr
         }
     }
 
-    /**
-     * Row click url
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['block_id' => $row->getId()]);
     }

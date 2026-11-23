@@ -149,7 +149,7 @@ class Maho_Ai_Block_Adminhtml_Schedule_Edit_Tab_Runs extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return '';
     }

@@ -128,7 +128,7 @@ class Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Grid extends Mage_Adminht
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/accessibilityscan_scan/view', ['id' => $row->getId()]);
     }

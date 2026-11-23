@@ -70,7 +70,7 @@ class Mage_Adminhtml_Block_Permissions_User_Grid extends Mage_Adminhtml_Block_Wi
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['user_id' => $row->getId()]);
     }

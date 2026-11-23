@@ -241,11 +241,9 @@ class Mage_Reports_Model_Resource_Customer_Collection extends Mage_Customer_Mode
 
     /**
      * Get select count sql
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = clone $this->getSelect();
         $countSelect->reset(Maho\Db\Select::ORDER);
