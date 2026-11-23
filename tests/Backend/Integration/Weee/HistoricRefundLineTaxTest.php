@@ -391,7 +391,7 @@ it('rounds each remaining unit after a historic credit recorded its VAT only on 
     }
 })->with(['positive VAT' => 1, 'negative VAT' => -1]);
 
-it('retains the confirmed VAT on an item when another invoice row has a fixed tax', function (): void {
+it('uses the documented fixed tax on a different invoice row to confirm the item VAT', function (bool $allocated): void {
     $order = historicRefundLineTaxOrder([[2, 10.0, 8.0], [1, -2.0, -1.6]]);
     [$item, $other] = array_values($order->getAllVisibleItems());
     $other->setWeeeTaxAppliedAmount(0.8)->setBaseWeeeTaxAppliedAmount(1.0)
@@ -409,12 +409,20 @@ it('retains the confirmed VAT on an item when another invoice row has a fixed ta
     });
     $first = Mage::getModel('sales/order_creditmemo')->load($first->getId());
     expect([$first->getBaseTaxAmount(), $first->getTaxAmount()])->toBe([5.0, 4.0]);
+    if (!$allocated) {
+        $feeItem = array_find($invoice->getAllItems(), static fn($row): bool => $row->getOrderItemId() == $other->getId());
+        $fees = Mage::helper('weee')->getApplied($feeItem);
+        $fees[0]['weee_document_gross_allocated'] = false;
+        Mage::helper('weee')->setApplied($feeItem, $fees);
+        $feeItem->save();
+        Mage::getModel('sales/order_item')->load($item->getId())->setBaseTaxRefunded(4.0)->setTaxRefunded(3.2)->save();
+    }
     $second = $service->refund($order, $qty);
     $second = Mage::getModel('sales/order_creditmemo')->load($second->getId());
     $line = $second->getAllItems()[0];
-    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe([5.0, 4.0])
-        ->and([$second->getBaseGrandTotal(), $second->getGrandTotal()])->toBe([25.0, 20.0]);
-});
+    expect([$line->getBaseTaxAmount(), $line->getTaxAmount()])->toBe($allocated ? [5.0, 4.0] : [6.0, 4.8])
+        ->and([$second->getBaseGrandTotal(), $second->getGrandTotal()])->toBe($allocated ? [25.0, 20.0] : [26.0, 20.8]);
+})->with(['allocated fee' => true, 'unconfirmed fee' => false]);
 
 it('refunds the signed VAT charged on each historic invoice for the same order item', function (bool $negativeFirst, float $negative, float $otherTax = -0.01): void {
     $order = historicRefundLineTaxOrder([[2, 0.02 + $negative, 0.02 + $negative], [1, $otherTax, $otherTax], [1, 0.0, 0.0]]);
