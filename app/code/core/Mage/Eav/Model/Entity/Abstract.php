@@ -331,10 +331,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * If attribute is not found false is returned
      *
-     * @param string|int|Mage_Core_Model_Config_Element $attribute
-     * @return Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute|false
+     * @param string|int|Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      */
-    public function getAttribute($attribute)
+    public function getAttribute($attribute): Mage_Eav_Model_Entity_Attribute_Abstract|false
     {
         if (is_numeric($attribute)) {
             $attributeId = $attribute;

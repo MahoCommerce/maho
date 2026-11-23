@@ -202,10 +202,10 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
             foreach ($setAttributeIds as $attributeId) {
                 if (!isset($attributes[$attributeId])) {
                     $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeId);
-                    if (!$this->_filterFilterableAttributes($attribute)) {
-                        continue;
-                    }
-                    if ($attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute && $attribute->getIsFilterable()) {
+                    if ($attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute
+                        && $this->_filterFilterableAttributes($attribute)
+                        && $attribute->getIsFilterable()
+                    ) {
                         $attributes[$attributeId] = $attribute;
                     }
                 }
