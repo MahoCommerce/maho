@@ -392,11 +392,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
 
     /**
      * Return default static virtual attribute that doesn't exists in EAV attributes
-     *
-     * @param string $attributeCode
-     * @return Mage_Eav_Model_Entity_Attribute
      */
-    protected function _getDefaultAttribute($attributeCode)
+    protected function _getDefaultAttribute(string $attributeCode): Mage_Eav_Model_Entity_Attribute_Abstract
     {
         $entityTypeId = $this->getEntityType()->getId();
         if (!isset(self::$_defaultAttributes[$entityTypeId][$attributeCode])) {

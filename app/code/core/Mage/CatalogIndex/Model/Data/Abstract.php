@@ -272,10 +272,8 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve Product Type Instance
-     *
-     * @return Mage_Catalog_Model_Product_Type_Abstract
      */
-    public function getTypeInstance()
+    public function getTypeInstance(): Mage_Catalog_Model_Product_Type_Abstract
     {
         if (is_null($this->_typeInstance)) {
             $product = Mage::getModel('catalog/product');

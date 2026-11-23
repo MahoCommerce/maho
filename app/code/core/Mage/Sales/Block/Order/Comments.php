@@ -49,10 +49,8 @@ class Mage_Sales_Block_Order_Comments extends Mage_Core_Block_Template
 
     /**
      * Initialize model comments and return comment collection
-     *
-     * @return Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract
      */
-    public function getComments()
+    public function getComments(): Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract
     {
         if (is_null($this->_commentCollection)) {
             $entity = $this->getEntity();

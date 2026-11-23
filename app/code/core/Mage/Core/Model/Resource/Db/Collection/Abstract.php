@@ -577,10 +577,8 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
 
     /**
      * Set flag data has changed to all collection items
-     *
-     * @return $this
      */
-    public function resetItemsDataChanged()
+    public function resetItemsDataChanged(): static
     {
         foreach ($this->_items as $item) {
             $item->setDataChanges(false);

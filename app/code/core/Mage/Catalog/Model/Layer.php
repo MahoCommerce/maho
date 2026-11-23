@@ -185,9 +185,9 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
     /**
      * Get collection of all filterable attributes for layer products set
      *
-     * @return Mage_Catalog_Model_Resource_Eav_Attribute[]
+     * @return array<int, Mage_Catalog_Model_Resource_Eav_Attribute>
      */
-    public function getFilterableAttributes()
+    public function getFilterableAttributes(): array
     {
         $setIds = $this->_getSetIds();
         if (!$setIds) {

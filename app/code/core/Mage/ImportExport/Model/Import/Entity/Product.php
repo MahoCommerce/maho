@@ -1726,10 +1726,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
     /**
      * Stock item saving.
-     *
-     * @return $this
      */
-    protected function _saveStockItem()
+    protected function _saveStockItem(): static
     {
         $defaultStockData = [
             'manage_stock'                  => 1,

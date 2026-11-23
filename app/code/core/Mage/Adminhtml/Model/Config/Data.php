@@ -38,10 +38,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Save config section
      * Require set: section, website, store and groups
-     *
-     * @return $this
      */
-    public function save()
+    public function save(): static
     {
         $this->_validate();
         $this->_getScope();
@@ -460,11 +458,9 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Secure set groups
      *
-     * @param array $groups
-     * @return Mage_Adminhtml_Model_Config_Data
      * @throws Mage_Core_Exception
      */
-    public function setGroupsSecure($groups)
+    public function setGroupsSecure(array $groups): static
     {
         $this->_validate();
         $this->_getScope();

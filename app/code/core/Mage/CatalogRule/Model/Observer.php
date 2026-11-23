@@ -327,12 +327,8 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Check rules that contains affected attribute
      * If rules were found they will be set to inactive and notice will be add to admin session
-     *
-     * @param string $attributeCode
-     *
-     * @return $this
      */
-    protected function _checkCatalogRulesAvailability($attributeCode)
+    protected function _checkCatalogRulesAvailability(string $attributeCode): static
     {
         /** @var Mage_CatalogRule_Model_Resource_Rule_Collection $collection */
         $collection = Mage::getResourceModel('catalogrule/rule_collection')

@@ -91,10 +91,8 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
 
     /**
      * Returns JSON encoded config to be used in JS scripts
-     *
-     * @return string
      */
-    public function getJsonConfig()
+    public function getJsonConfig(): string
     {
         Mage::app()->getLocale()->getJsPriceFormat();
         $optionsArray = $this->getOptions();

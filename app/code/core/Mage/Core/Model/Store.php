@@ -368,12 +368,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Process config value
      *
-     * @param string $fullPath
-     * @param string $path
-     * @param \Maho\Simplexml\Element $node
-     * @return array|string
+     * @return array<string, mixed>|string|false An array of the child values for a node with children. False when a
+     *     serialized value is not valid.
      */
-    protected function _processConfigValue($fullPath, $path, $node)
+    protected function _processConfigValue(string $fullPath, string $path, \Maho\Simplexml\Element $node): array|string|false
     {
         if (isset($this->_configCache[$path])) {
             return $this->_configCache[$path];

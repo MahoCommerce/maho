@@ -432,23 +432,16 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Calculate final price of selection
      * with take into account tier price
      *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param Mage_Catalog_Model_Product $selectionProduct
-     * @param float $bundleQty
-     * @param float|null $selectionQty
-     * @param bool $multiplyQty
-     * @param bool $takeTierPrice
-     * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
     public function getSelectionFinalTotalPrice(
-        $bundleProduct,
-        $selectionProduct,
-        $bundleQty,
-        $selectionQty,
-        $multiplyQty = true,
-        $takeTierPrice = true,
-    ) {
+        Mage_Catalog_Model_Product $bundleProduct,
+        Mage_Catalog_Model_Product $selectionProduct,
+        ?float $bundleQty,
+        ?float $selectionQty,
+        bool $multiplyQty = true,
+        bool $takeTierPrice = true,
+    ): float {
         $selectionQty ??= $selectionProduct->getSelectionQty();
 
         if ($bundleProduct->getPriceType() == self::PRICE_TYPE_DYNAMIC) {

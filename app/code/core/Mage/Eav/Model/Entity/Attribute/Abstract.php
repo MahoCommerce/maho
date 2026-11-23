@@ -83,12 +83,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
 
     /**
      * Load attribute data by code
-     *
-     * @param   mixed $entityType
-     * @param   string $code
-     * @return  $this
      */
-    public function loadByCode($entityType, $code)
+    public function loadByCode(Mage_Eav_Model_Entity_Type|int|string $entityType, string $code): static
     {
         \Maho\Profiler::start('_LOAD_ATTRIBUTE_BY_CODE__');
         $model = Mage::getSingleton('eav/config')->getAttribute($entityType, $code);

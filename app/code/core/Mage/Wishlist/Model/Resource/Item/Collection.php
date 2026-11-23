@@ -449,10 +449,8 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
 
     /**
      * Get sum of items collection qty
-     *
-     * @return int
      */
-    public function getItemsQty()
+    public function getItemsQty(): int
     {
         if (is_null($this->_itemsQty)) {
             $this->_itemsQty = 0;

@@ -20,9 +20,9 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
     /**
      * Get crosssell items
      *
-     * @return array
+     * @return list<Mage_Catalog_Model_Product>
      */
-    public function getItems()
+    public function getItems(): array
     {
         $items = $this->getData('items');
         if (is_null($items)) {

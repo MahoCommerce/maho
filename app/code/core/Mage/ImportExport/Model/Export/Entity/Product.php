@@ -456,10 +456,8 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
 
     /**
      * Prepare data for export.
-     *
-     * @return string
      */
-    protected function _prepareExport()
+    protected function _prepareExport(): string
     {
         //Execution time may be very long
         set_time_limit(0);

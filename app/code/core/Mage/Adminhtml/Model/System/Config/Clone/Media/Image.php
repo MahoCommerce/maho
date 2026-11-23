@@ -12,9 +12,10 @@ class Mage_Adminhtml_Model_System_Config_Clone_Media_Image extends Mage_Core_Mod
 {
     /**
      * Get fields prefixes
-     * @return array
+     *
+     * @return list<array{field: string, label: string}>
      */
-    public function getPrefixes()
+    public function getPrefixes(): array
     {
         // use cached eav config
         $entityTypeId = Mage::getSingleton('eav/config')->getEntityType(Mage_Catalog_Model_Product::ENTITY)->getId();

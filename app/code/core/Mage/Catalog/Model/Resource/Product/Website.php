@@ -64,16 +64,14 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
     /**
      * Add products to websites
      *
-     * @param array $websiteIds
-     * @param array $productIds
-     * @return $this
      * @throws Exception
+     *
+     * @param list<int|string> $websiteIds
+     * @param list<int|string> $productIds
      */
-    public function addProducts($websiteIds, $productIds)
+    public function addProducts(array $websiteIds, array $productIds): static
     {
-        if (!is_array($websiteIds) || !is_array($productIds)
-            || count($websiteIds) == 0 || count($productIds) == 0
-        ) {
+        if (!$websiteIds || !$productIds) {
             return $this;
         }
 

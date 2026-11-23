@@ -128,10 +128,8 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
 
     /**
      * Initialize attributes parameters for all attributes' sets.
-     *
-     * @return Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
      */
-    protected function _initAttributes()
+    protected function _initAttributes(): static
     {
         // temporary storage for attributes' parameters to avoid double querying inside the loop
         $attributesCache = [];

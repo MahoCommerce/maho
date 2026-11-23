@@ -84,11 +84,8 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
 
     /**
      * Retrieve SQL for search entities
-     *
-     * @param string $query
-     * @return Maho\Db\Select
      */
-    protected function _getSearchEntityIdsSql($query)
+    protected function _getSearchEntityIdsSql(string $query): \Maho\Db\Select
     {
         $tables = [];
         $selects = [];
