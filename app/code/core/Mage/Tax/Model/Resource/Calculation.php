@@ -37,7 +37,7 @@
  *     rates: list<AppliedRate>,
  *     percent: float,
  *     id: string,
- *     hidden?: int,
+ *     hidden?: bool,
  *     amount?: string,
  *     base_amount?: string,
  *     base_real_amount?: string,
@@ -163,7 +163,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             }
 
             if (isset($rate['hidden'])) {
-                $row['hidden'] = $rate['hidden'];
+                $row['hidden'] = (bool) $rate['hidden'];
             }
 
             if (isset($rate['amount'])) {
