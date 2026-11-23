@@ -60,7 +60,8 @@ class Mage_Weee_Model_Total_Creditmemo_Weee extends Mage_Sales_Model_Order_Credi
                 (float) $item->getQty(),
                 $store,
             );
-            [$inclTax, $baseInclTax] = $allocation->apply($item, $share, $store);
+            $allocation->apply($item, $share, $store);
+            [$inclTax, $baseInclTax] = $allocation->getTaxInclusiveAmounts($item);
             $totalTax += $share['gross'] - $share['discount'];
             $baseTotalTax += $share['base_gross'] - $share['base_discount'];
             $weeeTaxAmount += $inclTax;

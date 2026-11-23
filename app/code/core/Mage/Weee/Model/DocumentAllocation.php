@@ -176,15 +176,12 @@ class Mage_Weee_Model_DocumentAllocation
         return $share;
     }
 
-    /**
-     * @param Share $share
-     * @return array{float, float} The allocated tax-inclusive totals in order and base currency.
-     */
+    /** @param Share $share */
     public function apply(
         Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item,
         array $share,
         Mage_Core_Model_Store $store,
-    ): array {
+    ): void {
         $helper = Mage::helper('weee');
         $qty = $item->getQty();
         $orderItem = $item->getOrderItem();
@@ -222,9 +219,9 @@ class Mage_Weee_Model_DocumentAllocation
         }
         $applied = $helper->allocateTaxDiscounts($applied, $share['discount'], $share['base_discount'], $store);
         $discountsByTitle = $this->feeAmounts($applied);
+        $titleAmounts = array_intersect_key($share['fees'], $originalAmounts) ?: $originalAmounts;
         foreach (['gross' => ['row_amount', 'discount'], 'base_gross' => ['base_row_amount', 'base_discount']] as $key => [$amountKey, $discountKey]) {
-            // Older invoice titles can differ from the entries written on the new document.
-            $weights = array_intersect_key($share['fees'], $originalAmounts) + $originalAmounts;
+            $weights = $titleAmounts;
             foreach ($weights as $title => &$weight) {
                 $weight[$discountKey] = $discountsByTitle[$title][$discountKey] ?? 0.0;
             }
@@ -238,16 +235,17 @@ class Mage_Weee_Model_DocumentAllocation
         $item->setWeeeTaxRowDisposition($item->getWeeeTaxDisposition() * $qty);
         $item->setBaseWeeeTaxRowDisposition($item->getBaseWeeeTaxDisposition() * $qty);
         $helper->setApplied($item, $applied);
+    }
 
+    /** @return array{float, float} */
+    public function getTaxInclusiveAmounts(Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item): array
+    {
+        $helper = Mage::helper('weee');
+        $inclTax = (float) $helper->getRowWeeeTaxInclTax($item);
+        $baseInclTax = (float) $helper->getBaseRowWeeeTaxInclTax($item);
         // Some older order items only have aggregate fee fields.
-        if (!$applied) {
-            return [$share['gross'], $share['base_gross']];
-        }
-
-        $inclTax = $baseInclTax = 0.0;
-        foreach ($applied as $fee) {
-            $inclTax += max((float) $fee['row_amount_incl_tax'], 0.0);
-            $baseInclTax += max((float) $fee['base_row_amount_incl_tax'], 0.0);
+        if (!$inclTax && !$baseInclTax && !$helper->getApplied($item)) {
+            return [(float) $item->getWeeeTaxAppliedRowAmount(), (float) $item->getBaseWeeeTaxAppliedRowAmount()];
         }
         return [$inclTax, $baseInclTax];
     }
@@ -347,11 +345,11 @@ class Mage_Weee_Model_DocumentAllocation
      * @param array<array-key, array<string, mixed>> $applied
      * @return array<array-key, FeeAmounts>
      */
-    private function feeAmounts(array $applied): array
+    private function feeAmounts(array $applied, string $untitled = self::UNTITLED_FEE): array
     {
         $fees = [];
         foreach ($applied as $tax) {
-            $title = (string) ($tax['title'] ?? self::UNTITLED_FEE);
+            $title = (string) ($tax['title'] ?? $untitled);
             $fees[$title] ??= ['gross' => 0.0, 'base_gross' => 0.0, 'discount' => 0.0, 'base_discount' => 0.0];
             $fees[$title]['gross'] += (float) ($tax['row_amount'] ?? 0.0);
             $fees[$title]['base_gross'] += (float) ($tax['base_row_amount'] ?? 0.0);
@@ -408,6 +406,7 @@ class Mage_Weee_Model_DocumentAllocation
         $store = $order->getStore();
         $empty = ['qty' => 0.0, 'gross' => 0.0, 'base_gross' => 0.0, 'discount' => 0.0, 'base_discount' => 0.0, 'fees' => [], 'has_unlinked' => false];
         $byDocument = [];
+        $orderFees = [];
         $hasLegacy = false;
         foreach ($connection->fetchAll($select) as $item) {
             $fees = $helper->getAppliedToItem(new Maho\DataObject($item));
@@ -417,7 +416,21 @@ class Mage_Weee_Model_DocumentAllocation
             if (empty($first['weee_discount_allocated']) && count($fees) > 1) {
                 $fees = $this->recoverHistoricDiscounts($fees, $helper, $store);
             }
-            $item['fees'] = $this->feeAmounts($fees);
+            $id = (int) $item['order_item_id'];
+            $untitled = self::UNTITLED_FEE;
+            if ($fees) {
+                if (!isset($orderFees[$id])) {
+                    $orderItem = $order->getItemById($id);
+                    $orderFees[$id] = $orderItem ? $this->feeAmounts($helper->getAppliedToItem($orderItem)) : [];
+                }
+                if (isset($orderFees[$id][$untitled]) && array_any($fees, static fn(array $fee): bool => !isset($fee['title']))) {
+                    // Keep an unlabeled row distinct from an actual fee named "Fixed Product Tax".
+                    do {
+                        $untitled .= "\0";
+                    } while (isset($orderFees[$id][$untitled]) || in_array($untitled, array_column($fees, 'title'), true));
+                }
+            }
+            $item['fees'] = $this->feeAmounts($fees, $untitled);
             $byDocument[$item['document_id']][] = $item;
         }
 
@@ -439,6 +452,7 @@ class Mage_Weee_Model_DocumentAllocation
                     $amounts[$id][$key] += $gross;
                     $this->allocateTitleGross($item['fees'], $key, $gross, $store, balanceAgainstDiscounts: false);
                 }
+                $item['fees'] = $this->matchHistoricFeeTitles($item['fees'], $orderFees[$id] ?? [], $store);
                 foreach ($item['fees'] as $title => $fees) {
                     $amounts[$id]['fees'][$title] ??= ['gross' => 0.0, 'base_gross' => 0.0, 'discount' => 0.0, 'base_discount' => 0.0];
                     foreach (self::AMOUNTS as $key) {
@@ -450,6 +464,32 @@ class Mage_Weee_Model_DocumentAllocation
             }
         }
         return $amounts;
+    }
+
+    /**
+     * Assign unknown titles to the remaining order fees before tracking the balance of each fee.
+     *
+     * @param array<array-key, FeeAmounts> $historic
+     * @param array<array-key, FeeAmounts> $original
+     * @return array<array-key, FeeAmounts>
+     */
+    private function matchHistoricFeeTitles(array $historic, array $original, Mage_Core_Model_Store $store): array
+    {
+        $unknown = array_diff_key($historic, $original);
+        if (!$unknown || !$original) {
+            return $historic;
+        }
+
+        $matched = array_intersect_key($historic, $original);
+        $targets = array_diff_key($original, $matched) ?: $original;
+        foreach (['gross' => 'gross', 'base_gross' => 'base_gross', 'discount' => 'gross', 'base_discount' => 'base_gross'] as $key => $weightKey) {
+            $weights = array_map(static fn(array $fee): float => $fee[$weightKey], $targets);
+            $unmatchedAmount = array_sum(array_column($unknown, $key));
+            foreach ($this->allocateGross($weights, $unmatchedAmount, $store) as $title => $amount) {
+                $matched[$title][$key] = ($matched[$title][$key] ?? 0.0) + $amount;
+            }
+        }
+        return $matched;
     }
 
     /**

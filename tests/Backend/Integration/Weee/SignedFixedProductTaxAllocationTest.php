@@ -200,10 +200,37 @@ it('retains aggregate-only legacy fee amounts when collecting tax-inclusive tota
     $store = Mage::app()->getStore();
     $share = ['gross' => 0.09, 'base_gross' => 0.12, 'discount' => 0.0, 'base_discount' => 0.0, 'fees' => []];
 
-    $totals = (new Mage_Weee_Model_DocumentAllocation())->apply($item, $share, $store);
+    $allocation = new Mage_Weee_Model_DocumentAllocation();
+    $allocation->apply($item, $share, $store);
 
-    expect($totals)->toBe([0.09, 0.12])
+    expect($allocation->getTaxInclusiveAmounts($item))->toBe([0.09, 0.12])
         ->and($item->getWeeeTaxAppliedRowAmount())->toBe(0.09)
         ->and($item->getBaseWeeeTaxAppliedRowAmount())->toBe(0.12)
         ->and(Mage::helper('weee')->getApplied($item))->toBe([]);
+});
+
+it('uses the rewritten fee row getters for document tax-inclusive totals', function (): void {
+    $item = Mage::getModel('sales/order_creditmemo_item')->setData('qty', 2);
+    $helper = Mage::helper('weee');
+    $helper->setApplied($item, [['row_amount_incl_tax' => 0.06, 'base_row_amount_incl_tax' => 0.10]]);
+    Mage::unregister('_helper/weee');
+    Mage::register('_helper/weee', new class extends Mage_Weee_Helper_Data {
+        #[\Override]
+        public function getRowWeeeTaxInclTax($item)
+        {
+            return parent::getRowWeeeTaxInclTax($item) + 0.02;
+        }
+
+        #[\Override]
+        public function getBaseRowWeeeTaxInclTax($item)
+        {
+            return parent::getBaseRowWeeeTaxInclTax($item) + 0.03;
+        }
+    });
+    try {
+        expect((new Mage_Weee_Model_DocumentAllocation())->getTaxInclusiveAmounts($item))->toBe([0.08, 0.13]);
+    } finally {
+        Mage::unregister('_helper/weee');
+        Mage::register('_helper/weee', $helper);
+    }
 });

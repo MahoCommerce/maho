@@ -89,7 +89,8 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $share['base_gross'] = $store->roundPrice($share['base_gross'] - $baseReduction);
             $excess = $store->roundPrice($excess - $reduction);
             $baseExcess = $store->roundPrice($baseExcess - $baseReduction);
-            [$inclTax, $baseInclTax] = $allocation->apply($item, $share, $store);
+            $allocation->apply($item, $share, $store);
+            [$inclTax, $baseInclTax] = $allocation->getTaxInclusiveAmounts($item);
             $weeeInclTax += $inclTax;
             $baseWeeeInclTax += $baseInclTax;
         }

@@ -21,11 +21,12 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
     try {
+        $partiallyNamed = in_array($variant, ['partially named historic invoice', 'partially named historic invoice with fallback title'], true);
         $threeFees = in_array($variant, ['distinct small fees', 'same-title small fees'], true);
         $discountedCap = $variant === 'discounted cap';
         $fractionalQty = $variant === 'fractional quantity';
         Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => 0.72]]);
-        $store = setStoreDisplayCurrency($threeFees || $discountedCap ? 'USD' : 'EUR', 'USD,EUR');
+        $store = setStoreDisplayCurrency($threeFees || $discountedCap || $partiallyNamed ? 'USD' : 'EUR', 'USD,EUR');
         Mage::app()->setCurrentStore($store);
         $includedBefore = in_array($variant, ['subtotal', 'historic subcent to tax', 'invoice switch to tax'], true);
         $invoiceModeChanged = in_array($variant, ['invoice switch to tax', 'invoice switch to subtotal'], true);
@@ -55,13 +56,17 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
                 $discountedCap => 90.0,
                 default => 10.0,
             });
-        if (!$discountedCap) {
+        if (!$discountedCap && !$partiallyNamed) {
             $rule->save();
         }
         $attribute = 'partial_fpt_' . uniqid();
         WeeeDiscountFixture::createFeeAttribute($attribute);
+        if ($variant === 'partially named historic invoice with fallback title') {
+            Mage::getModel('catalog/resource_eav_attribute')->loadByCode('catalog_product', $attribute)
+                ->setFrontendLabel('Fixed Product Tax')->save();
+        }
         $secondAttribute = $attribute . '_other';
-        $twoFees = in_array($variant, ['two fees', 'two historic fees', 'gross per title', 'duplicated historic fees', 'same title'], true);
+        $twoFees = $partiallyNamed || in_array($variant, ['two fees', 'two historic fees', 'gross per title', 'duplicated historic fees', 'same title'], true);
         if ($twoFees) {
             WeeeDiscountFixture::createFeeAttribute($secondAttribute);
             if ($variant !== 'same title') {
@@ -82,6 +87,7 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         $subcent = in_array($variant, ['subcent', 'subcent historic invoices', 'historic subcent to subtotal', 'historic subcent to tax'], true);
         $fees = $variant === 'no fees' ? [] : [$attribute => match (true) {
             $cappedInvoice => 0.008,
+            $partiallyNamed => 0.04,
             $threeFees => 0.006,
             $fractionalQty => 0.015,
             $subcent => 0.004,
@@ -90,7 +96,11 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
             default => 0.12,
         }];
         if ($twoFees) {
-            $fees[$secondAttribute] = $variant === 'gross per title' ? 0.005 : 0.07;
+            $fees[$secondAttribute] = match (true) {
+                $partiallyNamed => 0.06,
+                $variant === 'gross per title' => 0.005,
+                default => 0.07,
+            };
         }
         if ($threeFees) {
             foreach ([$secondAttribute, $attribute . '_third'] as $code) {
@@ -176,11 +186,11 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
                 if (in_array($variant, ['history', 'two historic fees', 'duplicated historic fees'], true) && $index === 0) {
                     partialFptUseHistoricDocumentFormat($invoice->getAllItems()[0], $orderItem, $variant === 'duplicated historic fees');
                 }
-                if ($variant === 'untitled historic invoice') {
+                if ($variant === 'untitled historic invoice' || $partiallyNamed) {
                     $helper = Mage::helper('weee');
                     $invoiceItem = $invoice->getAllItems()[0];
                     $applied = $helper->getApplied($invoiceItem);
-                    unset($applied[0]['title']);
+                    unset($applied[$partiallyNamed ? 1 : 0]['title']);
                     $helper->setApplied($invoiceItem, $applied);
                     $invoiceItem->save();
                 }
@@ -263,6 +273,26 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
         $order->load((int) $order->getId());
 
         $cents = static fn(float $amount): int => (int) round($amount * 100);
+        if ($partiallyNamed) {
+            $helper = Mage::helper('weee');
+            $orderFees = $helper->getApplied($orderItem);
+            $historicFees = $helper->getApplied($invoices[0]->getAllItems()[0]);
+            expect(array_column($historicFees, 'title'))->toBe([$orderFees[0]['title']])
+                ->and(array_map($cents, array_column($historicFees, 'base_row_amount')))->toBe([8, 12]);
+
+            $perRefund = [];
+            foreach ($creditmemos as $creditmemo) {
+                $fees = $helper->getApplied($creditmemo->getAllItems()[0]);
+                expect(array_column($fees, 'title'))->toBe(array_column($orderFees, 'title'));
+                $perRefund[] = [
+                    array_map($cents, array_column($fees, 'row_amount')),
+                    array_map($cents, array_column($fees, 'base_row_amount')),
+                ];
+            }
+            expect($perRefund)->toBe([[[4, 6], [4, 6]], [[4, 6], [4, 6]]]);
+            return;
+        }
+
         if ($subcent) {
             if ($includedBefore) {
                 expect($cents($order->getSubtotal()))->toBe(145)
@@ -408,6 +438,8 @@ it('keeps fixed tax discounts and the paid amounts across partial documents', fu
     'two distinct fixed taxes' => [[1, 1, 2], [1, 1, 2], true, 'two fees'],
     'two distinct historic fee discounts' => [[1, 1, 2], [1, 1, 2], true, 'two historic fees'],
     'repeated historic fee discount with a missing amount' => [[1, 1, 2], [1, 1, 2], true, 'duplicated historic fees'],
+    'partial historical title match keeps each fee over two refunds' => [[2], [1, 1], true, 'partially named historic invoice'],
+    'partial historical title match preserves the actual fallback title' => [[2], [1, 1], true, 'partially named historic invoice with fallback title'],
     'untitled historic invoice linked to a named order fee' => [[1, 1], [1, 1], true, 'untitled historic invoice'],
     'historical fees without labels or VAT-inclusive amounts' => [[1, 1, 2], [1, 1, 2], true, 'missing fee fields'],
     'two subcent fees on separate lines and documents' => [[[1, 0], [0, 1]], [[1, 0], [0, 1]], true, 'subcent'],
