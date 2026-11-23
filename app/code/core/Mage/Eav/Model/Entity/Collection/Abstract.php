@@ -973,10 +973,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
             $object = $this->getNewEmptyItem()
                 ->setData($v);
             $this->addItem($object);
-            if (isset($this->_itemsById[$object->getId()])) {
-                $this->_itemsById[$object->getId()][] = $object;
-            } else {
-                $this->_itemsById[$object->getId()] = [$object];
+            // A row of an aggregate report has no entity ID, so it has no attribute values to load
+            $entityId = $object->getId();
+            if ($entityId !== null) {
+                $this->_itemsById[$entityId][] = $object;
             }
         }
 

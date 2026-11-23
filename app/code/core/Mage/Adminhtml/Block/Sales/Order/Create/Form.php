@@ -35,46 +35,31 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form extends Mage_Adminhtml_Block_
     }
 
     /**
-     * @return string
+     * Return true when the order has a customer or is a guest order.
      */
-    public function getCustomerSelectorDisplay()
+    protected function _hasCustomer(): bool
     {
-        $customerId = $this->getCustomerId();
-        if (is_null($customerId)) {
-            return 'block';
-        }
-        return 'none';
+        return $this->getCustomerId() !== null || $this->_getSession()->getCustomerIsGuest();
     }
 
-    /**
-     * @return string
-     */
-    public function getStoreSelectorDisplay()
+    public function getCustomerSelectorDisplay(): string
     {
-        $storeId    = $this->getStoreId();
-        $customerId = $this->getCustomerId();
-        if (!is_null($customerId) && !$storeId) {
-            return 'block';
-        }
-        return 'none';
+        return $this->_hasCustomer() ? 'none' : 'block';
     }
 
-    /**
-     * @return string
-     */
-    public function getDataSelectorDisplay()
+    public function getStoreSelectorDisplay(): string
     {
-        $storeId    = $this->getStoreId();
-        $customerId = $this->getCustomerId();
-        if (!is_null($customerId) && $storeId) {
-            return 'block';
-        }
-        return 'none';
+        return $this->_hasCustomer() && !$this->getStoreId() ? 'block' : 'none';
+    }
+
+    public function getDataSelectorDisplay(): string
+    {
+        return $this->_hasCustomer() && $this->getStoreId() ? 'block' : 'none';
     }
 
     public function getOrderDataJson(): string
     {
-        $data = [];
+        $data = ['is_guest' => (bool) $this->_getSession()->getCustomerIsGuest()];
         if (!is_null($this->getCustomerId())) {
             $data['customer_id'] = $this->getCustomerId();
             $data['addresses'] = [];
