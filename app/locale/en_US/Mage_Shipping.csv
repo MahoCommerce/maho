@@ -33,8 +33,6 @@
 "Invalid Country ""%s"" in the Row #%s.","Invalid Country ""%s"" in the Row #%s."
 "Invalid Region/State ""%s"" in the Row #%s.","Invalid Region/State ""%s"" in the Row #%s."
 "Invalid Shipping Price ""%s"" in the Row #%s.","Invalid Shipping Price ""%s"" in the Row #%s."
-"Invalid Table Rate code for type %s: %s","Invalid Table Rate code for type %s: %s"
-"Invalid Table Rate code type: %s","Invalid Table Rate code type: %s"
 "Invalid Table Rates File Format","Invalid Table Rates File Format"
 "Invalid Table Rates format in the Row #%s","Invalid Table Rates format in the Row #%s"
 "Local Time","Local Time"

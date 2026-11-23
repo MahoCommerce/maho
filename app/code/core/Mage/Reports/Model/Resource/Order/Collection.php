@@ -756,11 +756,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
     /**
      * Get select count sql
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = clone $this->getSelect();
         $countSelect->reset(Maho\Db\Select::ORDER);

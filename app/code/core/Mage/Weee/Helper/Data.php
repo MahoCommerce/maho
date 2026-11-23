@@ -138,16 +138,14 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get weee tax amount for product based on shipping and billing addresses, website and tax settings
-     *
-     * @param   Mage_Catalog_Model_Product $product
-     * @param   null|Mage_Customer_Model_Address_Abstract $shipping
-     * @param   null|Mage_Customer_Model_Address_Abstract $billing
-     * @param   mixed $website
-     * @param   bool $calculateTaxes
-     * @return  float
      */
-    public function getAmount($product, $shipping = null, $billing = null, $website = null, $calculateTaxes = false)
-    {
+    public function getAmount(
+        Mage_Catalog_Model_Product $product,
+        ?Mage_Sales_Model_Quote_Address $shipping = null,
+        ?Mage_Sales_Model_Quote_Address $billing = null,
+        Mage_Core_Model_Website|int|null $website = null,
+        bool $calculateTaxes = false,
+    ): float {
         if ($this->isEnabled()) {
             return Mage::getSingleton('weee/tax')
                 ->getWeeeAmount($product, $shipping, $billing, $website, $calculateTaxes);
@@ -159,6 +157,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * Return the display type of the zone, or whether it matches $compareTo when $compareTo is set
      *
      * @param int|list<int>|null $compareTo
+     * @return ($compareTo is null ? int|false : bool)
      */
     public function typeOfDisplay(?\Maho\DataObject $product, array|int|null $compareTo = null, ?string $zone = null, Mage_Core_Model_Store|int|null $store = null): bool|int
     {
@@ -217,20 +216,15 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Proxy for Mage_Weee_Model_Tax::getProductWeeeAttributes()
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param null|false|\Maho\DataObject $shipping
-     * @param null|false|\Maho\DataObject $billing
-     * @param int|Mage_Core_Model_Website|null|string|true $website
-     * @param bool                       $calculateTaxes
-     * @return array
+     * @return \Maho\DataObject[]
      */
     public function getProductWeeeAttributes(
-        $product,
-        $shipping = null,
-        $billing = null,
-        $website = null,
-        $calculateTaxes = false,
-    ) {
+        Mage_Catalog_Model_Product $product,
+        ?Mage_Sales_Model_Quote_Address $shipping = null,
+        ?Mage_Sales_Model_Quote_Address $billing = null,
+        Mage_Core_Model_Website|int|null $website = null,
+        bool $calculateTaxes = false,
+    ): array {
         return Mage::getSingleton('weee/tax')
             ->getProductWeeeAttributes($product, $shipping, $billing, $website, $calculateTaxes);
     }
@@ -416,20 +410,15 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get Product Weee attributes for price renderer
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param null|false|\Maho\DataObject $shipping Shipping Address
-     * @param null|false|\Maho\DataObject $billing Billing Address
-     * @param int|Mage_Core_Model_Website|null|string|true $website
-     * @param mixed $calculateTaxes
-     * @return array
+     * @return \Maho\DataObject[]
      */
     public function getProductWeeeAttributesForRenderer(
-        $product,
-        $shipping = null,
-        $billing = null,
-        $website = null,
-        $calculateTaxes = false,
-    ) {
+        Mage_Catalog_Model_Product $product,
+        ?Mage_Sales_Model_Quote_Address $shipping = null,
+        ?Mage_Sales_Model_Quote_Address $billing = null,
+        Mage_Core_Model_Website|int|null $website = null,
+        bool $calculateTaxes = false,
+    ): array {
         if ($this->isEnabled()) {
             return $this->getProductWeeeAttributes(
                 $product,
@@ -444,31 +433,17 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Returns amount to display excluding taxes
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @return float
      */
-    public function getAmountForDisplay($product)
+    public function getAmountForDisplay(Mage_Catalog_Model_Product $product): float
     {
-        if ($this->isEnabled()) {
-            $attributes = $this->getProductWeeeAttributesForRenderer(
-                $product,
-                null,
-                null,
-                null,
-                true,
-            );
-
-            if (is_array($attributes)) {
-                $amount = 0;
-                foreach ($attributes as $attribute) {
-                    /** @var \Maho\DataObject $attribute */
-                    $amount += $attribute->getAmount();
-                }
-                return $amount;
-            }
+        if (!$this->isEnabled()) {
+            return 0;
         }
-        return 0;
+        $amount = 0;
+        foreach ($this->getProductWeeeAttributesForRenderer($product, null, null, null, true) as $attribute) {
+            $amount += $attribute->getAmount();
+        }
+        return $amount;
     }
 
     /**

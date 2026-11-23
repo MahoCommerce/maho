@@ -52,11 +52,9 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
 
     /**
      * Minimize usual count select
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $countSelect = parent::getSelectCountSql();
         $countSelect->resetJoinLeft();

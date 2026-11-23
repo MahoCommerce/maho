@@ -38,11 +38,9 @@ class Mage_Sales_Model_Resource_Order_Grid_Collection extends Mage_Sales_Model_R
 
     /**
      * Get SQL for get record count
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         if ($this->getIsCustomerMode()) {
             $this->_renderFilters();

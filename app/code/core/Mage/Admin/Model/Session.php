@@ -364,13 +364,13 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         return $this->setData('acl_version', $value);
     }
 
-    public function getActiveTabId(bool $clear = false): ?int
+    public function getActiveTabId(bool $clear = false): ?string
     {
         $value = $this->getData('active_tab_id', $clear ?: null);
-        return $value === null ? null : (int) $value;
+        return $value === null ? null : (string) $value;
     }
 
-    public function setActiveTabId(?int $value): static
+    public function setActiveTabId(?string $value): static
     {
         return $this->setData('active_tab_id', $value);
     }

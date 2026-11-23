@@ -77,13 +77,8 @@ class Mage_Adminhtml_Block_Urlrewrite_Product_Grid extends Mage_Adminhtml_Block_
         return $this->getUrl('*/*/productGrid', ['_current' => true]);
     }
 
-    /**
-     * Get row url
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['product' => $row->getId()]) . 'category';
     }

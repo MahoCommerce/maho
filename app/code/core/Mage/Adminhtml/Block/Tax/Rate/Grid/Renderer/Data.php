@@ -8,18 +8,17 @@
  * @package Mage_Adminhtml
  */
 
+declare(strict_types=1);
+
 class Mage_Adminhtml_Block_Tax_Rate_Grid_Renderer_Data extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    protected function _getValue(\Maho\DataObject $row)
+    protected function _getValue(\Maho\DataObject $row): string
     {
-        $data = parent::_getValue($row);
-        if ((int) $data == $data) {
-            return (string) number_format((float) $data, 2);
+        $rate = (float) parent::_getValue($row);
+        if ((int) $rate == $rate) {
+            return number_format($rate, 2);
         }
-        if (!is_null($data)) {
-            return $data * 1;
-        }
-        return $this->getColumn()->getDefault();
+        return (string) $rate;
     }
 }

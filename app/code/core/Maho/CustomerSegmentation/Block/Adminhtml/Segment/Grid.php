@@ -152,7 +152,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

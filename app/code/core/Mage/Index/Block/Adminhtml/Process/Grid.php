@@ -231,15 +231,8 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
         return $value;
     }
 
-    /**
-     * Get row edit url
-     *
-     * @param Mage_Index_Model_Process $row
-     *
-     * @return string
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['process' => $row->getId()]);
     }

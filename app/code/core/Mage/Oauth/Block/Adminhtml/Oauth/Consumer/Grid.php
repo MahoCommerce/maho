@@ -131,18 +131,12 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
-    /**
-     * Get row URL
-     *
-     * @param Mage_Oauth_Model_Consumer $row
-     * @return string|null
-     */
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         if ($this->isAllowed('system/oauth/consumer/edit')) {
             return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
         }
-        return null;
+        return '';
     }
 }

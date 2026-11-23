@@ -87,12 +87,13 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Dependence extends Mage_Adminhtml
      * $block->addFieldDependence('result', 'source_1', 'foo')
      *       ->addFieldDependence('result', 'source_2', 'bar');
      *
+     * $refValues is the wanted value of the $dependentField element, or a list of them.
+     * A checkbox compares its checked state with a bool.
+     *
      * @param string $targetField field to be toggled
      * @param string $dependentField field that triggers the display of $targetField
-     * @param string|array $refValues wanted value(s) of the $dependentField element
-     * @return $this
      */
-    public function addFieldDependence($targetField, $dependentField, $refValues)
+    public function addFieldDependence(string $targetField, string $dependentField, array|string|int|bool $refValues): static
     {
         if ($this->isLogicalOperator($dependentField)) {
             Mage::throwException($this->__("Invalid field name '%s', must not be one of NOT, AND, OR, XOR", $dependentField));

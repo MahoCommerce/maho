@@ -157,7 +157,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     }
 
     #[\Override]
-    public function getRowUrl($row)
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         // Link to the gift card edit page
         return $this->getUrl('*/giftcard/edit', ['id' => $row->getGiftcardId()]);

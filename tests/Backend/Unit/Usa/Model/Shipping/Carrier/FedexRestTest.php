@@ -751,7 +751,7 @@ describe('FedEx REST configuration', function () {
     it('defaults dropoff to a REST pickup type and offers only REST pickup types', function () {
         expect((string) fedexShippedDefaults()->dropoff)->toBe('USE_SCHEDULED_PICKUP');
 
-        expect(array_keys(Mage::getModel('usa/shipping_carrier_fedex')->getCode('dropoff')))
+        expect(array_keys(Mage::getModel('usa/shipping_carrier_fedex')->getCodes('dropoff')))
             ->toBe([
                 'USE_SCHEDULED_PICKUP', 'CONTACT_FEDEX_TO_SCHEDULE', 'DROPOFF_AT_FEDEX_LOCATION',
                 'ON_CALL', 'PACKAGE_RETURN_PROGRAM', 'REGULAR_STOP', 'TAG',
@@ -773,7 +773,7 @@ describe('FedEx REST configuration', function () {
         expect((string) fedexShippedDefaults()->rate_endpoint)
             ->toBe(Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_ENDPOINT_STANDARD);
 
-        expect(array_keys(Mage::getModel('usa/shipping_carrier_fedex')->getCode('rate_endpoint')))
+        expect(array_keys(Mage::getModel('usa/shipping_carrier_fedex')->getCodes('rate_endpoint')))
             ->toBe(['standard', 'comprehensive']);
     });
 

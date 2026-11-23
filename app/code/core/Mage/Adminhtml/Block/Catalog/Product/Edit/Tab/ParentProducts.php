@@ -135,7 +135,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_ParentProducts extends Mage_
     }
 
     #[\Override]
-    public function getRowUrl($row): string
+    public function getRowUrl(\Maho\DataObject $row): string
     {
         return $this->getUrl('*/*/edit', ['id' => $row->getId()]);
     }

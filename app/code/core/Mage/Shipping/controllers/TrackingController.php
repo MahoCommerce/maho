@@ -52,7 +52,7 @@ class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
             $this->norouteAction();
             return;
         }
-        $shippingInfoModel = Mage::getModel('shipping/info')->loadByHash($this->getRequest()->getParam('hash'));
+        $shippingInfoModel = Mage::getModel('shipping/info')->loadByHash($this->getRequest()->getParam('hash', ''));
         Mage::register('current_shipping_info', $shippingInfoModel);
         if (count($shippingInfoModel->getTrackingInfo()) == 0) {
             $limiter->hit();
