@@ -293,42 +293,139 @@ it('includes the refunded tax when applying the shipping discount from the captu
     'the unreturned free item cannot cover any shipping discount' => [10.0, 2.0, 0.0, 1.98, 1, true],
 ]);
 
-it('keeps a refundable cent on each whole item when its tax covers the shipping discount', function (array $skus): void {
+it('keeps a refundable cent on each whole item when its tax covers the shipping discount', function (
+    array $skus,
+    int $largeQty = 1,
+    float $largeTax = 0.03,
+    float $smallTax = 0.01,
+): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
+    $store = Mage::app()->getStore();
+    $paymentPath = 'payment/checkmo/model';
+    $previousPaymentModel = $store->getConfig($paymentPath);
     try {
+        $capture = (1 + $largeQty) * 0.01;
+        $taxTotal = $largeTax + $smallTax;
+        $shippingDiscount = round($taxTotal - $capture, 2);
         [$order, $items, $invoices] = createSplitShippingRefundOrder(
-            ['shipping' => 10.0, 'small' => 0.01, 'large' => 0.03],
+            ['shipping' => 10.0, 'small' => 1.0, 'large' => 1.0],
             0.004,
             1.0,
-            0.02,
+            $shippingDiscount,
+            ['large' => $largeQty],
         );
         $invoice = $invoices['discount'];
         foreach ($invoice->getAllItems() as $line) {
             $amount = $line->getBaseRowTotal();
-            $line->setBaseDiscountAmount($amount)->setBaseTaxAmount($amount)->save();
+            $tax = $line->getOrderItemId() === $items['small']->getId() ? $smallTax : $largeTax;
+            $line->setBaseDiscountAmount($amount)->setBaseTaxAmount($tax)->save();
             $order->getItemById($line->getOrderItemId())->setBaseDiscountAmount($amount)->setBaseDiscountInvoiced($amount)
-                ->setBaseTaxAmount($amount)->setBaseTaxInvoiced($amount)->save();
+                ->setBaseTaxAmount($tax)->setBaseTaxInvoiced($tax)->save();
         }
-        $invoice->setBaseDiscountAmount(-0.06)->setBaseTaxAmount(0.04)->setBaseGrandTotal(0.02)->save();
-        $order->setBaseTaxInvoiced(0.04)->setBaseTaxAmount(0.04)
-            ->setBaseDiscountInvoiced(-5.06)->setBaseDiscountAmount(-5.06)
-            ->setBaseGrandTotal(6.02)->setBaseTotalPaid(6.02)->setBaseTotalInvoiced(6.02)->save();
+        $discount = 1 + $largeQty + $shippingDiscount;
+        $captureId = 'split-shipping-tax-' . uniqid();
+        $invoice->setBaseDiscountAmount(-$discount)->setBaseTaxAmount($taxTotal)->setBaseGrandTotal($capture)->setTransactionId($captureId)->save();
+        $order->setBaseTaxInvoiced($taxTotal)->setBaseTaxAmount($taxTotal)
+            ->setBaseDiscountInvoiced(-5.0 - $discount)->setBaseDiscountAmount(-5.0 - $discount)
+            ->setBaseGrandTotal(6.0 + $capture)->setBaseTotalPaid(6.0 + $capture)->setBaseTotalInvoiced(6.0 + $capture)->save();
+        Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
+            ->setTxnId($captureId)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
+        $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
+        $calls = new Maho\DataObject(['requests' => []]);
+        Mage::register('split_shipping_refund_payment_calls', $calls);
         $documents = Mage::getService('sales/order_document');
-        foreach ($skus as $sku) {
+        foreach ($skus as $return) {
+            [$sku, $qty, $fee] = is_array($return) ? $return : [$return, 1, 0.0];
             $order = Mage::getModel('sales/order')->load($order->getId());
             $invoice = Mage::getModel('sales/order_invoice')->load($invoice->getId());
-            $data = ['qtys' => [$items[$sku]->getId() => 1]];
-            $memo = $documents->refund($order, $data, invoice: $invoice);
+            $data = ['qtys' => [$items[$sku]->getId() => $qty], 'adjustment_negative' => $fee];
+            $memo = $documents->refund($order, $data, offlineRefund: false, invoice: $invoice);
             $saved = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
             expect($saved->getBaseGrandTotal())->toBe(0.01)
-                ->and($saved->getBaseDiscountAmount())->toBe($sku === 'small' ? -0.01 : -0.05);
+                ->and($saved->getBaseDiscountAmount())->toBe(round(-$saved->getAllItems()[0]->getBaseRowTotal() - $saved->getBaseTaxAmount() + $fee + 0.01, 2));
         }
-        expect(Mage::getModel('sales/order_invoice')->load($invoice->getId())->getBaseTotalRefunded())->toBe(0.02);
+        expect(Mage::getModel('sales/order_invoice')->load($invoice->getId())->getBaseTotalRefunded())->toBe(count($skus) * 0.01)
+            ->and($calls->getData('requests'))->toBe(array_fill(0, count($skus), ['amount' => 0.01, 'capture' => $captureId]));
     } finally {
+        Mage::unregister('split_shipping_refund_payment_calls');
+        $store->setConfig($paymentPath, $previousPaymentModel);
         $connection->rollBack();
     }
-})->with(['small first' => [['small', 'large']], 'large first' => [['large', 'small']]]);
+})->with([
+    'small first' => [['small', 'large']],
+    'large first' => [['large', 'small']],
+    'two large units first' => [['large', 'large', 'small'], 2],
+    'two large units last' => [['small', 'large', 'large'], 2],
+    'separate large returns' => [['large', 'small', 'large'], 2],
+    'two of three units with a fee' => [[['large', 2, 0.01], 'large', 'small'], 3, 0.07, 0.02],
+]);
+
+it('refunds the tax charged by the split invoice when the same items were also on the shipping invoice', function (): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    $store = Mage::app()->getStore();
+    $paymentPath = 'payment/checkmo/model';
+    $previousPaymentModel = $store->getConfig($paymentPath);
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 10.0, 'a' => 1.0, 'b' => 1.0],
+            0.004,
+            1.0,
+            0.04,
+            ['a' => 2, 'b' => 2],
+        );
+        $source = $invoices['discount'];
+        $other = $invoices['shipping'];
+        $converter = Mage::getModel('sales/convert_order');
+        foreach ($source->getAllItems() as $line) {
+            $item = $order->getItemById($line->getOrderItemId());
+            [$sourceTax, $otherTax] = $item->getSku() === 'a' ? [0.01, 0.07] : [0.06, 0.00];
+            $item->setBaseDiscountAmount(2.0)->setBaseDiscountInvoiced(2.0)
+                ->setBaseTaxAmount($sourceTax + $otherTax)->setBaseTaxInvoiced($sourceTax + $otherTax)->save();
+            $line->setData('qty', 1.0)->setBaseRowTotal(1.0)->setBaseDiscountAmount(1.0)->setBaseTaxAmount($sourceTax)->save();
+            $other->addItem($converter->itemToInvoiceItem($item)->setData('qty', 1.0)->setBaseRowTotal(1.0)
+                ->setBaseDiscountAmount(1.0)->setBaseTaxAmount($otherTax));
+        }
+        $captureId = 'shared-tax-capture-' . uniqid();
+        $source->setBaseSubtotal(2.0)->setBaseDiscountAmount(-2.04)->setBaseTaxAmount(0.07)
+            ->setBaseGrandTotal(0.03)->setTransactionId($captureId)->save();
+        $other->setBaseSubtotal(12.0)->setBaseDiscountAmount(-7.0)->setBaseTaxAmount(0.07)->setBaseGrandTotal(6.07)->save();
+        $order->setBaseTaxAmount(0.14)->setBaseTaxInvoiced(0.14)->setBaseDiscountAmount(-9.04)->setBaseDiscountInvoiced(-9.04)
+            ->setBaseGrandTotal(6.10)->setBaseTotalPaid(6.10)->setBaseTotalInvoiced(6.10)->save();
+        Mage::getModel('sales/order_payment_transaction')->setOrderPaymentObject($order->getPayment())
+            ->setTxnId($captureId)->setTxnType(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE)->save();
+        $store->setConfig($paymentPath, SplitShippingRefundPaymentDouble::class);
+        $calls = new Maho\DataObject(['requests' => []]);
+        Mage::register('split_shipping_refund_payment_calls', $calls);
+
+        $documents = Mage::getService('sales/order_document');
+        $order = Mage::getModel('sales/order')->load($order->getId());
+        $source = Mage::getModel('sales/order_invoice')->load($source->getId());
+        $fee = ['qtys' => [$items['a']->getId() => 1], 'adjustment_negative' => 0.02];
+        expect(fn() => $documents->refund($order, $fee, offlineRefund: false, invoice: $source))
+            ->toThrow(Mage_Core_Exception::class, 'Credit memo total must be greater than zero')
+            ->and($calls->getData('requests'))->toBe([]);
+        foreach (['a' => [0.01, 0.01], 'b' => [0.06, 0.02]] as $sku => [$tax, $amount]) {
+            $order = Mage::getModel('sales/order')->load($order->getId());
+            $source = Mage::getModel('sales/order_invoice')->load($source->getId());
+            $data = ['qtys' => [$items[$sku]->getId() => 1]];
+            $memo = $documents->refund($order, $data, offlineRefund: false, invoice: $source);
+            $saved = Mage::getModel('sales/order_creditmemo')->load($memo->getId());
+            expect($saved->getBaseTaxAmount())->toBe($tax)
+                ->and($saved->getAllItems()[0]->getBaseTaxAmount())->toBe($tax)
+                ->and($saved->getBaseGrandTotal())->toBe($amount);
+        }
+        expect($calls->getData('requests'))->toBe([
+            ['amount' => 0.01, 'capture' => $captureId],
+            ['amount' => 0.02, 'capture' => $captureId],
+        ]);
+    } finally {
+        Mage::unregister('split_shipping_refund_payment_calls');
+        $store->setConfig($paymentPath, $previousPaymentModel);
+        $connection->rollBack();
+    }
+});
 
 it('limits the deferred shipping discount to the tax actually refunded', function (): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');

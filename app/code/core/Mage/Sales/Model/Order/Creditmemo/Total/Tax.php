@@ -48,6 +48,10 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
                     $sharedItems[] = $line->getOrderItemId();
                 }
             }
+            // A split shipping discount is refunded against the tax on the same invoice.
+            if ($sharedItems && $creditmemo->getData('is_split_shipping_discount_invoice_refund')) {
+                $signedTax = $signedBaseTax = true;
+            }
             if ($sharedItems && $order->getId() && (!$signedTax || !$signedBaseTax)) {
                 // One invoice can carry negative tax even when the item's total over all invoices is positive.
                 $resource = Mage::getSingleton('core/resource');
@@ -166,11 +170,13 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Tax extends Mage_Sales_Model_Order
 
         $creditmemo->setGrandTotal($creditmemo->getGrandTotal() + $taxRefund + $totalHiddenTax);
         $baseGrandTotal = $creditmemo->getBaseGrandTotal() + $baseTaxRefund + $baseTotalHiddenTax;
-        $shippingDiscountLeft = (float) $creditmemo->getData('base_split_shipping_discount_left');
-        if ($shippingDiscountLeft > 0.0) {
-            $discount = max(0.0, min($shippingDiscountLeft, round($baseGrandTotal, 4), round($baseTaxRefund + $baseTotalHiddenTax, 4)));
+        if ($creditmemo->hasData('base_split_shipping_discount_left') || $creditmemo->hasData('base_split_shipping_discount_capacity')) {
+            $discount = Mage::getModel('sales/order_creditmemo_total_discount')->getShippingDiscountAfterTax(
+                $creditmemo,
+                $baseTaxRefund + $baseTotalHiddenTax,
+                $baseGrandTotal,
+            );
             $creditmemo->setBaseDiscountAmount($creditmemo->getBaseDiscountAmount() - $discount);
-            $creditmemo->unsetData('base_split_shipping_discount_left');
             $baseGrandTotal -= $discount;
         }
         $creditmemo->setBaseGrandTotal($baseGrandTotal);
