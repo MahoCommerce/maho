@@ -98,11 +98,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
         return $item->getId();
     }
 
-    /**
-     * @return bool
-     */
     #[\Override]
-    public function canDisplay()
+    public function canDisplay(): bool
     {
         if (!Mage::helper('wishlist')->isAllow()) {
             return false;

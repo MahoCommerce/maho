@@ -30,12 +30,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
         return $this->_sidebarStorageAction;
     }
 
-    /**
-     * Retrieve display block availability
-     *
-     * @return bool
-     */
-    public function canDisplay()
+    public function canDisplay(): bool
     {
         return (bool) $this->getCustomerId();
     }

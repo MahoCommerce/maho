@@ -18,13 +18,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Viewed extends Mage_Adminh
         $this->setDataId('viewed');
     }
 
-    /**
-     * Retrieve display block availability
-     *
-     * @return bool
-     */
     #[\Override]
-    public function canDisplay()
+    public function canDisplay(): bool
     {
         return false;
     }
