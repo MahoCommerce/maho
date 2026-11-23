@@ -26,16 +26,8 @@ class Mage_CatalogIndex_Model_Data_Grouped extends Mage_CatalogIndex_Model_Data_
         $this->_init('catalogindex/data_grouped');
     }
 
-    /**
-     * Fetch final price for product
-     *
-     * @param array $product
-     * @param Mage_Core_Model_Store $store
-     * @param Mage_Customer_Model_Group $group
-     * @return false
-     */
     #[\Override]
-    public function getFinalPrice($product, $store, $group)
+    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): false
     {
         return false;
     }

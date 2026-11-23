@@ -132,13 +132,8 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
 
     /**
      * Fetch final price for product
-     *
-     * @param array $product
-     * @param Mage_Core_Model_Store $store
-     * @param Mage_Customer_Model_Group $group
-     * @return float|false
      */
-    public function getFinalPrice($product, $store, $group)
+    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): float|false
     {
         $basePrice = $specialPrice = $specialPriceFrom = $specialPriceTo = null;
         $priceId = Mage::getSingleton('eav/entity_attribute')->getIdByCode(Mage_Catalog_Model_Product::ENTITY, 'price');
@@ -148,7 +143,7 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
 
         $attributes = [$priceId, $specialPriceId, $specialPriceFromId, $specialPriceToId];
 
-        $productData = $this->getAttributeData($product, $attributes, $store);
+        $productData = $this->getAttributeData([$productId], $attributes, $store);
         foreach ($productData as $row) {
             switch ($row['attribute_id']) {
                 case $priceId:
@@ -166,9 +161,12 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
             }
         }
 
-        return Mage::getSingleton('catalog/product_type')
+        $finalPrice = Mage::getSingleton('catalog/product_type')
             ->priceFactory($this->getTypeCode())
-            ->calculatePrice($basePrice, $specialPrice, $specialPriceFrom, $specialPriceTo, false, $store, $group, $product);
+            ->calculatePrice($basePrice, $specialPrice, $specialPriceFrom, $specialPriceTo, false, $store, $group, $productId);
+
+        // calculatePrice() returns the price attribute string when no special price or rule price is lower
+        return (float) $finalPrice;
     }
 
     /**
