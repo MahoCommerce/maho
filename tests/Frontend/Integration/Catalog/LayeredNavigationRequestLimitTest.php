@@ -69,7 +69,7 @@ function lnlLayer(Mage_Catalog_Model_Category $category): Mage_Catalog_Model_Lay
         }
 
         #[\Override]
-        public function getFilterableAttributes()
+        public function getFilterableAttributes(): array
         {
             return [lnlAttribute('color'), lnlAttribute('price')];
         }
@@ -230,7 +230,7 @@ describe('the limit of the layer', function () {
             }
 
             #[\Override]
-            public function getFilterableAttributes()
+            public function getFilterableAttributes(): array
             {
                 return [lnlAttribute('weight')];
             }

@@ -131,9 +131,9 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Fetch final price for product
+     * Fetch final price for product, or null for a product type that has no price of its own
      */
-    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): float|false
+    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): ?float
     {
         $basePrice = $specialPrice = $specialPriceFrom = $specialPriceTo = null;
         $priceId = Mage::getSingleton('eav/entity_attribute')->getIdByCode(Mage_Catalog_Model_Product::ENTITY, 'price');

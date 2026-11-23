@@ -27,9 +27,9 @@ class Mage_CatalogIndex_Model_Data_Grouped extends Mage_CatalogIndex_Model_Data_
     }
 
     #[\Override]
-    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): false
+    public function getFinalPrice(int $productId, Mage_Core_Model_Store $store, Mage_Customer_Model_Group $group): null
     {
-        return false;
+        return null;
     }
 
     /**
