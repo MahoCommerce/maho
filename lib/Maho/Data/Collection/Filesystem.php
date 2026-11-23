@@ -25,6 +25,8 @@ use Maho\Data\Collection;
  * Supports some fancy filters.
  *
  * At least one target directory must be set
+ *
+ * @phpstan-type FileRow array{filename: string, basename: string, mtime: int|false, subdir_count?: int}
  */
 class Filesystem extends Collection
 {
@@ -105,9 +107,9 @@ class Filesystem extends Collection
     /**
      * Collecting items helper variables
      */
-    /** @var array<int, string|array{filename: string, basename: string, mtime: int|false, subdir_count?: int}> */
+    /** @var array<int, string|FileRow> */
     protected array $_collectedDirs  = [];
-    /** @var array<int, string|array{filename: string, basename: string, mtime: int|false, subdir_count?: int}> */
+    /** @var array<int, string|FileRow> */
     protected array $_collectedFiles = [];
 
     /**
@@ -354,8 +356,8 @@ class Filesystem extends Collection
      * Callback for sorting items
      * Currently supports only sorting by one column
      *
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $a
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $b
+     * @param FileRow $a
+     * @param FileRow $b
      * @return int|void
      */
     protected function _usort($a, $b)
@@ -385,7 +387,7 @@ class Filesystem extends Collection
      * Generate item row basing on the filename
      *
      * @param string $filename
-     * @return array{filename: string, basename: string, mtime: int|false, subdir_count?: int}
+     * @return FileRow
      */
     protected function _generateRow($filename)
     {
@@ -436,7 +438,7 @@ class Filesystem extends Collection
      * The filters renderer and caller
      * Aplies to each row, renders once.
      *
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      */
     protected function _filterRow($row)
@@ -470,7 +472,7 @@ class Filesystem extends Collection
      * Skips, if there is no filtered key in the row
      *
      * @param callable $callback
-     * @param array{0: string, 1: mixed, 2: array{filename: string, basename: string, mtime: int|false, subdir_count?: int}} $callbackParams
+     * @param array{0: string, 1: mixed, 2: FileRow} $callbackParams
      * @return bool
      */
     protected function _invokeFilter($callback, $callbackParams)
@@ -631,7 +633,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -647,7 +649,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -662,7 +664,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -677,7 +679,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -692,7 +694,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -707,7 +709,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array{filename: string, basename: string, mtime: int|false, subdir_count?: int} $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()

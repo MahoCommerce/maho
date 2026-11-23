@@ -61,17 +61,16 @@ class Mage_Reports_Model_Resource_Wishlist_Collection extends Mage_Core_Model_Re
         $customersSelect = $collection->getSelectCountSql();
 
         $countSelect = clone $customersSelect;
-        $countSelect->joinLeft(
+        $countSelect->join(
             ['wt' => $this->getWishlistTable()],
             'wt.customer_id = e.entity_id',
             [],
-        )
-            ->group('wt.wishlist_id');
+        );
         $resultSelect = $this->getConnection()->select()
             ->union([$customersSelect, $countSelect], Maho\Db\Select::SQL_UNION_ALL);
         [$customers, $count] = $this->getConnection()->fetchCol($resultSelect);
 
-        return [($count * 100) / $customers, $count];
+        return [$customers ? ($count * 100) / $customers : 0, $count];
     }
 
     /**

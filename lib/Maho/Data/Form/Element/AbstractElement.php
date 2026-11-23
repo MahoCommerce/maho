@@ -383,8 +383,12 @@ abstract class AbstractElement extends AbstractForm
         } else {
             unset($this->_data['checked']);
         }
-        if (in_array('readonly', $attributes) && empty($this->_data['readonly'])) {
-            unset($this->_data['readonly']);
+        if (in_array('readonly', $attributes)) {
+            if (empty($this->_data['readonly'])) {
+                unset($this->_data['readonly']);
+            } else {
+                $this->_data['readonly'] = 'readonly';
+            }
         }
         return parent::serialize($attributes, $valueSeparator, $fieldSeparator, $quote);
     }
