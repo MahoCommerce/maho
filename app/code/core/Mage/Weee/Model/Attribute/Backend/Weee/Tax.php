@@ -144,11 +144,10 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
     }
 
     /**
-     * @param \Maho\DataObject $object
-     * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @param Mage_Catalog_Model_Product $object
      */
     #[\Override]
-    public function afterDelete($object)
+    public function afterDelete($object): static
     {
         $this->_getResource()->deleteProductData($object, $this->getAttribute());
         return $this;
