@@ -168,18 +168,12 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\El
         return sprintf('<%s %s%s>', $element, implode(' ', $parts), $closed ? ' /' : '');
     }
 
-    /**
-     * Return escaped value
-     *
-     * @param string|null $index
-     * @return false|string
-     */
     #[\Override]
-    public function getEscapedValue($index = null)
+    public function getEscapedValue(int|string|null $index = null): string
     {
         $value = $this->getValue();
         if (is_array($value)) {
-            return false;
+            return '';
         }
 
         $index ??= 'value';

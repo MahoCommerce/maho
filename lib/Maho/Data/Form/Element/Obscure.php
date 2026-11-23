@@ -22,12 +22,9 @@ class Obscure extends Password
 
     /**
      * Hide value to make sure it will not show in HTML
-     *
-     * @param string $index
-     * @return string
      */
     #[\Override]
-    public function getEscapedValue($index = null)
+    public function getEscapedValue(int|string|null $index = null): string
     {
         $value = parent::getEscapedValue($index);
         if (!empty($value)) {
