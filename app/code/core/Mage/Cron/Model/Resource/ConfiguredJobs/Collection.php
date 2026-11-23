@@ -6,6 +6,8 @@
  * @package Mage_Cron
  */
 
+declare(strict_types=1);
+
 /**
  * In-memory collection for configured cron jobs grid.
  * Extends Collection\Db to satisfy the Grid widget's type requirements,
