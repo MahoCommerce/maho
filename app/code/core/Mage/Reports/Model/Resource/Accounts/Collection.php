@@ -8,7 +8,9 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model_Resource_Customer_Collection
+declare(strict_types=1);
+
+class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model_Resource_Customer_Collection implements Mage_Reports_Model_Report_CollectionInterface
 {
     /**
      * Join created_at and accounts fields
@@ -30,12 +32,9 @@ class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model
 
     /**
      * Set date range
-     *
-     * @param string $from
-     * @param string $to
-     * @return $this
      */
-    public function setDateRange($from, $to)
+    #[\Override]
+    public function setDateRange(string $from, string $to): static
     {
         $this->_reset()
              ->_joinFields($from, $to);
@@ -45,10 +44,10 @@ class Mage_Reports_Model_Resource_Accounts_Collection extends Mage_Reports_Model
     /**
      * Set store ids to final result
      *
-     * @param array $storeIds
-     * @return $this
+     * @param list<int>|null $storeIds
      */
-    public function setStoreIds($storeIds)
+    #[\Override]
+    public function setStoreIds(?array $storeIds): static
     {
         if ($storeIds) {
             $this->addAttributeToFilter('store_id', ['in' => (array) $storeIds]);

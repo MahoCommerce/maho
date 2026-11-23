@@ -13,50 +13,37 @@
  * @method $this setPageSize(int $value)
  * @method array getStoreIds()
  * @method $this setStoreIds($value)
- * @method $this setDateRange(string $from, string $to)
  */
 class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
 {
     /**
-     * @var Mage_Reports_Model_Report
+     * @var Maho\Data\Collection&Mage_Reports_Model_Report_CollectionInterface
      */
     protected $_reportModel;
 
     /**
-     * @param string $modelClass
-     * @return $this
+     * @throws \UnexpectedValueException when $modelClass names a class that is not a report collection
      */
-    public function initCollection($modelClass)
+    public function initCollection(string $modelClass): static
     {
-        $this->_reportModel = Mage::getResourceModel($modelClass);
+        $collection = Mage::getResourceModel($modelClass);
+        if (!$collection instanceof Maho\Data\Collection || !$collection instanceof Mage_Reports_Model_Report_CollectionInterface) {
+            throw new \UnexpectedValueException("The report collection {$modelClass} must be a Maho\\Data\\Collection that implements Mage_Reports_Model_Report_CollectionInterface.");
+        }
+        $this->_reportModel = $collection;
 
         return $this;
     }
 
-    /**
-     * @param string $from
-     * @param string $to
-     * @return Maho\Data\Collection
-     */
-    public function getReportFull($from, $to)
+    public function getReportFull(string $from, string $to): Maho\Data\Collection
     {
-        return $this->_reportModel
-            ->setDateRange($from, $to)
-            ->setPageSize(false)
-            ->setStoreIds($this->getStoreIds());
+        $this->_reportModel->setDateRange($from, $to)->setStoreIds($this->getStoreIds());
+        return $this->_reportModel->setPageSize(null);
     }
 
-    /**
-     * @param string $from
-     * @param string $to
-     * @return Maho\Data\Collection
-     */
-    public function getReport($from, $to)
+    public function getReport(string $from, string $to): Maho\Data\Collection
     {
-        return $this->_reportModel
-            ->setDateRange($from, $to)
-            ->setPageSize($this->getPageSize())
-            ->setStoreIds($this->getStoreIds());
+        $this->_reportModel->setDateRange($from, $to)->setStoreIds($this->getStoreIds());
+        return $this->_reportModel->setPageSize($this->getPageSize());
     }
-
 }

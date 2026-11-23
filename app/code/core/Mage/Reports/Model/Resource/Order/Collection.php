@@ -11,7 +11,7 @@
 /**
  * @method Mage_Sales_Model_Order getFirstItem()
  */
-class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Resource_Order_Collection
+class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Resource_Order_Collection implements Mage_Reports_Model_Report_CollectionInterface
 {
     /**
      * Is live
@@ -489,12 +489,9 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
 
     /**
      * Set date range
-     *
-     * @param string $from
-     * @param string $to
-     * @return $this
      */
-    public function setDateRange($from, $to)
+    #[\Override]
+    public function setDateRange(string $from, string $to): static
     {
         $this->_reset()
             ->addFieldToFilter('created_at', ['from' => $from, 'to' => $to])
@@ -512,10 +509,10 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     /**
      * Set store filter collection
      *
-     * @param array $storeIds
-     * @return $this
+     * @param list<int>|null $storeIds
      */
-    public function setStoreIds($storeIds)
+    #[\Override]
+    public function setStoreIds(?array $storeIds): static
     {
         $adapter = $this->getConnection();
         $baseSubtotalInvoiced = $adapter->getIfNullSql('main_table.base_subtotal_invoiced', 0);
