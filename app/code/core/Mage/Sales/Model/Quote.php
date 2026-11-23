@@ -753,7 +753,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return false;
     }
 
-    public function getItemById(int|string|null $itemId): ?Mage_Sales_Model_Quote_Item
+    public function getItemById(?int $itemId): ?Mage_Sales_Model_Quote_Item
     {
         $quoteItem = $this->getItemsCollection()->getItemById($itemId);
         if ($quoteItem) {
@@ -798,11 +798,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Remove quote item by item identifier
-     *
-     * @param   int $itemId
-     * @return  $this
      */
-    public function removeItem($itemId)
+    public function removeItem(?int $itemId): static
     {
         $item = $this->getItemById($itemId);
 
@@ -1010,14 +1007,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * For more options see Mage_Catalog_Helper_Product->addParamsToBuyRequest()
      *
-     * @param int $itemId
-     * @param \Maho\DataObject $buyRequest
-     * @param null|array|\Maho\DataObject $params
-     * @return Mage_Sales_Model_Quote_Item
+     * @param array<string, mixed>|\Maho\DataObject|null $params
      *
      * @see Mage_Catalog_Helper_Product::addParamsToBuyRequest()
      */
-    public function updateItem($itemId, $buyRequest, $params = null)
+    public function updateItem(int $itemId, \Maho\DataObject $buyRequest, array|\Maho\DataObject|null $params = null): Mage_Sales_Model_Quote_Item
     {
         $item = $this->getItemById($itemId);
         if (!$item) {

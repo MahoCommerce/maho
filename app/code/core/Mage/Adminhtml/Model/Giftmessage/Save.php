@@ -202,7 +202,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
     {
         $result = [];
         foreach ($this->getAllowQuoteItems() as $itemId) {
-            $item = $this->_getQuote()->getItemById($itemId);
+            $item = $this->_getQuote()->getItemById((int) $itemId);
             if (!$item) {
                 continue;
             }
