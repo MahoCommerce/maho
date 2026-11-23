@@ -3469,55 +3469,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Get insert queries in array for insert by range with step parameter
-     *
-     * @throws \Maho\Db\Exception
-     */
-    #[\Override]
-    public function selectsByRange(string $rangeField, \Maho\Db\Select $select, int $stepCount = 100): array
-    {
-        $queries = [];
-        $fromSelect = $select->getPart(\Maho\Db\Select::FROM);
-        if (empty($fromSelect)) {
-            throw new \Maho\Db\Exception('Select must have correct FROM part');
-        }
-
-        // The first FROM entry is the main table: Select writes every table as a join type
-        $correlationName = array_key_first($fromSelect);
-        $tableName = $fromSelect[$correlationName]['tableName'];
-
-        $selectRange = $this->select()
-            ->from(
-                $tableName,
-                [
-                    new \Maho\Db\Expr('MIN(' . $this->quoteIdentifier($rangeField) . ') AS min'),
-                    new \Maho\Db\Expr('MAX(' . $this->quoteIdentifier($rangeField) . ') AS max'),
-                ],
-            );
-
-        $rangeResult = $this->fetchRow($selectRange);
-        $min = $rangeResult['min'];
-        $max = $rangeResult['max'];
-
-        while ($min <= $max) {
-            $partialSelect = clone $select;
-            $partialSelect->where(
-                $this->quoteIdentifier($correlationName) . '.'
-                    . $this->quoteIdentifier($rangeField) . ' >= ?',
-                $min,
-            )
-            ->where(
-                $this->quoteIdentifier($correlationName) . '.'
-                    . $this->quoteIdentifier($rangeField) . ' < ?',
-                $min + $stepCount,
-            );
-            $queries[] = $partialSelect;
-            $min += $stepCount;
-        }
-        return $queries;
-    }
-
-    /**
      * Convert date format to unix time
      *
      * @throws \Maho\Db\Exception
