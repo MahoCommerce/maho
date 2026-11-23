@@ -13,6 +13,12 @@ namespace Maho\Db;
 
 /**
  * @phpstan-import-type BindValue from Adapter\AdapterInterface
+ * @phpstan-type SelectColumn array{0: string, 1: string|Expr, 2: string|null}
+ * @phpstan-type SelectFrom array{joinType: 'from'|'inner join'|'left join'|'right join', schema: string|null, tableName: string|Expr|Select|array{string, string|Expr|Select}, joinCondition: string|null, useInCond?: bool, joinInTables?: list<string>}
+ * @phpstan-type SelectUnion array{target: Select|Expr|string, type: string|null}
+ * @phpstan-type SelectWhere array<string, string>|string
+ * @phpstan-type SelectOrder array{0: string, 1: string}|Expr
+ * @phpstan-type SelectParts array{distinct: bool, columns: list<SelectColumn>, from: array<string, SelectFrom>, union: list<SelectUnion>, where: list<SelectWhere>, group: list<string|Expr>, having: list<string>, order: list<SelectOrder>, limitcount: int|null, limitoffset: int|null, forupdate: bool, straightjoin: bool}
  */
 class Select implements \Stringable
 {
@@ -62,7 +68,7 @@ class Select implements \Stringable
      * The component parts of a SELECT statement
      * Maintained for backward compatibility with getPart()/setPart()
      *
-     * @var array<string, mixed>
+     * @var SelectParts
      */
     protected array $_parts = [
         self::DISTINCT     => false,
@@ -586,6 +592,10 @@ class Select implements \Stringable
 
     /**
      * Get part of the structured information for the current query.
+     *
+     * @template TPart of string
+     * @param TPart $part
+     * @return (TPart is key-of<SelectParts> ? SelectParts[TPart] : value-of<SelectParts>)
      */
     public function getPart(string $part): mixed
     {
@@ -598,6 +608,10 @@ class Select implements \Stringable
 
     /**
      * Modify (hack) part of the structured information for the current query
+     *
+     * @template TPart of string
+     * @param TPart $part
+     * @param (TPart is key-of<SelectParts> ? SelectParts[TPart] : mixed) $value
      */
     public function setPart(string $part, mixed $value): self
     {
@@ -1213,11 +1227,9 @@ class Select implements \Stringable
                 // Take the first select and make it the base query
                 array_shift($select);
                 // Copy all parts EXCEPT union from the first select
-                foreach (array_keys($this->_parts) as $part) {
-                    if ($part !== self::UNION) {
-                        $this->_parts[$part] = $firstSelect->getPart($part);
-                    }
-                }
+                $union = $this->_parts[self::UNION];
+                $this->_parts = $firstSelect->_parts;
+                $this->_parts[self::UNION] = $union;
             }
         }
 

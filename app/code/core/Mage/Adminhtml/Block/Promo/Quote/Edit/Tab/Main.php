@@ -168,7 +168,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
             'name'  => 'use_auto_generation',
             'label' => Mage::helper('salesrule')->__('Use Auto Generation'),
             'note'  => Mage::helper('salesrule')->__('If you select and save the rule you will be able to generate multiple coupon codes.'),
-            'checked' => (int) $model->getUseAutoGeneration() > 0 ? 'checked' : '',
+            'checked' => (int) $model->getUseAutoGeneration() > 0,
         ]);
 
         $renderer = $this->getLayout()->createBlock('adminhtml/promo_quote_edit_tab_main_renderer_checkbox');

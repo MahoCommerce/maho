@@ -249,7 +249,7 @@ class Mysql extends AbstractPdoAdapter
             throw new \RuntimeException('pdo_mysql extension is not installed');
         }
 
-        $hostInfo = $this->_getHostInfo($this->_config['host'] ?? $this->_config['unix_socket'] ?? null);
+        $hostInfo = $this->_getHostInfo($this->_config['host'] ?? $this->_config['unix_socket'] ?? 'localhost');
 
         switch ($hostInfo->getAddressType()) {
             case self::ADDRESS_TYPE_UNIX_SOCKET:
@@ -3482,15 +3482,9 @@ class Mysql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception('Select must have correct FROM part');
         }
 
-        $tableName = [];
-        $correlationName = '';
-        foreach ($fromSelect as $fromName => $formPart) {
-            $correlationName = $fromName;
-            if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
-                $tableName = $formPart['tableName'];
-                break;
-            }
-        }
+        // The first FROM entry is the main table: Select writes every table as a join type
+        $correlationName = array_key_first($fromSelect);
+        $tableName = $fromSelect[$correlationName]['tableName'];
 
         $selectRange = $this->select()
             ->from(

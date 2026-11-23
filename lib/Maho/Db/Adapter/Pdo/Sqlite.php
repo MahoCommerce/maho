@@ -2900,15 +2900,9 @@ class Sqlite extends AbstractPdoAdapter
             throw new \Maho\Db\Exception('Select must have correct FROM part');
         }
 
-        $tableName = [];
-        $correlationName = '';
-        foreach ($fromSelect as $fromName => $formPart) {
-            $correlationName = $fromName;
-            if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
-                $tableName = $formPart['tableName'];
-                break;
-            }
-        }
+        // The first FROM entry is the main table: Select writes every table as a join type
+        $correlationName = array_key_first($fromSelect);
+        $tableName = $fromSelect[$correlationName]['tableName'];
 
         $selectRange = $this->select()
             ->from(

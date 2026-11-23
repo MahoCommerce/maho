@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Button extends AbstractElement
 {
     /**
      * Button constructor.
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

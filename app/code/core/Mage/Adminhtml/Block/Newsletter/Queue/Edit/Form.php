@@ -70,7 +70,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
             $fieldset->addField('date', 'date', [
                 'name'      => 'start_at',
                 'time'      => true,
-                'disabled'  => 'true',
+                'disabled'  => true,
                 'style'     => 'width:38%;',
                 'format'    => $outputFormat,
                 'label'     => Mage::helper('newsletter')->__('Queue Date Start'),

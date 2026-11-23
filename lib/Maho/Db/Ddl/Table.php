@@ -190,7 +190,7 @@ class Table
     /**
      * Additional table options
      *
-     * @var array<string, mixed>
+     * @var array<string, string|int>
      */
     protected array $_options = [
         'type'          => 'INNODB',
@@ -565,6 +565,8 @@ class Table
 
     /**
      * Set table option
+     *
+     * @param string|int $value
      */
     public function setOption(string $key, mixed $value): self
     {
@@ -575,6 +577,8 @@ class Table
     /**
      * Retrieve table option value by option name
      * Return null if option does not exits
+     *
+     * @return string|int|null
      */
     public function getOption(string $key): mixed
     {
@@ -587,7 +591,7 @@ class Table
     /**
      * Retrieve array of table options
      *
-     * @return array<string, mixed>
+     * @return array<string, string|int>
      */
     public function getOptions(): array
     {

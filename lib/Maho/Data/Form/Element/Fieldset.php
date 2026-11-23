@@ -14,6 +14,9 @@ namespace Maho\Data\Form\Element;
 use Maho\Data\Form;
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Fieldset extends AbstractElement
 {
     /**
@@ -31,7 +34,7 @@ class Fieldset extends AbstractElement
     protected $_sortChildrenDirection = SORT_ASC;
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -98,7 +101,7 @@ class Fieldset extends AbstractElement
     /**
      * @param string $elementId
      * @param string $type
-     * @param array<string, mixed> $config
+     * @param ElementConfig $config
      * @param string|false $after
      * @return AbstractElement
      */

@@ -242,8 +242,8 @@ class Db extends Collection
             // - all joins are left joins
             // - there are no join conditions using bind params (for simplicity)
             $leftJoins = array_filter($countSelect->getPart(Select::FROM), fn($table) => $table['joinType'] == Select::LEFT_JOIN || $table['joinType'] == Select::FROM);
-            if (count($leftJoins) == count($countSelect->getPart(Select::FROM))) {
-                $mainTable = array_key_first(array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM));
+            $mainTable = array_key_first(array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM));
+            if ($mainTable !== null && count($leftJoins) == count($countSelect->getPart(Select::FROM))) {
                 $mainTable = preg_quote($mainTable, '/');
                 $pattern = "/^$mainTable\\.\\w+/";
                 $whereUsingJoin = array_filter($countSelect->getPart(Select::WHERE), function ($clause) use ($pattern): bool {

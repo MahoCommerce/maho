@@ -142,7 +142,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @return string|null
      */
     public function getOperatorName()
     {

@@ -16,6 +16,9 @@ use Maho\Data\Form\Element\Collection as ElementCollection;
 use Maho\Data\Form\Element\Renderer\RendererInterface;
 use Maho\Profiler;
 
+/**
+ * @phpstan-import-type ElementConfig from Form\Element\AbstractElement
+ */
 class Form extends AbstractForm
 {
     /**
@@ -37,7 +40,7 @@ class Form extends AbstractForm
     protected static ?\Maho\Data\Form\Element\Renderer\RendererInterface $_defaultFieldsetElementRenderer = null;
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

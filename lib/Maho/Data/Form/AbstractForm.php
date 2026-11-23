@@ -20,6 +20,8 @@ use Maho\DataObject;
  *
  * @method \Maho\Data\Form getForm()
  * @method $this setValue(mixed $value)
+ *
+ * @phpstan-import-type ElementConfig from AbstractElement
  */
 abstract class AbstractForm extends \Maho\DataObject
 {
@@ -38,7 +40,7 @@ abstract class AbstractForm extends \Maho\DataObject
     protected $_types = [];
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -109,7 +111,7 @@ abstract class AbstractForm extends \Maho\DataObject
      *
      * @param   string $elementId
      * @param   string $type
-     * @param   array<string, mixed>  $config
+     * @param   ElementConfig  $config
      * @param   string|false $after
      * @return AbstractElement
      */
@@ -145,7 +147,7 @@ abstract class AbstractForm extends \Maho\DataObject
 
     /**
      * @param string $elementId
-     * @param array<string, mixed> $config
+     * @param ElementConfig $config
      * @param bool|string|null $after
      *
      * @return Element\Fieldset
@@ -160,7 +162,7 @@ abstract class AbstractForm extends \Maho\DataObject
 
     /**
      * @param string $elementId
-     * @param array<string, mixed> $config
+     * @param ElementConfig $config
      * @return Element\Column
      */
     public function addColumn($elementId, $config)

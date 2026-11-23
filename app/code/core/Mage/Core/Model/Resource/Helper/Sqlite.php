@@ -24,7 +24,7 @@ class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_He
      * Returns analytic expression for database column
      *
      * @param string $column
-     * @param string $groupAliasName OPTIONAL
+     * @param string|array<string|Maho\Db\Expr>|null $groupAliasName OPTIONAL
      * @param string $orderBy OPTIONAL
      * @return Maho\Db\Expr
      */

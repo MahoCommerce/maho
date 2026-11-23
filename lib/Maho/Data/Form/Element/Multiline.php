@@ -15,12 +15,14 @@ use Maho\Data\Form\Element\AbstractElement;
 
 /**
  * Form multiline text elements
+ *
+ * @phpstan-import-type ElementConfig from AbstractElement
  */
 class Multiline extends AbstractElement
 {
     /**
      * Multiline constructor.
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

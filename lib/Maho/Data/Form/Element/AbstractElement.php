@@ -16,6 +16,77 @@ use Maho\Data\Form\AbstractForm;
 use Maho\Data\Form\Element\Renderer\RendererInterface;
 
 /**
+ * @phpstan-type ElementConfig array{
+ *     name?: string,
+ *     label?: string,
+ *     title?: string,
+ *     required?: bool,
+ *     disabled?: bool,
+ *     readonly?: bool,
+ *     class?: string,
+ *     style?: string,
+ *     note?: string,
+ *     comment?: string,
+ *     tooltip?: string,
+ *     value?: mixed,
+ *     values?: array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|null,
+ *     options?: array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|string|null,
+ *     legend?: string,
+ *     text?: string,
+ *     id?: string,
+ *     after_element_html?: string,
+ *     before_element_html?: string,
+ *     onclick?: string,
+ *     onchange?: string,
+ *     tabindex?: int|string,
+ *     autocomplete?: string,
+ *     maxlength?: int,
+ *     size?: int,
+ *     rows?: int,
+ *     cols?: int,
+ *     wrap?: string,
+ *     no_span?: bool,
+ *     no_container?: bool,
+ *     container_id?: string,
+ *     fieldset_html_class?: string,
+ *     table_class?: string,
+ *     value_class?: string,
+ *     html_content?: string,
+ *     format?: string,
+ *     input_format?: string,
+ *     time?: bool,
+ *     locale?: string,
+ *     image?: string,
+ *     checked?: bool,
+ *     bold?: bool,
+ *     separator?: string,
+ *     line_count?: int,
+ *     select_all?: string,
+ *     deselect_all?: string,
+ *     can_be_empty?: bool,
+ *     config?: \Maho\DataObject|null,
+ *     wysiwyg?: bool,
+ *     force_load?: bool,
+ *     theme?: string,
+ *     config_path?: string,
+ *     placeholder?: string,
+ *     base_url?: string,
+ *     image_entity?: string,
+ *     value_name?: string,
+ *     scope?: string|bool,
+ *     scope_id?: int|string,
+ *     scope_label?: string,
+ *     inherit?: bool|int|string,
+ *     can_use_default_value?: bool,
+ *     can_use_website_value?: bool,
+ *     can_use_system_value?: bool,
+ *     field_config?: \Maho\Simplexml\Element,
+ *     action?: string,
+ *     method?: string,
+ *     enctype?: string,
+ *     ...<string, mixed>
+ * }
+ *
  * @method Form getForm()
  * @method mixed getValue(string|int|null $index = null)
  * @method $this unsCanUseDefaultValue()
@@ -37,7 +108,7 @@ abstract class AbstractElement extends AbstractForm
 
     /**
      * AbstractElement constructor.
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -311,6 +382,9 @@ abstract class AbstractElement extends AbstractForm
             $this->_data['checked'] = 'checked';
         } else {
             unset($this->_data['checked']);
+        }
+        if (in_array('readonly', $attributes) && empty($this->_data['readonly'])) {
+            unset($this->_data['readonly']);
         }
         return parent::serialize($attributes, $valueSeparator, $fieldSeparator, $quote);
     }

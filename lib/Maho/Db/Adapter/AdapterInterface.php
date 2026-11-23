@@ -24,6 +24,7 @@ namespace Maho\Db\Adapter;
  * @phpstan-type IndexDescription array{SCHEMA_NAME: ?string, TABLE_NAME: string, KEY_NAME: string, COLUMNS_LIST: list<string>, INDEX_TYPE: string, INDEX_METHOD: string, type: string, fields: list<string>}
  * @phpstan-type ForeignKeyDescription array{FK_NAME: string, SCHEMA_NAME: ?string, TABLE_NAME: string, COLUMN_NAME: string, REF_SCHEMA_NAME: ?string, REF_TABLE_NAME: string, REF_COLUMN_NAME: string, ON_DELETE: string, ON_UPDATE: string}
  * @phpstan-type DdlCacheValue string|array<string, ColumnDescription|IndexDescription|ForeignKeyDescription>
+ * @phpstan-type ConnectionConfig array{host?: string, port?: string|int, unix_socket?: string, username?: string, password?: string, dbname?: string, path?: string, charset?: string, sql_mode?: string, sslmode?: string, gssencmode?: string, initStatements?: string, engine?: string, model?: string, type?: string, pdoType?: string, active?: string, persistent?: string, profiler?: bool, ...<string, mixed>}
  */
 interface AdapterInterface
 {
@@ -712,7 +713,7 @@ interface AdapterInterface
     /**
      * Returns the configuration variables in this adapter.
      *
-     * @return array<string, mixed>
+     * @return ConnectionConfig
      */
     public function getConfig(): array;
 

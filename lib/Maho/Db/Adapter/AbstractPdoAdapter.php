@@ -33,6 +33,7 @@ use Maho\Db\Statement\Pdo\Mysql as Statement;
  * @phpstan-import-type IndexDescription from AdapterInterface
  * @phpstan-import-type ForeignKeyDescription from AdapterInterface
  * @phpstan-import-type DdlCacheValue from AdapterInterface
+ * @phpstan-import-type ConnectionConfig from AdapterInterface
  */
 abstract class AbstractPdoAdapter implements AdapterInterface
 {
@@ -74,7 +75,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Adapter configuration
      *
-     * @var array<string, mixed>
+     * @var ConnectionConfig
      */
     protected array $_config = [];
 
@@ -211,7 +212,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     /**
      * Constructor
      *
-     * @param array<string, mixed> $config
+     * @param ConnectionConfig $config
      */
     public function __construct(array $config)
     {

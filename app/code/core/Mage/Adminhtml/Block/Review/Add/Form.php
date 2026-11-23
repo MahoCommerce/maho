@@ -54,7 +54,7 @@ class Mage_Adminhtml_Block_Review_Add_Form extends Mage_Adminhtml_Block_Widget_F
             'name'      => 'nickname',
             'title'     => Mage::helper('review')->__('Nickname'),
             'label'     => Mage::helper('review')->__('Nickname'),
-            'maxlength' => '50',
+            'maxlength' => 50,
             'required'  => true,
         ]);
 
@@ -62,7 +62,7 @@ class Mage_Adminhtml_Block_Review_Add_Form extends Mage_Adminhtml_Block_Widget_F
             'name'      => 'title',
             'title'     => Mage::helper('review')->__('Summary of Review'),
             'label'     => Mage::helper('review')->__('Summary of Review'),
-            'maxlength' => '255',
+            'maxlength' => 255,
             'required'  => true,
         ]);
 

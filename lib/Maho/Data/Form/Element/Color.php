@@ -12,13 +12,16 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Color extends AbstractElement
 {
     public const string VALIDATION_REGEX_WITH_HASH = '/^#[a-f0-9]{6}$/i';
     public const string VALIDATION_REGEX_WITHOUT_HASH = '/^[a-f0-9]{6}$/i';
 
     /**
-     * @param array<string, mixed> $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

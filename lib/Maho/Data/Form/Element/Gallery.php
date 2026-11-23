@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Gallery extends AbstractElement
 {
     /**
      * Gallery constructor.
-     * @param array<string, mixed> $data
+     * @param ElementConfig $data
      */
     public function __construct($data)
     {

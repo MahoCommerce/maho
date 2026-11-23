@@ -13,6 +13,9 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Image extends AbstractElement
 {
     /** The preview shows at 4rem, so 128 pixels cover a screen with a pixel ratio of 2 */
@@ -21,7 +24,7 @@ class Image extends AbstractElement
     /**
      * Constructor
      *
-     * @param array<string, mixed> $data
+     * @param ElementConfig $data
      */
     public function __construct($data)
     {
