@@ -1799,13 +1799,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Add custom option information to product
-     *
-     * @param   string $code    Option code
-     * @param   mixed  $value   Value of the option
-     * @param   int    $product Product ID
-     * @return  $this
      */
-    public function addCustomOption($code, $value, $product = null)
+    public function addCustomOption(string $code, string|int|float|null $value, ?Mage_Catalog_Model_Product $product = null): static
     {
         $product = $product ?: $this;
         $option = Mage::getModel('catalog/product_configuration_item_option')
