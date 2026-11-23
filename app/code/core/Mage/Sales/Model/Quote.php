@@ -303,12 +303,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Loading only active quote
      *
-     * @param int $quoteId
-     * @return $this
+     * @param int|string|null $quoteId A quote ID, also as a session or a request holds it
      */
-    public function loadActive($quoteId)
+    public function loadActive(int|string|null $quoteId): static
     {
-        $this->_getResource()->loadActive($this, $quoteId);
+        $this->_getResource()->loadActive($this, $quoteId === null ? null : (int) $quoteId);
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);
@@ -318,12 +317,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Loading quote by identifier
      *
-     * @param int $quoteId
-     * @return $this
+     * @param int|string|null $quoteId A quote ID, also as a session or a request holds it
      */
-    public function loadByIdWithoutStore($quoteId)
+    public function loadByIdWithoutStore(int|string|null $quoteId): static
     {
-        $this->_getResource()->loadByIdWithoutStore($this, $quoteId);
+        $this->_getResource()->loadByIdWithoutStore($this, $quoteId === null ? null : (int) $quoteId);
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);

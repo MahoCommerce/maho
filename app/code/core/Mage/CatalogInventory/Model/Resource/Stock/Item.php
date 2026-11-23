@@ -19,7 +19,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
     /**
      * Loading stock item data by product
      */
-    public function loadByProductId(Mage_CatalogInventory_Model_Stock_Item $item, int|string|null $productId): static
+    public function loadByProductId(Mage_CatalogInventory_Model_Stock_Item $item, ?int $productId): static
     {
         if ($productId !== null) {
             $select = $this->_getLoadSelect('product_id', $productId, $item)

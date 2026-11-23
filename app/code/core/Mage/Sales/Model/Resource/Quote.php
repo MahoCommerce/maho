@@ -41,7 +41,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Load quote data by customer identifier
      */
-    public function loadByCustomerId(Mage_Sales_Model_Quote $quote, int|string|null $customerId): static
+    public function loadByCustomerId(Mage_Sales_Model_Quote $quote, ?int $customerId): static
     {
         if ($customerId !== null) {
             $select = $this->_getLoadSelect('customer_id', $customerId, $quote)
@@ -62,7 +62,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Load only active quote
      */
-    public function loadActive(Mage_Sales_Model_Quote $quote, int|string|null $quoteId): static
+    public function loadActive(Mage_Sales_Model_Quote $quote, ?int $quoteId): static
     {
         if ($quoteId !== null) {
             $select = $this->_getLoadSelect('entity_id', $quoteId, $quote)
@@ -81,7 +81,7 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Load quote data by identifier without store
      */
-    public function loadByIdWithoutStore(Mage_Sales_Model_Quote $quote, int|string|null $quoteId): static
+    public function loadByIdWithoutStore(Mage_Sales_Model_Quote $quote, ?int $quoteId): static
     {
         $read = $this->_getReadAdapter();
         if ($read && $quoteId !== null) {
