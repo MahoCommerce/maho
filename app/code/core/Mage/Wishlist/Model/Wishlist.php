@@ -123,11 +123,8 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
 
     /**
      * Load by sharing code
-     *
-     * @param string $code
-     * @return $this
      */
-    public function loadByCode($code)
+    public function loadByCode(string $code): static
     {
         $this->_getResource()->load($this, $code, 'sharing_code');
         if (!$this->getShared()) {

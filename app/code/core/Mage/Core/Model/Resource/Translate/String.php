@@ -20,7 +20,7 @@ class Mage_Core_Model_Resource_Translate_String extends Mage_Core_Model_Resource
      * @param Mage_Core_Model_Translate_String $object
      */
     #[\Override]
-    public function load(Mage_Core_Model_Abstract $object, mixed $value, ?string $field = null): static
+    public function load(Mage_Core_Model_Abstract $object, int|string|null $value, ?string $field = null): static
     {
         if (is_string($value)) {
             $select = $this->_getReadAdapter()->select()

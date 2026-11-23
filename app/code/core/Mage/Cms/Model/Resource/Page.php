@@ -327,7 +327,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     #[\Override]
-    public function load(Mage_Core_Model_Abstract $object, mixed $value, ?string $field = null): static
+    public function load(Mage_Core_Model_Abstract $object, int|string|null $value, ?string $field = null): static
     {
         if (!is_numeric($value) && is_null($field)) {
             $field = 'identifier';

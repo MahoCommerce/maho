@@ -228,7 +228,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     #[\Override]
     public function load($id, $field = null)
     {
-        if (!is_numeric($id) && is_null($field)) {
+        if (is_string($id) && !is_numeric($id) && is_null($field)) {
             $this->_getResource()->load($this, $id, 'code');
             return $this;
         }

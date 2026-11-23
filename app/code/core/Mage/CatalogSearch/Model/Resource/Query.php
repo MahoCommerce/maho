@@ -74,7 +74,7 @@ class Mage_CatalogSearch_Model_Resource_Query extends Mage_Core_Model_Resource_D
      * Loading string as a value or regular numeric
      */
     #[\Override]
-    public function load(Mage_Core_Model_Abstract $object, mixed $value, ?string $field = null): static
+    public function load(Mage_Core_Model_Abstract $object, int|string|null $value, ?string $field = null): static
     {
         if (is_numeric($value)) {
             return parent::load($object, $value);
