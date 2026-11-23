@@ -389,7 +389,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
             $stockItem = $product->getStockItem();
             if (!$stockItem) {
                 $stockItem = Mage::getModel('cataloginventory/stock_item');
-                $stockItem->loadByProduct($product->getId());
+                $stockItem->loadByProduct($product);
             }
             return $stockItem->getQty();
         }

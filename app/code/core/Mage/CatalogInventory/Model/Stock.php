@@ -94,7 +94,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
         $qtys = [];
         foreach ($items as $productId => $item) {
             if (empty($item['item'])) {
-                $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+                $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $productId);
             } else {
                 $stockItem = $item['item'];
             }
@@ -160,7 +160,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     {
         $productId = $item->getProductId();
         if ($productId) {
-            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $productId);
             if (Mage::helper('cataloginventory')->isQty($stockItem->getTypeId())) {
                 if ($item->getStoreId()) {
                     $stockItem->setStoreId($item->getStoreId());
@@ -185,7 +185,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
      */
     public function backItemQty($productId, $qty)
     {
-        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $productId);
         if ($stockItem->getId() && Mage::helper('cataloginventory')->isQty($stockItem->getTypeId())) {
             $stockItem->addQty($qty);
             if ($stockItem->getCanBackInStock() && $stockItem->getQty() > $stockItem->getMinQty()) {

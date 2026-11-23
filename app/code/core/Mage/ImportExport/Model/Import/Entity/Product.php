@@ -1780,7 +1780,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                 /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
                 $stockItem = Mage::getModel('cataloginventory/stock_item');
-                $stockItem->loadByProduct($row['product_id']);
+                $stockItem->loadByProduct((int) $row['product_id']);
                 $existStockData = $stockItem->getData();
 
                 $row = array_merge(

@@ -31,7 +31,7 @@ class Mage_CatalogInventory_Model_Stock_Item_Api_V2 extends Mage_CatalogInventor
         /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
         $stockItem = Mage::getModel('cataloginventory/stock_item')
             ->setStoreId($this->_getStoreId())
-            ->loadByProduct($productId);
+            ->loadByProduct((int) $productId);
 
         if (!$stockItem->getId()) {
             $this->_fault('not_exists');

@@ -219,7 +219,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     {
         $productType ??= $this->getProductType($productId);
 
-        $item = $this->getStockItemModel()->loadByProduct($productId);
+        $item = $this->getStockItemModel()->loadByProduct((int) $productId);
 
         $status  = self::STATUS_IN_STOCK;
         $qty     = 0;
@@ -337,7 +337,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
             $parentType = $productTypes[$parentId] ?? null;
             $item->setData(['stock_id' => $stockId])
                 ->setOrigData()
-                ->loadByProduct($parentId);
+                ->loadByProduct((int) $parentId);
             $status  = self::STATUS_IN_STOCK;
             $qty     = 0;
             if ($item->getId()) {

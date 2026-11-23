@@ -62,7 +62,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
         $stockItem = $object->getStockItem();
         if (!$stockItem) {
             $stockItem = Mage::getModel('cataloginventory/stock_item');
-            $stockItem->loadByProduct($object->getId());
+            $stockItem->loadByProduct((int) $object->getId());
         }
 
         if ($attrCode === 'is_in_stock') {

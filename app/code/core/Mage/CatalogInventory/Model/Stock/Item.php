@@ -133,11 +133,9 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Load item data by product
-     *
-     * @param Mage_Catalog_Model_Product|int|string|null $product A product, or a product ID as a row or a request holds it
+     * Load item data by product, or by product ID
      */
-    public function loadByProduct(Mage_Catalog_Model_Product|int|string|null $product): static
+    public function loadByProduct(Mage_Catalog_Model_Product|int $product): static
     {
         $productId = $product instanceof Mage_Catalog_Model_Product ? $product->getId() : $product;
         $this->_getResource()->loadByProductId($this, $productId === null ? null : (int) $productId);
