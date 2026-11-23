@@ -606,11 +606,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then prepare of bundle selections options.
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $processMode
+     * @return list<Mage_Catalog_Model_Product>|string The products to add, or an error message
      */
     #[\Override]
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode): array|string
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, ?Mage_Catalog_Model_Product $product, string $processMode): array|string
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -863,10 +862,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Prepare additional options/information for order item which will be
      * created from this product
      *
-     * @param Mage_Catalog_Model_Product $product
+     * @return array<string, mixed>
      */
     #[\Override]
-    public function getOrderOptions($product = null): array
+    public function getOrderOptions(?Mage_Catalog_Model_Product $product = null): array
     {
         $optionArr = parent::getOrderOptions($product);
 

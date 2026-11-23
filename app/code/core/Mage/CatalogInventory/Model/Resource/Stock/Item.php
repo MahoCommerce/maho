@@ -18,17 +18,16 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
 
     /**
      * Loading stock item data by product
-     *
-     * @param int $productId
-     * @return $this
      */
-    public function loadByProductId(Mage_CatalogInventory_Model_Stock_Item $item, $productId)
+    public function loadByProductId(Mage_CatalogInventory_Model_Stock_Item $item, int|string|null $productId): static
     {
-        $select = $this->_getLoadSelect('product_id', $productId, $item)
-            ->where('stock_id = :stock_id');
-        $data = $this->_getReadAdapter()->fetchRow($select, [':stock_id' => $item->getStockId()]);
-        if ($data) {
-            $item->setData($data);
+        if ($productId !== null) {
+            $select = $this->_getLoadSelect('product_id', $productId, $item)
+                ->where('stock_id = :stock_id');
+            $data = $this->_getReadAdapter()->fetchRow($select, [':stock_id' => $item->getStockId()]);
+            if ($data) {
+                $item->setData($data);
+            }
         }
         $this->_afterLoad($item);
         return $this;

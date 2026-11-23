@@ -268,11 +268,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then prepare options belonging to specific product type.
      *
-     * @param  Mage_Catalog_Model_Product $product
-     * @param  string $processMode
-     * @return array|string
+     * @return list<Mage_Catalog_Model_Product>|string The products to add, or an error message
      */
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, ?Mage_Catalog_Model_Product $product, string $processMode): array|string
     {
         $product = $this->getProduct($product);
         /** @var Mage_Catalog_Model_Product $product */
@@ -530,10 +528,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Prepare additional options/information for order item which will be
      * created from this product
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
+     * @return array<string, mixed>
      */
-    public function getOrderOptions($product = null)
+    public function getOrderOptions(?Mage_Catalog_Model_Product $product = null): array
     {
         $optionArr = [];
         if ($info = $this->getProduct($product)->getCustomOption('info_buyRequest')) {

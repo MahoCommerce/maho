@@ -258,12 +258,10 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then prepare options for downloadable links.
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $processMode
-     * @return array|string
+     * @return list<Mage_Catalog_Model_Product>|string The products to add, or an error message
      */
     #[\Override]
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, ?Mage_Catalog_Model_Product $product, string $processMode): array|string
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -344,11 +342,10 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
      * Prepare additional options/information for order item which will be
      * created from this product
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
+     * @return array<string, mixed>
      */
     #[\Override]
-    public function getOrderOptions($product = null)
+    public function getOrderOptions(?Mage_Catalog_Model_Product $product = null): array
     {
         $options = parent::getOrderOptions($product);
         if ($linkIds = $this->getProduct($product)->getCustomOption('downloadable_link_ids')) {
