@@ -297,16 +297,29 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     }
 
     /**
-     * Refresh index for visibility of enabled product in store
-     * if store parameter is null - index will refreshed for all stores
-     * if product parameter is null - idex will be refreshed for all products
+     * Refresh the enabled index of a store, for the given products or for all products of the store
      *
-     * @param Mage_Core_Model_Store $store
-     * @param Mage_Catalog_Model_Product|array $product
-     * @throws Mage_Core_Exception
-     * @return $this
+     * @param array<int|string>|null $productIds
      */
-    public function refreshEnabledIndex($store = null, $product = null)
+    public function refreshEnabledIndex(Mage_Core_Model_Store $store, ?array $productIds = null): static
+    {
+        $this->_refreshEnabledIndex($store, $productIds ?? []);
+        return $this;
+    }
+
+    /**
+     * Refresh the enabled index of one product in a store
+     */
+    public function refreshProductEnabledIndex(Mage_Core_Model_Store $store, int $productId): static
+    {
+        $this->_refreshEnabledIndex($store, [$productId]);
+        return $this;
+    }
+
+    /**
+     * @param array<int|string> $productIds An empty list refreshes all products of the store
+     */
+    protected function _refreshEnabledIndex(Mage_Core_Model_Store $store, array $productIds): void
     {
         $statusAttribute        = $this->getAttribute('status');
         $visibilityAttribute    = $this->getAttribute('visibility');
@@ -319,64 +332,33 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
 
         $select = $adapter->select();
         $condition = [];
-        $websiteId = null;
 
         $indexTable = $this->getTable('catalog/product_enabled_index');
-        if (is_null($store) && is_null($product)) {
-            Mage::throwException(
-                Mage::helper('catalog')->__('To reindex the enabled product(s), the store or product must be specified'),
-            );
-        } elseif (is_null($product) || is_array($product)) {
-            $storeId    = $store->getId();
-            $websiteId  = (int) $store->getWebsiteId();
+        $storeId    = $store->getId();
+        $websiteId  = $store->getWebsiteId();
 
-            if (is_array($product) && !empty($product)) {
-                $condition[] = $adapter->quoteInto('product_id IN (?)', $product);
-            }
-
-            $condition[] = $adapter->quoteInto('store_id = ?', $storeId);
-
-            $selectFields = [
-                't_v_default.entity_id',
-                new Maho\Db\Expr((string) $storeId),
-                $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
-            ];
-        } elseif ($store === null) {
-            foreach ($product->getStoreIds() as $storeId) {
-                $store = Mage::app()->getStore($storeId);
-                $this->refreshEnabledIndex($store, $product);
-            }
-            return $this;
-        } else {
-            $productId = is_numeric($product) ? $product : $product->getId();
-            $storeId   = is_numeric($store) ? $store : $store->getId();
-
-            $condition = [
-                'product_id = ?' => (int) $productId,
-                'store_id   = ?' => (int) $storeId,
-            ];
-
-            $selectFields = [
-                new Maho\Db\Expr($productId),
-                new Maho\Db\Expr((string) $storeId),
-                $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
-            ];
-
-            $select->where('t_v_default.entity_id = ?', $productId);
+        if ($productIds) {
+            $condition[] = $adapter->quoteInto('product_id IN (?)', $productIds);
         }
+
+        $condition[] = $adapter->quoteInto('store_id = ?', $storeId);
+
+        $selectFields = [
+            't_v_default.entity_id',
+            new Maho\Db\Expr((string) $storeId),
+            $adapter->getCheckSql('t_v.value_id > 0', 't_v.value', 't_v_default.value'),
+        ];
 
         $adapter->delete($indexTable, $condition);
 
         $select->from(['t_v_default' => $visibilityTable], $selectFields);
 
         // A join that comes before from() loses its condition, so the website join comes here
-        if ($websiteId !== null) {
-            $select->joinInner(
-                ['w' => $this->getTable('catalog/product_website')],
-                $adapter->quoteInto('w.product_id = t_v_default.entity_id AND w.website_id = ?', $websiteId),
-                [],
-            );
-        }
+        $select->joinInner(
+            ['w' => $this->getTable('catalog/product_website')],
+            $adapter->quoteInto('w.product_id = t_v_default.entity_id AND w.website_id = ?', $websiteId),
+            [],
+        );
 
         $visibilityTableJoinCond = [
             't_v.entity_id = t_v_default.entity_id',
@@ -420,13 +402,11 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             ->where('t_v_default.store_id = ?', 0)
             ->where(sprintf('%s = ?', $valueCondition), Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
-        if (is_array($product) && !empty($product)) {
-            $select->where('t_v_default.entity_id IN (?)', $product);
+        if ($productIds) {
+            $select->where('t_v_default.entity_id IN (?)', $productIds);
         }
 
         $adapter->query($adapter->insertFromSelect($select, $indexTable, [], \Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE));
-
-        return $this;
     }
 
     /**
