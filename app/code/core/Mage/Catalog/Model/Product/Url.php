@@ -43,6 +43,7 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
      */
     public function __construct(array $args = [])
     {
+        parent::__construct();
         $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
         $this->_store = empty($args['store']) ? Mage::app()->getStore() : $args['store'];
     }

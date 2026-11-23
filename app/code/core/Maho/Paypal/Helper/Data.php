@@ -131,7 +131,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $billingData['street'] = implode("\n", array_filter([
                 $paypalAddress['address_line_1'] ?? '',
                 $paypalAddress['address_line_2'] ?? '',
-            ]));
+            ], boolval(...)));
             $billingData['city'] = $paypalAddress['admin_area_2'] ?? '';
             $billingData['region'] = $paypalAddress['admin_area_1'] ?? '';
             $billingData['postcode'] = $paypalAddress['postal_code'] ?? '';

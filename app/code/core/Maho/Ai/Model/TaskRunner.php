@@ -233,7 +233,7 @@ class Maho_Ai_Model_TaskRunner
             array_unshift($messages, ['role' => 'system', 'content' => $task->getData('system_prompt')]);
         }
 
-        $options = array_filter(['model' => $task->getData('model')]);
+        $options = array_filter(['model' => $task->getData('model')], boolval(...));
 
         $provider = Mage::getSingleton('ai/platform_factory')->create(
             $task->getData('platform') ?: null,
@@ -264,7 +264,7 @@ class Maho_Ai_Model_TaskRunner
         $text     = $messages[0]['content'] ?? '';
 
         $storeId = $task->getData('store_id') ?: null;
-        $options = array_filter(['model' => $task->getData('model')]);
+        $options = array_filter(['model' => $task->getData('model')], boolval(...));
 
         $targetDims = (int) Mage::getStoreConfig('ai/embed/target_dimensions', $storeId);
         if ($targetDims > 0) {

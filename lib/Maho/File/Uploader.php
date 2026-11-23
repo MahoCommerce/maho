@@ -145,8 +145,14 @@ class Uploader
      */
     protected $_result;
 
-    public function __construct(string|array $fileId)
+    /**
+     * Read the file $fileId from $_FILES. A subclass for a file that is already on the server passes null and sets the file.
+     */
+    public function __construct(string|array|null $fileId = null)
     {
+        if ($fileId === null) {
+            return;
+        }
         $this->_setUploadFileId($fileId);
         if (empty($this->_file['tmp_name']) || !file_exists($this->_file['tmp_name'])) {
             $errorCode = $this->_file['error'] ?? 0;

@@ -34,8 +34,9 @@ class Mage_Weee_Block_Renderer_Weee_Tax extends Mage_Adminhtml_Block_Widget impl
     /**
      * Public constructor
      */
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('weee/renderer/tax.phtml');
     }
 

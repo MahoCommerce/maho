@@ -266,7 +266,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $classes = array_values(array_filter(array_column(
                 $helper->getFrontendClasses($this->getEntityType()->getEntityTypeCode()),
                 'value',
-            )));
+            ), boolval(...)));
             if (!in_array($class, $classes, true)) {
                 $errors->addError('frontend_class', $helper->__('The input validation must be one of: %s', implode(', ', $classes)));
             }

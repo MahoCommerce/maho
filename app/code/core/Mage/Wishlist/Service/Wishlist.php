@@ -300,7 +300,7 @@ class Mage_Wishlist_Service_Wishlist
         $core->assertCaptcha($fields);
 
         $emails = array_values(array_unique(array_filter(array_map(fn(#[\SensitiveParameter]
-            mixed $email): string => trim((string) $email), $emails))));
+            mixed $email): string => trim((string) $email), $emails), boolval(...))));
         $error = match (true) {
             $emails === [] => $helper->__("Email address can't be empty."),
             count($emails) > self::SHARE_MAX_RECIPIENTS => $helper->__('Please enter no more than 5 email addresses.'),

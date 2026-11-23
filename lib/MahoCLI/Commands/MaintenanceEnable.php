@@ -36,7 +36,7 @@ class MaintenanceEnable extends Command
         $output->writeln('<info>Maintenance mode enabled</info>');
 
         if ($ipOption !== null) {
-            $ips = array_filter(array_map(trim(...), explode(',', $ipOption)));
+            $ips = array_filter(array_map(trim(...), explode(',', $ipOption)), boolval(...));
             if ($ips) {
                 if (file_put_contents($maintenanceIpFile, implode("\n", $ips)) === false) {
                     $output->writeln('<error>Failed to create maintenance.ip file</error>');

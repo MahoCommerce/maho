@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Widget_Chooser extends Mage_Adminhtm
         if (!is_array($selectedCategories)) {
             $selectedCategories = [$selectedCategories];
         }
-        $this->_selectedCategories = array_filter($selectedCategories);
+        $this->_selectedCategories = array_filter($selectedCategories, boolval(...));
         return $this;
     }
 

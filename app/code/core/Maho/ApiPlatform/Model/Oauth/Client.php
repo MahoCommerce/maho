@@ -91,7 +91,7 @@ class Maho_ApiPlatform_Model_Oauth_Client extends Mage_Core_Model_Abstract
             return [];
         }
 
-        return array_values(array_filter(array_map(trim(...), explode(',', $raw))));
+        return array_values(array_filter(array_map(trim(...), explode(',', $raw)), boolval(...)));
     }
 
     public function hasGrantType(string $grantType): bool

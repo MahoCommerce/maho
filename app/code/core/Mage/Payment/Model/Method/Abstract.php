@@ -137,8 +137,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
      */
     protected $_debugReplacePrivateDataKeys = [];
 
-    public function __construct() {}
-
     /**
      * Check order availability
      *

@@ -27,15 +27,16 @@ class Mage_Tax_Model_Resource_Report_Collection extends Mage_Sales_Model_Resourc
      */
     protected $_selectedColumns    = [];
 
+    private bool $isConstructed = false;
+
     /**
      * Initialize custom resource model
      */
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct(Mage::getResourceModel('sales/report')->init($this->_aggregationTable));
+        $this->isConstructed = true;
         $this->setModel('adminhtml/report_item');
-        $this->_resource = Mage::getResourceModel('sales/report')->init($this->_aggregationTable);
-        $this->setConnection($this->getResource()->getReadConnection());
     }
 
     /**
@@ -80,6 +81,11 @@ class Mage_Tax_Model_Resource_Report_Collection extends Mage_Sales_Model_Resourc
     #[\Override]
     protected function _initSelect()
     {
+        // The parent constructor calls this method before the caller sets the period and the filters
+        if (!$this->isConstructed) {
+            return $this;
+        }
+
         $this->getSelect()->from($this->getResource()->getMainTable(), $this->_getSelectedColumns());
         if (!$this->isTotals() && !$this->isSubTotals()) {
             $this->getSelect()->group([$this->_periodFormat, 'code', 'percent']);

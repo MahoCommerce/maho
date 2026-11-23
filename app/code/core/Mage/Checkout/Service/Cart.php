@@ -569,7 +569,7 @@ class Mage_Checkout_Service_Cart
             'giftcard_recipient_email', 'giftcard_message', 'giftcard_delivery_date',
         ];
         if (array_intersect_key($options, array_flip(['options', 'links', 'super_group', 'bundle_option', 'giftcard_amount', 'options_files']))) {
-            $buyRequest->addData(array_filter(array_intersect_key($options, array_flip($structuredKeys))));
+            $buyRequest->addData(array_filter(array_intersect_key($options, array_flip($structuredKeys)), boolval(...)));
         } elseif ($options !== []) {
             $buyRequest->setData('options', $options);
         }
@@ -851,7 +851,7 @@ class Mage_Checkout_Service_Cart
         foreach ($quote->getAllAddresses() as $address) {
             $ruleIds = $address->getAppliedRuleIds();
             $ruleIds = is_string($ruleIds) ? $ruleIds : '';
-            $applied = array_filter(explode(',', $ruleIds), static fn(string $id): bool => $id !== '');
+            $applied = array_filter(explode(',', $ruleIds), boolval(...));
             if (in_array((string) $ruleId, $applied, true)) {
                 return true;
             }

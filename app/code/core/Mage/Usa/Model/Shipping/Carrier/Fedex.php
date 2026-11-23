@@ -1010,7 +1010,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                     'streetLines' => array_values(array_filter([
                         $request->getShipperAddressStreet1(),
                         $request->getShipperAddressStreet2(),
-                    ])),
+                    ], boolval(...))),
                     'city' => $request->getShipperAddressCity(),
                     'stateOrProvinceCode' => $request->getShipperAddressStateOrProvinceCode(),
                     'postalCode' => $request->getShipperAddressPostalCode(),
@@ -1028,7 +1028,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                         'streetLines' => array_values(array_filter([
                             $request->getRecipientAddressStreet1(),
                             $request->getRecipientAddressStreet2(),
-                        ])),
+                        ], boolval(...))),
                         'city' => $request->getRecipientAddressCity(),
                         'stateOrProvinceCode' => $request->getRecipientAddressStateOrProvinceCode(),
                         'postalCode' => $request->getRecipientAddressPostalCode(),

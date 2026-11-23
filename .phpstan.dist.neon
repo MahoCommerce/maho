@@ -8,17 +8,23 @@ includes:
 parameters:
     strictRules:
         allRules: false
-        matchingInheritedMethodNames: true
+        booleansInLoopConditions: true
+        closureUsesThis: true
         disallowedBacktick: true
+        disallowedImplicitArrayCreation: true
+        illegalConstructorMethodCall: true
+        matchingInheritedMethodNames: true
+        numericOperandsInArithmeticOperators: true
+        overwriteVariablesWithLoop: true
+        requireParentConstructorCall: true
+        strictArrayFilter: true
+        switchConditionsMatchingType: true
 
     level: 6
     tmpDir: .phpstan.cache
     reportUnmatchedIgnoredErrors: true
-    checkFunctionNameCase: true
-    checkInternalClassCaseSensitivity: true
     checkMissingOverrideMethodAttribute: true
     treatPhpDocTypesAsCertain: false
-    reportMaybesInPropertyPhpDocTypes: true
 
     fileExtensions:
         - php

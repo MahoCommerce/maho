@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Design_Preview extends Mage_
         $tokens = [];
         $node = Mage::getConfig()->getNode(Mage_Core_Model_Design_Tokens::CONFIG_NODE);
         foreach ($node ? $node->children() : [] as $name => $entry) {
-            $vars = array_values(array_filter(array_map(trim(...), explode(',', (string) $entry->var))));
+            $vars = array_values(array_filter(array_map(trim(...), explode(',', (string) $entry->var)), boolval(...)));
             if ($vars) {
                 $tokens[] = [
                     'name' => 'groups[tokens][fields][' . $name . '][value]',

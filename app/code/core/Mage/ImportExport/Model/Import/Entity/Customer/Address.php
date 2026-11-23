@@ -152,7 +152,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
         $isAppendMode   = Mage_ImportExport_Model_Import::BEHAVIOR_APPEND == $this->_customer->getBehavior();
         $multiSelect    = [];
 
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $entityRows = [];
             $attributes = [];
             $defaults   = []; // customer default addresses (billing/shipping) data

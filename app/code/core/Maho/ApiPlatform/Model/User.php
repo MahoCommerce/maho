@@ -150,7 +150,7 @@ class Maho_ApiPlatform_Model_User extends Mage_Core_Model_Abstract
         if (!is_array($decoded)) {
             return [];
         }
-        return array_values(array_filter(array_map(intval(...), $decoded)));
+        return array_values(array_filter(array_map(intval(...), $decoded), boolval(...)));
     }
 
     /**
@@ -158,7 +158,7 @@ class Maho_ApiPlatform_Model_User extends Mage_Core_Model_Abstract
      */
     public function setAllowedStoreIds(array $storeIds): static
     {
-        $storeIds = array_values(array_filter(array_map(intval(...), $storeIds)));
+        $storeIds = array_values(array_filter(array_map(intval(...), $storeIds), boolval(...)));
         return $this->setData(
             'allowed_store_ids',
             $storeIds === [] ? null : Mage::helper('core')->jsonEncode($storeIds),

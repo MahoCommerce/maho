@@ -22,7 +22,7 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
             $segmentIds = explode(',', (string) $segmentIds);
         }
 
-        return array_values(array_unique(array_filter(array_map(intval(...), $segmentIds))));
+        return array_values(array_unique(array_filter(array_map(intval(...), $segmentIds), boolval(...))));
     }
 
     /**

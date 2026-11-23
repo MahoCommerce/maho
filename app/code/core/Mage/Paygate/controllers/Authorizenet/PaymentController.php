@@ -16,7 +16,7 @@ class Mage_Paygate_Authorizenet_PaymentController extends Mage_Core_Controller_F
     #[Maho\Config\Route('/paygate/authorizenet_payment/cancel', methods: ['POST'])]
     public function cancelAction(): void
     {
-        $result['success'] = false;
+        $result = ['success' => false];
         try {
             Mage::helper('paygate')->cancelPartialAuthorization(Mage::getSingleton('checkout/session')->getQuote());
             $result['success']  = true;

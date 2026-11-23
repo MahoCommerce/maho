@@ -1498,9 +1498,9 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
             } else {
                 $appliedAmount = 0;
                 $baseAppliedAmount = 0;
-                foreach ($row['rates'] as $rate) {
-                    $appliedAmount += $rate['amount'];
-                    $baseAppliedAmount += $rate['base_amount'];
+                foreach ($row['rates'] as $appliedRate) {
+                    $appliedAmount += $appliedRate['amount'];
+                    $baseAppliedAmount += $appliedRate['base_amount'];
                 }
             }
 

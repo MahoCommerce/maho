@@ -1379,7 +1379,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     public function markProductRewritesGone(int|array $productIds): int
     {
-        $productIds = array_values(array_filter(array_map(intval(...), (array) $productIds)));
+        $productIds = array_values(array_filter(array_map(intval(...), (array) $productIds), boolval(...)));
         if ($productIds === []) {
             return 0;
         }

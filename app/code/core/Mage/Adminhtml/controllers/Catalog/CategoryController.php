@@ -269,7 +269,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 $category->setPostedProducts($products);
                 if (isset($data['category_pinned_products'])) {
                     $category->setPostedPinnedProducts(
-                        array_values(array_filter(array_map(intval(...), explode(',', (string) $data['category_pinned_products'])))),
+                        array_values(array_filter(array_map(intval(...), explode(',', (string) $data['category_pinned_products'])), boolval(...))),
                     );
                 }
             }
@@ -496,7 +496,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     protected function _getPostedProductIds(string $key): array
     {
         $posted = (string) $this->getRequest()->getPost($key);
-        return array_values(array_unique(array_filter(array_map(intval(...), explode(',', $posted)))));
+        return array_values(array_unique(array_filter(array_map(intval(...), explode(',', $posted)), boolval(...))));
     }
 
     /**

@@ -166,7 +166,7 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
      */
     public function getViewports(): array
     {
-        return array_values(array_filter(explode(',', (string) $this->getData('viewports'))));
+        return array_values(array_filter(explode(',', (string) $this->getData('viewports')), boolval(...)));
     }
 
     /**

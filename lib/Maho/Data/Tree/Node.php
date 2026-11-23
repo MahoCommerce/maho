@@ -54,6 +54,7 @@ class Node extends \Maho\DataObject
      */
     public function __construct($data, $idField, $tree, $parent = null)
     {
+        parent::__construct();
         $this->setTree($tree);
         $this->setParent($parent);
         $this->setIdField($idField);

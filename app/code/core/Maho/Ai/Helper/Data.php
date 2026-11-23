@@ -248,7 +248,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         $context = array_filter([
             'entity_type' => $data['entity_type'] ?? null,
             'entity_id'   => $data['entity_id'] ?? null,
-        ]);
+        ], boolval(...));
 
         $task = Mage::getModel('ai/task');
         $task->setData([
@@ -482,7 +482,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         if (isset($local[$name])) {
             return $local[$name];
         }
-        $parts = array_values(array_filter(explode('_', $name)));
+        $parts = array_values(array_filter(explode('_', $name), boolval(...)));
         $verbs = ['list' => $this->__('List'), 'get' => $this->__('Show'), 'create' => $this->__('Create'), 'update' => $this->__('Update'), 'delete' => $this->__('Delete')];
         $verb = $verbs[$parts[count($parts) - 1] ?? ''] ?? null;
         if (count($parts) > 2 && $verb !== null) {

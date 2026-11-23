@@ -446,7 +446,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     /** @return list<string> */
     public function getTopCountryCodes(): array
     {
-        $topCountries = array_filter(explode(',', (string) Mage::getStoreConfig('general/country/top_countries')));
+        $topCountries = array_filter(explode(',', (string) Mage::getStoreConfig('general/country/top_countries')), boolval(...));
 
         $transportObject = new \Maho\DataObject();
         $transportObject->setData('top_countries', $topCountries);

@@ -234,7 +234,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     {
         $codes = array_map($this->_currencyCode(...), explode(',', (string) $configValue));
 
-        return array_values(array_filter($codes));
+        return array_values(array_filter($codes, boolval(...)));
     }
 
     /**

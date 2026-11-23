@@ -17,6 +17,7 @@ class Mage_Cms_Model_Resource_Page_Entity extends Mage_Eav_Model_Entity_Abstract
 {
     public function __construct()
     {
+        parent::__construct();
         $resource = Mage::getSingleton('core/resource');
         $this->setType(Mage_Cms_Model_Page::ENTITY);
         $this->setConnection($resource->getConnection('core_read'), $resource->getConnection('core_write'));

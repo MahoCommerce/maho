@@ -197,7 +197,10 @@ class Ftp extends \Maho\Io
             if (is_null($dest)) {
                 if ($result) {
                     fseek($stream, 0);
-                    for ($result = ''; $s = fread($stream, 4096); $result .= $s);
+                    $result = '';
+                    while (($s = fread($stream, 4096)) !== false && $s !== '') {
+                        $result .= $s;
+                    }
                 }
                 fclose($stream);
             }

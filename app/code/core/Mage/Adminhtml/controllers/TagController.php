@@ -130,6 +130,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {
+            $data = [];
             $data['name']               = trim($postData['tag_name']);
             $data['status']             = $postData['tag_status'];
             $data['base_popularity']    = $postData['base_popularity'] ?? 0;

@@ -80,7 +80,7 @@ class Mage_Catalog_Model_Resource_Product_Website extends Mage_Core_Model_Resour
         try {
             // Before adding of products we should remove it old rows with same ids
             $this->removeProducts($websiteIds, $productIds);
-            $indexProductIds = array_values(array_filter(array_map(\intval(...), $productIds)));
+            $indexProductIds = array_values(array_filter(array_map(\intval(...), $productIds), boolval(...)));
 
             foreach ($websiteIds as $websiteId) {
                 foreach ($productIds as $productId) {

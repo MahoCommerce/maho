@@ -78,7 +78,7 @@ class TranslationsUnused extends BaseMahoCommand
     protected function getFiles(): array
     {
         $files = $this->searchSourceFiles();
-        return array_filter(array_map(trim(...), $files));
+        return array_filter(array_map(trim(...), $files), boolval(...));
     }
 
     /**
@@ -161,7 +161,7 @@ class TranslationsUnused extends BaseMahoCommand
                 }
             }
 
-            $matches = array_filter(array_unique($matches));
+            $matches = array_filter(array_unique($matches), boolval(...));
             if (count($matches)) {
                 $map[$file] = $matches;
             }

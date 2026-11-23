@@ -70,7 +70,7 @@ final class AdminRoleProvider extends CrudProvider
         $dto->resources = in_array('all', $allowed, true) ? ['all'] : array_values(array_filter(array_map(
             static fn(string $id): ?string => str_starts_with($id, 'admin/') ? substr($id, 6) : null,
             $allowed,
-        )));
+        ), boolval(...)));
 
         $select = $adapter->select()
             ->from($resource->getTableName('admin/role'), ['count' => new \Maho\Db\Expr('COUNT(*)')])

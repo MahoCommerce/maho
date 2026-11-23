@@ -78,7 +78,7 @@ class Mage_ConfigurableSwatches_Helper_Productlist extends Mage_Core_Helper_Abst
         $this->_swatchAttributeIds ??= array_values(array_unique(array_filter(array_map(
             intval(...),
             explode(',', (string) Mage::getStoreConfig(Mage_ConfigurableSwatches_Helper_Data::CONFIG_PATH_LIST_SWATCH_ATTRIBUTE)),
-        ))));
+        ), boolval(...))));
         return $this->_swatchAttributeIds;
     }
 

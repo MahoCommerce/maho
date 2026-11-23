@@ -22,6 +22,7 @@ class LocalFileUploader extends \Mage_Core_Model_File_Uploader
 {
     public function __construct(string $path, string $fileName)
     {
+        parent::__construct();
         $size = filesize($path);
         $this->_file = [
             'name' => $fileName,

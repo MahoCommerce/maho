@@ -829,7 +829,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Model_Email_Template_Mailer $mailer */
         $mailer    = Mage::getModel('core/email_template_mailer');
         $emailInfo = Mage::getModel('core/email_info');
-        $emailInfo->addTo(array_filter($emails), $generalContactName);
+        $emailInfo->addTo(array_filter($emails, boolval(...)), $generalContactName);
         $mailer->addEmailInfo($emailInfo);
 
         // Set all required params and send emails

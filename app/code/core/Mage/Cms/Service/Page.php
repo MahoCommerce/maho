@@ -80,7 +80,7 @@ class Mage_Cms_Service_Page
             $value = (string) $page->getData($field);
             $values = array_map(strval(...), $values);
             if ($value !== '' && $page->dataHasChangedFor($field) && !in_array($value, $values, true)) {
-                $errors->addError($field, Mage::helper('cms')->__('The value must be one of: %s', implode(', ', array_filter($values))));
+                $errors->addError($field, Mage::helper('cms')->__('The value must be one of: %s', implode(', ', array_filter($values, boolval(...)))));
             }
         }
         $errors->throwIfErrors();

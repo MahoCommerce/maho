@@ -15,6 +15,7 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
 
     public function __construct()
     {
+        parent::__construct();
         $this->setType('blog_category');
         $this->_storeTable = $this->getTable('blog/category_store');
         $this->_postCategoryTable = $this->getTable('blog/post_category');

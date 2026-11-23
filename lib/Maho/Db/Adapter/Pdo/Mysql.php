@@ -1899,14 +1899,14 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
-        $row = array_first($data);
+        $firstRow = array_first($data);
         // support insert syntaxes
-        if (!is_array($row)) {
+        if (!is_array($firstRow)) {
             return $this->insert($table, $data);
         }
 
         // validate data array
-        $cols = array_keys($row);
+        $cols = array_keys($firstRow);
         $insertArray = [];
         foreach ($data as $row) {
             $line = [];
@@ -3468,7 +3468,8 @@ class Mysql extends AbstractPdoAdapter
 
         $tableName = [];
         $correlationName = '';
-        foreach ($fromSelect as $correlationName => $formPart) {
+        foreach ($fromSelect as $fromName => $formPart) {
+            $correlationName = $fromName;
             if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
                 $tableName = $formPart['tableName'];
                 break;

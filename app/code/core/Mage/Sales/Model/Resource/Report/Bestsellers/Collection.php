@@ -24,15 +24,16 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
      */
     protected $_selectedColumns    = [];
 
+    private bool $isConstructed = false;
+
     /**
      * Initialize custom resource model
      */
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct(Mage::getResourceModel('sales/report')->init('sales/bestsellers_aggregated_daily'));
+        $this->isConstructed = true;
         $this->setModel('adminhtml/report_item');
-        $this->_resource = Mage::getResourceModel('sales/report')->init('sales/bestsellers_aggregated_daily');
-        $this->setConnection($this->getResource()->getReadConnection());
         // overwrite default behaviour
         $this->_applyFilters = false;
     }
@@ -108,6 +109,11 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
     #[\Override]
     protected function _initSelect()
     {
+        // The parent constructor calls this method before the caller sets the period and the filters
+        if (!$this->isConstructed) {
+            return $this;
+        }
+
         $select = $this->getSelect();
 
         // if grouping by product, not by period

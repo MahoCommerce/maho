@@ -272,7 +272,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
                 $helper->getGtinAttribute($store),
                 $helper->getMpnAttribute($store),
                 $helper->getConditionAttribute($store),
-            ]),
+            ], boolval(...)),
             $attributeCodes,
         ));
 

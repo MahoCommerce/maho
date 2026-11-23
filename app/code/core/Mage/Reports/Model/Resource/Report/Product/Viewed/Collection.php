@@ -24,16 +24,16 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
      */
     protected $_selectedColumns    = [];
 
+    private bool $isConstructed = false;
+
     /**
      * Initialize custom resource model
      */
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct(Mage::getResourceModel('sales/report')->init(Mage_Reports_Model_Resource_Report_Product_Viewed::AGGREGATION_DAILY));
+        $this->isConstructed = true;
         $this->setModel('adminhtml/report_item');
-        $this->_resource = Mage::getResourceModel('sales/report')
-            ->init(Mage_Reports_Model_Resource_Report_Product_Viewed::AGGREGATION_DAILY);
-        $this->setConnection($this->getResource()->getReadConnection());
         // overwrite default behaviour
         $this->_applyFilters = false;
     }
@@ -106,6 +106,11 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed_Collection extends Mage_
     #[\Override]
     protected function _initSelect()
     {
+        // The parent constructor calls this method before the caller sets the period and the filters
+        if (!$this->isConstructed) {
+            return $this;
+        }
+
         $select = $this->getSelect();
 
         // if grouping by product, not by period

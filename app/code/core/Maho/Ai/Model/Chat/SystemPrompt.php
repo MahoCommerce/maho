@@ -72,7 +72,7 @@ class Maho_Ai_Model_Chat_SystemPrompt
             sprintf('- Admin locale: %s.', (string) $locale->getLocaleCode()),
             $this->timezone($timezone),
             $this->storeViews(),
-        ]));
+        ], boolval(...)));
     }
 
     /** The current offset of the store timezone and its changes in the last year, so the model turns a store time of the administrator into UTC. */

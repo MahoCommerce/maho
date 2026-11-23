@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -20,8 +21,9 @@ class Mage_Adminhtml_Block_Urlrewrite_Selector extends Mage_Core_Block_Template
     /**
      * Set block template and get available modes
      */
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('urlrewrite/selector.phtml');
         $this->_modes = [
             'category' => Mage::helper('adminhtml')->__('For category'),

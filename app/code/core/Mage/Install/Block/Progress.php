@@ -12,8 +12,9 @@ declare(strict_types=1);
 
 class Mage_Install_Block_Progress extends Mage_Core_Block_Template
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('page/progress.phtml');
         $this->assign('steps', Mage::getSingleton('install/wizard')->getSteps());
     }

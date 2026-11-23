@@ -258,7 +258,7 @@ class Mage_Core_Model_Design_Tokens
         if ($type === '') {
             return null;
         }
-        $options = array_filter(array_map(trim(...), explode(',', (string) $entry->options)));
+        $options = array_filter(array_map(trim(...), explode(',', (string) $entry->options)), boolval(...));
         return ['type' => $type, 'range' => trim((string) $entry->range), 'options' => array_values($options)];
     }
 

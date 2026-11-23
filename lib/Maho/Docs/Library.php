@@ -202,7 +202,7 @@ final class Library
                 $description = trim($match[1], " \t\"'");
             }
             if (preg_match('/^admin_pages:\s*\[(.*)\]\s*$/m', $frontMatter[1], $match)) {
-                $adminPages = array_values(array_filter(array_map(static fn(string $route): string => trim($route, " \t\"'"), explode(',', $match[1]))));
+                $adminPages = array_values(array_filter(array_map(static fn(string $route): string => trim($route, " \t\"'"), explode(',', $match[1])), boolval(...)));
             }
         }
         // A "#" line inside a code block is a comment, not the title.

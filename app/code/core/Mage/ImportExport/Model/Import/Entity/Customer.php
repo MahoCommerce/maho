@@ -215,7 +215,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      */
     protected function _deleteCustomers()
     {
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $idToDelete = [];
 
             foreach ($bunch as $rowNum => $rowData) {
@@ -355,7 +355,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
         $passTable      = $resource->getAttribute('password_hash')->getBackend()->getTable();
         $multiSelect    = [];
 
-        while ($bunch = $this->_dataSourceModel->getNextBunch()) {
+        while (($bunch = $this->_dataSourceModel->getNextBunch()) !== null && $bunch !== []) {
             $entityRowsIn = [];
             $entityRowsUp = [];
             $attributes   = [];

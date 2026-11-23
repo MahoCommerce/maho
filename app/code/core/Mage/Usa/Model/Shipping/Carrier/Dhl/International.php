@@ -1418,7 +1418,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
         $nodePieces = $nodeShipmentDetails->addChild('Pieces', '', '');
 
-        $package = [];
+        $packages = $rawRequest->getPackages();
         $packageType = '';
 
         /*
@@ -1429,7 +1429,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
          * JP (Jumbo Junior Parcel), PA (Parcel), DF (DHL Flyer)
          */
         $i = 0;
-        foreach ($rawRequest->getPackages() as $package) {
+        foreach ($packages as $package) {
             $nodePiece = $nodePieces->addChild('Piece', '', '');
             $packageType = 'EE';
             if ($package['params']['container'] == self::DHL_CONTENT_TYPE_NON_DOC) {
@@ -1456,6 +1456,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             }
             $nodePiece->addChild('PieceContents', mb_substr(implode(',', $content), 0, 34));
         }
+        $lastPackage = $packages === [] ? [] : end($packages);
 
         if (!$originRegion) {
             $nodeShipmentDetails->addChild('Weight', (string) round($rawRequest->getPackageWeight(), 1));
@@ -1474,7 +1475,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
              */
             $nodeShipmentDetails->addChild('DoorTo', 'DD');
             $nodeShipmentDetails->addChild('DimensionUnit', substr($this->_getDimensionUnit(), 0, 1));
-            if ($package['params']['container'] == self::DHL_CONTENT_TYPE_NON_DOC) {
+            if ($lastPackage['params']['container'] == self::DHL_CONTENT_TYPE_NON_DOC) {
                 $packageType = 'CP';
             }
             $nodeShipmentDetails->addChild('PackageType', $packageType);
@@ -1486,7 +1487,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                 Mage::app()->getWebsite($this->_request->getWebsiteId())->getBaseCurrencyCode(),
             );
         } else {
-            if ($package['params']['container'] == self::DHL_CONTENT_TYPE_NON_DOC) {
+            if ($lastPackage['params']['container'] == self::DHL_CONTENT_TYPE_NON_DOC) {
                 $packageType = 'CP';
             }
             $nodeShipmentDetails->addChild('PackageType', $packageType);

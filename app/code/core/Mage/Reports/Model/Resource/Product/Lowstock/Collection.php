@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -176,7 +177,7 @@ class Mage_Reports_Model_Resource_Product_Lowstock_Collection extends Mage_Repor
     public function filterByIsQtyProductTypes()
     {
         $this->filterByProductType(
-            array_keys(array_filter(Mage::helper('cataloginventory')->getIsQtyTypeIds())),
+            array_keys(array_filter(Mage::helper('cataloginventory')->getIsQtyTypeIds(), boolval(...))),
         );
         return $this;
     }

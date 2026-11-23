@@ -63,6 +63,7 @@ class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
     {
         $filter = $this->getFilter();
         $query = [$filter->getRequestVar() => $this->_getRemovedValue()];
+        $params = [];
         $params['_current']     = true;
         $params['_use_rewrite'] = true;
         $params['_query']       = $query;

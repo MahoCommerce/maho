@@ -40,7 +40,7 @@ class ImportSampleData extends BaseMahoCommand
     ): int {
         $this->initMaho();
         $reporter = $this->consoleReporter($output, false);
-        $packs = $pack !== null ? array_values(array_filter(array_map(trim(...), explode(',', $pack)))) : null;
+        $packs = $pack !== null ? array_values(array_filter(array_map(trim(...), explode(',', $pack)), boolval(...))) : null;
         try {
             if ($path !== null) {
                 $package = Package::fromPath($path);

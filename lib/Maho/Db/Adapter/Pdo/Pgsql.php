@@ -1293,12 +1293,12 @@ class Pgsql extends AbstractPdoAdapter
     #[\Override]
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int
     {
-        $row = array_first($data);
-        if (!is_array($row)) {
+        $firstRow = array_first($data);
+        if (!is_array($firstRow)) {
             return $this->insert($table, $data);
         }
 
-        $cols = array_keys($row);
+        $cols = array_keys($firstRow);
         $insertArray = [];
         foreach ($data as $row) {
             $line = [];
@@ -3138,7 +3138,8 @@ class Pgsql extends AbstractPdoAdapter
 
         $tableName = [];
         $correlationName = '';
-        foreach ($fromSelect as $correlationName => $formPart) {
+        foreach ($fromSelect as $fromName => $formPart) {
+            $correlationName = $fromName;
             if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
                 $tableName = $formPart['tableName'];
                 break;

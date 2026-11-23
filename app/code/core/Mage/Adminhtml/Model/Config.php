@@ -68,6 +68,7 @@ class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
 
     public function __construct()
     {
+        parent::__construct();
         $this->_cacheChecksum = null;
         $this->setCache(Mage::app()->getCache());
         $this->setCacheTags([Mage_Core_Model_Config::CACHE_TAG]);

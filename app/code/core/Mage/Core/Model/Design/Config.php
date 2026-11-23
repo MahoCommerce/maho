@@ -18,6 +18,7 @@ class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
      */
     public function __construct(array $params = [])
     {
+        parent::__construct();
         if (isset($params['designRoot'])) {
             if (!is_dir($params['designRoot'])) {
                 throw new Mage_Core_Exception("Design root '{$params['designRoot']}' isn't a directory.");

@@ -69,7 +69,7 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Grouped extends Mage_Im
                 'table' => $resource->getAttributeTypeTable($row['type']),
             ];
         }
-        while ($bunch = $this->_entityModel->getNextBunch()) {
+        while (($bunch = $this->_entityModel->getNextBunch()) !== null && $bunch !== []) {
             $linksData     = [
                 'product_ids'      => [],
                 'links'            => [],

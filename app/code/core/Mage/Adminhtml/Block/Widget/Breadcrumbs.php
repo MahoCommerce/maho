@@ -20,8 +20,9 @@ class Mage_Adminhtml_Block_Widget_Breadcrumbs extends Mage_Adminhtml_Block_Templ
     /**
      * Mage_Adminhtml_Block_Widget_Breadcrumbs constructor.
      */
-    public function __construct()
+    public function __construct(array $args = [])
     {
+        parent::__construct($args);
         $this->setTemplate('widget/breadcrumbs.phtml');
         $this->addLink(Mage::helper('adminhtml')->__('Home'), Mage::helper('adminhtml')->__('Home'), $this->getUrl('*'));
     }

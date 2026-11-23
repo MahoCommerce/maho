@@ -301,7 +301,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     'zp' => $address ? (string) $address->getPostcode() : '',
                     'country' => $address ? (string) $address->getCountryId() : '',
                     'external_id' => (string) $order->getCustomerId(),
-                ]);
+                ], boolval(...));
             }
         }
 
@@ -323,7 +323,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             'zp' => $address ? (string) $address->getPostcode() : '',
             'country' => $address ? (string) $address->getCountryId() : '',
             'external_id' => (string) $customer->getId(),
-        ]);
+        ], boolval(...));
     }
 
     /**

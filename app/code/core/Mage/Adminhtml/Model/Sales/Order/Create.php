@@ -103,6 +103,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
 
     public function __construct()
     {
+        parent::__construct();
         $this->_session = Mage::getSingleton('adminhtml/session_quote');
     }
 

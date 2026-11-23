@@ -61,7 +61,7 @@ class Mage_SalesRule_Model_Observer
     protected function _hasUsageLimit(Mage_Sales_Model_Order $order): bool
     {
         $customerId = (int) $order->getCustomerId();
-        foreach ($customerId ? array_filter(explode(',', (string) $order->getAppliedRuleIds())) : [] as $ruleId) {
+        foreach ($customerId ? array_filter(explode(',', (string) $order->getAppliedRuleIds()), boolval(...)) : [] as $ruleId) {
             if ((int) Mage::getModel('salesrule/rule')->load((int) $ruleId)->getUsesPerCustomer() > 0) {
                 return true;
             }
@@ -84,7 +84,7 @@ class Mage_SalesRule_Model_Observer
 
         // Sorted so concurrent placements take the rule row locks in the same
         // order and queue instead of deadlocking.
-        $ruleIds = array_unique(array_filter(array_map(intval(...), explode(',', (string) $order->getAppliedRuleIds()))));
+        $ruleIds = array_unique(array_filter(array_map(intval(...), explode(',', (string) $order->getAppliedRuleIds())), boolval(...)));
         sort($ruleIds);
         $customerId = (int) $order->getCustomerId();
 

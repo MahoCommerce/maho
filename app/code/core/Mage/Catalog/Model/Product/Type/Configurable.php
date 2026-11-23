@@ -298,8 +298,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     {
         if (!$this->getProduct($product)->hasData($this->_usedProductIds)) {
             $usedProductIds = [];
-            foreach ($this->getUsedProducts(null, $product) as $product) {
-                $usedProductIds[] = $product->getId();
+            foreach ($this->getUsedProducts(null, $product) as $usedProduct) {
+                $usedProductIds[] = $usedProduct->getId();
             }
             $this->getProduct($product)->setData($this->_usedProductIds, $usedProductIds);
         }
