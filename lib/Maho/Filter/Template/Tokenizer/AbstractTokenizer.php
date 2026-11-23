@@ -26,8 +26,6 @@ abstract class AbstractTokenizer
      * Move current index to next char.
      *
      * If index out of bounds returns false
-     *
-     * @phpstan-impure
      */
     public function next(): bool
     {
@@ -43,8 +41,6 @@ abstract class AbstractTokenizer
      * Move current index to previous char.
      *
      * If index out of bounds returns false
-     *
-     * @phpstan-impure
      */
     public function prev(): bool
     {

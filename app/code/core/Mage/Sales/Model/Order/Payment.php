@@ -314,7 +314,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 ->fetchTransactionInfo($this, $invoice->getTransactionId());
         }
         $status = true;
-        if (!$invoice->getIsPaid() && !$this->getIsTransactionPending()) {
+        $canCapture = !$invoice->getIsPaid() && !$this->getIsTransactionPending();
+        if ($canCapture) {
             // attempt to capture: this can trigger "is_transaction_pending"
             \Maho\Profiler::start('payment.capture', [
                 'payment.method' => $this->getMethodInstance()->getCode(),
@@ -2022,11 +2023,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         return $value === null ? null : (bool) $value;
     }
 
-    /**
-     * A payment method sets the flag while it captures, so the value can change between two calls.
-     *
-     * @phpstan-impure
-     */
     public function getIsTransactionPending(): ?bool
     {
         $value = $this->getData('is_transaction_pending');
