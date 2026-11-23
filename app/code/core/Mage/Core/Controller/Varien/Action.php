@@ -588,8 +588,9 @@ abstract class Mage_Core_Controller_Varien_Action
             $messagesStorage = [$messagesStorage];
         }
         foreach ($messagesStorage as $storageName) {
+            /** @var Mage_Core_Model_Session_Abstract|false $storage */
             $storage = Mage::getSingleton($storageName);
-            if ($storage instanceof Mage_Core_Model_Session_Abstract) {
+            if ($storage) {
                 $block = $this->getLayout()->getMessagesBlock();
                 $block->addMessages($storage->getMessages(true));
                 $block->addStorageType($storageName);

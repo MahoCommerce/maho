@@ -133,9 +133,10 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      */
     public function getAttributeObject(): Mage_Catalog_Model_Resource_Eav_Attribute|false
     {
+        /** @var Mage_Catalog_Model_Resource_Eav_Attribute|false $attribute */
         $attribute = Mage::getSingleton('eav/config')
             ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
-        return $attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute ? $attribute : false;
+        return $attribute;
     }
 
     /**
