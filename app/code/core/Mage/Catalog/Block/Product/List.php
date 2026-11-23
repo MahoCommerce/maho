@@ -93,12 +93,7 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
         return Mage::getSingleton('catalog/layer');
     }
 
-    /**
-     * Retrieve loaded category collection
-     *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
-     */
-    public function getLoadedProductCollection()
+    public function getLoadedProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
         return $this->_getProductCollection();
     }

@@ -8,8 +8,14 @@
  * @package Mage_Reports
  */
 
+/**
+ * @extends \Maho\Data\Collection<Mage_Adminhtml_Model_Report_Item>
+ */
 class Mage_Reports_Model_Grouped_Collection extends \Maho\Data\Collection //Mage_Core_Model_Resource_Db_Collection_Abstract
 {
+    #[\Override]
+    protected $_itemObjectClass = Mage_Adminhtml_Model_Report_Item::class;
+
     /**
      * Column name for group by clause
      *
@@ -20,7 +26,7 @@ class Mage_Reports_Model_Grouped_Collection extends \Maho\Data\Collection //Mage
     /**
      * Collection resource
      *
-     * @var \Maho\Data\Collection\Db|null
+     * @var \Maho\Data\Collection\Db<Mage_Adminhtml_Model_Report_Item>|null
      */
     protected $_resourceCollection  = null;
 
@@ -64,10 +70,9 @@ class Mage_Reports_Model_Grouped_Collection extends \Maho\Data\Collection //Mage
     /**
      * Setter for resource collection
      *
-     * @param \Maho\Data\Collection\Db $collection
-     * @return $this
+     * @param \Maho\Data\Collection\Db<Mage_Adminhtml_Model_Report_Item> $collection
      */
-    public function setResourceCollection($collection)
+    public function setResourceCollection(\Maho\Data\Collection\Db $collection): static
     {
         $this->_resourceCollection = $collection;
         return $this;

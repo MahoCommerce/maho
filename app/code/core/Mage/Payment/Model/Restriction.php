@@ -39,7 +39,7 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
         ?Mage_Sales_Model_Quote $quote = null,
         ?Mage_Customer_Model_Customer $customer = null,
     ): bool {
-        $restrictions = $this->getCollection()
+        $restrictions = Mage::getResourceModel('payment/restriction_collection')
             ->addFieldToFilter('status', self::STATUS_ENABLED);
 
         foreach ($restrictions as $restriction) {

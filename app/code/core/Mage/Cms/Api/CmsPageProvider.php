@@ -138,7 +138,7 @@ final class CmsPageProvider extends CrudProvider
      */
     private function getPageByIdentifierBackend(string $identifier): ?CmsPage
     {
-        $collection = \Mage::getModel('cms/page')->getCollection();
+        $collection = \Mage::getResourceModel('cms/page_collection');
         $collection->addFieldToFilter('identifier', $identifier);
 
         $allowed = $this->allowedStoreIds();

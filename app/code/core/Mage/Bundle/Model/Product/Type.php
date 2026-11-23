@@ -528,7 +528,6 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
 
         $selections = $this->getSelectionsCollection($optionCollection->getAllIds(), $product);
 
-        /** @var Mage_Bundle_Model_Selection $selection */
         foreach ($selections as $selection) {
             if ($selection->getProductId() == $optionProduct->getId()) {
                 foreach ($options as &$option) {
@@ -593,7 +592,6 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             return false;
         }
         $salableSelectionCount = 0;
-        /** @var Mage_Bundle_Model_Selection $selection */
         foreach ($selectionCollection as $selection) {
             if ($selection->isSalable()) {
                 $requiredOptionIds[$selection->getOptionId()] = 1;

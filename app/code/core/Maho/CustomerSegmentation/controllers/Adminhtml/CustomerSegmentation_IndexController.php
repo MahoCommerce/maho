@@ -178,7 +178,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             );
         } else {
             try {
-                $collection = Mage::getModel('customersegmentation/segment')->getCollection()
+                $collection = Mage::getResourceModel('customersegmentation/segment_collection')
                     ->addFieldToFilter('segment_id', ['in' => $segmentIds]);
 
                 foreach ($collection as $segment) {

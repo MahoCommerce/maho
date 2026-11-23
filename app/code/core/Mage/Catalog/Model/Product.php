@@ -151,6 +151,9 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return Mage::app()->getStore()->getId();
     }
 
+    /**
+     * @return Mage_Catalog_Model_Resource_Product_Collection<static>
+     */
     #[\Override]
     public function getResourceCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {

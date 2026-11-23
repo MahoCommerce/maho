@@ -305,7 +305,6 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
         $sources = [];
         foreach ($collection as $attribute) {
-            /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
             $code = (string) $attribute->getAttributeCode();
             if ($code === $this->getAttributeCode() || (string) $attribute->getFrontendLabel() === '') {
                 continue;

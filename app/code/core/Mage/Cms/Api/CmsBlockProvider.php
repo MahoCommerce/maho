@@ -78,7 +78,7 @@ final class CmsBlockProvider extends CrudProvider
             return $this->getByIdentifierBackend($identifier);
         }
 
-        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection = \Mage::getResourceModel('cms/block_collection');
         $collection->addFieldToFilter('identifier', $identifier);
         $collection->addStoreFilter(StoreContext::getStoreId());
         $collection->addFieldToFilter('is_active', 1);
@@ -97,7 +97,7 @@ final class CmsBlockProvider extends CrudProvider
      */
     private function getByIdentifierBackend(string $identifier): ?CmsBlock
     {
-        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection = \Mage::getResourceModel('cms/block_collection');
         $collection->addFieldToFilter('identifier', $identifier);
 
         $allowed = $this->allowedStoreIds();

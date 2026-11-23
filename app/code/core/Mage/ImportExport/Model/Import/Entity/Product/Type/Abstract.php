@@ -142,7 +142,6 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
             foreach (Mage::getResourceModel('catalog/product_attribute_collection')
                 ->setAttributeSetFilter($attributeSet->getId()) as $attribute
             ) {
-                /** @var Mage_Eav_Model_Entity_Attribute $attribute */
                 $attributeCode = $attribute->getAttributeCode();
                 $attributeId   = $attribute->getId();
 

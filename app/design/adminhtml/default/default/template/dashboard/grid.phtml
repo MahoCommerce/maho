@@ -31,7 +31,7 @@ $numColumns = count($this->getColumns());
     <tbody>
     <?php if (($this->getCollection()->getSize() > 0) && (!$this->getIsCollapsed())): ?>
     <?php foreach ($this->getCollection() as $_index => $_item): ?>
-        <tr title="<?= $this->getRowId($_item) ?>">
+        <tr title="<?= $this->getRowUrl($_item) ?>">
         <?php $i = 0;
         foreach ($this->getColumns() as $_column): ?>
             <td class="<?= $_column->getCssProperty() ?> <?= ++$i == $numColumns ? 'last' : '' ?>"><?= (($_html = $_column->getRowField($_item)) != '' ? $_html : '&nbsp;') ?></td>

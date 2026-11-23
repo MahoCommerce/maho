@@ -33,10 +33,8 @@ class Mage_CatalogSearch_Block_Advanced_Form extends Mage_Core_Block_Template
 
     /**
      * Retrieve collection of product searchable attributes
-     *
-     * @return \Maho\Data\Collection\Db
      */
-    public function getSearchableAttributes()
+    public function getSearchableAttributes(): Mage_Catalog_Model_Resource_Product_Attribute_Collection
     {
         return $this->getModel()->getAttributes();
     }
