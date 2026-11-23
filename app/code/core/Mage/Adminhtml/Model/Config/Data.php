@@ -512,11 +512,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
     /**
      * Check field visibility by scope
-     *
-     * @param Mage_Core_Model_Config_Element $field
-     * @return bool
      */
-    protected function _isValidField($field)
+    protected function _isValidField(\Maho\Simplexml\Element|false $field): bool
     {
         if (!$field) {
             return false;
