@@ -339,13 +339,21 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
 
     private function refundsRemainingItems(Mage_Sales_Model_Order_Creditmemo $memo): bool
     {
-        $quantities = [];
-        foreach ($memo->getItemsCollection() as $item) {
-            $quantities[(int) $item->getOrderItemId()] ??= (float) $item->getQty();
+        $quantities = null;
+        if ($memo::class === Mage_Sales_Model_Order_Creditmemo::class) {
+            $quantities = [];
+            foreach ($memo->getItemsCollection() as $item) {
+                $quantities[(int) $item->getOrderItemId()] ??= (float) $item->getQty();
+            }
         }
 
         foreach ($memo->getOrder()->getAllItems() as $orderItem) {
-            $qty = $quantities[(int) $orderItem->getId()] ?? 0.0;
+            if ($quantities === null) {
+                $item = $memo->getItemByOrderId($orderItem->getId());
+                $qty = $item ? (float) $item->getQty() : 0.0;
+            } else {
+                $qty = $quantities[(int) $orderItem->getId()] ?? 0.0;
+            }
             if ($orderItem->getQtyToInvoice() > 0 || round($qty - $orderItem->getQtyToRefund(), 4) < 0.0) {
                 return false;
             }

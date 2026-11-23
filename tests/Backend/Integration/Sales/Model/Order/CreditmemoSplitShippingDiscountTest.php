@@ -174,6 +174,38 @@ it('uses the registered shipping discount on a previously loaded order', functio
     }
 })->with(['after the first refund' => false, 'before the second invoice was saved' => true]);
 
+it('uses a rewritten credit memo lookup when checking for the final refund', function (): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        [$order, $items, $invoices] = createSplitShippingRefundOrder(
+            ['shipping' => 10.0, 'replacement' => 10.0],
+            0.004,
+            1.0,
+            0.01,
+        );
+        $items['replacement']->setQtyRefunded(1.0);
+        $rewritten = new class extends Mage_Sales_Model_Order_Creditmemo {
+            #[\Override]
+            public function getItemByOrderId($orderId): false
+            {
+                return false;
+            }
+        };
+        $native = Mage::getModel('sales/order_creditmemo');
+        foreach ([$native, $rewritten] as $memo) {
+            $memo->setOrder($order)->setInvoice($invoices['shipping'])
+                ->setGrandTotal(0.04)->setBaseGrandTotal(11.0)->setBaseShippingAmount(1.0);
+            $memo->addItem(Mage::getModel('sales/convert_order')->itemToCreditmemoItem($items['shipping'])->setQty(1.0));
+            Mage::getModel('sales/order_creditmemo_total_discount')->collect($memo);
+        }
+        expect($native->getBaseDiscountAmount())->toBe(-5.01)
+            ->and($rewritten->getBaseDiscountAmount())->toBe(-5.0);
+    } finally {
+        $connection->rollBack();
+    }
+});
+
 it('limits online refunds to each invoice in a recognized split shipping pair', function (string $gatewayScenario): void {
     $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
     $connection->beginTransaction();
