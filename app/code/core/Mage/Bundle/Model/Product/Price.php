@@ -479,13 +479,9 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     /**
      * Returns the lowest price after applying any applicable bundle discounts
      *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param float|string $price
-     * @param int $bundleQty
-     * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getLowestPrice($bundleProduct, $price, $bundleQty = 1)
+    public function getLowestPrice(Mage_Catalog_Model_Product $bundleProduct, float|string $price, ?float $bundleQty = 1): float
     {
         $price *= 1;
         return min(
@@ -719,7 +715,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         }
 
         if (!isset(self::$attributeCache[$productId]['price_type'])) {
-            $attributes = $resource->getAttributeData($productId, $productPriceTypeId, $store);
+            $attributes = $resource->getAttributeData([$productId], [$productPriceTypeId], $store);
             self::$attributeCache[$productId]['price_type'] = $attributes;
         } else {
             $attributes = self::$attributeCache[$productId]['price_type'];
