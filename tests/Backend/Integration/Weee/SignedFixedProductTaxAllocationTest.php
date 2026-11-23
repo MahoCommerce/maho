@@ -226,6 +226,18 @@ it('uses the rewritten fee row getters for document tax-inclusive totals', funct
         {
             return parent::getBaseRowWeeeTaxInclTax($item) + 0.03;
         }
+
+        #[\Override]
+        public function getWeeeTaxInclTax($item)
+        {
+            return 1.0;
+        }
+
+        #[\Override]
+        public function getBaseWeeeTaxInclTax($item)
+        {
+            return 2.0;
+        }
     });
     try {
         expect((new Mage_Weee_Model_DocumentAllocation())->getTaxInclusiveAmounts($item))->toBe([0.08, 0.13]);
@@ -234,3 +246,94 @@ it('uses the rewritten fee row getters for document tax-inclusive totals', funct
         Mage::register('_helper/weee', $helper);
     }
 });
+
+it('accumulates subcent discounts before rounding a historic fee with a missing title', function (): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    try {
+        $number = uniqid('historic-fee-');
+        $order = Mage::getModel('sales/order')->setStoreId(1)
+            ->setIncrementId($number)->setBaseCurrencyCode('USD')->setOrderCurrencyCode('EUR');
+        $orderItem = Mage::getModel('sales/order_item')->setProductType('simple')->setSku($number)
+            ->setQtyOrdered(3)->setQtyInvoiced(3)->setWeeeTaxAppliedRowAmount(6.0)->setBaseWeeeTaxAppliedRowAmnt(3.0);
+        $helper = Mage::helper('weee');
+        $historicFees = [
+            ['title' => 'Recycling', 'row_amount' => 0.80, 'base_row_amount' => 0.40, 'weee_discount' => 0.008, 'base_weee_discount' => 0.004],
+            ['row_amount' => 1.20, 'base_row_amount' => 0.60, 'weee_discount' => 0.012, 'base_weee_discount' => 0.006],
+        ];
+        $originalFees = $historicFees;
+        $originalFees[1]['title'] = 'Disposal';
+        foreach ($originalFees as &$fee) {
+            $fee['row_amount'] *= 3;
+            $fee['base_row_amount'] *= 3;
+        }
+        unset($fee);
+        $helper->setApplied($orderItem, $originalFees);
+        $order->addItem($orderItem)->save();
+        for ($number = 1; $number <= 3; $number++) {
+            $invoice = Mage::getModel('sales/order_invoice')->setOrder($order)->setIncrementId($order->getIncrementId() . '-' . $number)
+                ->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID)->setTaxAmount(1.98)->setBaseTaxAmount(0.99);
+            $item = Mage::getModel('sales/order_invoice_item')->setOrderItem($orderItem)->setData('qty', 1)
+                ->setWeeeTaxAppliedRowAmount(2.0)->setBaseWeeeTaxAppliedRowAmount(1.0);
+            $helper->setApplied($item, $historicFees);
+            $invoice->addItem($item)->save();
+        }
+
+        $order = Mage::getModel('sales/order')->load((int) $order->getId());
+        $orderItem = $order->getItemById((int) $orderItem->getId());
+        $memo = Mage::getModel('sales/order_creditmemo')->setOrder($order);
+        $memoItem = Mage::getModel('sales/order_creditmemo_item')->setOrderItem($orderItem)->setQty(3);
+        $memo->addItem($memoItem);
+        Mage::getModel('weee/total_creditmemo_weee')->collect($memo);
+
+        $fees = $helper->getApplied($memoItem);
+        expect(array_sum(array_column($fees, 'weee_discount')))->toEqualWithDelta(0.06, 0.000001)
+            ->and(array_sum(array_column($fees, 'base_weee_discount')))->toEqualWithDelta(0.03, 0.000001)
+            ->and($memo->getGrandTotal())->toEqualWithDelta(5.94, 0.000001)
+            ->and($memo->getBaseGrandTotal())->toEqualWithDelta(2.97, 0.000001);
+    } finally {
+        $connection->rollBack();
+    }
+});
+
+it('keeps unit-only WEEE rewrites in invoice and credit memo inclusive subtotals', function (float $unit, float $baseUnit): void {
+    $order = Mage::getModel('sales/order')->setStoreId(1)->setTaxAmount(0.09)->setBaseTaxAmount(0.15);
+    $orderItem = Mage::getModel('sales/order_item')->setId(1)->setProductType('simple')
+        ->setQtyOrdered(3)->setQtyInvoiced(3)->setWeeeTaxAppliedRowAmount(0.09)->setBaseWeeeTaxAppliedRowAmnt(0.15);
+    $order->getItemsCollection()->addItem($orderItem);
+    $helper = Mage::helper('weee');
+    $helper->setApplied($orderItem, [['title' => 'Recycling', 'amount' => $unit, 'base_amount' => $baseUnit, 'row_amount' => 0.09, 'base_row_amount' => 0.15]]);
+    $invoice = Mage::getModel('sales/order_invoice')->setOrder($order)->setSubtotalInclTax(32.0)->setBaseSubtotalInclTax(40.0);
+    $invoice->addItem(Mage::getModel('sales/order_invoice_item')->setOrderItem($orderItem)->setData('qty', 2));
+    $memo = Mage::getModel('sales/order_creditmemo')->setOrder($order)->setSubtotalInclTax(32.0)->setBaseSubtotalInclTax(40.0);
+    $memo->addItem(Mage::getModel('sales/order_creditmemo_item')->setOrderItem($orderItem)->setData('qty', 2));
+    Mage::unregister('_helper/weee');
+    Mage::register('_helper/weee', new class extends Mage_Weee_Helper_Data {
+        #[\Override]
+        public function getWeeeTaxInclTax($item)
+        {
+            return parent::getWeeeTaxInclTax($item) + 0.01;
+        }
+
+        #[\Override]
+        public function getBaseWeeeTaxInclTax($item)
+        {
+            return parent::getBaseWeeeTaxInclTax($item) + 0.02;
+        }
+    });
+    try {
+        Mage::getModel('weee/total_invoice_weee')->collect($invoice);
+        Mage::getModel('weee/total_creditmemo_weee')->collect($memo);
+
+        expect($invoice->getSubtotalInclTax())->toEqualWithDelta(32.08, 0.000001)
+            ->and($invoice->getBaseSubtotalInclTax())->toEqualWithDelta(40.14, 0.000001)
+            ->and($memo->getSubtotalInclTax())->toEqualWithDelta(32.08, 0.000001)
+            ->and($memo->getBaseSubtotalInclTax())->toEqualWithDelta(40.14, 0.000001);
+    } finally {
+        Mage::unregister('_helper/weee');
+        Mage::register('_helper/weee', $helper);
+    }
+})->with([
+    'allocated row equals nominal unit times quantity' => [0.03, 0.05],
+    'allocated row differs from nominal unit times quantity' => [0.029, 0.049],
+]);

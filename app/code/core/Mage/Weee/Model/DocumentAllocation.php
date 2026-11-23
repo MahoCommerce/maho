@@ -245,9 +245,33 @@ class Mage_Weee_Model_DocumentAllocation
         $baseInclTax = (float) $helper->getBaseRowWeeeTaxInclTax($item);
         // Some older order items only have aggregate fee fields.
         if (!$inclTax && !$baseInclTax && !$helper->getApplied($item)) {
-            return [(float) $item->getWeeeTaxAppliedRowAmount(), (float) $item->getBaseWeeeTaxAppliedRowAmount()];
+            $inclTax = (float) $item->getWeeeTaxAppliedRowAmount();
+            $baseInclTax = (float) $item->getBaseWeeeTaxAppliedRowAmount();
         }
-        return [$inclTax, $baseInclTax];
+        if ($helper::class === Mage_Weee_Helper_Data::class) {
+            return [$inclTax, $baseInclTax];
+        }
+
+        $native = new Mage_Weee_Helper_Data();
+        return [
+            $inclTax + $this->getUnitRewriteAdjustment($item, $helper, $native, 'getRowWeeeTaxInclTax', 'getWeeeTaxInclTax'),
+            $baseInclTax + $this->getUnitRewriteAdjustment($item, $helper, $native, 'getBaseRowWeeeTaxInclTax', 'getBaseWeeeTaxInclTax'),
+        ];
+    }
+
+    private function getUnitRewriteAdjustment(
+        Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item,
+        Mage_Weee_Helper_Data $helper,
+        Mage_Weee_Helper_Data $native,
+        string $rowGetter,
+        string $unitGetter,
+    ): float {
+        // An explicit row override determines the whole row. Otherwise keep only the unit
+        // customization so that nominal amounts do not replace the persisted allocation.
+        if ((new ReflectionMethod($helper, $rowGetter))->getDeclaringClass()->getName() !== Mage_Weee_Helper_Data::class) {
+            return 0.0;
+        }
+        return ($helper->$unitGetter($item) - $native->$unitGetter($item)) * $item->getQty();
     }
 
     /**
@@ -256,7 +280,7 @@ class Mage_Weee_Model_DocumentAllocation
      */
     private function allocateTitleGross(array &$fees, string $key, float $amount, Mage_Core_Model_Store $store, bool $balanceAgainstDiscounts = true): void
     {
-        $gross = $this->allocateGross(array_map(static fn(array $fee): float => $fee[$key], $fees), $amount, $store);
+        $gross = $this->allocateByWeight(array_map(static fn(array $fee): float => $fee[$key], $fees), $amount, $store);
         if ($balanceAgainstDiscounts) {
             $discount = $key === 'gross' ? 'discount' : 'base_discount';
             $gross = $this->balanceGross($gross, array_map(static fn(array $fee): float => $fee[$discount], $fees), $store);
@@ -271,7 +295,7 @@ class Mage_Weee_Model_DocumentAllocation
      * @param array<array-key, float> $weights
      * @return array<array-key, float>
      */
-    private function allocateGross(array $weights, float $amount, Mage_Core_Model_Store $store): array
+    private function allocateByWeight(array $weights, float $amount, ?Mage_Core_Model_Store $store): array
     {
         $weight = array_sum($weights);
         $last = array_key_last($weights);
@@ -279,9 +303,12 @@ class Mage_Weee_Model_DocumentAllocation
         $previous = 0.0;
         foreach ($weights as $index => &$share) {
             $seen += $share;
-            $rounded = $index === $last ? $amount : ($weight ? $store->roundPrice($amount * $seen / $weight) : 0.0);
-            $share = $store->roundPrice($rounded - $previous);
-            $previous = $rounded;
+            $cumulative = $index === $last ? $amount : ($weight ? $amount * $seen / $weight : 0.0);
+            if ($store && $index !== $last) {
+                $cumulative = $store->roundPrice($cumulative);
+            }
+            $share = $store?->roundPrice($cumulative - $previous) ?? ($cumulative - $previous);
+            $previous = $cumulative;
         }
         unset($share);
         return $weights;
@@ -333,7 +360,7 @@ class Mage_Weee_Model_DocumentAllocation
             $entriesByTitle[$fee['title']][$index] = (float) $fee[$amountKey];
         }
         foreach ($entriesByTitle as $title => $entries) {
-            $gross = $this->allocateGross($entries, $amounts[$title][$key] ?? 0.0, $store);
+            $gross = $this->allocateByWeight($entries, $amounts[$title][$key] ?? 0.0, $store);
             foreach ($this->balanceGross($gross, array_intersect_key($discounts, $entries), $store) as $index => $amount) {
                 $applied[$index][$amountKey . '_incl_tax'] += $amount - $applied[$index][$amountKey];
                 $applied[$index][$amountKey] = $amount;
@@ -485,7 +512,9 @@ class Mage_Weee_Model_DocumentAllocation
         foreach (['gross' => 'gross', 'base_gross' => 'base_gross', 'discount' => 'gross', 'base_discount' => 'base_gross'] as $key => $weightKey) {
             $weights = array_map(static fn(array $fee): float => $fee[$weightKey], $targets);
             $unmatchedAmount = array_sum(array_column($unknown, $key));
-            foreach ($this->allocateGross($weights, $unmatchedAmount, $store) as $title => $amount) {
+            // Discounts retain subcent precision until the document history has been summed.
+            $roundingStore = $key === $weightKey ? $store : null;
+            foreach ($this->allocateByWeight($weights, $unmatchedAmount, $roundingStore) as $title => $amount) {
                 $matched[$title][$key] = ($matched[$title][$key] ?? 0.0) + $amount;
             }
         }
