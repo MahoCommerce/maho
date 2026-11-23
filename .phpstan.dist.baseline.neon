@@ -61,12 +61,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getRowUrl() expects int|string|null, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid.php
-
-		-
 			rawMessage: 'Parameter #2 $checked of method Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox::_getCheckboxHtml() expects bool, string given.'
 			identifier: argument.type
 			count: 1
