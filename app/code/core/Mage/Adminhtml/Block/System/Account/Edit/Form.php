@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     #[\Override]
-    protected function _prepareForm()
+    protected function _prepareForm(): static
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();
         $user = Mage::getModel('admin/user')
@@ -106,15 +106,15 @@ class Mage_Adminhtml_Block_System_Account_Edit_Form extends Mage_Adminhtml_Block
         if ($passkeyEnabled) {
             $passkeyStatusHtml = '<strong>' . Mage::helper('adminhtml')->__('Passkey Active') . '</strong>';
             $passkeyExtraHtml = [
-                $this->getButtonHtml($this->__('Register New Passkey'), null, '', 'register-passkey-btn'),
-                $this->getButtonHtml($this->__('Remove Passkey'), null, '', 'remove-passkey-btn'),
+                $this->getButtonHtml($this->__('Register New Passkey'), '', '', 'register-passkey-btn'),
+                $this->getButtonHtml($this->__('Remove Passkey'), '', '', 'remove-passkey-btn'),
                 '<input id="passkey_enabled" type="hidden" value="1">',
             ];
         } else {
             $passkeyStatusHtml = Mage::helper('adminhtml')->__('No Passkey Created');
             $passkeyExtraHtml = [
-                $this->getButtonHtml($this->__('Register Passkey'), null, '', 'register-passkey-btn'),
-                $this->getButtonHtml($this->__('Remove Passkey'), null, 'no-display', 'remove-passkey-btn'),
+                $this->getButtonHtml($this->__('Register Passkey'), '', '', 'register-passkey-btn'),
+                $this->getButtonHtml($this->__('Remove Passkey'), '', 'no-display', 'remove-passkey-btn'),
                 '<input id="passkey_enabled" type="hidden" value="0">',
             ];
         }

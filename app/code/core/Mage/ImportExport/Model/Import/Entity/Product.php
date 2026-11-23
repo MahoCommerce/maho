@@ -1815,12 +1815,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
     /**
      * Removes empty keys in case value is null or empty string
-     *
-     * @param array $rowData
      */
-    protected function _filterRowData(&$rowData): void
+    protected function _filterRowData(array &$rowData): void
     {
-        $rowData = array_filter($rowData, fn($tmpString) => strlen($tmpString ?? ''));
+        $rowData = array_filter($rowData, static fn(mixed $value): bool => $value !== null && $value !== '');
         // Exceptions - for sku - put them back in
         $rowData[self::COL_SKU] ??= null;
         // Remove null byte character
