@@ -491,12 +491,9 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
     /**
      * Retrieve Object instance with original data
-     *
-     * @param \Maho\DataObject $object
-     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _getOrigObject($object)
+    protected function _getOrigObject(Mage_Core_Model_Abstract $object): Mage_Core_Model_Abstract
     {
         $className  = $object::class;
         $origObject = new $className();

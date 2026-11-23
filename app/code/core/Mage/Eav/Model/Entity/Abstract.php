@@ -1060,10 +1060,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
 
     /**
      * Save entity's attributes into the object's resource
-     *
-     * @return $this
      */
-    public function save(\Maho\DataObject $object)
+    public function save(Mage_Core_Model_Abstract $object): static
     {
         if ($object->isDeleted()) {
             return $this->delete($object);
@@ -1088,11 +1086,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
 
     /**
      * Retrieve Object instance with original data
-     *
-     * @param \Maho\DataObject $object
-     * @return \Maho\DataObject
      */
-    protected function _getOrigObject($object)
+    protected function _getOrigObject(Mage_Core_Model_Abstract $object): Mage_Core_Model_Abstract
     {
         $className  = $object::class;
         $origObject = new $className();
@@ -1105,15 +1100,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Prepare entity object data for save
      *
-     * result array structure:
-     * array (
-     *  'newObject', 'entityRow', 'insert', 'update', 'delete'
-     * )
-     *
-     * @param \Maho\DataObject $newObject
-     * @return  array
+     * @return array{newObject: Mage_Core_Model_Abstract, entityRow: array<string, mixed>, insert: array<int, mixed>, update: array<int, array{value_id: ?int, value: mixed}>, delete: array<string, list<array{attribute_id: int, value_id: ?int}>>}
      */
-    protected function _collectSaveData($newObject)
+    protected function _collectSaveData(Mage_Core_Model_Abstract $newObject): array
     {
         $newData   = $newObject->getData();
         $entityId  = $newObject->getData($this->getEntityIdField());

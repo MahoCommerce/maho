@@ -276,7 +276,7 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
      * Override to handle hybrid EAV/static approach
      */
     #[\Override]
-    public function save(\Maho\DataObject $object)
+    public function save(Mage_Core_Model_Abstract $object): static
     {
         $now = Mage::app()->getLocale()->formatDateForDb('now');
 
