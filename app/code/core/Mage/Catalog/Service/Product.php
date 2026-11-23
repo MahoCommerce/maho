@@ -353,7 +353,7 @@ class Mage_Catalog_Service_Product
      */
     public function validateAttributes(array $data): array
     {
-        $values = new \Maho\DataObject();
+        $values = Mage::getModel('catalog/product')->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
         foreach ($data as $code => $value) {
             $attribute = Mage::getSingleton('eav/config')->getAttribute(Product::ENTITY, $code);
             if (!$attribute || !$attribute->getAttributeId() || $attribute->getBackend()->isStatic()) {

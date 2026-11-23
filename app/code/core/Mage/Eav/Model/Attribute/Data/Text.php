@@ -41,6 +41,10 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
             $value = $this->getEntity()->getDataUsingMethod($attribute->getAttributeCode());
         }
 
+        if (is_array($value)) {
+            return [Mage::helper('eav')->__('The value of attribute "%s" contains invalid data.', $label)];
+        }
+
         if ($this->isRequired() && (string) $value === '') {
             $errors[] = Mage::helper('eav')->__('"%s" is a required value.', $label);
         }
