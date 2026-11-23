@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Newsletter_Subscriber_Grid_Filter_Website extends Mag
      * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         $result = $this->getCollection()->toOptionArray();
         array_unshift($result, ['label' => null, 'value' => null]);

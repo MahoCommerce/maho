@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Admin
      * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         return [
             [

@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Review_Grid_Filter_Type extends Mage_Adminhtml_Block_
      * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         return [
             ['label' => '', 'value' => ''],

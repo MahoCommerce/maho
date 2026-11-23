@@ -14,7 +14,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Filter_Status exten
      * @return array[]
      */
     #[\Override]
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         return [
             ['value' => null, 'label' => null],

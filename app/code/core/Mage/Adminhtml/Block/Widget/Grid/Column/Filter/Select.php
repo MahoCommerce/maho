@@ -13,7 +13,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Select extends Mage_Adminht
     /**
      * @return array[]
      */
-    protected function _getOptions()
+    protected function _getOptions(): array
     {
         $emptyOption = ['value' => null, 'label' => ''];
 
