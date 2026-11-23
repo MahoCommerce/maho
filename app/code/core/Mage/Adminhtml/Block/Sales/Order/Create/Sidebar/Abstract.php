@@ -33,11 +33,11 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Abstract extends Mage_Admi
     /**
      * Retrieve display block availability
      *
-     * @return int|false|null
+     * @return bool
      */
     public function canDisplay()
     {
-        return $this->getCustomerId();
+        return (bool) $this->getCustomerId();
     }
 
     /**

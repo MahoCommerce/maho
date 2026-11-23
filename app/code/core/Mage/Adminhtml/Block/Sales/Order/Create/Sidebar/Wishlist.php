@@ -99,7 +99,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Wishlist extends Mage_Admi
     }
 
     /**
-     * @return int|false|null
+     * @return bool
      */
     #[\Override]
     public function canDisplay()
