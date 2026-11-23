@@ -541,7 +541,7 @@ class Mage_Eav_Model_Config
      *
      * $entityType is the entity type, its code or its ID, as getEntityType() takes it.
      *
-     * @return string[]
+     * @return list<string>
      * @throws Mage_Core_Exception
      * @throws Exception
      */

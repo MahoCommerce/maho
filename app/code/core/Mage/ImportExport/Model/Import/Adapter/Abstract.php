@@ -9,7 +9,7 @@
  */
 
 /**
- * @implements SeekableIterator<int, array>
+ * @implements SeekableIterator<int, array<string, string>>
  */
 abstract class Mage_ImportExport_Model_Import_Adapter_Abstract implements SeekableIterator
 {

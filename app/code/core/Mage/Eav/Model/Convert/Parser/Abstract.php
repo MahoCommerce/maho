@@ -12,7 +12,9 @@ abstract class Mage_Eav_Model_Convert_Parser_Abstract extends Mage_Dataflow_Mode
 {
     /** @var array<int, Mage_Core_Model_Store>|null */
     protected ?array $_storesById = null;
+    /** @var array<int, string>|null */
     protected ?array $_attributeSetsById = null;
+    /** @var array<string, int>|null */
     protected ?array $_attributeSetsByName = null;
 
     /**
