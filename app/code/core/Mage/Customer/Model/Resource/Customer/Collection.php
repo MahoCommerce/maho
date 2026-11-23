@@ -128,11 +128,9 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
 
     /**
      * Get SQL for get record count
-     *
-     * @return Maho\Db\Select
      */
     #[\Override]
-    public function getSelectCountSql()
+    public function getSelectCountSql(): Maho\Db\Select
     {
         $select = parent::getSelectCountSql();
         $select->resetJoinLeft();
