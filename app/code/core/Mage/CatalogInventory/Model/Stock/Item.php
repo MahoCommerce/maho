@@ -133,17 +133,12 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Load item data by product
-     *
-     * @param   mixed $product
-     * @return  $this
+     * Load item data by product, or by product ID
      */
-    public function loadByProduct($product)
+    public function loadByProduct(Mage_Catalog_Model_Product|int $product): static
     {
-        if ($product instanceof Mage_Catalog_Model_Product) {
-            $product = $product->getId();
-        }
-        $this->_getResource()->loadByProductId($this, $product);
+        $productId = $product instanceof Mage_Catalog_Model_Product ? $product->getId() : $product;
+        $this->_getResource()->loadByProductId($this, $productId === null ? null : (int) $productId);
         $this->setOrigData();
         return $this;
     }
@@ -209,14 +204,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
 
     /**
      * Adding stock data to product
-     *
-     * @return  $this
      */
-    public function assignProduct(Mage_Catalog_Model_Product $product)
+    public function assignProduct(Mage_Catalog_Model_Product $product): static
     {
         if (!$this->getId() || !$this->getProductId()) {
-            $this->_getResource()->loadByProductId($this, $product->getId());
-            $this->setOrigData();
+            $this->loadByProduct($product);
         }
 
         $this->setProduct($product);

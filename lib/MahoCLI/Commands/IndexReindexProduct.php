@@ -53,7 +53,7 @@ class IndexReindexProduct extends BaseMahoCommand
             $output->writeln(sprintf('<comment>Including %d child product(s) in reindex</comment>', count($childProductIds)));
         }
 
-        $indexCollection = Mage::getModel('index/process')->getCollection();
+        $indexCollection = Mage::getResourceModel('index/process_collection');
         if ($specificIndexers) {
             $indexCollection->addFieldToFilter('indexer_code', ['in' => $specificIndexers]);
         }

@@ -39,10 +39,8 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
 
     /**
      * Retrieve collection of all attributes
-     *
-     * @return \Maho\Data\Collection\Db
      */
-    protected function _getAttributesCollection()
+    protected function _getAttributesCollection(): Mage_Catalog_Model_Resource_Product_Attribute_Collection
     {
         if (!$this->_attributesCollection) {
             $this->_attributesCollection = Mage::getResourceModel('catalog/product_attribute_collection')
@@ -57,11 +55,8 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
 
     /**
      * Check attribute is Text and is Searchable
-     *
-     * @param Mage_Catalog_Model_Entity_Attribute $attribute
-     * @return bool
      */
-    protected function _isAttributeTextAndSearchable($attribute)
+    protected function _isAttributeTextAndSearchable(Mage_Catalog_Model_Resource_Eav_Attribute $attribute): bool
     {
         if (($attribute->getIsSearchable()
             && !in_array($attribute->getFrontendInput(), ['select', 'multiselect']))
@@ -75,11 +70,8 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
 
     /**
      * Check attributes has options and searchable
-     *
-     * @param Mage_Catalog_Model_Entity_Attribute $attribute
-     * @return bool
      */
-    protected function _hasAttributeOptionsAndSearchable($attribute)
+    protected function _hasAttributeOptionsAndSearchable(Mage_Catalog_Model_Resource_Eav_Attribute $attribute): bool
     {
         if ($attribute->getIsSearchable()
             && in_array($attribute->getFrontendInput(), ['select', 'multiselect'])
@@ -92,11 +84,8 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
 
     /**
      * Retrieve SQL for search entities
-     *
-     * @param string $query
-     * @return Maho\Db\Select
      */
-    protected function _getSearchEntityIdsSql($query)
+    protected function _getSearchEntityIdsSql(string $query): \Maho\Db\Select
     {
         $tables = [];
         $selects = [];
@@ -108,7 +97,6 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
          * Collect tables and attribute ids of attributes with string values
          */
         foreach ($this->_getAttributesCollection() as $attribute) {
-            /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
             $attributeCode = $attribute->getAttributeCode();
             if ($this->_isAttributeTextAndSearchable($attribute)) {
                 $table = $attribute->getBackendTable();

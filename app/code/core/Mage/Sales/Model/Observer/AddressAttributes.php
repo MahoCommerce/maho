@@ -19,7 +19,7 @@ declare(strict_types=1);
  */
 class Mage_Sales_Model_Observer_AddressAttributes
 {
-    /** @var array<string, Mage_Customer_Model_Attribute>|null */
+    /** @var array<string, Mage_Eav_Model_Entity_Attribute>|null */
     protected ?array $attributes = null;
 
     /**
@@ -181,7 +181,7 @@ class Mage_Sales_Model_Observer_AddressAttributes
     }
 
     /**
-     * @return array<string, Mage_Customer_Model_Attribute>
+     * @return array<string, Mage_Eav_Model_Entity_Attribute>
      */
     protected function getAttributes(): array
     {

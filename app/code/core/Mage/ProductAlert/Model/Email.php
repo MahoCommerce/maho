@@ -167,25 +167,19 @@ class Mage_ProductAlert_Model_Email extends Mage_Core_Model_Abstract
 
     /**
      * Retrieve price block
-     *
-     * @return Mage_ProductAlert_Block_Email_Price
      */
-    protected function _getPriceBlock()
+    protected function _getPriceBlock(): Mage_ProductAlert_Block_Email_Price
     {
-        $this->_priceBlock ??= Mage::helper('productalert')
-            ->createBlock('productalert/email_price');
+        $this->_priceBlock ??= Mage::app()->getLayout()->createBlock('productalert/email_price');
         return $this->_priceBlock;
     }
 
     /**
      * Retrieve stock block
-     *
-     * @return Mage_ProductAlert_Block_Email_Stock
      */
-    protected function _getStockBlock()
+    protected function _getStockBlock(): Mage_ProductAlert_Block_Email_Stock
     {
-        $this->_stockBlock ??= Mage::helper('productalert')
-            ->createBlock('productalert/email_stock');
+        $this->_stockBlock ??= Mage::app()->getLayout()->createBlock('productalert/email_stock');
         return $this->_stockBlock;
     }
 

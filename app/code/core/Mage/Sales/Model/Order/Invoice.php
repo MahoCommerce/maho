@@ -119,11 +119,8 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
 
     /**
      * Load invoice by increment id
-     *
-     * @param string $incrementId
-     * @return $this
      */
-    public function loadByIncrementId($incrementId)
+    public function loadByIncrementId(string $incrementId): static
     {
         return $this->load($incrementId, 'increment_id');
     }
@@ -458,18 +455,14 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $items;
     }
 
-    /**
-     * @param int|string $itemId
-     * @return false|Mage_Sales_Model_Order_Invoice_Item
-     */
-    public function getItemById($itemId)
+    public function getItemById(int $itemId): ?Mage_Sales_Model_Order_Invoice_Item
     {
         foreach ($this->getItemsCollection() as $item) {
-            if ($item->getId() == $itemId) {
+            if ((int) $item->getId() === $itemId) {
                 return $item;
             }
         }
-        return false;
+        return null;
     }
 
     /**

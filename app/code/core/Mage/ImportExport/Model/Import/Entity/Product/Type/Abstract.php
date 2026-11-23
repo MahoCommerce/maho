@@ -128,10 +128,8 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
 
     /**
      * Initialize attributes parameters for all attributes' sets.
-     *
-     * @return Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
      */
-    protected function _initAttributes()
+    protected function _initAttributes(): static
     {
         // temporary storage for attributes' parameters to avoid double querying inside the loop
         $attributesCache = [];
@@ -142,7 +140,6 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
             foreach (Mage::getResourceModel('catalog/product_attribute_collection')
                 ->setAttributeSetFilter($attributeSet->getId()) as $attribute
             ) {
-                /** @var Mage_Eav_Model_Entity_Attribute $attribute */
                 $attributeCode = $attribute->getAttributeCode();
                 $attributeId   = $attribute->getId();
 

@@ -25,7 +25,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract_Source_Code
      */
     public function toOptionArray(): array
     {
-        $codes = Mage::getSingleton($this->_carrierModel)->getCodes($this->_codeType);
+        /** @var Mage_Shipping_Model_Carrier_Abstract $carrier */
+        $carrier = Mage::getSingleton($this->_carrierModel);
+        $codes = $carrier->getCodes($this->_codeType);
 
         $options = [];
         foreach ($codes as $value => $label) {

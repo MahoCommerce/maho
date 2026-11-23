@@ -432,23 +432,16 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
      * Calculate final price of selection
      * with take into account tier price
      *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param Mage_Catalog_Model_Product $selectionProduct
-     * @param float $bundleQty
-     * @param float|null $selectionQty
-     * @param bool $multiplyQty
-     * @param bool $takeTierPrice
-     * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
     public function getSelectionFinalTotalPrice(
-        $bundleProduct,
-        $selectionProduct,
-        $bundleQty,
-        $selectionQty,
-        $multiplyQty = true,
-        $takeTierPrice = true,
-    ) {
+        Mage_Catalog_Model_Product $bundleProduct,
+        Mage_Catalog_Model_Product $selectionProduct,
+        ?float $bundleQty,
+        ?float $selectionQty,
+        bool $multiplyQty = true,
+        bool $takeTierPrice = true,
+    ): float {
         $selectionQty ??= $selectionProduct->getSelectionQty();
 
         if ($bundleProduct->getPriceType() == self::PRICE_TYPE_DYNAMIC) {
@@ -467,7 +460,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
             }
         }
 
-        $price = $this->getLowestPrice($bundleProduct, $price, $bundleQty);
+        $price = $this->getLowestPrice($bundleProduct, (float) $price, $bundleQty);
 
         if ($multiplyQty) {
             $price *= $selectionQty;
@@ -479,15 +472,10 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
     /**
      * Returns the lowest price after applying any applicable bundle discounts
      *
-     * @param Mage_Catalog_Model_Product $bundleProduct
-     * @param float|string $price
-     * @param int $bundleQty
-     * @return float
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getLowestPrice($bundleProduct, $price, $bundleQty = 1)
+    public function getLowestPrice(Mage_Catalog_Model_Product $bundleProduct, float $price, ?float $bundleQty = 1): float
     {
-        $price *= 1;
         return min(
             $this->_getApp()->getStore()->roundPrice($price),
             $this->_applyGroupPrice($bundleProduct, $price),
@@ -719,7 +707,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         }
 
         if (!isset(self::$attributeCache[$productId]['price_type'])) {
-            $attributes = $resource->getAttributeData($productId, $productPriceTypeId, $store);
+            $attributes = $resource->getAttributeData([$productId], [$productPriceTypeId], $store);
             self::$attributeCache[$productId]['price_type'] = $attributes;
         } else {
             $attributes = self::$attributeCache[$productId]['price_type'];

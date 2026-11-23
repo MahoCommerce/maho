@@ -93,12 +93,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
 
     /**
      * Add Value Sort To Collection Select
-     *
-     * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
-     * @param string $dir direction
-     * @return $this
      */
-    public function addValueSortToCollection($collection, $dir = \Maho\Data\Collection::SORT_ORDER_DESC)
+    public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = \Maho\Data\Collection::SORT_ORDER_DESC): static
     {
         return $this;
     }

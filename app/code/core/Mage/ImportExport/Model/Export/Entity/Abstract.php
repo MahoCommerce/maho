@@ -240,9 +240,11 @@ abstract class Mage_ImportExport_Model_Export_Entity_Abstract
     /**
      * Apply filter to collection and add not skipped attributes to select.
      *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
+     * @template TCollection of Mage_Eav_Model_Entity_Collection_Abstract
+     * @param TCollection $collection
+     * @return TCollection
      */
-    protected function _prepareEntityCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection)
+    protected function _prepareEntityCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection): Mage_Eav_Model_Entity_Collection_Abstract
     {
         if (!isset($this->_parameters[Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP])
             || !is_array($this->_parameters[Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP])

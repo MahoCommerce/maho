@@ -91,14 +91,9 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
 
     /**
      * Get load select
-     *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract|Mage_Checkout_Model_Agreement $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
         if ($object->getStoreId()) {

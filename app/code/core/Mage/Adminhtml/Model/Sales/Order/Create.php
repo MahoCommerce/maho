@@ -140,7 +140,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             return $item;
         }
         if (is_numeric($item)) {
-            return $this->getSession()->getQuote()->getItemById($item);
+            return $this->getSession()->getQuote()->getItemById((int) $item);
         }
         return false;
     }

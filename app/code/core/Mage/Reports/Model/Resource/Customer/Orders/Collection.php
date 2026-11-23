@@ -8,6 +8,8 @@
  * @package Mage_Reports
  */
 
+declare(strict_types=1);
+
 class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Reports_Model_Resource_Order_Collection
 {
     #[\Override]
@@ -34,13 +36,9 @@ class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Report
 
     /**
      * Set date range
-     *
-     * @param string $from
-     * @param string $to
-     * @return $this
      */
     #[\Override]
-    public function setDateRange($from, $to)
+    public function setDateRange(string $from, string $to): static
     {
         $this->_reset()
             ->_joinFields($from, $to);
@@ -50,11 +48,10 @@ class Mage_Reports_Model_Resource_Customer_Orders_Collection extends Mage_Report
     /**
      * Set store filter to collection
      *
-     * @param array $storeIds
-     * @return $this
+     * @param list<int>|null $storeIds
      */
     #[\Override]
-    public function setStoreIds($storeIds)
+    public function setStoreIds(?array $storeIds): static
     {
         if ($storeIds) {
             $this->addAttributeToFilter('store_id', ['in' => (array) $storeIds]);

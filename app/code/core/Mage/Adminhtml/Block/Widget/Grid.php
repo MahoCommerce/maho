@@ -1956,6 +1956,14 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     }
 
     /**
+     * Return the CSS class of the row, or an empty string for no class.
+     */
+    public function getRowClass(\Maho\DataObject $row): string
+    {
+        return '';
+    }
+
+    /**
      * @return int[]
      */
     public function getLimitOptions(): array

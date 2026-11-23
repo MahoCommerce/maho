@@ -50,13 +50,13 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
      * Retrieve Product Type Instances
      * as key - type code, value - instance model
      *
-     * @return array
+     * @return array<string, Mage_Catalog_Model_Product_Type_Abstract>
      */
-    public function getProductTypeInstances()
+    public function getProductTypeInstances(): array
     {
         if (is_null($this->_productTypes)) {
             $this->_productTypes = [];
-            $productEmulator     = new \Maho\DataObject();
+            $productEmulator     = Mage::getModel('catalog/product');
 
             foreach (array_keys(Mage_Catalog_Model_Product_Type::getTypes()) as $typeId) {
                 $productEmulator->setTypeId($typeId);
@@ -146,7 +146,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
      */
     public function changeItemStatus(Mage_CatalogInventory_Model_Stock_Item $item)
     {
-        $productId  = $item->getProductId();
+        $productId  = (int) $item->getProductId();
         if (!$productType = $item->getProductTypeId()) {
             $productType    = $this->getProductType($productId);
         }
@@ -209,13 +209,8 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
 
     /**
      * Update product status from stock item
-     *
-     * @param int $productId
-     * @param string $productType
-     * @param int $websiteId
-     * @return $this
      */
-    public function updateStatus($productId, $productType = null, $websiteId = null)
+    public function updateStatus(int $productId, ?string $productType = null, ?int $websiteId = null): static
     {
         $productType ??= $this->getProductType($productId);
 
@@ -312,13 +307,8 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
 
     /**
      * Process Parents by child
-     *
-     * @param int $productId
-     * @param int $stockId
-     * @param int $websiteId
-     * @return $this
      */
-    protected function _processParents($productId, $stockId = 1, $websiteId = null)
+    protected function _processParents(int $productId, int $stockId = 1, ?int $websiteId = null): static
     {
         $parentIds = [];
         foreach ($this->getProductTypeInstances() as $typeInstance) {
@@ -337,7 +327,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
             $parentType = $productTypes[$parentId] ?? null;
             $item->setData(['stock_id' => $stockId])
                 ->setOrigData()
-                ->loadByProduct($parentId);
+                ->loadByProduct((int) $parentId);
             $status  = self::STATUS_IN_STOCK;
             $qty     = 0;
             if ($item->getId()) {

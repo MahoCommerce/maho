@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Sales_Model_Resource_Order_Collection_Abstract<Mage_Sales_Model_Order_Invoice>
+ */
 class Mage_Sales_Model_Resource_Order_Invoice_Collection extends Mage_Sales_Model_Resource_Order_Collection_Abstract
 {
     /**

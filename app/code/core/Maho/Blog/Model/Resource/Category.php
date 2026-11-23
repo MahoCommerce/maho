@@ -231,7 +231,7 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
     }
 
     #[\Override]
-    public function save(\Maho\DataObject $object)
+    public function save(Mage_Core_Model_Abstract $object): static
     {
         $now = Mage::app()->getLocale()->formatDateForDb('now');
 

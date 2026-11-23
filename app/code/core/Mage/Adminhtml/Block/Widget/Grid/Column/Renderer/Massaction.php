@@ -47,18 +47,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_A
         return parent::render($row);
     }
 
-    /**
-     * Returns HTML of the checkbox
-     *
-     * @param string $value
-     * @param bool   $checked
-     * @return string
-     */
     #[\Override]
-    protected function _getCheckboxHtml($value, $checked)
+    protected function _getCheckboxHtml(string $value, bool $checked): string
     {
         $html = '<input type="checkbox" name="' . $this->getColumn()->getName() . '" ';
-        $html .= 'value="' . $this->escapeHtml($value) . '" class="massaction-checkbox"' . $checked . '>';
+        $html .= 'value="' . $this->escapeHtml($value) . '" class="massaction-checkbox"' . ($checked ? ' checked="checked"' : '') . '>';
         return $html;
     }
 }

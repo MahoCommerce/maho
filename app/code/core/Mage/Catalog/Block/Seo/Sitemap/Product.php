@@ -14,6 +14,7 @@ declare(strict_types=1);
  * SEO Products Sitemap block
  *
  * @package    Mage_Catalog
+ * @extends Mage_Catalog_Block_Seo_Sitemap_Abstract<Mage_Catalog_Model_Product>
  */
 class Mage_Catalog_Block_Seo_Sitemap_Product extends Mage_Catalog_Block_Seo_Sitemap_Abstract
 {
@@ -41,17 +42,12 @@ class Mage_Catalog_Block_Seo_Sitemap_Product extends Mage_Catalog_Block_Seo_Site
     }
 
     /**
-     * Get item URL
-     *
      * @param Mage_Catalog_Model_Product $product
-     * @return string
      */
     #[\Override]
-    public function getItemUrl($product)
+    public function getItemUrl(Mage_Catalog_Model_Abstract $product): string
     {
-        /** @var Mage_Catalog_Helper_Product $helper */
-        $helper = Mage::helper('catalog/product');
-        return $helper->getProductUrl($product);
+        return $product->getProductUrl();
     }
 
     public function setCollection(?Mage_Catalog_Model_Resource_Product_Collection $value): static

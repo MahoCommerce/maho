@@ -115,7 +115,6 @@
 "Invalid EAV attribute.","Invalid EAV attribute."
 "Invalid entity specified","Invalid entity specified"
 "Invalid entity supplied.","Invalid entity supplied."
-"Invalid entity supplied: %s","Invalid entity supplied: %s"
 "Invalid entity type","Invalid entity type"
 "Invalid entity_id, skipping the record.","Invalid entity_id, skipping the record."
 "Invalid foreign key","Invalid foreign key"

@@ -93,9 +93,9 @@ class Mage_Adminhtml_Block_Notification_Grid extends Mage_Adminhtml_Block_Widget
 
     /**
      * @param Mage_AdminNotification_Model_Inbox $row
-     * @return string
      */
-    public function getRowClass(\Maho\DataObject $row)
+    #[\Override]
+    public function getRowClass(\Maho\DataObject $row): string
     {
         return $row->getIsRead() ? 'read' : 'unread';
     }

@@ -65,11 +65,7 @@ class Mage_Review_Block_Form extends Mage_Core_Block_Template
         return $product->load($this->getRequest()->getParam('id'));
     }
 
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getAction()
+    public function getFormActionUrl(): string
     {
         $productId = Mage::app()->getRequest()->getParam('id', false);
         return Mage::getUrl('review/product/post', ['id' => $productId, '_secure' => $this->_isSecure()]);

@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 /**
  * @method bool hasErrors()
- * @method $this setAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $value)
  */
 abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
 {
@@ -259,12 +258,8 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
 
     /**
      * Load object data
-     *
-     * @param string|null|int $id
-     * @param string|null $field
-     * @return $this
      */
-    public function load($id, $field = null)
+    public function load(int|string|null $id, ?string $field = null): static
     {
         $this->_beforeLoad($id, $field);
         $this->_getResource()->load($this, $id, $field);

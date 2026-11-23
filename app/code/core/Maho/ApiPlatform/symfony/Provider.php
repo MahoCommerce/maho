@@ -121,6 +121,7 @@ abstract class Provider implements ProviderInterface
      */
     protected function loadById(string $modelAlias, int|string $id): \Mage_Core_Model_Abstract
     {
+        /** @var \Mage_Core_Model_Abstract $model */
         $model = \Mage::getModel($modelAlias);
         try {
             $model->load($id);
@@ -138,7 +139,9 @@ abstract class Provider implements ProviderInterface
      */
     protected function provideCollection(array $context): TraversablePaginator
     {
-        $collection = \Mage::getModel($this->modelAlias)->getCollection();
+        /** @var \Mage_Core_Model_Abstract $model */
+        $model = \Mage::getModel($this->modelAlias);
+        $collection = $model->getCollection();
 
         $this->applyCollectionFilters($collection, $context['filters'] ?? []);
 

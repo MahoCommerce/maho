@@ -8,7 +8,7 @@
  * @package Mage_Reports
  */
 
-class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_Model_Resource_Product_Collection
+class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_Model_Resource_Product_Collection implements Mage_Reports_Model_Report_CollectionInterface
 {
     #[\Override]
     protected function _construct(): void
@@ -20,12 +20,9 @@ class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_M
     }
     /**
      * Set Date range to collection
-     *
-     * @param string $from
-     * @param string $to
-     * @return $this
      */
-    public function setDateRange($from, $to)
+    #[\Override]
+    public function setDateRange(string $from, string $to): static
     {
         $this->_reset()
             ->addOrderedQty($from, $to)
@@ -36,10 +33,10 @@ class Mage_Reports_Model_Resource_Product_Sold_Collection extends Mage_Reports_M
     /**
      * Set store filter to collection
      *
-     * @param array $storeIds
-     * @return $this
+     * @param list<int>|null $storeIds
      */
-    public function setStoreIds($storeIds)
+    #[\Override]
+    public function setStoreIds(?array $storeIds): static
     {
         if ($storeIds) {
             $this->getSelect()->where('order_items.store_id IN (?)', (array) $storeIds);

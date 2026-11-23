@@ -384,7 +384,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
             $this->setStockItem(Mage::getModel('cataloginventory/stock_item'));
         }
 
-        $this->_galleryBackendModel = $this->getAttribute('media_gallery')->getBackend();
+        $this->_galleryBackendModel = $this->getProductModel()->getResource()->getMediaGalleryBackend();
     }
 
     /**
@@ -497,7 +497,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
                         }
 
                         if (isset($stockItems[$model->getSku()]) && $stock = $stockItems[$model->getSku()]) {
-                            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($model->getId());
+                            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($model);
                             $stockItemId = $stockItem->getId();
 
                             if (!$stockItemId) {

@@ -150,7 +150,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     {
         $request = $this->getRequest();
 
-        $id = $request->getParam('id', false);
+        $id = $request->getParam('id');
         /** @var Mage_Api2_Model_Acl_Global_Role $role */
         $role = Mage::getModel('api2/acl_global_role')->load($id);
 
@@ -255,7 +255,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     #[Maho\Config\Route('/admin/api2_role/delete')]
     public function deleteAction(): void
     {
-        $id = $this->getRequest()->getParam('id', false);
+        $id = $this->getRequest()->getParam('id');
 
         //Validate current admin password
         $currentPassword = $this->getRequest()->getParam('current_password');

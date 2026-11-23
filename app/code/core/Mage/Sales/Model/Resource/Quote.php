@@ -19,13 +19,10 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
-     * @param Mage_Core_Model_Abstract|Mage_Sales_Model_Quote $object
-     * @return Maho\Db\Select
+     * @param Mage_Sales_Model_Quote $object
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select   = parent::_getLoadSelect($field, $value, $object);
         $storeIds = $object->getSharedStoreIds();
@@ -43,23 +40,18 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 
     /**
      * Load quote data by customer identifier
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @param int $customerId
-     * @return $this
      */
-    public function loadByCustomerId($quote, $customerId)
+    public function loadByCustomerId(Mage_Sales_Model_Quote $quote, ?int $customerId): static
     {
-        $adapter = $this->_getReadAdapter();
-        $select  = $this->_getLoadSelect('customer_id', $customerId, $quote)
-            ->where('is_active = ?', 1)
-            ->order('updated_at ' . Maho\Db\Select::SQL_DESC)
-            ->limit(1);
-
-        $data    = $adapter->fetchRow($select);
-
-        if ($data) {
-            $quote->setData($data);
+        if ($customerId !== null) {
+            $select = $this->_getLoadSelect('customer_id', $customerId, $quote)
+                ->where('is_active = ?', 1)
+                ->order('updated_at ' . Maho\Db\Select::SQL_DESC)
+                ->limit(1);
+            $data = $this->_getReadAdapter()->fetchRow($select);
+            if ($data) {
+                $quote->setData($data);
+            }
         }
 
         $this->_afterLoad($quote);
@@ -69,20 +61,16 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 
     /**
      * Load only active quote
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @param int $quoteId
-     * @return $this
      */
-    public function loadActive($quote, $quoteId)
+    public function loadActive(Mage_Sales_Model_Quote $quote, ?int $quoteId): static
     {
-        $adapter = $this->_getReadAdapter();
-        $select  = $this->_getLoadSelect('entity_id', $quoteId, $quote)
-            ->where('is_active = ?', 1);
-
-        $data    = $adapter->fetchRow($select);
-        if ($data) {
-            $quote->setData($data);
+        if ($quoteId !== null) {
+            $select = $this->_getLoadSelect('entity_id', $quoteId, $quote)
+                ->where('is_active = ?', 1);
+            $data = $this->_getReadAdapter()->fetchRow($select);
+            if ($data) {
+                $quote->setData($data);
+            }
         }
 
         $this->_afterLoad($quote);
@@ -92,15 +80,11 @@ class Mage_Sales_Model_Resource_Quote extends Mage_Sales_Model_Resource_Abstract
 
     /**
      * Load quote data by identifier without store
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @param int $quoteId
-     * @return $this
      */
-    public function loadByIdWithoutStore($quote, $quoteId)
+    public function loadByIdWithoutStore(Mage_Sales_Model_Quote $quote, ?int $quoteId): static
     {
         $read = $this->_getReadAdapter();
-        if ($read) {
+        if ($read && $quoteId !== null) {
             $select = parent::_getLoadSelect('entity_id', $quoteId, $quote);
 
             $data = $read->fetchRow($select);

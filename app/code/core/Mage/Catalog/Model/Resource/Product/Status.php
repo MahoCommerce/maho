@@ -50,23 +50,17 @@ class Mage_Catalog_Model_Resource_Product_Status extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Refresh enabled index cache
-     *
-     * @param int $productId
-     * @param int $storeId
-     * @return $this
+     * Refresh the enabled index of a product in a store, or in all stores for the default store ID
      */
-    public function refreshEnabledIndex($productId, $storeId)
+    public function refreshEnabledIndex(int $productId, int $storeId): static
     {
-        if ($storeId == Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID) {
-            foreach (Mage::app()->getStores() as $store) {
-                $this->refreshEnabledIndex($productId, $store->getId());
-            }
+        $stores = $storeId === Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID
+            ? Mage::app()->getStores()
+            : [Mage::app()->getStore($storeId)];
 
-            return $this;
+        foreach ($stores as $store) {
+            Mage::getResourceSingleton('catalog/product')->refreshProductEnabledIndex($store, $productId);
         }
-
-        Mage::getResourceSingleton('catalog/product')->refreshEnabledIndex($storeId, $productId);
 
         return $this;
     }

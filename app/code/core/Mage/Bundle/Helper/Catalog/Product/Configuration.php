@@ -32,16 +32,13 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
 
     /**
      * Obtain final price of selection in a bundle product
-     *
-     * @param Mage_Catalog_Model_Product $selectionProduct
-     * @return float
      */
     public function getSelectionFinalPrice(
         Mage_Catalog_Model_Product_Configuration_Item_Interface $item,
-        $selectionProduct,
-    ) {
+        Mage_Catalog_Model_Product $selectionProduct,
+    ): float {
         $selectionProduct->unsetData('final_price');
-        return $item->getProduct()->getPriceModel()->getSelectionFinalTotalPrice(
+        return Mage::helper('bundle')->getPriceModel($item->getProduct())->getSelectionFinalTotalPrice(
             $item->getProduct(),
             $selectionProduct,
             $item->getQty() * 1,

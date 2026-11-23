@@ -8,6 +8,21 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @phpstan-type FormattedTierPrice array{
+ *     price_id?: int,
+ *     website_id?: int,
+ *     all_groups?: int,
+ *     cust_group: int,
+ *     price: float|string,
+ *     price_qty: float|int,
+ *     website_price: float|string,
+ *     savePercent: float,
+ *     formated_price: string,
+ *     formated_price_incl_tax: string,
+ *     real_price_html?: string,
+ * }
+ */
 abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Template
 {
     /**
@@ -380,11 +395,10 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     /**
      * Get tier prices (formatted)
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
+     * @return list<FormattedTierPrice>
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getTierPrices($product = null)
+    public function getTierPrices(?Mage_Catalog_Model_Product $product = null): array
     {
         $product ??= $this->getProduct();
         $prices = $product->getFormatedTierPrice();

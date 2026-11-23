@@ -94,11 +94,9 @@ class Mage_Catalog_Block_Product_List extends Mage_Catalog_Block_Product_Abstrac
     }
 
     /**
-     * Retrieve loaded category collection
-     *
-     * @return Mage_Eav_Model_Entity_Collection_Abstract
+     * @return \Maho\Data\Collection<Mage_Catalog_Model_Product>
      */
-    public function getLoadedProductCollection()
+    public function getLoadedProductCollection(): \Maho\Data\Collection
     {
         return $this->_getProductCollection();
     }

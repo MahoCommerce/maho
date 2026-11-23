@@ -517,29 +517,25 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Example: the cataloginventory validation of decimal qty can change qty to int,
      * so need to change quote item qty option value too.
      *
-     * @param   array           $options
-     * @param   mixed           $value
-     * @param   Mage_Catalog_Model_Product $product
-     * @return  Mage_Bundle_Model_Product_Type
+     * @param array<int, Mage_Sales_Model_Quote_Item_Option> $options
      */
     #[\Override]
-    public function updateQtyOption($options, \Maho\DataObject $option, $value, $product = null)
+    public function updateQtyOption(array $options, \Maho\DataObject $option, float $value, ?Mage_Catalog_Model_Product $product = null): static
     {
-        $optionProduct      = $option->getProduct($product);
+        $optionProduct      = $option->getProduct();
         $optionUpdateFlag   = $option->getHasQtyOptionUpdate();
         $optionCollection   = $this->getOptionsCollection($product);
 
         $selections = $this->getSelectionsCollection($optionCollection->getAllIds(), $product);
 
-        /** @var Mage_Bundle_Model_Selection $selection */
         foreach ($selections as $selection) {
             if ($selection->getProductId() == $optionProduct->getId()) {
                 foreach ($options as &$option) {
                     if ($option->getCode() == 'selection_qty_' . $selection->getSelectionId()) {
                         if ($optionUpdateFlag) {
-                            $option->setValue((int) $option->getValue());
+                            $option->setValue((string) (int) $option->getValue());
                         } else {
-                            $option->setValue($value);
+                            $option->setValue((string) $value);
                         }
                     }
                 }
@@ -566,10 +562,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Checking if we can sale this bundle
      *
      * @param Mage_Catalog_Model_Product $product
-     * @return bool
      */
     #[\Override]
-    public function isSalable($product = null)
+    public function isSalable($product = null): bool
     {
         $salable = parent::isSalable($product);
         if (!is_null($salable)) {
@@ -596,7 +591,6 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
             return false;
         }
         $salableSelectionCount = 0;
-        /** @var Mage_Bundle_Model_Selection $selection */
         foreach ($selectionCollection as $selection) {
             if ($selection->isSalable()) {
                 $requiredOptionIds[$selection->getOptionId()] = 1;
@@ -611,12 +605,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then prepare of bundle selections options.
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $processMode
-     * @return array|string
+     * @return list<Mage_Catalog_Model_Product>|string The products to add, or an error message
      */
     #[\Override]
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, ?Mage_Catalog_Model_Product $product, string $processMode): array|string
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -740,15 +732,15 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 }
                 $qty = (float) $qty;
 
-                $product->addCustomOption('selection_qty_' . $selection->getSelectionId(), $qty, $selection);
-                $selection->addCustomOption('selection_id', $selection->getSelectionId());
-                $product->addCustomOption('product_qty_' . $selection->getId(), $qty, $selection);
+                $product->addCustomOption('selection_qty_' . $selection->getSelectionId(), (string) $qty, $selection);
+                $selection->addCustomOption('selection_id', (string) $selection->getSelectionId());
+                $product->addCustomOption('product_qty_' . $selection->getId(), (string) $qty, $selection);
 
                 /*
                  * Create extra attributes that will be converted to product options in order item
                  * for selection (not for all bundle)
                  */
-                $price = $product->getPriceModel()->getSelectionFinalTotalPrice($product, $selection, 0, $qty);
+                $price = Mage::helper('bundle')->getPriceModel($product)->getSelectionFinalTotalPrice($product, $selection, 0, $qty);
                 $attributes = [
                     'price'         => Mage::app()->getStore()->convertPrice($price),
                     'qty'           => $qty,
@@ -869,11 +861,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Prepare additional options/information for order item which will be
      * created from this product
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @return array
+     * @return array<string, mixed>
      */
     #[\Override]
-    public function getOrderOptions($product = null)
+    public function getOrderOptions(?Mage_Catalog_Model_Product $product = null): array
     {
         $optionArr = parent::getOrderOptions($product);
 
@@ -892,7 +883,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                 if ($selection->isSalable()) {
                     $selectionQty = $product->getCustomOption('selection_qty_' . $selection->getSelectionId());
                     if ($selectionQty) {
-                        $price = $product->getPriceModel()->getSelectionFinalTotalPrice(
+                        $price = Mage::helper('bundle')->getPriceModel($product)->getSelectionFinalTotalPrice(
                             $product,
                             $selection,
                             0,

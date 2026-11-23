@@ -96,13 +96,9 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
 
     /**
      * Loading currency data
-     *
-     * @param   string $id
-     * @param   string $field
-     * @return  $this
      */
     #[\Override]
-    public function load($id, $field = null)
+    public function load(int|string|null $id, ?string $field = null): static
     {
         $this->_rates = [];
         $this->setData('currency_code', Mage::helper('directory')->normalizeCurrencyCode((string) $id));

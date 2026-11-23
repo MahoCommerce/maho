@@ -15,7 +15,7 @@ $isSubscribed = $this->getIsSubscribed();
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
 <?= $this->getChildHtml('form_before') ?>
-<form action="<?= $this->getAction() ?>" method="post" id="form-validate">
+<form action="<?= $this->getFormActionUrl() ?>" method="post" id="form-validate">
     <?= $this->getBlockHtml('formkey') ?>
     <input type="hidden" name="is_subscribed" value="<?= $isSubscribed ? '0' : '1' ?>">
     <p class="newsletter-description">

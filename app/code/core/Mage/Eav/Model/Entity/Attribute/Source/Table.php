@@ -90,12 +90,9 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * Add Value Sort To Collection Select
      *
      * @param Mage_Catalog_Model_Resource_Collection_Abstract $collection
-     * @param string $dir
-     *
-     * @return $this
      */
     #[\Override]
-    public function addValueSortToCollection($collection, $dir = Maho\Db\Select::SQL_ASC)
+    public function addValueSortToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, string $dir = Maho\Db\Select::SQL_ASC): static
     {
         $valueTable1    = $this->getAttribute()->getAttributeCode() . '_t1';
         $valueTable2    = $this->getAttribute()->getAttributeCode() . '_t2';

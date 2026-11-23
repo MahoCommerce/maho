@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TItem of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
+ * @extends \Maho\Data\Collection\Db<TItem>
+ */
 abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     /**
@@ -149,6 +153,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     {
         $this->setItemObjectClass(Mage::getConfig()->getModelClassName($model));
         $entityModel ??= $model;
+        /** @var Mage_Eav_Model_Entity_Abstract $entity */
         $entity = Mage::getResourceSingleton($entityModel);
         $this->setEntity($entity);
 
@@ -157,20 +162,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
 
     /**
      * Set entity to use for attributes
-     *
-     * @param Mage_Eav_Model_Entity_Abstract $entity
-     * @throws Mage_Eav_Exception
-     * @return $this
      */
-    public function setEntity($entity)
+    public function setEntity(Mage_Eav_Model_Entity_Abstract $entity): static
     {
-        if ($entity instanceof Mage_Eav_Model_Entity_Abstract) {
-            $this->_entity = $entity;
-        } elseif (is_string($entity) || $entity instanceof Mage_Core_Model_Config_Element) {
-            $this->_entity = Mage::getModel('eav/entity')->setType($entity);
-        } else {
-            throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Invalid entity supplied: %s', print_r($entity, true)));
-        }
+        $this->_entity = $entity;
         return $this;
     }
 
@@ -210,7 +205,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * Add an object to the collection
      */
     #[\Override]
-    public function addItem(\Maho\DataObject $object)
+    public function addItem(\Maho\DataObject $object): static
     {
         if ($object::class !== $this->_itemObjectClass) {
             throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Attempt to add an invalid object'));
@@ -978,10 +973,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
             $object = $this->getNewEmptyItem()
                 ->setData($v);
             $this->addItem($object);
-            if (isset($this->_itemsById[$object->getId()])) {
-                $this->_itemsById[$object->getId()][] = $object;
-            } else {
-                $this->_itemsById[$object->getId()] = [$object];
+            // A row of an aggregate report has no entity ID, so it has no attribute values to load
+            $entityId = $object->getId();
+            if ($entityId !== null) {
+                $this->_itemsById[$entityId][] = $object;
             }
         }
 

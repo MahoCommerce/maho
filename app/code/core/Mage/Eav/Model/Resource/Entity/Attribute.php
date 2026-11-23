@@ -62,13 +62,12 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
 
     /**
      * Load attribute data by attribute code
-     *
-     * @param int $entityTypeId
-     * @param string $code
-     * @return bool
      */
-    public function loadByCode(Mage_Core_Model_Abstract $object, $entityTypeId, $code)
+    public function loadByCode(Mage_Core_Model_Abstract $object, int $entityTypeId, ?string $code): bool
     {
+        if ($code === null) {
+            return false;
+        }
         $bind   = [':entity_type_id' => $entityTypeId];
         $select = $this->_getLoadSelect('attribute_code', $code, $object)
             ->where('entity_type_id = :entity_type_id');

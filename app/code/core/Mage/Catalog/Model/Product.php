@@ -151,6 +151,9 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
         return Mage::app()->getStore()->getId();
     }
 
+    /**
+     * @return Mage_Catalog_Model_Resource_Product_Collection<static>
+     */
     #[\Override]
     public function getResourceCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
@@ -771,10 +774,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Get product price model
-     *
-     * @return Mage_Bundle_Model_Product_Price
      */
-    public function getPriceModel()
+    public function getPriceModel(): Mage_Catalog_Model_Product_Type_Price
     {
         return Mage::getSingleton('catalog/product_type')->priceFactory($this->getTypeId());
     }
@@ -1799,13 +1800,8 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
     /**
      * Add custom option information to product
-     *
-     * @param   string $code    Option code
-     * @param   mixed  $value   Value of the option
-     * @param   int    $product Product ID
-     * @return  $this
      */
-    public function addCustomOption($code, $value, $product = null)
+    public function addCustomOption(string $code, ?string $value, ?Mage_Catalog_Model_Product $product = null): static
     {
         $product = $product ?: $this;
         $option = Mage::getModel('catalog/product_configuration_item_option')

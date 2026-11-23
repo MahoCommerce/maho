@@ -196,13 +196,13 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
     /**
      * Retrieve allowed quote items products for gift messages
      *
-     * @return array
+     * @return list<int>
      */
-    public function getAllowQuoteItemsProducts()
+    public function getAllowQuoteItemsProducts(): array
     {
         $result = [];
         foreach ($this->getAllowQuoteItems() as $itemId) {
-            $item = $this->_getQuote()->getItemById($itemId);
+            $item = $this->_getQuote()->getItemById((int) $itemId);
             if (!$item) {
                 continue;
             }

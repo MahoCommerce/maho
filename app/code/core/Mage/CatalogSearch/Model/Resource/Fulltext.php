@@ -774,16 +774,11 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     }
 
     /**
-     * Retrieve Product Emulator (Varien Object)
-     *
-     * @return \Maho\DataObject
+     * Return an empty product, which the indexer fills with the few fields that the product type reads.
      */
-    protected function _getProductEmulator()
+    protected function _getProductEmulator(): Mage_Catalog_Model_Product
     {
-        $productEmulator = new \Maho\DataObject();
-        $productEmulator->setIdFieldName('entity_id');
-
-        return $productEmulator;
+        return Mage::getModel('catalog/product');
     }
 
     /**

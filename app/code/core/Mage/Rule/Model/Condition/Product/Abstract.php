@@ -129,21 +129,14 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     }
 
     /**
-     * Retrieve attribute object
-     *
-     * @return Mage_Catalog_Model_Resource_Eav_Attribute
+     * Return the product attribute of the condition, or false when the condition names no attribute.
      */
-    public function getAttributeObject()
+    public function getAttributeObject(): Mage_Catalog_Model_Resource_Eav_Attribute|false
     {
-        try {
-            $obj = Mage::getSingleton('eav/config')
-                ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
-        } catch (Exception) {
-            $obj = new \Maho\DataObject();
-            $obj->setEntity(Mage::getResourceSingleton('catalog/product'))
-                ->setFrontendInput('text');
-        }
-        return $obj;
+        /** @var Mage_Catalog_Model_Resource_Eav_Attribute|false $attribute */
+        $attribute = Mage::getSingleton('eav/config')
+            ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
+        return $attribute;
     }
 
     /**

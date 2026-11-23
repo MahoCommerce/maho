@@ -25,4 +25,14 @@ class Mage_Bundle_Helper_Data extends Mage_Core_Helper_Abstract
         $config = Mage::getConfig()->getNode(self::XML_NODE_BUNDLE_PRODUCT_TYPE);
         return array_keys($config->allowed_selection_types->asArray());
     }
+
+    /**
+     * Return the price model of the bundle product $product
+     */
+    public function getPriceModel(Mage_Catalog_Model_Product $product): Mage_Bundle_Model_Product_Price
+    {
+        /** @var Mage_Bundle_Model_Product_Price $priceModel */
+        $priceModel = $product->getPriceModel();
+        return $priceModel;
+    }
 }

@@ -86,15 +86,15 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     /**
      * Prepare [$productId=>$qty] based on [$productId => ['qty'=>$qty, 'item'=>$stockItem]]
      *
-     * @param array $items
-     * @return array
+     * @param array<int, array{qty: float|int, item?: Mage_CatalogInventory_Model_Stock_Item|null}> $items
+     * @return array<int, float|int>
      */
-    protected function _prepareProductQtys($items)
+    protected function _prepareProductQtys(array $items): array
     {
         $qtys = [];
         foreach ($items as $productId => $item) {
             if (empty($item['item'])) {
-                $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+                $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $productId);
             } else {
                 $stockItem = $item['item'];
             }
@@ -153,14 +153,12 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
 
     /**
      * Subtract ordered qty for product
-     *
-     * @return  Mage_CatalogInventory_Model_Stock
      */
-    public function registerItemSale(\Maho\DataObject $item)
+    public function registerItemSale(\Maho\DataObject $item): static
     {
         $productId = $item->getProductId();
         if ($productId) {
-            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
+            $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct((int) $productId);
             if (Mage::helper('cataloginventory')->isQty($stockItem->getTypeId())) {
                 if ($item->getStoreId()) {
                     $stockItem->setStoreId($item->getStoreId());
@@ -178,12 +176,8 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
 
     /**
      * Get back to stock (when order is canceled or whatever else)
-     *
-     * @param int $productId
-     * @param float $qty
-     * @return $this
      */
-    public function backItemQty($productId, $qty)
+    public function backItemQty(int $productId, float $qty): static
     {
         $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
         if ($stockItem->getId() && Mage::helper('cataloginventory')->isQty($stockItem->getTypeId())) {

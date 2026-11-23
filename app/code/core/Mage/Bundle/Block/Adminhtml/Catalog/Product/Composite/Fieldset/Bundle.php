@@ -12,11 +12,9 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Bundle exte
 {
     /**
      * Returns string with json config for bundle product
-     *
-     * @return string
      */
     #[\Override]
-    public function getJsonConfig()
+    public function getJsonConfig(): string
     {
         $options = [];
         $optionsArray = $this->getOptions();

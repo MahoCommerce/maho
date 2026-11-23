@@ -126,7 +126,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     {
         $this->_allSeries = $this->getRowsData($this->_dataRows);
         foreach ($this->_axisMaps as $axis => $attr) {
-            $this->setAxisLabels($axis, $this->getRowsData($attr, true));
+            $this->setAxisLabels($axis, array_map(strval(...), $this->getCollection()->getColumnValues($attr)));
         }
 
         $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
@@ -211,23 +211,18 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     }
 
     /**
-     * Get rows data
+     * Get the values of each attribute in the collection rows, with negative values set to 0
      *
-     * @param array $attributes
-     * @param bool $single
-     * @return array
+     * @param list<string> $attributes
+     * @return array<string, list<float>>
      */
-    protected function getRowsData($attributes, $single = false)
+    protected function getRowsData(array $attributes): array
     {
         $items = $this->getCollection()->getItems();
         $options = [];
         foreach ($items as $item) {
-            if ($single) {
-                $options[] = max(0, $item->getData($attributes));
-            } else {
-                foreach ((array) $attributes as $attr) {
-                    $options[$attr][] = max(0, $item->getData($attr));
-                }
+            foreach ($attributes as $attr) {
+                $options[$attr][] = max(0.0, (float) $item->getData($attr));
             }
         }
         return $options;

@@ -112,13 +112,10 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
 

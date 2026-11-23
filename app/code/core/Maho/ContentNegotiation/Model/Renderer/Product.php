@@ -81,8 +81,7 @@ class Maho_ContentNegotiation_Model_Renderer_Product extends Maho_ContentNegotia
         }
 
         if ($product->getTypeId() === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-            /** @var Mage_Bundle_Model_Product_Price $priceModel */
-            $priceModel = $product->getPriceModel();
+            $priceModel = Mage::helper('bundle')->getPriceModel($product);
             $withTax = Mage::helper('structureddata')->displayPriceIncludesTax($product->getStoreId());
             [$min, $max] = $priceModel->getTotalPrices($product, null, $withTax, false);
             $store = Mage::app()->getStore();

@@ -327,7 +327,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     #[\Override]
-    public function load(Mage_Core_Model_Abstract $object, $value, $field = null)
+    public function load(Mage_Core_Model_Abstract $object, int|string|null $value, ?string $field = null): static
     {
         if (!is_numeric($value) && is_null($field)) {
             $field = 'identifier';
@@ -351,13 +351,10 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Retrieve select object for load object data
      *
-     * @param string $field
-     * @param mixed $value
      * @param Mage_Cms_Model_Page $object
-     * @return Maho\Db\Select
      */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         $select = parent::_getLoadSelect($field, $value, $object);
 

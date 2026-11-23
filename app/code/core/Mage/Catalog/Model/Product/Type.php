@@ -25,13 +25,14 @@ class Mage_Catalog_Model_Product_Type
 
     protected static ?array $_types = null;
     protected static ?array $_compositeTypes = null;
+    /** @var array<string, Mage_Catalog_Model_Product_Type_Price>|null */
     protected static ?array $_priceModels = null;
     protected static ?array $_typesPriority = null;
 
     /**
      * Product type instance factory
      */
-    public static function factory(\Maho\DataObject $product, bool $singleton = false): Mage_Catalog_Model_Product_Type_Abstract
+    public static function factory(Mage_Catalog_Model_Product $product, bool $singleton = false): Mage_Catalog_Model_Product_Type_Abstract
     {
         $types = self::getTypes();
         $typeId = (string) $product->getTypeId();
@@ -56,12 +57,10 @@ class Mage_Catalog_Model_Product_Type
 
     /**
      * Product type price model factory
-     *
-     * @param   string $productType
-     * @return  Mage_Catalog_Model_Product_Type_Price
      */
-    public static function priceFactory($productType)
+    public static function priceFactory(?string $productType): Mage_Catalog_Model_Product_Type_Price
     {
+        $productType = (string) $productType;
         if (isset(self::$_priceModels[$productType])) {
             return self::$_priceModels[$productType];
         }
@@ -74,8 +73,10 @@ class Mage_Catalog_Model_Product_Type
             $priceModelName = self::DEFAULT_PRICE_MODEL;
         }
 
-        self::$_priceModels[$productType] = Mage::getModel($priceModelName);
-        return self::$_priceModels[$productType];
+        /** @var Mage_Catalog_Model_Product_Type_Price $priceModel */
+        $priceModel = Mage::getModel($priceModelName);
+        self::$_priceModels[$productType] = $priceModel;
+        return $priceModel;
     }
 
     /**

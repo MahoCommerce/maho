@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -19,9 +20,9 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
     /**
      * Get crosssell items
      *
-     * @return array
+     * @return list<Mage_Catalog_Model_Product>
      */
-    public function getItems()
+    public function getItems(): array
     {
         $items = $this->getData('items');
         if (is_null($items)) {
@@ -37,7 +38,6 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
                         ->setPositionOrder()
                         ->load();
 
-                    /** @var Mage_Catalog_Model_Product_Link $item */
                     foreach ($collection as $item) {
                         $ninProductIds[] = $item->getId();
                         $items[] = $item;

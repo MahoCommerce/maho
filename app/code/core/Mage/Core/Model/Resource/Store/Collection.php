@@ -9,8 +9,7 @@
  */
 
 /**
- * @method Mage_Core_Model_Store getItemById(int $value)
- * @method Mage_Core_Model_Store[] getItems()
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Core_Model_Store>
  */
 class Mage_Core_Model_Resource_Store_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

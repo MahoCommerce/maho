@@ -9,7 +9,7 @@
  */
 
 /**
- * @method Mage_Admin_Model_Role[] getItems()
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Admin_Model_Role>
  */
 class Mage_Admin_Model_Resource_Role_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

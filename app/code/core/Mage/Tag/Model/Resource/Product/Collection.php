@@ -8,9 +8,6 @@
  * @package Mage_Tag
  */
 
-/**
- * @method Mage_Catalog_Model_Product[] getItems()
- */
 class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
 {
     /**

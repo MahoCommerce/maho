@@ -185,9 +185,9 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
     /**
      * Get collection of all filterable attributes for layer products set
      *
-     * @return Mage_Catalog_Model_Resource_Eav_Attribute[]
+     * @return array<int, Mage_Catalog_Model_Resource_Eav_Attribute>
      */
-    public function getFilterableAttributes()
+    public function getFilterableAttributes(): array
     {
         $setIds = $this->_getSetIds();
         if (!$setIds) {
@@ -202,10 +202,10 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
             foreach ($setAttributeIds as $attributeId) {
                 if (!isset($attributes[$attributeId])) {
                     $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, $attributeId);
-                    if (!$this->_filterFilterableAttributes($attribute)) {
-                        continue;
-                    }
-                    if ($attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute && $attribute->getIsFilterable()) {
+                    if ($attribute instanceof Mage_Catalog_Model_Resource_Eav_Attribute
+                        && $this->_filterFilterableAttributes($attribute)
+                        && $attribute->getIsFilterable()
+                    ) {
                         $attributes[$attributeId] = $attribute;
                     }
                 }
@@ -308,9 +308,9 @@ class Mage_Catalog_Model_Layer extends \Maho\DataObject
     {
         $filters = [Mage::getModel('catalog/layer_filter_category')->setLayer($this)];
         foreach ($this->getFilterableAttributes() as $attribute) {
-            $filters[] = Mage::getModel($this->_getFilterModelName($attribute))
-                ->setLayer($this)
-                ->setAttributeModel($attribute);
+            /** @var Mage_Catalog_Model_Layer_Filter_Abstract $filter */
+            $filter = Mage::getModel($this->_getFilterModelName($attribute));
+            $filters[] = $filter->setLayer($this)->setAttributeModel($attribute);
         }
 
         return $filters;

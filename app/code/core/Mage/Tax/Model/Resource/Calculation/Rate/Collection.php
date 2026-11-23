@@ -9,7 +9,7 @@
  */
 
 /**
- * @method Mage_Tax_Model_Calculation_Rate[] getItems()
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Tax_Model_Calculation_Rate>
  */
 class Mage_Tax_Model_Resource_Calculation_Rate_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

@@ -10,7 +10,6 @@
 
 class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
-    protected ?\Maho\DataObject $_dummyElement = null;
     protected ?Mage_Adminhtml_Block_System_Config_Form_Field $_fieldRenderer = null;
     protected ?array $_values = null;
 
@@ -39,14 +38,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
         $html .= $this->_getFooterHtml($element);
 
         return $html;
-    }
-
-    protected function _getDummyElement(): \Maho\DataObject
-    {
-        if (empty($this->_dummyElement)) {
-            $this->_dummyElement = new \Maho\DataObject(['show_in_default' => 1, 'show_in_website' => 1]);
-        }
-        return $this->_dummyElement;
     }
 
     protected function _getFieldRenderer(): Mage_Adminhtml_Block_System_Config_Form_Field
@@ -80,8 +71,6 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
             $inherit = true;
         }
 
-        $e = $this->_getDummyElement();
-
         $field = $fieldset->addField(
             $moduleName,
             'select',
@@ -91,8 +80,8 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
                 'value'         => $data,
                 'values'        => $this->_getValues(),
                 'inherit'       => $inherit,
-                'can_use_default_value' => $this->getForm()->canUseDefaultValue($e),
-                'can_use_website_value' => $this->getForm()->canUseWebsiteValue($e),
+                'can_use_default_value' => $this->getForm()->canUseDefaultValue(true),
+                'can_use_website_value' => $this->getForm()->canUseWebsiteValue(true),
                 'scope'         => true,
                 'scope_label'   => Mage::helper('adminhtml')->__('Store View'),
             ],

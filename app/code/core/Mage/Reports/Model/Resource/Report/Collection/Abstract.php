@@ -8,6 +8,9 @@
  * @package Mage_Reports
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Adminhtml_Model_Report_Item>
+ */
 class Mage_Reports_Model_Resource_Report_Collection_Abstract extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

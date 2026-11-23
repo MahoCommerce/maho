@@ -26,11 +26,7 @@ class Mage_Customer_Block_Newsletter extends Mage_Customer_Block_Account_Dashboa
         return $this->getSubscriptionObject()->isSubscribed();
     }
 
-    /**
-     * @return string
-     */
-    #[\Override]
-    public function getAction()
+    public function getFormActionUrl(): string
     {
         return $this->getUrl('*/*/save');
     }

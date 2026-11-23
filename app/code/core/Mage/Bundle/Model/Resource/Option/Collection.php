@@ -13,8 +13,7 @@
  *
  * @package    Mage_Bundle
  *
- * @method Mage_Bundle_Model_Option[] getItems()
- * @method Mage_Bundle_Model_Option getItemById($idValue)
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Bundle_Model_Option>
  */
 class Mage_Bundle_Model_Resource_Option_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {

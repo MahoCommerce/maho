@@ -192,11 +192,7 @@ abstract class AbstractElement extends AbstractForm
         return htmlspecialchars((string) $string, ENT_QUOTES, 'UTF-8');
     }
 
-    /**
-     * @param string|null $index
-     * @return string
-     */
-    public function getEscapedValue($index = null)
+    public function getEscapedValue(?int $index = null): string
     {
         $value = $this->getValue($index);
 

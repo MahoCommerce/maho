@@ -350,7 +350,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
         return $price;
     }
 
-    public function setConfigurationItemOption(?\Maho\DataObject $value): static
+    public function setConfigurationItemOption(?Mage_Catalog_Model_Product_Configuration_Item_Option_Interface $value): static
     {
         return $this->setData('configuration_item_option', $value);
     }

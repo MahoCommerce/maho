@@ -35,7 +35,7 @@ class FeedGenerateAll extends BaseMahoCommand
     ): int {
         $this->initMaho();
 
-        $collection = Mage::getModel('feedmanager/feed')->getCollection();
+        $collection = Mage::getResourceModel('feedmanager/feed_collection');
 
         if (!$includeDisabled) {
             $collection->addFieldToFilter('is_enabled', 1);

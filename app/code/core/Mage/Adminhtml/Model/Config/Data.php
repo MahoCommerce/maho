@@ -38,10 +38,8 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Save config section
      * Require set: section, website, store and groups
-     *
-     * @return $this
      */
-    public function save()
+    public function save(): static
     {
         $this->_validate();
         $this->_getScope();
@@ -80,6 +78,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
             if ($clonedFields = !empty($groupConfig->clone_fields)) {
                 if ($groupConfig->clone_model) {
+                    /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                     $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                 } else {
                     Mage::throwException('Config form fieldset clone model required to be able to clone fields');
@@ -459,11 +458,9 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
     /**
      * Secure set groups
      *
-     * @param array $groups
-     * @return Mage_Adminhtml_Model_Config_Data
      * @throws Mage_Core_Exception
      */
-    public function setGroupsSecure($groups)
+    public function setGroupsSecure(array $groups): static
     {
         $this->_validate();
         $this->_getScope();
@@ -478,6 +475,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                 $fieldName = $field;
                 if ($groupConfig && $groupConfig->clone_fields) {
                     if ($groupConfig->clone_model) {
+                        /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                         $cloneModel = Mage::getModel((string) $groupConfig->clone_model);
                     } else {
                         Mage::throwException(
@@ -497,7 +495,7 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
                         $fieldConfig = $node[0];
                     }
                 }
-                if (($groupConfig ? !$groupConfig->dynamic_group : true) && !$this->_isValidField($fieldConfig)) {
+                if (($groupConfig ? !$groupConfig->dynamic_group : true) && (!$fieldConfig || !$this->_isValidField($fieldConfig))) {
                     $message = Mage::helper('adminhtml')->__('Wrong field specified.') . ' ' . Mage::helper('adminhtml')->__('(%s/%s/%s)', $section, $group, $field);
                     Mage::throwException($message);
                 }
@@ -512,15 +510,9 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 
     /**
      * Check field visibility by scope
-     *
-     * @param Mage_Core_Model_Config_Element $field
-     * @return bool
      */
-    protected function _isValidField($field)
+    protected function _isValidField(\Maho\Simplexml\Element $field): bool
     {
-        if (!$field) {
-            return false;
-        }
         $scope = $this->getScope();
         if (!in_array($scope, [self::SCOPE_DEFAULT, self::SCOPE_WEBSITES, self::SCOPE_STORES], true)) {
             return true;

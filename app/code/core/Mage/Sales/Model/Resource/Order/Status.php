@@ -33,16 +33,8 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
         $this->_stateTable  = $this->getTable('sales/order_status_state');
     }
 
-    /**
-     * Retrieve select object for load object data
-     *
-     * @param string $field
-     * @param mixed $value
-     * @param \Maho\DataObject $object
-     * @return  Maho\Db\Select
-     */
     #[\Override]
-    protected function _getLoadSelect($field, $value, $object)
+    protected function _getLoadSelect(string $field, int|string $value, Mage_Core_Model_Abstract $object): \Maho\Db\Select
     {
         if ($field == 'default_state') {
             $select = $this->_getReadAdapter()->select()

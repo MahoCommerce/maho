@@ -395,14 +395,8 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 
     /**
      * Run indexing process for product collection
-     *
-     * @param   Mage_Catalog_Model_Resource_Product_Collection $collection
-     * @param   mixed $store
-     * @param   array $attributes
-     * @param   array $prices
-     * @return  Mage_CatalogIndex_Model_Indexer
      */
-    protected function _walkCollection($collection, $store, $attributes = [], $prices = [])
+    protected function _walkCollection(Mage_Catalog_Model_Resource_Product_Collection $collection, Mage_Core_Model_Store $store, array $attributes = [], array $prices = []): static
     {
         $productCount = $collection->getSize();
         if (!$productCount) {
@@ -433,7 +427,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                     $this->_getResource()->reindexFinalPrices($stepData, $store);
                 }
 
-                Mage::getResourceSingleton('catalog/product')->refreshEnabledIndex($store, $stepData);
+                Mage::getResourceSingleton('catalog/product')->refreshEnabledIndex($store, array_map(\intval(...), $stepData));
 
                 $kill = Mage::getModel('catalogindex/catalog_index_kill_flag')->loadSelf();
                 if ($kill->checkIsThisProcess()) {

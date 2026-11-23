@@ -279,7 +279,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         $id = $forcedId;
                     }
 
-                    if ($finalPrice !== false && $id !== false && $priceAttribute !== false) {
+                    if ($finalPrice !== null && $id !== false && $priceAttribute !== false) {
                         $this->_insert('catalogindex/price', [
                             $id,
                             $store->getWebsiteId(),

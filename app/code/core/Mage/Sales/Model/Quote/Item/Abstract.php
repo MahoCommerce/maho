@@ -42,7 +42,7 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     /**
      * Children items in bundle product, configurable product, etc.
      *
-     * @var array
+     * @var list<static>
      */
     protected $_children    = [];
 
@@ -120,10 +120,9 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     /**
      * Set parent item
      *
-     * @param  Mage_Sales_Model_Quote_Item $parentItem
-     * @return $this
+     * @param static|null $parentItem An item of the same class as this item
      */
-    public function setParentItem($parentItem)
+    public function setParentItem(?Mage_Sales_Model_Quote_Item_Abstract $parentItem): static
     {
         if ($parentItem) {
             $this->_parentItem = $parentItem;
@@ -148,9 +147,9 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     /**
      * Get child items
      *
-     * @return Mage_Sales_Model_Quote_Item_Abstract[]
+     * @return list<static>
      */
-    public function getChildren()
+    public function getChildren(): array
     {
         return $this->_children;
     }
@@ -158,10 +157,9 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     /**
      * Add child item
      *
-     * @param  Mage_Sales_Model_Quote_Item_Abstract $child
-     * @return $this
+     * @param static $child An item of the same class as this item
      */
-    public function addChild($child)
+    public function addChild(Mage_Sales_Model_Quote_Item_Abstract $child): static
     {
         $this->setHasChildren();
         $this->_children[] = $child;

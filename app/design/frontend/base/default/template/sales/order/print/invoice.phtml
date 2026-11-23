@@ -30,7 +30,6 @@
         <div class="col-2">
         <?php endif ?>
             <h3><?= $this->__('Billing Address') ?></h3>
-            <?php $_billing = $_invoice->getbillingAddress() ?>
             <address><?= $_order->getBillingAddress()->format('html') ?></address>
         </div>
         <?php if (!$_order->getIsVirtual()): ?>

@@ -53,7 +53,7 @@ final class RevocationRequestProvider extends Provider
     {
         $email = $this->requireCustomerEmail();
 
-        $collection = \Mage::getModel($this->modelAlias)->getCollection()
+        $collection = \Mage::getResourceModel('revocation/request_collection')
             ->addFieldToFilter('email', $email);
 
         return $this->paginate($collection, $context);
@@ -61,7 +61,7 @@ final class RevocationRequestProvider extends Provider
 
     private function provideAdminCollection(array $context): TraversablePaginator
     {
-        $collection = \Mage::getModel($this->modelAlias)->getCollection();
+        $collection = \Mage::getResourceModel('revocation/request_collection');
 
         $filters = $context['filters'] ?? [];
         if (!empty($filters['processedStatus'])) {
@@ -86,7 +86,7 @@ final class RevocationRequestProvider extends Provider
             return null;
         }
 
-        $model = \Mage::getModel($this->modelAlias)->load($id);
+        $model = \Mage::getModel('revocation/request')->load($id);
         if (!$model->getId()) {
             return null;
         }

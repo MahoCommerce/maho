@@ -127,14 +127,13 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
     /**
      * Init config group
-     *
-     * @param \Maho\Data\Form $form
-     * @param \Maho\Simplexml\Element $group
-     * @param \Maho\Simplexml\Element $section
-     * @param \Maho\Data\Form\Element\Fieldset|null $parentElement
      */
-    protected function _initGroup($form, $group, $section, $parentElement = null): void
-    {
+    protected function _initGroup(
+        \Maho\Data\Form\AbstractForm $form,
+        Mage_Core_Model_Config_Element $group,
+        \Maho\Simplexml\Element $section,
+        ?\Maho\Data\Form\Element\Fieldset $parentElement = null,
+    ): void {
         /** @var Mage_Adminhtml_Block_System_Config_Form_Fieldset $fieldsetRenderer */
         $fieldsetRenderer = $group->frontend_model
             ? Mage::getBlockSingleton((string) $group->frontend_model)
@@ -171,6 +170,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
             if ($group->clone_fields) {
                 if ($group->clone_model) {
+                    /** @var Mage_Adminhtml_Model_System_Config_Clone_Media_Image $cloneModel */
                     $cloneModel = Mage::getModel((string) $group->clone_model);
                 } else {
                     Mage::throwException($this->__('Config form fieldset clone model required to be able to clone fields'));
@@ -203,14 +203,14 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Build the dependence array while resolving field names and checking element visibility
      *
-     * @param \Maho\Simplexml\Element $node
-     * @param \Maho\Simplexml\Element $group
-     * @param \Maho\Simplexml\Element $section
-     * @param string $fieldPrefix
-     * @return array
+     * @return array{string, string|list<string>|array<string|int, string|list<string>|array{operator: string, condition: array}>}
      */
-    protected function _buildDependenceCondition($node, $group, $section, $fieldPrefix = '')
-    {
+    protected function _buildDependenceCondition(
+        \Maho\Simplexml\Element $node,
+        \Maho\Simplexml\Element $group,
+        \Maho\Simplexml\Element $section,
+        string $fieldPrefix = '',
+    ): array {
         $block = $this->_getDependence();
 
         // If we have a logical operator, recurse
@@ -249,8 +249,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
         // Get the wanted value for the condition, can be multiple values if a separator attribute is provided
         $condition = (string) ($node->value ?? $node);
-        if (isset($node['separator'])) {
-            $condition = explode($node['separator'], $condition);
+        $separator = (string) $node['separator'];
+        if ($separator !== '') {
+            $condition = explode($separator, $condition);
         }
 
         // If the field isn't shown in current scope, provide its value to the dependence block so conditions work properly
@@ -268,16 +269,15 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Init fieldset fields
      *
-     * @param \Maho\Data\Form\Element\Fieldset $fieldset
-     * @param \Maho\Simplexml\Element $group
-     * @param \Maho\Simplexml\Element $section
-     * @param string $fieldPrefix
-     * @param string $labelPrefix
-     * @throw Mage_Core_Exception
-     * @return $this
+     * @throws Mage_Core_Exception
      */
-    public function initFields($fieldset, $group, $section, $fieldPrefix = '', $labelPrefix = '')
-    {
+    public function initFields(
+        \Maho\Data\Form\Element\Fieldset $fieldset,
+        \Maho\Simplexml\Element $group,
+        \Maho\Simplexml\Element $section,
+        string $fieldPrefix = '',
+        string $labelPrefix = '',
+    ): static {
         if (!$this->_configDataObject) {
             $this->_initObjects();
         }
@@ -395,8 +395,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     'scope'                 => $this->getScope(),
                     'scope_id'              => $this->getScopeId(),
                     'scope_label'           => $this->getScopeLabel($element),
-                    'can_use_default_value' => $this->canUseDefaultValue((int) $element->show_in_default),
-                    'can_use_website_value' => $this->canUseWebsiteValue((int) $element->show_in_website),
+                    'can_use_default_value' => $this->canUseDefaultValue($element->is('show_in_default')),
+                    'can_use_website_value' => $this->canUseWebsiteValue($element->is('show_in_website')),
                     'can_use_system_value'  => $this->canUseSystemValue($path, $element),
                 ]);
                 $this->_prepareFieldOriginalData($field, $element);
@@ -514,12 +514,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
     /**
      * Support models "getCommentText" method for group note generation
-     *
-     * @param Mage_Core_Model_Config_Element $element
-     * @param string $helper
-     * @return string
      */
-    protected function _prepareGroupComment($element, $helper)
+    protected function _prepareGroupComment(Mage_Core_Model_Config_Element $element, string $helper): string
     {
         return $this->_prepareFieldComment($element, $helper, null);
     }
@@ -566,15 +562,14 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param \Maho\Simplexml\Element $field
-     * @return bool
+     * Return true when a field that shows in the default scope can take its value from that scope.
      */
-    public function canUseDefaultValue($field)
+    public function canUseDefaultValue(bool $showInDefault): bool
     {
-        if ($this->getScope() == self::SCOPE_STORES && $field) {
+        if ($this->getScope() == self::SCOPE_STORES && $showInDefault) {
             return true;
         }
-        if ($this->getScope() == self::SCOPE_WEBSITES && $field) {
+        if ($this->getScope() == self::SCOPE_WEBSITES && $showInDefault) {
             return true;
         }
         return false;
@@ -597,12 +592,11 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param \Maho\Simplexml\Element $field
-     * @return bool
+     * Return true when a field that shows in the website scope can take its value from that scope.
      */
-    public function canUseWebsiteValue($field)
+    public function canUseWebsiteValue(bool $showInWebsite): bool
     {
-        if ($this->getScope() == self::SCOPE_STORES && $field) {
+        if ($this->getScope() == self::SCOPE_STORES && $showInWebsite) {
             return true;
         }
         return false;

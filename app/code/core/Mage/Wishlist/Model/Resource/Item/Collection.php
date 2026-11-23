@@ -13,8 +13,7 @@
  *
  * @package    Mage_Wishlist
  *
- * @method Mage_Wishlist_Model_Item getItemById(int|string $value)
- * @method Mage_Wishlist_Model_Item[] getItems()
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Wishlist_Model_Item>
  */
 class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
@@ -450,16 +449,13 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
 
     /**
      * Get sum of items collection qty
-     *
-     * @return int
      */
-    public function getItemsQty()
+    public function getItemsQty(): int
     {
         if (is_null($this->_itemsQty)) {
             $this->_itemsQty = 0;
             foreach ($this as $wishlistItem) {
-                $qty = $wishlistItem->getQty();
-                $this->_itemsQty += ($qty === 0) ? 1 : $qty;
+                $this->_itemsQty += $wishlistItem->getQty() ?: 1;
             }
         }
 

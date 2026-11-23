@@ -20,8 +20,11 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
         return parent::_beforeSave($object);
     }
 
+    /**
+     * @param Mage_Catalog_Model_Resource_Eav_Attribute $object
+     */
     #[\Override]
-    protected function _afterSave(Mage_Core_Model_Abstract $object)
+    protected function _afterSave(Mage_Core_Model_Abstract $object): static
     {
         $this->_clearUselessAttributeValues($object);
         return parent::_afterSave($object);
@@ -29,11 +32,8 @@ class Mage_Catalog_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Enti
 
     /**
      * Clear useless attribute values
-     *
-     * @param  Mage_Catalog_Model_Resource_Eav_Attribute $object
-     * @return $this
      */
-    protected function _clearUselessAttributeValues(Mage_Core_Model_Abstract $object)
+    protected function _clearUselessAttributeValues(Mage_Catalog_Model_Resource_Eav_Attribute $object): static
     {
         $origData = $object->getOrigData();
 

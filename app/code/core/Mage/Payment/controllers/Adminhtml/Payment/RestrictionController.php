@@ -274,20 +274,18 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         // Ensure the rule has a form (should auto-create if null)
         $rule->getForm();
 
-        $model = Mage::getModel($type)
-            ->setId($id)
-            ->setType($type)
-            ->setRule($rule)
-            ->setPrefix('conditions');
-        if (!empty($typeArr[1])) {
-            $model->setData('attribute', $typeArr[1]);
-        }
-
+        $model = Mage::getModel($type);
+        $html = '';
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setId($id)
+                ->setType($type)
+                ->setRule($rule)
+                ->setPrefix('conditions');
+            if (!empty($typeArr[1])) {
+                $model->setData('attribute', $typeArr[1]);
+            }
             $model->setJsFormObject($this->getRequest()->getParam('form'));
             $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
         }
         $this->getResponse()->setBody($html);
     }

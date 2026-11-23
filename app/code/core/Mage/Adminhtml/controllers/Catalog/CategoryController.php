@@ -573,23 +573,18 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             Mage::throwException(Mage::helper('adminhtml')->__('An error occurred while adding condition.'));
         }
 
-        $model = Mage::getModel($type)
-            ->setId($id)
-            ->setType($type)
-            ->setRule(Mage::getModel('catalog/category_dynamic_rule'))
-            ->setPrefix('conditions');
-        if (!empty($typeArr[1])) {
-            // For rule conditions, set attribute using setData
-            if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+        $model = Mage::getModel($type);
+        $html = '';
+        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $model->setId($id)
+                ->setType($type)
+                ->setRule(Mage::getModel('catalog/category_dynamic_rule'))
+                ->setPrefix('conditions');
+            if (!empty($typeArr[1])) {
                 $model->setData('attribute', $typeArr[1]);
             }
-        }
-
-        if ($model instanceof Mage_Rule_Model_Condition_Abstract) {
             $model->setJsFormObject($this->getRequest()->getParam('form'));
             $html = $model->asHtmlRecursive();
-        } else {
-            $html = '';
         }
         $this->getResponse()->setBody($html);
     }

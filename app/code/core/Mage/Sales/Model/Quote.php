@@ -303,12 +303,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Loading only active quote
      *
-     * @param int $quoteId
-     * @return $this
+     * @param int|string|null $quoteId A quote ID, also as a session or a request holds it
      */
-    public function loadActive($quoteId)
+    public function loadActive(int|string|null $quoteId): static
     {
-        $this->_getResource()->loadActive($this, $quoteId);
+        $this->_getResource()->loadActive($this, $quoteId === null ? null : (int) $quoteId);
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);
@@ -318,12 +317,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     /**
      * Loading quote by identifier
      *
-     * @param int $quoteId
-     * @return $this
+     * @param int|string|null $quoteId A quote ID, also as a session or a request holds it
      */
-    public function loadByIdWithoutStore($quoteId)
+    public function loadByIdWithoutStore(int|string|null $quoteId): static
     {
-        $this->_getResource()->loadByIdWithoutStore($this, $quoteId);
+        $this->_getResource()->loadByIdWithoutStore($this, $quoteId === null ? null : (int) $quoteId);
         $this->_afterLoad();
         $this->setOrigData();
         $this->setDataChanges(false);
@@ -755,24 +753,18 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return false;
     }
 
-    /**
-     * Retrieve item model object by item identifier
-     *
-     * @param   int $itemId
-     * @return  Mage_Sales_Model_Quote_Item
-     */
-    public function getItemById($itemId)
+    public function getItemById(?int $itemId): ?Mage_Sales_Model_Quote_Item
     {
-        if ($quoteItem = $this->getItemsCollection()->getItemById($itemId)) {
+        $quoteItem = $this->getItemsCollection()->getItemById($itemId);
+        if ($quoteItem) {
             return $quoteItem;
         }
         foreach ($this->getItemsCollection() as $item) {
             if ($item->getId() == $itemId) {
-                $quoteItem = $item;
-                return $quoteItem;
+                return $item;
             }
         }
-        return $quoteItem;
+        return null;
     }
 
     /**
@@ -806,11 +798,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Remove quote item by item identifier
-     *
-     * @param   int $itemId
-     * @return  $this
      */
-    public function removeItem($itemId)
+    public function removeItem(?int $itemId): static
     {
         $item = $this->getItemById($itemId);
 
@@ -1018,14 +1007,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * For more options see Mage_Catalog_Helper_Product->addParamsToBuyRequest()
      *
-     * @param int $itemId
-     * @param \Maho\DataObject $buyRequest
-     * @param null|array|\Maho\DataObject $params
-     * @return Mage_Sales_Model_Quote_Item
+     * @param array<string, mixed>|\Maho\DataObject|null $params
      *
      * @see Mage_Catalog_Helper_Product::addParamsToBuyRequest()
      */
-    public function updateItem($itemId, $buyRequest, $params = null)
+    public function updateItem(int $itemId, \Maho\DataObject $buyRequest, array|\Maho\DataObject|null $params = null): Mage_Sales_Model_Quote_Item
     {
         $item = $this->getItemById($itemId);
         if (!$item) {

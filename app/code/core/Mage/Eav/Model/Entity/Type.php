@@ -103,12 +103,11 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
 
     /**
      * Init and retrieve attribute collection
-     *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|object
      */
-    protected function _getAttributeCollection()
+    protected function _getAttributeCollection(): Mage_Eav_Model_Resource_Entity_Attribute_Collection
     {
         $collectionClass = $this->getEntityAttributeCollection();
+        /** @var Mage_Eav_Model_Resource_Entity_Attribute_Collection $collection */
         $collection = Mage::getResourceModel($collectionClass);
         $objectsModel = $this->getAttributeModel();
         if ($objectsModel) {
@@ -157,7 +156,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         // read view of that save, and MariaDB innodb_snapshot_isolation would abort
         // the save with ER_CHECKREAD (1020).
         return Mage::getSingleton('core/resource')->runOutsideTransaction(
-            fn($connection) => $this->_allocateIncrementId($connection, $storeId),
+            fn($connection) => $this->_allocateIncrementId($connection, (int) $storeId),
         );
     }
 
@@ -167,12 +166,9 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      * Uses plain SQL, because the eav/entity_store model is bound to the shared
      * write connection.
      *
-     * @param Maho\Db\Adapter\AdapterInterface $connection
-     * @param int $storeId
-     * @return string
      * @throws Exception
      */
-    protected function _allocateIncrementId($connection, $storeId)
+    protected function _allocateIncrementId(\Maho\Db\Adapter\AdapterInterface $connection, int $storeId): string
     {
         $table = Mage::getSingleton('core/resource')->getTableName('eav/entity_store');
         $entityTypeId = (int) $this->getId();
@@ -200,8 +196,9 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
                 $row = $connection->fetchRow($select);
             }
 
-            $incrementId = Mage::getModel($this->getIncrementModel())
-                ->setPrefix($row['increment_prefix'])
+            /** @var Mage_Eav_Model_Entity_Increment_Abstract $increment */
+            $increment = Mage::getModel($this->getIncrementModel());
+            $incrementId = $increment->setPrefix($row['increment_prefix'])
                 ->setPadLength($this->getIncrementPadLength())
                 ->setPadChar($this->getIncrementPadChar())
                 ->setLastId($row['increment_last_id'])

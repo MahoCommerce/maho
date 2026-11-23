@@ -11,7 +11,6 @@
 declare(strict_types=1);
 
 use Mage_Catalog_Model_Product as Product;
-use Mage_Catalog_Model_Product_Attribute_Backend_Media as MediaBackend;
 
 class Mage_Catalog_Service_Product_Media
 {
@@ -47,7 +46,7 @@ class Mage_Catalog_Service_Product_Media
     ): void {
         $this->validateImage($path);
         $types = Mage_Catalog_Helper_Image::mapDeprecatedRoles($types);
-        $backend = $this->getBackend($product);
+        $backend = $product->getResource()->getMediaGalleryBackend();
         $file = $backend->addImage($product, $path, $types === [] ? null : $types, false, false);
         $backend->updateImage($product, $file, $this->getImageData($label, $position, $disabled));
         $this->save($product);
@@ -132,7 +131,7 @@ class Mage_Catalog_Service_Product_Media
         ?array $types = null,
     ): void {
         $file = $this->getFile($product, $valueId);
-        $backend = $this->getBackend($product);
+        $backend = $product->getResource()->getMediaGalleryBackend();
         $backend->updateImage($product, $file, $this->getImageData($label, $position, $disabled));
         if ($types !== null) {
             $backend->setMediaAttribute($product, $types, $file);
@@ -146,7 +145,7 @@ class Mage_Catalog_Service_Product_Media
      */
     public function removeImage(Product $product, int $valueId): void
     {
-        $this->getBackend($product)->removeImage($product, $this->getFile($product, $valueId));
+        $product->getResource()->getMediaGalleryBackend()->removeImage($product, $this->getFile($product, $valueId));
         $this->save($product);
     }
 
@@ -176,13 +175,6 @@ class Mage_Catalog_Service_Product_Media
             ['label' => $label, 'position' => $position, 'disabled' => $disabled === null ? null : (int) $disabled],
             fn(mixed $value): bool => $value !== null,
         );
-    }
-
-    private function getBackend(Product $product): MediaBackend
-    {
-        /** @var MediaBackend $backend */
-        $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
-        return $backend;
     }
 
     /**

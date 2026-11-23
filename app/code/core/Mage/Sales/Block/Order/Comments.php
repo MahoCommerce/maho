@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -48,10 +49,8 @@ class Mage_Sales_Block_Order_Comments extends Mage_Core_Block_Template
 
     /**
      * Initialize model comments and return comment collection
-     *
-     * @return Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract
      */
-    public function getComments()
+    public function getComments(): Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract
     {
         if (is_null($this->_commentCollection)) {
             $entity = $this->getEntity();
@@ -65,7 +64,6 @@ class Mage_Sales_Block_Order_Comments extends Mage_Core_Block_Template
                 Mage::throwException(Mage::helper('sales')->__('Invalid entity model'));
             }
 
-            /** @var Mage_Sales_Model_Resource_Order_Comment_Collection_Abstract $commentCollection */
             $commentCollection = Mage::getResourceModel($collectionClass);
             $this->_commentCollection = $commentCollection;
             $this->_commentCollection->setParentFilter($entity)

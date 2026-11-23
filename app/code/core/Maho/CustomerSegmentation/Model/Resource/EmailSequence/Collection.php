@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Maho_CustomerSegmentation_Model_EmailSequence>
+ */
 class Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]

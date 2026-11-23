@@ -45,13 +45,15 @@ class Mage_Core_Model_Email_Attachment
     public function getContent(): string
     {
         if ($this->content === null) {
-            $entity = Mage::getModel($this->entityModel)->load($this->entityId);
+            /** @var Mage_Core_Model_Abstract $entity */
+            $entity = Mage::getModel($this->entityModel);
+            $entity->load($this->entityId);
             $renderer = Mage::getModel($this->sourceModel);
             if (!is_object($renderer) || !method_exists($renderer, 'getPdf')) {
                 Mage::throwException("Invalid attachment source model: {$this->sourceModel}");
             }
             // $renderer is a dynamically-resolved PDF model implementing getPdf(array): string
-            $this->content = (string) $renderer->getPdf([$entity]); // @phpstan-ignore argument.type
+            $this->content = (string) $renderer->getPdf([$entity]);
         }
         return $this->content;
     }

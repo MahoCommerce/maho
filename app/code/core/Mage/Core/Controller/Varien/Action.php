@@ -580,15 +580,15 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * Initializing layout messages by message storage(s), loading and adding messages to layout messages block
      *
-     * @param string|array $messagesStorage
-     * @return $this
+     * @param string|list<string> $messagesStorage
      */
-    protected function _initLayoutMessages($messagesStorage)
+    protected function _initLayoutMessages(string|array $messagesStorage): static
     {
         if (!is_array($messagesStorage)) {
             $messagesStorage = [$messagesStorage];
         }
         foreach ($messagesStorage as $storageName) {
+            /** @var Mage_Core_Model_Session_Abstract|false $storage */
             $storage = Mage::getSingleton($storageName);
             if ($storage) {
                 $block = $this->getLayout()->getMessagesBlock();
@@ -606,10 +606,9 @@ abstract class Mage_Core_Controller_Varien_Action
     /**
      * Initializing layout messages by message storage(s), loading and adding messages to layout messages block
      *
-     * @param string|array $messagesStorage
-     * @return $this
+     * @param string|list<string> $messagesStorage
      */
-    public function initLayoutMessages($messagesStorage)
+    public function initLayoutMessages(string|array $messagesStorage): static
     {
         return $this->_initLayoutMessages($messagesStorage);
     }

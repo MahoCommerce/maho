@@ -460,16 +460,16 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Retrieve all grouped shipping rates
      *
-     * @return array
+     * @return array<string, list<Mage_Sales_Model_Quote_Address_Rate>>
      */
-    public function getGroupedAllShippingRates()
+    public function getGroupedAllShippingRates(): array
     {
         $rates = [];
         foreach ($this->getShippingRatesCollection() as $rate) {
             if (!$rate->isDeleted() && $rate->getCarrierInstance()) {
                 $rates[$rate->getCarrier()] ??= [];
                 $rates[$rate->getCarrier()][] = $rate;
-                $rates[$rate->getCarrier()][0]->carrier_sort_order = $rate->getCarrierInstance()->getSortOrder();
+                $rates[$rate->getCarrier()][0]->setData('carrier_sort_order', $rate->getCarrierInstance()->getSortOrder());
             }
         }
         uasort($rates, $this->_sortRates(...));

@@ -182,6 +182,7 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get collection instance
      *
+     * @return Mage_Catalog_Model_Resource_Collection_Abstract<static>
      * @throws \RuntimeException
      */
     #[\Override]
@@ -197,13 +198,15 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Load entity by attribute
      *
-     * @param Mage_Eav_Model_Entity_Attribute_Interface|integer|string|array $attribute
-     * @param null|string|array $value
-     * @param string $additionalAttributes
-     * @return false|$this
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|list<array<string, mixed>> $attribute An attribute, or a list of conditions that match with OR
+     * @param int|string|array<string, mixed>|null $value A value, or a condition such as ['in' => [1, 2]]
+     * @param list<string>|string $additionalAttributes
      */
-    public function loadByAttribute($attribute, $value, $additionalAttributes = '*')
-    {
+    public function loadByAttribute(
+        Mage_Eav_Model_Entity_Attribute_Interface|int|string|array $attribute,
+        int|string|array|null $value,
+        string|array $additionalAttributes = '*',
+    ): static|false {
         $collection = $this->getResourceCollection()
             ->addAttributeToSelect($additionalAttributes)
             ->addAttributeToFilter($attribute, $value)

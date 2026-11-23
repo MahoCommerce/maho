@@ -41,6 +41,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
             return $this;
         }
         try {
+            /** @var Mage_Eav_Model_Entity_Collection_Abstract $collection */
             $collection = Mage::getResourceModel($this->getVar('entity_type') . '_collection');
             $collection->load();
         } catch (Exception $e) {
@@ -64,6 +65,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
         }
         foreach ($this->getData() as $i => $row) {
             $this->setPosition('Line: ' . $i);
+            /** @var Mage_Core_Model_Abstract $entity */
             $entity = Mage::getModel($this->getVar('entity_type'));
             if (!empty($row['entity_id'])) {
                 try {

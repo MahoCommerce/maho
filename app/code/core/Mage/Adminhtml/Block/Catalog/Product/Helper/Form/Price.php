@@ -56,17 +56,13 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends \Maho\Data\
         return "<script>if (dynamicTaxes == undefined) var dynamicTaxes = new Array(); dynamicTaxes[dynamicTaxes.length]='{$attribute->getAttributeCode()}'</script>";
     }
 
-    /**
-     * @param null $index deprecated
-     * @return string|null
-     */
     #[\Override]
-    public function getEscapedValue($index = null)
+    public function getEscapedValue(?int $index = null): string
     {
         $value = $this->getValue();
 
         if (!is_numeric($value)) {
-            return null;
+            return '';
         }
 
         return Mage::helper('adminhtml')->formatPriceForInput($value);

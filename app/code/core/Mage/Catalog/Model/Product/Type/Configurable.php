@@ -614,12 +614,10 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      * Prepare product and its configuration to be added to some products list.
      * Perform standard preparation process and then add Configurable specific options.
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param string $processMode
-     * @return array|string
+     * @return list<Mage_Catalog_Model_Product>|string The products to add, or an error message
      */
     #[\Override]
-    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, ?Mage_Catalog_Model_Product $product, string $processMode): array|string
     {
         $attributes = $buyRequest->getSuperAttribute();
         if ($attributes || !$this->_isStrictProcessMode($processMode)) {
@@ -656,8 +654,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                 }
                 if ($subProduct) {
                     $product->addCustomOption('attributes', Mage::helper('core')->jsonEncode($attributes));
-                    $product->addCustomOption('product_qty_' . $subProduct->getId(), 1, $subProduct);
-                    $product->addCustomOption('simple_product', $subProduct->getId(), $subProduct);
+                    $product->addCustomOption('product_qty_' . $subProduct->getId(), '1', $subProduct);
+                    $product->addCustomOption('simple_product', (string) $subProduct->getId(), $subProduct);
                     $_result = $subProduct->getTypeInstance(true)->_prepareProduct(
                         $buyRequest,
                         $subProduct,
@@ -684,7 +682,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                     $_result[0]->setParentProductId($product->getId())
                         // add custom option to simple product for protection of process
                         //when we add simple product separately
-                        ->addCustomOption('parent_product_id', $product->getId());
+                        ->addCustomOption('parent_product_id', (string) $product->getId());
                     if ($this->_isStrictProcessMode($processMode)) {
                         $_result[0]->setCartQty(1);
                     }
@@ -748,11 +746,10 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      * Prepare additional options/information for order item which will be
      * created from this product
      *
-     * @param  Mage_Catalog_Model_Product $product
-     * @return array
+     * @return array<string, mixed>
      */
     #[\Override]
-    public function getOrderOptions($product = null)
+    public function getOrderOptions(?Mage_Catalog_Model_Product $product = null): array
     {
         $options = parent::getOrderOptions($product);
         $options['attributes_info'] = $this->getSelectedAttributesInfo($product);

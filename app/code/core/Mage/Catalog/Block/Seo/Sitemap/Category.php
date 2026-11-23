@@ -14,6 +14,7 @@ declare(strict_types=1);
  * SEO Categories Sitemap block
  *
  * @package    Mage_Catalog
+ * @extends Mage_Catalog_Block_Seo_Sitemap_Abstract<Mage_Catalog_Model_Category>
  */
 class Mage_Catalog_Block_Seo_Sitemap_Category extends Mage_Catalog_Block_Seo_Sitemap_Abstract
 {
@@ -33,13 +34,10 @@ class Mage_Catalog_Block_Seo_Sitemap_Category extends Mage_Catalog_Block_Seo_Sit
     }
 
     /**
-     * Get item URL
-     *
      * @param Mage_Catalog_Model_Category $category
-     * @return string
      */
     #[\Override]
-    public function getItemUrl($category)
+    public function getItemUrl(Mage_Catalog_Model_Abstract $category): string
     {
         $helper = Mage::helper('catalog/category');
         /** @var Mage_Catalog_Helper_Category $helper */

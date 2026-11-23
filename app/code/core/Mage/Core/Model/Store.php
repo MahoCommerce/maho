@@ -226,9 +226,9 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     #[\Override]
-    public function load($id, $field = null)
+    public function load(int|string|null $id, ?string $field = null): static
     {
-        if (!is_numeric($id) && is_null($field)) {
+        if (is_string($id) && !is_numeric($id) && is_null($field)) {
             $this->_getResource()->load($this, $id, 'code');
             return $this;
         }
@@ -368,12 +368,10 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Process config value
      *
-     * @param string $fullPath
-     * @param string $path
-     * @param \Maho\Simplexml\Element $node
-     * @return array|string
+     * @return array<string, mixed>|string|false An array of the child values for a node with children. False when a
+     *     serialized value is not valid.
      */
-    protected function _processConfigValue($fullPath, $path, $node)
+    protected function _processConfigValue(string $fullPath, string $path, \Maho\Simplexml\Element $node): array|string|false
     {
         if (isset($this->_configCache[$path])) {
             return $this->_configCache[$path];
@@ -390,6 +388,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
         $sValue = (string) $node;
         if (!empty($node['backend_model']) && !empty($sValue)) {
+            /** @var Mage_Core_Model_Config_Data $backend */
             $backend = Mage::getModel((string) $node['backend_model']);
             $backend->setPath($path)->setValue($sValue)->afterLoad();
             $sValue = $backend->getValue();

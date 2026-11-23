@@ -188,19 +188,20 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
     }
 
     /**
-     * Set filter for queue by subscriber.
-     *
-     * @param int $subscriberId
-     * @return $this
+     * Set filter for queue by subscriber. A null subscriber ID matches no queue.
      */
-    public function addSubscriberFilter($subscriberId)
+    public function addSubscriberFilter(?int $subscriberId): static
     {
         $this->getSelect()->join(
             ['link' => $this->getTable('newsletter/queue_link')],
             'main_table.queue_id=link.queue_id',
             ['letter_sent_at'],
-        )
-        ->where('link.subscriber_id = ?', $subscriberId);
+        );
+        if ($subscriberId === null) {
+            $this->getSelect()->where('1 = 0');
+        } else {
+            $this->getSelect()->where('link.subscriber_id = ?', $subscriberId);
+        }
 
         return $this;
     }

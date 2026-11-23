@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -10,27 +11,23 @@
 class Mage_CatalogIndex_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
 {
     /**
-     * @var array|null
+     * @var array<int, array<int, int>>|null
      */
     protected $_storeToWebsite   = null;
 
-    /**
-     * @param string $table
-     * @return $this
-     */
-    public function convertStoreToWebsite($table)
+    public function convertStoreToWebsite(string $table): static
     {
         $assignment = $this->_getStoreToWebsiteAssignments();
-        foreach ($assignment as $website => $stores) {
-            $this->_setWebsiteInfo($table, $website, $stores);
+        foreach ($assignment as $websiteId => $storeIds) {
+            $this->_setWebsiteInfo($table, $websiteId, $storeIds);
         }
         return $this;
     }
 
     /**
-     * @return Mage_Core_Model_Website[]
+     * @return array<int, array<int, int>> Store IDs by website ID
      */
-    protected function _getStoreToWebsiteAssignments()
+    protected function _getStoreToWebsiteAssignments(): array
     {
         if (is_null($this->_storeToWebsite)) {
             $this->_storeToWebsite = [];
@@ -44,12 +41,9 @@ class Mage_CatalogIndex_Model_Resource_Setup extends Mage_Core_Model_Resource_Se
     }
 
     /**
-     * @param string $table
-     * @param int $websiteId
-     * @param array $storeIds
-     * @return $this
+     * @param array<int, int> $storeIds
      */
-    protected function _setWebsiteInfo($table, $websiteId, $storeIds)
+    protected function _setWebsiteInfo(string $table, int $websiteId, array $storeIds): static
     {
         $this->getConnection()->update(
             $table,

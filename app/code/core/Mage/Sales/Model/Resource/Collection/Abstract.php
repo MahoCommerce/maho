@@ -8,6 +8,10 @@
  * @package Mage_Sales
  */
 
+/**
+ * @template TItem of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<TItem>
+ */
 abstract class Mage_Sales_Model_Resource_Collection_Abstract extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

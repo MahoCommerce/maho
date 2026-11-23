@@ -17,6 +17,9 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
      */
     protected $_actions = [];
 
+    /**
+     * @param Mage_Sales_Model_Order $row
+     */
     #[\Override]
     public function render(\Maho\DataObject $row): string
     {

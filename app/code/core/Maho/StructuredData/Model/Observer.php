@@ -70,7 +70,7 @@ class Maho_StructuredData_Model_Observer
             // On a block-cache hit _toHtml() is skipped but this event still fires; the collection
             // is then unloaded, so reusing it would force a full listing query on every request and
             // defeat the cache. Only emit when the block actually rendered (collection already loaded).
-            if ($collection instanceof Maho\Data\Collection\Db && !$collection->isLoaded()) {
+            if (!$collection->isLoaded()) {
                 return [];
             }
             return $this->_urls($collection, 'getProductUrl');

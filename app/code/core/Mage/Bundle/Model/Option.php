@@ -38,15 +38,9 @@ class Mage_Bundle_Model_Option extends Mage_Core_Model_Abstract
 
     /**
      * Add selection to option
-     *
-     * @param Mage_Bundle_Model_Selection $selection
-     * @return $this|false
      */
-    public function addSelection($selection)
+    public function addSelection(Mage_Catalog_Model_Product $selection): static
     {
-        if (!$selection) {
-            return false;
-        }
         if (!$selections = $this->getData('selections')) {
             $selections = [];
         }

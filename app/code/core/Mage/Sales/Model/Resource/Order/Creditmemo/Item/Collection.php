@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @extends Mage_Sales_Model_Resource_Collection_Abstract<Mage_Sales_Model_Order_Creditmemo_Item>
+ */
 class Mage_Sales_Model_Resource_Order_Creditmemo_Item_Collection extends Mage_Sales_Model_Resource_Collection_Abstract
 {
     /**

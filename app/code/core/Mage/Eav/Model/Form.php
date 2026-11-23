@@ -288,10 +288,8 @@ abstract class Mage_Eav_Model_Form
 
     /**
      * Return attribute data model by attribute
-     *
-     * @return Mage_Eav_Model_Attribute_Data_Abstract
      */
-    protected function _getAttributeDataModel(Mage_Eav_Model_Entity_Attribute $attribute)
+    protected function _getAttributeDataModel(Mage_Eav_Model_Attribute $attribute): Mage_Eav_Model_Attribute_Data_Abstract
     {
         $dataModel = Mage_Eav_Model_Attribute_Data::factory($attribute, $this->getEntity());
         $dataModel->setIsAjaxRequest($this->getIsAjaxRequest());

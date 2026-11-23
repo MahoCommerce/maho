@@ -16,6 +16,8 @@ declare(strict_types=1);
  * @package    Mage_Catalog
  *
  * @method bool hasRealPriceHtml()
+ *
+ * @phpstan-import-type FormattedTierPrice from Mage_Catalog_Block_Product_Abstract
  */
 class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstract
 {
@@ -81,12 +83,11 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
     /**
      * Get tier prices (formatted)
      *
-     * @param Mage_Catalog_Model_Product $product
-     * @param Mage_Catalog_Model_Product $parent
-     * @return array
+     * @param Mage_Catalog_Model_Product|null $parent The bundle product of a bundle selection
+     * @return list<FormattedTierPrice>
      */
     #[\Override]
-    public function getTierPrices($product = null, $parent = null)
+    public function getTierPrices(?Mage_Catalog_Model_Product $product = null, ?Mage_Catalog_Model_Product $parent = null): array
     {
         $product ??= $this->getProduct();
         $prices = $product->getFormatedTierPrice();
@@ -119,8 +120,8 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
 
                     // if applicable, adjust the tier prices
                     if (isset($bundlePriceModel)) {
-                        $price['price']         = $bundlePriceModel->getLowestPrice($parent, $price['price']);
-                        $price['website_price'] = $bundlePriceModel->getLowestPrice($parent, $price['website_price']);
+                        $price['price']         = $bundlePriceModel->getLowestPrice($parent, (float) $price['price']);
+                        $price['website_price'] = $bundlePriceModel->getLowestPrice($parent, (float) $price['website_price']);
                     }
 
                     $tierPrice = Mage::app()->getStore()->convertPrice(
@@ -139,7 +140,7 @@ class Mage_Catalog_Block_Product_Price extends Mage_Catalog_Block_Product_Abstra
                         $product->setPrice($tierPrice);
                         $product->setFinalPrice($tierPrice);
 
-                        $this->getLayout()->getBlock('product.info')->getPriceHtml($product);
+                        $this->getPriceHtml($product);
                         $product->setPriceCalculation(true);
 
                         $price['real_price_html'] = $product->getRealPriceHtml();

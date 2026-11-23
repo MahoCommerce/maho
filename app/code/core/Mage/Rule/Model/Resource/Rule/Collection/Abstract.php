@@ -8,6 +8,10 @@
  * @package Mage_Rule
  */
 
+/**
+ * @template TItem of Mage_Rule_Model_Abstract = Mage_Rule_Model_Abstract
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<TItem>
+ */
 abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**
@@ -42,7 +46,6 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
     {
         parent::_afterLoad();
         if ($this->getFlag('add_websites_to_result') && $this->_items) {
-            /** @var Mage_Rule_Model_Abstract $item */
             foreach ($this->_items as $item) {
                 $item->afterLoad();
             }

@@ -148,6 +148,7 @@ abstract class Processor implements ProcessorInterface
      */
     protected function loadModel(int $id): \Mage_Core_Model_Abstract
     {
+        /** @var \Mage_Core_Model_Abstract $model */
         $model = \Mage::getModel($this->modelAlias);
         try {
             $model->load($id);

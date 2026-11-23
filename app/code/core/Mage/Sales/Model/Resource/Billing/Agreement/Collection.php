@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Sales_Model_Billing_Agreement>
+ */
 class Mage_Sales_Model_Resource_Billing_Agreement_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

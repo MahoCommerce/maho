@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Rule_Model_Resource_Rule_Collection_Abstract<Mage_CatalogRule_Model_Rule>
+ */
 class Mage_CatalogRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Resource_Rule_Collection_Abstract
 {
     /**
