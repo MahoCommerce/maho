@@ -28,43 +28,12 @@ const STORE_SWITCHER_ADMIN_PASSWORD = 'Password123!';
 const STORE_SWITCHER_QUERY = 'form_key=PestStoreSwitcherFormKey';
 
 beforeEach(function () {
-    createStoreSwitcherAdmin();
+    createBrowserAdmin(STORE_SWITCHER_ADMIN_USER, STORE_SWITCHER_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteStoreSwitcherAdmin();
+    deleteBrowserAdmin(STORE_SWITCHER_ADMIN_USER);
 });
-
-function deleteStoreSwitcherAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(STORE_SWITCHER_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
-
-/** A fresh admin with the full-access role, so the password is known and ACL never gets in the way. */
-function createStoreSwitcherAdmin(): void
-{
-    deleteStoreSwitcherAdmin();
-
-    $user = Mage::getModel('admin/user')
-        ->setUsername(STORE_SWITCHER_ADMIN_USER)
-        ->setFirstname('Store')
-        ->setLastname('Switcher')
-        ->setEmail('store-switcher@example.test')
-        ->setPassword(STORE_SWITCHER_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
-}
 
 /** The first switchable store view. */
 function storeSwitcherStoreId(): int

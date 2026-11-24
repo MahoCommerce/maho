@@ -733,7 +733,8 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
                     ['main' => $this->getTable($relation->getTable())],
                     ['parent_id' => $parentField, 'child_id' => $childField],
                 )
-                ->where("main.{$parentField} IN (?)", $productIds);
+                ->where("main.{$parentField} IN (?)", $productIds)
+                ->order("main.{$childField}");
             if (!is_null($relation->getWhere())) {
                 $select->where($relation->getWhere());
             }

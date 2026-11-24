@@ -6,6 +6,22 @@ SPDX-License-Identifier: AFL-3.0
 -->
 
 <layout>
+    <adminhtml_report_explorer_index>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/report-explorer.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="adminhtml/report_explorer" name="report.explorer" />
+        </reference>
+    </adminhtml_report_explorer_index>
+    <adminhtml_dashboard_index>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/report-explorer.js</name></action>
+        </reference>
+        <reference name="dashboard.widgets.stats">
+            <block type="adminhtml/report_explorer_pinned" name="report.explorer.pinned" />
+        </reference>
+    </adminhtml_dashboard_index>
     <adminhtml_report_statistics_index>
         <reference name="content">
             <block type="adminhtml/report_refresh_statistics" template="report/refresh/statistics.phtml" name="sales.report.refreshstatistics" />

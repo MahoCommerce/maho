@@ -1,0 +1,23 @@
+<!--@subject {{var subject}} @-->
+<!--@vars
+{"htmlescape var=$subject":"Subject",
+"var report_html":"Report"}
+@-->
+
+<!--@styles
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td class="action-content">
+            <h1>{{htmlescape var=$subject}}</h1>
+            {{var report_html}}
+            <p>You get this email because you chose it for this saved report in Reports &gt; Explorer. To stop it, open the report and click Email.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

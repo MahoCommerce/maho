@@ -595,6 +595,9 @@ final class Assistant
         'promo' => 'promotions',
         'tax' => 'tax',
         'newsletter' => 'other',
+        // Before 'report': the first match wins, and the Explorer has its own tools
+        'report_explorer' => 'explorer',
+        'dashboard' => 'explorer',
         'report' => 'reports',
         'system' => 'system',
         'permissions' => 'system',

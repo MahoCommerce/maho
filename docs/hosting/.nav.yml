@@ -9,6 +9,7 @@ nav:
 - Cron jobs: cron.md
 - Maintenance mode: maintenance-mode.md
 - Health check & DB maintenance: health-check.md
+- Report Explorer database and cache: report-explorer.md
 - Logging: logging.md
 - OpenTelemetry: opentelemetry.md
 - Email sending (SMTP): email-sending-configuration.md

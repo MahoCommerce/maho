@@ -15,6 +15,7 @@ nav:
   - Customer Segments: guide/customer-segments.md
   - Email Automation: guide/email-automation.md
   - Gift Cards: guide/gift-cards.md
+  - Report Explorer data sets: report-datasets.md
   - Markdown renderers: markdown-renderers.md
 - Core & architecture:
   - Routing: routing.md

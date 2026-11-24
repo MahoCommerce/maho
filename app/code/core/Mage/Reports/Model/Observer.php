@@ -39,6 +39,29 @@ class Mage_Reports_Model_Observer
         Mage::getSingleton('reports/notFound')->recordRequest($request, $response);
     }
 
+    /** Mark the day of a saved or deleted order, so the next report calculates its daily totals again. */
+    #[Maho\Config\Observer('sales_order_save_after')]
+    #[Maho\Config\Observer('sales_order_delete_after')]
+    public function markOrderDay(\Maho\Event\Observer $observer): void
+    {
+        $order = $observer->getEvent()->getData('order');
+        if ($order instanceof Mage_Sales_Model_Order && Mage_Reports_Model_Explorer_DailyTotals::minDays() > 0) {
+            Mage::getSingleton('reports/explorer_dailyTotals')->markChanged($order->getCreatedAt());
+        }
+    }
+
+    #[Maho\Config\CronJob('reports_update_daily_totals', schedule: '*/5 * * * *')]
+    public function updateDailyTotals(): void
+    {
+        Mage::getSingleton('reports/explorer_dailyTotals')->update(new DateTimeImmutable('now', new DateTimeZone('UTC')));
+    }
+
+    #[Maho\Config\CronJob('reports_send_subscriptions', schedule: '5 * * * *')]
+    public function sendSubscriptions(): void
+    {
+        Mage::getService('reports/subscription')->queueDue(new DateTimeImmutable('now', new DateTimeZone('UTC')));
+    }
+
     #[Maho\Config\CronJob('report_not_found_clean', schedule: '15 * * * *')]
     public function cleanNotFound(): void
     {
@@ -46,5 +69,12 @@ class Mage_Reports_Model_Observer
             Mage::getStoreConfigAsInt(Mage_Reports_Model_NotFound::XML_PATH_DAYS_TO_KEEP),
             Mage::getStoreConfigAsInt(Mage_Reports_Model_NotFound::XML_PATH_MAX_ROWS),
         );
+    }
+
+    /** A save of the reports settings clears the Explorer results, because a setting changes what a report counts. */
+    #[Maho\Config\Observer('admin_system_config_changed_section_reports')]
+    public function cleanExplorerCache(): void
+    {
+        Mage::app()->cleanCache([Mage_Reports_Model_Explorer_Runner::CACHE_TAG]);
     }
 }

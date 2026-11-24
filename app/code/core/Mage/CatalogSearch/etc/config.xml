@@ -11,6 +11,13 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_CatalogSearch>
     </modules>
     <global>
+        <reports>
+            <datasets>
+                <search_terms>
+                    <class>catalogsearch/report_dataset_searchTerms</class>
+                </search_terms>
+            </datasets>
+        </reports>
         <catalogsearch_fulltext>
             <model>catalogsearch/fulltext</model>
         </catalogsearch_fulltext>

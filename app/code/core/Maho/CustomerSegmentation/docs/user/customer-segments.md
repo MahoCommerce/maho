@@ -639,6 +639,13 @@ To see which customers are in a segment:
    - Use Maho export functionality
    - Filter by segment before export
 
+### Reports by Segment
+
+The report explorer (**Reports > Explorer**) has the grouping and the filter **Customer segment** on
+the Orders and Customers data. Use it to compare the sales of your segments, or to see the orders
+of one segment over time. A report reads the members of the last refresh, so an order counts in
+the segments of its customer now. See [Report explorer](report-explorer.md).
+
 ### Performance Monitoring
 
 Monitor segment refresh performance in logs:

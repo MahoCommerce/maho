@@ -145,7 +145,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Count each storefront address that answers 404 in Reports > 404 Errors.</comment>
+                            <comment>Count each storefront address that answers 404 in the 404 errors reports of Reports > Explorer.</comment>
                         </enabled>
                         <log_rate_limit translate="label comment">
                             <label>Pages Recorded per Hour per Visitor</label>
@@ -177,6 +177,125 @@ SPDX-License-Identifier: AFL-3.0
                         </max_rows>
                     </fields>
                 </not_found>
+                <explorer translate="label">
+                    <label>Explorer</label>
+                    <sort_order>5</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <max_rows translate="label comment">
+                            <label>Rows per Page</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>The most rows that the Explorer page and the API show at once. A CSV export with more rows runs in the background.</comment>
+                        </max_rows>
+                        <export_max_rows translate="label comment">
+                            <label>Rows per Export</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>The most rows that one CSV export writes.</comment>
+                        </export_max_rows>
+                        <cache_lifetime_open translate="label comment">
+                            <label>Cache Lifetime of a Current Period (seconds)</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>A report whose period includes today, or a report on carts or stock, stays in the cache this long.</comment>
+                        </cache_lifetime_open>
+                        <cache_lifetime_closed translate="label comment">
+                            <label>Cache Lifetime of a Past Period (seconds)</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>A report on a period that ended before today stays in the cache this long. A save of this section clears the cache.</comment>
+                        </cache_lifetime_closed>
+                        <dead_stock_days translate="label comment">
+                            <label>Dead Stock After (days)</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>A product in stock with no sale in this number of days is dead stock.</comment>
+                        </dead_stock_days>
+                        <abandoned_after_hours translate="label comment">
+                            <label>Abandoned After (hours)</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>An active cart with an email and no order is abandoned after this number of hours without activity.</comment>
+                        </abandoned_after_hours>
+                        <recent_cart_hours translate="label comment">
+                            <label>Recent Carts (hours)</label>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>An active cart with no order is recent when its last activity is within this number of hours.</comment>
+                        </recent_cart_hours>
+                        <report_attributes translate="label comment">
+                            <label>Attributes for Sales by Attribute</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>reports/system_config_source_reportAttributes</source_model>
+                            <can_be_empty>1</can_be_empty>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Each attribute gets a grouping and a report "Sales by" in the order items data.</comment>
+                        </report_attributes>
+                        <daily_totals_min_days translate="label comment">
+                            <label>Daily Totals from (days)</label>
+                            <validate>validate-digits</validate>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>An order report on a period of at least this number of days reads the daily totals of the orders instead of each order, when its metrics, groupings and filters allow it. The numbers are the same, and a long period reads far fewer rows. "0" reads each order always. Enter a value, such as 7, when the reports of a store with many orders take seconds. Cron then builds the totals.</comment>
+                        </daily_totals_min_days>
+                        <email_hour translate="label comment">
+                            <label>Hour of the Report Emails</label>
+                            <validate>validate-digits validate-digits-range digits-range-0-23</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>The hour of the day, from 0 to 23 in the default time zone, when the store emails the saved reports. A weekly email goes on the first day of the week, and a monthly email on the first day of the month.</comment>
+                        </email_hour>
+                        <email_identity translate="label">
+                            <label>Sender of the Report Emails</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </email_identity>
+                        <email_template translate="label">
+                            <label>Template of the Report Emails</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </email_template>
+                    </fields>
+                </explorer>
             </groups>
         </reports>
         <system>

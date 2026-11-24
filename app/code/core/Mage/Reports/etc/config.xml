@@ -47,6 +47,27 @@ SPDX-License-Identifier: AFL-3.0
                     <not_found>
                         <table>report_not_found</table>
                     </not_found>
+                    <saved>
+                        <table>report_saved</table>
+                    </saved>
+                    <dashboard_item>
+                        <table>report_dashboard_item</table>
+                    </dashboard_item>
+                    <subscription>
+                        <table>report_subscription</table>
+                    </subscription>
+                    <order_daily>
+                        <table>report_order_daily</table>
+                    </order_daily>
+                    <order_daily_change>
+                        <table>report_order_daily_change</table>
+                    </order_daily_change>
+                    <annotation>
+                        <table>report_annotation</table>
+                    </annotation>
+                    <target>
+                        <table>report_target</table>
+                    </target>
                 </entities>
             </reports_resource>
         </models>
@@ -60,8 +81,61 @@ SPDX-License-Identifier: AFL-3.0
                 <reports>slow</reports>
             </routing>
         </queue>
+        <resources>
+            <report_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </report_read>
+        </resources>
+        <cache>
+            <types>
+                <reports_explorer translate="label,description" module="reports">
+                    <label>Report Explorer Results</label>
+                    <description>The results of the report explorer, for a few minutes or, for a closed period, a day.</description>
+                    <tags>REPORTS_EXPLORER</tags>
+                </reports_explorer>
+            </types>
+        </cache>
+        <storage>
+            <mounts>
+                <!-- Private: the report exports that the queue writes, with customer data -->
+                <reports_exports>
+                    <dir>var</dir>
+                    <path>reports/export</path>
+                </reports_exports>
+            </mounts>
+        </storage>
+        <reports>
+            <datasets>
+                <carts>
+                    <class>reports/report_dataset_carts</class>
+                </carts>
+                <cart_items>
+                    <class>reports/report_dataset_cartItems</class>
+                </cart_items>
+                <product_views>
+                    <class>reports/report_dataset_productViews</class>
+                </product_views>
+                <not_found>
+                    <class>reports/report_dataset_notFound</class>
+                </not_found>
+            </datasets>
+        </reports>
+        <template>
+            <email>
+                <reports_explorer_email_template translate="label" module="reports">
+                    <label>Saved Report by Email</label>
+                    <file>reports_explorer_report.html</file>
+                    <type>html</type>
+                </reports_explorer_email_template>
+            </email>
+        </template>
         <docs>
             <user>docs/user</user>
+            <developer>docs/developer</developer>
+            <api>docs/api</api>
+            <sysadmin>docs/sysadmin</sysadmin>
         </docs>
     </global>
     <adminhtml>
@@ -125,6 +199,20 @@ SPDX-License-Identifier: AFL-3.0
                 <days_to_keep>30</days_to_keep>
                 <max_rows>10000</max_rows>
             </not_found>
+            <explorer>
+                <max_rows>10000</max_rows>
+                <export_max_rows>1000000</export_max_rows>
+                <cache_lifetime_open>300</cache_lifetime_open>
+                <cache_lifetime_closed>86400</cache_lifetime_closed>
+                <dead_stock_days>90</dead_stock_days>
+                <abandoned_after_hours>24</abandoned_after_hours>
+                <recent_cart_hours>24</recent_cart_hours>
+                <report_attributes></report_attributes>
+                <daily_totals_min_days>0</daily_totals_min_days>
+                <email_hour>7</email_hour>
+                <email_template>reports_explorer_email_template</email_template>
+                <email_identity>general</email_identity>
+            </explorer>
         </reports>
     </default>
 </config>

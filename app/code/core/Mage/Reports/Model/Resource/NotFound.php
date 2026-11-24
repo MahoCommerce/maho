@@ -77,15 +77,4 @@ class Mage_Reports_Model_Resource_NotFound extends Mage_Core_Model_Resource_Db_A
 
         return $deleted;
     }
-
-    /**
-     * @param list<int> $ids
-     */
-    public function deleteByIds(array $ids): int
-    {
-        if ($ids === []) {
-            return 0;
-        }
-        return $this->_getWriteAdapter()->delete($this->getMainTable(), ['not_found_id IN (?)' => $ids]);
-    }
 }

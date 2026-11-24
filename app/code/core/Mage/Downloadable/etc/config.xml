@@ -11,6 +11,13 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Downloadable>
     </modules>
     <global>
+        <reports>
+            <datasets>
+                <downloads>
+                    <class>downloadable/report_dataset_downloads</class>
+                </downloads>
+            </datasets>
+        </reports>
         <services>
             <downloadable>
                 <class>Mage_Downloadable_Service</class>

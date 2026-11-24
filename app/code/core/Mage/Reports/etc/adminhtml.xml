@@ -10,6 +10,11 @@ SPDX-License-Identifier: AFL-3.0
             <title>Reports</title>
             <sort_order>80</sort_order>
             <children>
+                <explorer translate="title" module="reports">
+                    <title>Explorer</title>
+                    <sort_order>1</sort_order>
+                    <action>adminhtml/report_explorer</action>
+                </explorer>
                 <salesroot translate="title" module="reports">
                     <title>Sales</title>
                     <sort_order>10</sort_order>
@@ -103,11 +108,6 @@ SPDX-License-Identifier: AFL-3.0
                     <sort_order>60</sort_order>
                     <action>adminhtml/report/search</action>
                 </search>
-                <notfound translate="title" module="reports">
-                    <title>404 Errors</title>
-                    <sort_order>61</sort_order>
-                    <action>adminhtml/report_notfound</action>
-                </notfound>
                 <statistics translate="title" module="reports">
                     <sort_order>65535</sort_order>
                     <title>Refresh Statistics</title>
@@ -124,6 +124,10 @@ SPDX-License-Identifier: AFL-3.0
                         <title>Reports</title>
                         <sort_order>80</sort_order>
                         <children>
+                            <explorer translate="title">
+                                <title>Explorer</title>
+                                <sort_order>1</sort_order>
+                            </explorer>
                             <salesroot translate="title">
                                 <title>Sales</title>
                                 <children>

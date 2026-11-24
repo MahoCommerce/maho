@@ -115,4 +115,80 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
             $collection->addItem($item);
         }
     }
+
+    /**
+     * Give each row of a records result of the report explorer the admin URL of its link, as url, and remove the route
+     * data. A row has no link when the admin user may not open the route, or when a value of its link is missing.
+     *
+     * @param array<string, mixed> $result the result of Mage_Reports_Model_Explorer_Runner::records()
+     * @return array<string, mixed>
+     */
+    public function addRecordUrls(array $result): array
+    {
+        $route = $result['route'] ?? null;
+        $aclResource = $result['routeAclResource'] ?? null;
+        $allowed = is_string($route)
+            && ($aclResource === null || Mage::getSingleton('admin/session')->isAllowed($aclResource));
+        foreach ($result['rows'] as $index => $row) {
+            unset($result['rows'][$index]['routeQuery']);
+            if (!$allowed || (array_key_exists('routeQuery', $row) && $row['routeQuery'] === null)) {
+                continue;
+            }
+            $params = $result['routeParam'] === null ? [] : [$result['routeParam'] => $row['id']];
+            if (isset($row['routeQuery'])) {
+                $params['_query'] = $row['routeQuery'];
+            }
+            $result['rows'][$index]['url'] = Mage::helper('adminhtml')->getUrl($route, $params);
+        }
+        unset($result['route'], $result['routeParam'], $result['routeAclResource']);
+        return $result;
+    }
+
+    /**
+     * The shape of a saved report for the Explorer page.
+     *
+     * @return array{id: int, name: string, shared: bool, mine: bool, request: array<string, mixed>, updatedAt: ?string}
+     */
+    public function savedReportToArray(Mage_Reports_Model_SavedReport $report, ?int $adminUserId): array
+    {
+        return [
+            'id' => (int) $report->getId(),
+            'name' => (string) $report->getName(),
+            'shared' => (bool) $report->getIsShared(),
+            'mine' => $adminUserId !== null && $report->getAdminUserId() === $adminUserId,
+            'request' => $report->getRequestData(),
+            'updatedAt' => $report->getUpdatedAt(),
+        ];
+    }
+
+    /**
+     * The report emails of an administrator for the Explorer page, by saved report ID.
+     *
+     * @return array<int, array{frequency: ?string, alertMetric: ?string, alertDirection: ?string, alertThreshold: ?float}>
+     */
+    public function subscriptionsFor(int $adminUserId): array
+    {
+        return array_map(
+            static fn(Mage_Reports_Model_Subscription $subscription): array => [
+                'frequency' => $subscription->getFrequency(),
+                'alertMetric' => $subscription->getAlertMetric(),
+                'alertDirection' => $subscription->getAlertDirection(),
+                'alertThreshold' => $subscription->getAlertThreshold(),
+            ],
+            Mage::getService('reports/subscription')->listFor($adminUserId),
+        );
+    }
+
+    /**
+     * The saved reports that an administrator sees on the Explorer page.
+     *
+     * @return list<array{id: int, name: string, shared: bool, mine: bool, request: array<string, mixed>, updatedAt: ?string}>
+     */
+    public function savedReportsFor(?int $adminUserId, Mage_Reports_Model_Explorer_Access $access): array
+    {
+        return array_map(
+            fn(Mage_Reports_Model_SavedReport $report): array => $this->savedReportToArray($report, $adminUserId),
+            Mage::getService('reports/savedReport')->listFor($adminUserId, $access),
+        );
+    }
 }

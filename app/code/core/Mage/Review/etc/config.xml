@@ -11,6 +11,13 @@ SPDX-License-Identifier: AFL-3.0
         </Mage_Review>
     </modules>
     <global>
+        <reports>
+            <datasets>
+                <reviews>
+                    <class>review/report_dataset_reviews</class>
+                </reviews>
+            </datasets>
+        </reports>
         <models>
             <review>
                 <class>Mage_Review_Model</class>

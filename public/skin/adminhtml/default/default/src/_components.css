@@ -314,6 +314,17 @@
         @apply d-select-sm;
     }
 
+    /* The buttons and selects of a grid header take the small size of the pager beside them */
+    .grid-widget :is(table.actions, .massaction) {
+        & button {
+            @apply d-btn-sm;
+        }
+
+        & select {
+            @apply d-select-sm;
+        }
+    }
+
     /* Filter columns are narrow, so the controls keep the md height with less padding */
     .grid tr.filter {
         & th {
@@ -645,6 +656,37 @@
 
     .uploader:has(> .uploader-dropzone) {
         margin-bottom: var(--maho-space-2);
+    }
+
+    /* Reports > Explorer: the parts of the report one under the other, and the total tiles in rows */
+    .report-explorer-layout {
+        display: flex;
+        flex-direction: column;
+        gap: var(--maho-space-4);
+    }
+
+    .report-explorer-totals {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+        gap: var(--maho-space-3);
+    }
+
+    .report-explorer-driver {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: var(--maho-space-2);
+        row-gap: 2px;
+    }
+
+    .report-explorer-driver > :last-child {
+        grid-column: span 2;
+    }
+
+    .report-explorer-explain {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--maho-space-4);
     }
 
     /* Product websites: one card for each website, with its stores and their store views */
@@ -1103,6 +1145,12 @@
     :root[data-scheme="light"] #scheme-toggle .scheme-light {
         display: block;
     }
+
+    /* base.css draws every link in a box head as a large light title, which the config sections keep */
+    .entry-edit .entry-edit-head a.report-explorer-title {
+        font: inherit !important;
+        color: inherit !important;
+    }
 }
 
 @layer components {
@@ -1331,6 +1379,11 @@
 
 /* The d-btn and d-input rules sit in the utilities layer, so the pressed button of the view switch, the pin, the position of the checkbox and the hover states are here */
 @layer utilities {
+    /* daisyUI shows 24rem of an open list, which cuts the twelfth option of an admin select, such as Custom in a period list */
+    ::picker(select) {
+        max-height: min(30rem, 80dvh);
+    }
+
     .merchandiser-select {
         position: absolute;
     }

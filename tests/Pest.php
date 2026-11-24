@@ -528,6 +528,40 @@ function adminLoginAndVisit(string $username, string $password, string $path, st
     return waitForPageLoad($page, $readySelector);
 }
 
+/**
+ * Create an active admin user with the first group role, so that a browser test can log in with $password.
+ * Delete a user with the same name first, which a stopped run can leave.
+ */
+function createBrowserAdmin(string $username, string $password): void
+{
+    deleteBrowserAdmin($username);
+    $user = Mage::getModel('admin/user')
+        ->setUsername($username)
+        ->setFirstname('Browser')
+        ->setLastname('Test')
+        ->setEmail($username . '@example.test')
+        ->setPassword($password)
+        ->setIsActive()
+        ->save();
+    $roleId = Mage::getModel('admin/role')->getCollection()
+        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
+        ->setPageSize(1)
+        ->getFirstItem()
+        ->getId();
+    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
+}
+
+/**
+ * Delete the admin user $username, if it exists.
+ */
+function deleteBrowserAdmin(string $username): void
+{
+    $user = Mage::getModel('admin/user')->loadByUsername($username);
+    if ($user->getId()) {
+        $user->delete();
+    }
+}
+
 /*
 |--------------------------------------------------------------------------
 | Message Queue Helper Functions

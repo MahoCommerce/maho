@@ -45,43 +45,12 @@ const WYSIWYG_LOSS_DEFAULT_SPANS = '<table style="min-width: 50px;"><colgroup><c
     . '<td colspan="1" rowspan="1" style="vertical-align: middle;"><p><strong>Short ingredient lists</strong><br>Ten or fewer, on the front</p></td></tr></tbody></table>';
 
 beforeEach(function () {
-    createWysiwygLossAdmin();
+    createBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER, WYSIWYG_LOSS_ADMIN_PASSWORD);
 });
 
 afterEach(function () {
-    deleteWysiwygLossAdmin();
+    deleteBrowserAdmin(WYSIWYG_LOSS_ADMIN_USER);
 });
-
-function deleteWysiwygLossAdmin(): void
-{
-    $user = Mage::getModel('admin/user')->loadByUsername(WYSIWYG_LOSS_ADMIN_USER);
-    if ($user->getId()) {
-        $user->delete();
-    }
-}
-
-/** Create an admin with the full-access role. The password is known and the ACL allows all. */
-function createWysiwygLossAdmin(): void
-{
-    deleteWysiwygLossAdmin();
-
-    $user = Mage::getModel('admin/user')
-        ->setUsername(WYSIWYG_LOSS_ADMIN_USER)
-        ->setFirstname('Wysiwyg')
-        ->setLastname('Loss')
-        ->setEmail('wysiwyg-loss@example.test')
-        ->setPassword(WYSIWYG_LOSS_ADMIN_PASSWORD)
-        ->setIsActive()
-        ->save();
-
-    $roleId = Mage::getModel('admin/role')->getCollection()
-        ->addFieldToFilter('role_type', Mage_Admin_Model_Acl::ROLE_TYPE_GROUP)
-        ->setPageSize(1)
-        ->getFirstItem()
-        ->getId();
-
-    Mage::getModel('admin/user')->load($user->getId())->setRoleIds([$roleId])->saveRelations();
-}
 
 function createWysiwygLossProduct(): Mage_Catalog_Model_Product
 {

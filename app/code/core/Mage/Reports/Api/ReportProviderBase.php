@@ -67,8 +67,7 @@ abstract class ReportProviderBase extends \Maho\ApiPlatform\Provider
      */
     public static function timezone(): string
     {
-        return (string) (\Mage::getStoreConfig(\Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE, \Mage_Core_Model_App::ADMIN_STORE_ID)
-            ?: \Mage_Core_Model_Locale::DEFAULT_TIMEZONE);
+        return \Mage_Reports_Model_Explorer_Runner::timezone();
     }
 
     /**

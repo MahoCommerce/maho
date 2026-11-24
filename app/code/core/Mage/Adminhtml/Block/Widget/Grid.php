@@ -776,40 +776,38 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $select = clone $collection->getSelect();
         $orderParts = $select->getPart(\Maho\Db\Select::ORDER);
 
-        $orderExprs = [];
+        $terms = [];
         $hasIdInOrder = false;
         foreach ($orderParts as $term) {
             if (!$term instanceof \Maho\Db\Expr && $term[0] === $this->_entityIdField) {
                 $hasIdInOrder = true;
             }
-            $orderExprs[] = $term instanceof \Maho\Db\Expr ? $term->__toString() : ($term[0] . ' ' . $term[1]);
+            $terms[] = $term instanceof \Maho\Db\Expr
+                ? [preg_replace('/\s+(ASC|DESC)$/i', '', $term->__toString()), preg_match('/\sDESC$/i', $term->__toString()) ? 'DESC' : 'ASC']
+                : [$term[0], strtoupper($term[1]) === 'DESC' ? 'DESC' : 'ASC'];
         }
-        if (!$orderExprs) {
-            $orderExprs[] = $this->_entityIdField . ' DESC';
+        if (!$terms) {
+            $terms[] = [$this->_entityIdField, 'DESC'];
         } elseif (!$hasIdInOrder) {
-            $lastTerm = end($orderParts);
-            $dir = (!$lastTerm instanceof \Maho\Db\Expr && strtoupper($lastTerm[1]) === 'ASC') ? 'ASC' : 'DESC';
-            $orderExprs[] = $this->_entityIdField . ' ' . $dir;
+            $terms[] = [$this->_entityIdField, end($terms)[1]];
         }
-        $orderSql = implode(', ', $orderExprs);
 
         $id = $this->_entityIdField;
-        $w = "ORDER BY {$orderSql}";
+        $select->reset(\Maho\Db\Select::ORDER);
         $select->reset(\Maho\Db\Select::LIMIT_COUNT);
         $select->reset(\Maho\Db\Select::LIMIT_OFFSET);
         $select->reset(\Maho\Db\Select::COLUMNS);
-        $select->columns([
-            $id,
-            'prev_id'  => new \Maho\Db\Expr("LAG({$id}) OVER ({$w})"),
-            'next_id'  => new \Maho\Db\Expr("LEAD({$id}) OVER ({$w})"),
-            'position' => new \Maho\Db\Expr("ROW_NUMBER() OVER ({$w})"),
-            'total'    => new \Maho\Db\Expr('COUNT(*) OVER ()'),
-        ]);
+        $columns = [$id];
+        foreach ($terms as $index => [$sql]) {
+            $columns["nav_sort{$index}"] = new \Maho\Db\Expr($sql);
+        }
+        $select->columns($columns);
 
         Mage::getSingleton('adminhtml/session')->setData($this->getId() . '_nav', [
             'sql' => $select->assemble(),
             'bind' => [],
             'id_field' => $id,
+            'directions' => array_column($terms, 1),
         ]);
     }
 
