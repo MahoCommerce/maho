@@ -282,6 +282,20 @@ describe('Select Query Builder - Complex Queries', function () {
         expect($sql)->toContain('UNION');
     });
 
+    it('keeps the unions of the first select when an empty select unions it', function () {
+        $storeTable = $this->adapter->getTableName('core_store');
+        $selectStore = fn(int $storeId): Select => $this->adapter->select()
+            ->from($storeTable, ['store_id'])
+            ->where('store_id = ?', $storeId);
+
+        $inner = $this->adapter->select()
+            ->union([$selectStore(0), $selectStore(1)], Select::SQL_UNION_ALL);
+        $outer = $this->adapter->select()
+            ->union([$inner, $selectStore(1)], Select::SQL_UNION_ALL);
+
+        expect(array_map(intval(...),$this->adapter->fetchCol($outer)))->toEqualCanonicalizing([0, 1, 1]);
+    });
+
     it('joins the WHERE conditions in the order that they were added', function () {
         $select = $this->adapter->select()
             ->from($this->configTable, ['scope', 'path'])

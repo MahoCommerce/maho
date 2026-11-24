@@ -565,10 +565,8 @@ class Table
 
     /**
      * Set table option
-     *
-     * @param string|int $value
      */
-    public function setOption(string $key, mixed $value): self
+    public function setOption(string $key, string|int $value): self
     {
         $this->_options[$key] = $value;
         return $this;
@@ -577,10 +575,8 @@ class Table
     /**
      * Retrieve table option value by option name
      * Return null if option does not exits
-     *
-     * @return string|int|null
      */
-    public function getOption(string $key): mixed
+    public function getOption(string $key): string|int|null
     {
         if (!isset($this->_options[$key])) {
             return null;

@@ -1226,10 +1226,10 @@ class Select implements \Stringable
             if ($firstSelect instanceof Select) {
                 // Take the first select and make it the base query
                 array_shift($select);
-                // Copy all parts EXCEPT union from the first select
+                // Copy all parts from the first select, and keep its unions before the unions of this select
                 $union = $this->_parts[self::UNION];
                 $this->_parts = $firstSelect->_parts;
-                $this->_parts[self::UNION] = $union;
+                $this->_parts[self::UNION] = array_merge($firstSelect->_parts[self::UNION], $union);
             }
         }
 
