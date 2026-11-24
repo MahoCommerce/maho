@@ -206,6 +206,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $ratio = $totalBaseAmount > 0 ? $totalDisplayAmount / $totalBaseAmount : 0;
 
                 foreach ($codes as $code => $baseAmount) {
+                    $code = (string) $code;
                     $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
                     $displayCode = Mage::helper('giftcard')->maskCode($code);
 

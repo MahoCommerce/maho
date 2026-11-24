@@ -37,6 +37,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
         $baseCurrency = $quote->getBaseCurrencyCode();
 
         foreach ($codes as $code => $appliedAmount) {
+            $code = (string) $code;
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if ($giftcard->getId()) {
