@@ -114,7 +114,7 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
     #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
-        if ($this->isStaticAttribute($attribute) && !$this->_isFilteringStaticAttribute) {
+        if (is_string($attribute) && $this->isStaticAttribute($attribute) && !$this->_isFilteringStaticAttribute) {
             $this->_isFilteringStaticAttribute = true;
             $result = $this->addFieldToFilter($attribute, $condition);
             $this->_isFilteringStaticAttribute = false;
