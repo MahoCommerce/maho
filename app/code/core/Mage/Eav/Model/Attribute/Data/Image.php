@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_File
 {
     private const array ALLOWED_IMAGE_TYPES = [
@@ -25,8 +28,8 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
      * Validate file by attribute validate rules
      * Return array of errors
      *
-     * @param array $value
-     * @return array
+     * @param array<int|string, bool|int|string> $value An upload of $_FILES
+     * @return list<string>
      */
     #[\Override]
     protected function _validateByRules($value)
@@ -73,7 +76,7 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
     }
 
     /**
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -89,6 +92,9 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
 
     /**
      * Give the uploaded file the extension of its real image type.
+     *
+     * @param array<int|string, bool|int|string> $value An upload of $_FILES
+     * @return array<int|string, bool|int|string>
      */
     protected function _setImageTypeExtension(array $value): array
     {

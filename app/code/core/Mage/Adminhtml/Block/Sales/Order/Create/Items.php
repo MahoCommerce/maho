@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @phpstan-import-type SourceOption from Mage_Eav_Model_Entity_Attribute_Source_Interface
+ */
 class Mage_Adminhtml_Block_Sales_Order_Create_Items extends Mage_Adminhtml_Block_Sales_Order_Create_Abstract
 {
     /**
@@ -33,7 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items extends Mage_Adminhtml_Block
     /**
      * The product tax classes that a custom item can use
      *
-     * @return list<array{value: string, label: string}>
+     * @return list<SourceOption>
      */
     public function getProductTaxClassOptions(): array
     {

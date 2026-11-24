@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type SqlCondition from \Maho\Db\Adapter\AdapterInterface
+ */
 class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
     /**
@@ -17,10 +20,11 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      */
     protected $_store;
 
+    /** @var list<SqlCondition> Each condition names its attribute in the key attribute */
     protected array $_filter = [];
-    protected array $_joinFilter = [];
     /** @var list<array{attribute: ?string, alias: ?string, bind: ?string, joinType: ?string, storeId: ?int}> */
     protected array $_joinAttr = [];
+    /** @var array<string, string>|null */
     protected ?array $_attrToDb = null;
     /** @var list<array{alias: string, attribute: string, field: ?string, bind: string, cond: ?string, joinType: ?string}> */
     protected array $_joinField = [];
@@ -45,7 +49,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @return array
+     * @return array<string, string> The values of the profile variables filter/*, by the rest of their name
      */
     protected function _parseVars()
     {
@@ -61,8 +65,8 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @param array $attrFilterArray
-     * @param array $attrToDb
+     * @param array<string, string|array{type: string, bind?: string}> $attrFilterArray The filter type of each field
+     * @param array<string, string>|null $attrToDb The attribute of each field
      * @param string $bind
      * @param string $joinType
      * @return $this
@@ -166,7 +170,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @return array
+     * @return list<SqlCondition>
      */
     public function getFilter()
     {
@@ -174,9 +178,9 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @param array $fields
+     * @param array<string, string> $fields
      * @param string $name
-     * @return array|bool
+     * @return array<string, string>|false
      */
     protected function getFieldValue($fields = [], $name = '')
     {
@@ -196,7 +200,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
     }
 
     /**
-     * @param array $joinAttr
+     * @param array{alias?: string, attribute?: string, bind?: string, joinType?: string, storeId?: int|string|null} $joinAttr
      * @throws Exception
      */
     public function setJoinAttr($joinAttr): void
@@ -268,7 +272,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
             $filterQuery = $this->getFilter();
             if (is_array($filterQuery)) {
                 foreach ($filterQuery as $val) {
-                    $collection->addFieldToFilter([$val]);
+                    $collection->addAttributeToFilter([$val]);
                 }
             }
 

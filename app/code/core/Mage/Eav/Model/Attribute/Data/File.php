@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ * @phpstan-import-type OutputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_Abstract
 {
     /**
@@ -20,7 +24,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Extract data from request and return value
      *
-     * @return false|array|string
+     * @return InputValue
      */
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
@@ -76,8 +80,8 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
      * Validate file by attribute validate rules
      * Return array of errors
      *
-     * @param array $value
-     * @return array
+     * @param array<int|string, bool|int|string> $value An upload of $_FILES
+     * @return list<string>
      */
     protected function _validateByRules($value)
     {
@@ -125,9 +129,9 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Validate data
      *
-     * @param array|string|false|null $value
+     * @param InputValue $value
      * @throws Mage_Core_Exception
-     * @return true|array<string>
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -173,7 +177,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Export attribute value to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -235,7 +239,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Restore attribute value from SESSION to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      */
     #[\Override]
@@ -248,7 +252,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
      * Return formatted attribute value from entity model
      *
      * @param string $format
-     * @return string|array
+     * @return OutputValue
      * @throws Mage_Core_Exception
      */
     #[\Override]

@@ -8,6 +8,15 @@
  * @package Mage_Eav
  */
 
+/**
+ * A value is a text, a list of texts for a multiline or multiselect attribute, or an upload of $_FILES for a file
+ * attribute: the keys name, type, tmp_name, error and size, and the key delete when the form removes the file.
+ * extractValue() returns false when the request does not hold the field. A caller that passes the data of a model,
+ * such as the cart service with a quote address, passes the types of the database: an int, a float or a bool.
+ *
+ * @phpstan-type InputValue string|int|float|bool|array<int|string, scalar|null>|null
+ * @phpstan-type OutputValue string|int|float|false|array<int|string, int|string>|null
+ */
 abstract class Mage_Eav_Model_Attribute_Data_Abstract
 {
     /**
@@ -49,7 +58,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Array of full extracted data
      * Needed for depends attributes
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $_extractedData       = [];
 
@@ -132,6 +141,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set array of full extracted data
      *
+     * @param array<string, mixed> $data The data of the entity, which the conditions of the attributes read
      * @return $this
      */
     public function setExtractedData(array $data)
@@ -278,7 +288,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Validate value by attribute input validation rule
      *
      * @param string $value
-     * @return string|array|true
+     * @return list<string>|true
      */
     protected function _validateInputRule($value)
     {
@@ -403,23 +413,23 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Extract data from request and return value
      *
-     * @return array|string|false
+     * @return InputValue
      */
     abstract public function extractValue(Mage_Core_Controller_Request_Http $request);
 
     /**
      * Validate data
      *
-     * @param array|string|false|null $value
+     * @param InputValue $value
      * @throws Mage_Core_Exception
-     * @return true|array<string>
+     * @return true|list<string>
      */
     abstract public function validateValue($value);
 
     /**
      * Export attribute value to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      */
     abstract public function compactValue($value);
@@ -427,7 +437,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Restore attribute value from SESSION to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      */
     abstract public function restoreValue($value);
@@ -436,7 +446,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Return formatted attribute value from entity model
      *
      * @param string $format
-     * @return string|array
+     * @return OutputValue
      */
     abstract public function outputValue($format = Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_TEXT);
 }

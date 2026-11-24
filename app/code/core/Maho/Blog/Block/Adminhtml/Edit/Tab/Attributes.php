@@ -25,7 +25,7 @@ class Maho_Blog_Block_Adminhtml_Edit_Tab_Attributes extends Mage_Adminhtml_Block
     }
 
     /**
-     * @return list<Maho_Blog_Model_Resource_Eav_Attribute>
+     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributes(): array
     {

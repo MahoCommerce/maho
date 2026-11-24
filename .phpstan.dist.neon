@@ -60,7 +60,6 @@ parameters:
                 - app/code/core/Mage/Customer/*
                 - app/code/core/Mage/Dataflow/*
                 - app/code/core/Mage/Downloadable/*
-                - app/code/core/Mage/Eav/*
                 - app/code/core/Mage/GiftMessage/*
                 - app/code/core/Mage/GoogleAnalytics/*
                 - app/code/core/Mage/ImportExport/*

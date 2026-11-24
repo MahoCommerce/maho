@@ -9,14 +9,22 @@
  */
 
 /**
+ * @phpstan-import-type SourceOption from Mage_Eav_Model_Entity_Attribute_Source_Interface
  * @extends Mage_Eav_Model_Entity_Attribute_Source_Abstract<Mage_Catalog_Model_Resource_Collection_Abstract>
  */
 class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     /**
-     * Default values for option cache
+     * Options with the labels of the store, by store ID
      *
-     * @var array
+     * @var array<int, list<SourceOption>>
+     */
+    protected array $_optionsByStore = [];
+
+    /**
+     * Options with the admin labels, by store ID
+     *
+     * @var array<int, list<SourceOption>>
      */
     protected $_optionsDefault = [];
 
@@ -25,13 +33,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
     {
         $storeId = $this->getAttribute()->getStoreId();
         $storeId ??= 0;
-        if (!is_array($this->_options)) {
-            $this->_options = [];
-        }
-        if (!is_array($this->_optionsDefault)) {
-            $this->_optionsDefault = [];
-        }
-        if (!isset($this->_options[$storeId])) {
+        if (!isset($this->_optionsByStore[$storeId])) {
             $idPrefix = 'ATTRIBUTE_OPTIONS_ID_' . $this->getAttribute()->getId();
             $tags = array_merge(
                 ['eav', Mage_Core_Model_Translate::CACHE_TAG],
@@ -43,10 +45,10 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
                 ->setStoreFilter($this->getAttribute()->getStoreId())
                 ->initCache(Mage::app()->getCache(), $idPrefix, $tags)
                 ->load();
-            $this->_options[$storeId]        = $collection->toOptionArray();
+            $this->_optionsByStore[$storeId] = $collection->toOptionArray();
             $this->_optionsDefault[$storeId] = $collection->toOptionArray('default_value');
         }
-        $options = ($defaultValues ? $this->_optionsDefault[$storeId] : $this->_options[$storeId]);
+        $options = ($defaultValues ? $this->_optionsDefault[$storeId] : $this->_optionsByStore[$storeId]);
         if ($withEmpty) {
             array_unshift($options, ['label' => '', 'value' => '']);
         }
@@ -58,7 +60,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Table extends Mage_Eav_Model_Entity
      * Get a text for option value
      *
      * @param string|int $value
-     * @return string|array|false
+     * @return string|list<string>|false
      */
     #[\Override]
     public function getOptionText($value)

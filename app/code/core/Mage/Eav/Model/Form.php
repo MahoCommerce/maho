@@ -8,6 +8,12 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TAttribute of Mage_Eav_Model_Attribute = Mage_Eav_Model_Attribute
+ *
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ * @phpstan-import-type OutputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 abstract class Mage_Eav_Model_Form
 {
     /**
@@ -55,21 +61,21 @@ abstract class Mage_Eav_Model_Form
     /**
      * Array of form attributes
      *
-     * @var array|null
+     * @var array<string, TAttribute>|null
      */
     protected $_attributes;
 
     /**
      * Array of form system attributes
      *
-     * @var array|null
+     * @var array<string, TAttribute>|null
      */
     protected $_systemAttributes;
 
     /**
      * Array of form user defined attributes
      *
-     * @var array|null
+     * @var array<string, TAttribute>|null
      */
     protected $_userAttributes;
 
@@ -105,7 +111,7 @@ abstract class Mage_Eav_Model_Form
     /**
      * Get EAV Entity Form Attribute Collection
      *
-     * @return mixed
+     * @return Mage_Eav_Model_Resource_Form_Attribute_Collection<TAttribute>
      */
     protected function _getFormAttributeCollection()
     {
@@ -218,12 +224,11 @@ abstract class Mage_Eav_Model_Form
     /**
      * Return array of form attributes
      *
-     * @return Mage_Customer_Model_Attribute[]
+     * @return array<string, TAttribute>
      */
     public function getAttributes()
     {
         if (is_null($this->_attributes)) {
-            /** @var Mage_Eav_Model_Resource_Form_Attribute_Collection $collection */
             $collection = $this->_getFormAttributeCollection();
 
             $collection->setStore($this->getStore())
@@ -233,8 +238,8 @@ abstract class Mage_Eav_Model_Form
 
             $this->_attributes      = [];
             $this->_userAttributes  = [];
+            $this->_systemAttributes = [];
             foreach ($collection as $attribute) {
-                /** @var Mage_Eav_Model_Entity_Attribute $attribute */
                 $this->_attributes[$attribute->getAttributeCode()] = $attribute;
                 if ($attribute->getIsUserDefined()) {
                     $this->_userAttributes[$attribute->getAttributeCode()] = $attribute;
@@ -250,7 +255,7 @@ abstract class Mage_Eav_Model_Form
      * Return attribute instance by code or false
      *
      * @param string $attributeCode
-     * @return Mage_Eav_Model_Entity_Attribute|false
+     * @return TAttribute|false
      */
     public function getAttribute($attributeCode)
     {
@@ -261,7 +266,7 @@ abstract class Mage_Eav_Model_Form
     /**
      * Return array of form user defined attributes
      *
-     * @return array
+     * @return array<string, TAttribute>
      */
     public function getUserAttributes()
     {
@@ -275,7 +280,7 @@ abstract class Mage_Eav_Model_Form
     /**
      * Return array of form system attributes
      *
-     * @return array
+     * @return array<string, TAttribute>
      */
     public function getSystemAttributes()
     {
@@ -299,6 +304,8 @@ abstract class Mage_Eav_Model_Form
 
     /**
      * Prepare request with data and returns it
+     *
+     * @param array<string, mixed> $data The request parameters
      */
     public function prepareRequest(array $data): Mage_Core_Controller_Request_Http
     {
@@ -315,6 +322,7 @@ abstract class Mage_Eav_Model_Form
      *
      * @param string $scope the request scope
      * @param bool $scopeOnly search value only in scope or search value in global too
+     * @return array<string, InputValue>
      */
     public function extractData(Mage_Core_Controller_Request_Http $request, $scope = null, $scopeOnly = true): array
     {
@@ -334,7 +342,8 @@ abstract class Mage_Eav_Model_Form
     /**
      * Validate data array and return true or array of errors
      *
-     * @return bool|array
+     * @param array<string, InputValue> $data
+     * @return true|list<string>
      */
     public function validateData(array $data)
     {
@@ -362,6 +371,7 @@ abstract class Mage_Eav_Model_Form
     /**
      * Compact data array to current entity
      *
+     * @param array<string, InputValue> $data
      * @return $this
      */
     public function compactData(array $data)
@@ -382,6 +392,7 @@ abstract class Mage_Eav_Model_Form
     /**
      * Restore data array from SESSION to current entity
      *
+     * @param array<string, InputValue> $data
      * @return $this
      */
     public function restoreData(array $data)
@@ -402,7 +413,7 @@ abstract class Mage_Eav_Model_Form
      * Return array of entity formatted values
      *
      * @param string $format
-     * @return array
+     * @return array<string, OutputValue>
      */
     public function outputData($format = Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_TEXT)
     {

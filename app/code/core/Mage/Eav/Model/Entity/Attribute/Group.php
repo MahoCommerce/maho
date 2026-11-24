@@ -56,11 +56,17 @@ class Mage_Eav_Model_Entity_Attribute_Group extends Mage_Core_Model_Abstract
         return $this->setData('attribute_set_id', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute>|null
+     */
     public function getAttributes(): ?array
     {
         return $this->getData('attributes');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute>|null $value
+     */
     public function setAttributes(?array $value): static
     {
         return $this->setData('attributes', $value);

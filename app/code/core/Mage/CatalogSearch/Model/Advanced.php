@@ -236,14 +236,14 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
                 $value[$key] = $attribute->getSource()->getOptionText($val);
 
                 if (is_array($value[$key])) {
-                    $value[$key] = $value[$key]['label'];
+                    $value[$key] = implode(', ', $value[$key]);
                 }
             }
             $value = implode(', ', $value);
         } elseif ($attribute->getFrontendInput() == 'select' || $attribute->getFrontendInput() == 'multiselect') {
             $value = $attribute->getSource()->getOptionText($value);
             if (is_array($value)) {
-                $value = $value['label'];
+                $value = implode(', ', $value);
             }
         } elseif ($attribute->getFrontendInput() == 'boolean') {
             $value = $value == 1

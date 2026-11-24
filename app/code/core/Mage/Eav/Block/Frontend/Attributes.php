@@ -13,6 +13,8 @@ declare(strict_types=1);
  * attribute set, and a titled text under the table for each value of a Text Area attribute.
  *
  * The layout names the record with the action setRegistryKey, for example current_category.
+ *
+ * @phpstan-type AttributeRow array{label: string, value: string, code: string, text: bool}
  */
 class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
 {
@@ -34,7 +36,7 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
      * does not hide. A Text Area value is a text: it shows under the table, because a long value does not fit in a
      * cell.
      *
-     * @return list<array{label: string, value: string, code: string, text: bool}>
+     * @return list<AttributeRow>
      */
     public function getAttributeValues(): array
     {
@@ -84,7 +86,7 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
      * has the rows of its table and its texts. The first group takes the title of the block, or
      * "Additional Information". Each other group takes the label of its group in the current store view.
      *
-     * @return list<array{title: string, named: bool, rows: list<array>, texts: list<array>}>
+     * @return list<array{title: string, named: bool, rows: list<AttributeRow>, texts: list<AttributeRow>}>
      */
     public function getAttributeGroups(): array
     {
@@ -120,6 +122,8 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
 
     /**
      * Return the HTML of a value. HTML stays only when the attribute allows HTML or uses the WYSIWYG editor.
+     *
+     * @param AttributeRow $row
      */
     public function getValueHtml(array $row): string
     {
@@ -132,6 +136,8 @@ class Mage_Eav_Block_Frontend_Attributes extends Mage_Core_Block_Template
 
     /**
      * Return the HTML of a text of getAttributeGroups(). A value without HTML keeps its line breaks.
+     *
+     * @param AttributeRow $row
      */
     public function getTextHtml(array $row): string
     {

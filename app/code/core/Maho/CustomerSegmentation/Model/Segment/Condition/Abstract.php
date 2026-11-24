@@ -244,7 +244,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     }
 
     /**
-     * @return list<array{value: int|string, label: string}>
+     * @return list<array{value: int|string|list<array{value: int|string, label: string}>, label: string}>
      */
     protected function getCustomValueOptions(Mage_Eav_Model_Entity_Attribute_Abstract $attribute): array
     {
@@ -257,10 +257,24 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         if (!in_array($attribute->getFrontendInput(), ['select', 'multiselect'], true) || !$attribute->usesSource()) {
             return [];
         }
-        return array_values(array_filter(
-            $attribute->getSource()->getAllOptions(),
-            fn(array $option): bool => ($option['value'] ?? '') !== '',
-        ));
+        $options = [];
+        foreach ($attribute->getSource()->getAllOptions() as $option) {
+            if (is_array($option['value'])) {
+                // A group keeps its children, which the select shows as an optgroup
+                $group = [];
+                foreach ($option['value'] as $child) {
+                    if ($child['value'] !== '') {
+                        $group[] = ['value' => $child['value'], 'label' => $child['label']];
+                    }
+                }
+                if ($group) {
+                    $options[] = ['value' => $group, 'label' => $option['label']];
+                }
+            } elseif ($option['value'] !== '') {
+                $options[] = ['value' => $option['value'], 'label' => $option['label']];
+            }
+        }
+        return $options;
     }
 
     /**

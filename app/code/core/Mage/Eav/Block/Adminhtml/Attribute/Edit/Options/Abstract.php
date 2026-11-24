@@ -81,7 +81,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
     /**
      * Retrieve attribute option values if attribute input type select or multiselect
      *
-     * @return array
+     * @return list<\Maho\DataObject>
      */
     public function getOptionValues()
     {
@@ -138,7 +138,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
     /**
      * Retrieve frontend labels of attribute for each store
      *
-     * @return array
+     * @return array<int|string, ?string> The labels by store ID
      */
     public function getLabelValues()
     {
@@ -161,7 +161,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
      * Retrieve attribute option values for given store id
      *
      * @param int $storeId
-     * @return array
+     * @return array<int|string, ?string> The option labels of the store by option ID
      */
     public function getStoreOptionValues($storeId)
     {

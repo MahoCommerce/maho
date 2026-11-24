@@ -10,6 +10,9 @@
 
 class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype
 {
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         return [

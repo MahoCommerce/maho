@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type AttributeSetInfo from Mage_Eav_Model_Entity_Attribute_Abstract
+ */
 class Mage_Eav_Model_Config
 {
     /**
@@ -29,6 +33,9 @@ class Mage_Eav_Model_Config
         'is_unique',
     ];
 
+    /**
+     * @var array<int|string, bool>
+     */
     protected array $_storeInitialized = [];
 
     /**
@@ -62,7 +69,7 @@ class Mage_Eav_Model_Config
      *          int sort,
      *      ]
      * ]
-     * @var mixed[][][][]|null
+     * @var array<int|string, AttributeSetInfo>|null
      */
     protected $_attributeSetInfo;
 
@@ -276,7 +283,6 @@ class Mage_Eav_Model_Config
 
         $this->_entityTypes = [];
         $this->_entityTypeByCode = [];
-        /** @var array $entityTypeData */
         foreach ($cacheData['_entityTypes'] as $entityTypeData) {
             $entityType = Mage::getModel('eav/entity_type')
                 ->setData($entityTypeData);
@@ -285,10 +291,7 @@ class Mage_Eav_Model_Config
         }
 
         $this->_entityTypeAttributes[$storeId] = [];
-        /** @var int $entityTypeId */
-        /** @var array $entityTypeAttributes */
         foreach ($cacheData['_entityTypeAttributes'] as $entityTypeId => $entityTypeAttributes) {
-            /** @var array $attributeData */
             foreach ($entityTypeAttributes as $attributeData) {
                 $attributeId = $attributeData['attribute_id'];
                 $attributeCode = $attributeData['attribute_code'];
@@ -347,7 +350,7 @@ class Mage_Eav_Model_Config
     /**
      * Create model instance from array
      *
-     * @param array $attributeData
+     * @param array<string, DbValue|AttributeSetInfo> $attributeData The row of the attribute and of its additional table, with the attribute_set_info that the collection adds
      * @return Mage_Eav_Model_Entity_Attribute_Abstract|false
      * @throws Mage_Core_Exception
      */
@@ -599,7 +602,7 @@ class Mage_Eav_Model_Config
      * Return first attribute sorting information found for a given list of attribute sets
      * @param int $attributeId
      * @param int|int[] $attributeSetIds
-     * @return false|array
+     * @return false|array{group_id: DbValue, group_sort: DbValue, sort: DbValue}
      */
     public function getAttributeSetGroupInfo($attributeId, $attributeSetIds)
     {

@@ -1761,8 +1761,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         }
 
         $this->_items = [];
-        $this->_data = [];
-        $this->_itemsById = [];
+        $this->resetData();
         return parent::clear();
     }
 
