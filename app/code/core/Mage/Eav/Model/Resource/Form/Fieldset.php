@@ -10,8 +10,6 @@
 
 /**
  * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Form_Fieldset>
- *
- * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_Abstract
 {
@@ -97,7 +95,7 @@ class Mage_Eav_Model_Resource_Form_Fieldset extends Mage_Core_Model_Resource_Db_
      * Retrieve fieldset labels for stores
      *
      * @param Mage_Eav_Model_Form_Fieldset $object
-     * @return array<int|string, DbValue> The labels by store ID
+     * @return array<int|string, string> The labels by store ID
      */
     public function getLabels($object)
     {

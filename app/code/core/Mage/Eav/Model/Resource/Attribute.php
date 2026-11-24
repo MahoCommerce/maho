@@ -171,7 +171,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Return forms in which the attribute
      *
-     * @return list<DbValue> The form codes
+     * @return list<string> The form codes
      */
     public function getUsedInForms(Mage_Core_Model_Abstract $object)
     {

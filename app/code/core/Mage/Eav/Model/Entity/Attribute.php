@@ -17,8 +17,6 @@ declare(strict_types=1);
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Collection getResourceCollection()
  *
  * @method $this unsIsVisible()
- *
- * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
@@ -764,7 +762,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * Retrieve attribute codes by frontend type
      *
      * @param string $type
-     * @return list<DbValue>
+     * @return list<string>
      */
     public function getAttributeCodesByFrontendType($type)
     {
@@ -774,7 +772,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Return array of labels of stores
      *
-     * @return array<int|string, DbValue> The labels by store ID
+     * @return array<int|string, ?string> The labels by store ID
      */
     public function getStoreLabels()
     {

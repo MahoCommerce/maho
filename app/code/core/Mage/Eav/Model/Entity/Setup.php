@@ -10,7 +10,8 @@
 
 /**
  * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
- * @phpstan-type AttributeDefinition array{option?: AttributeOption, ...<string, mixed>}
+ * @phpstan-type AttributeDefinition array{option?: AttributeOption, ...<string, scalar|null>}
+ * @phpstan-type AttributeRow array<string, string|int|float|null>
  * @phpstan-type AttributeOption array{attribute_id?: int|string|false, value?: array<int|string, array<int, string>>, order?: array<int|string, int>, delete?: array<int|string, bool|int|string>, values?: list<string>}
  * @phpstan-type EntityDefinition array{entity_model: string, attribute_model?: string, table?: string, table_prefix?: string, id_field?: string, increment_model?: string, increment_per_store?: bool|int, increment_pad_length?: int, increment_pad_char?: string, additional_attribute_table?: string, entity_attribute_collection?: string, frontend_prefix?: string, backend_prefix?: string, source_prefix?: string, attributes?: array<string, AttributeDefinition>}
  */
@@ -574,10 +575,10 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Retrieve value from array by key or return default value
      *
-     * @param AttributeDefinition|EntityDefinition $array
+     * @param array<string, scalar|AttributeOption|array<string, AttributeDefinition>|null> $array An attribute or an entity definition
      * @param string $key
      * @param string|int|null $default
-     * @return mixed The value of $key, with a boolean as 0 or 1
+     * @return string|int|float|null The value of $key, with a boolean as 0 or 1
      */
     protected function _getValue($array, $key, $default = null)
     {
@@ -591,7 +592,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * Prepare attribute values to save
      *
      * @param AttributeDefinition $attr
-     * @return array<string, mixed>
+     * @return AttributeRow
      */
     protected function _prepareValues($attr)
     {
@@ -616,7 +617,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Validate attribute data before insert into table
      *
-     * @param  array<string, mixed> $data
+     * @param  AttributeRow $data
      * @throws Mage_Eav_Exception
      * @return true
      */
@@ -782,7 +783,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array<string, mixed>|string $field A column name, or the values by column name
+     * @param array<string, scalar|null>|string $field A column name, or the values by column name
      * @param mixed $value
      * @param int $sortOrder
      * @return $this
@@ -799,7 +800,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array<string, mixed>|string $field A column name, or the values by column name
+     * @param array<string, scalar|null>|string $field A column name, or the values by column name
      * @param mixed $value
      * @param int $sortOrder
      * @return $this
@@ -852,7 +853,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array<string, mixed>|string $field A column name, or the values by column name
+     * @param array<string, scalar|null>|string $field A column name, or the values by column name
      * @param mixed $value
      * @return $this
      */
@@ -1235,7 +1236,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Insert attribute and filter data
      *
-     * @param array<string, mixed> $data
+     * @param AttributeRow $data
      * @return $this
      */
     protected function _insertAttribute(array $data)
@@ -1267,7 +1268,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * Insert attribute additional data
      *
      * @param int $entityTypeId
-     * @param array<string, mixed> $data
+     * @param AttributeRow $data
      * @return $this
      */
     protected function _insertAttributeAdditionalData($entityTypeId, array $data)

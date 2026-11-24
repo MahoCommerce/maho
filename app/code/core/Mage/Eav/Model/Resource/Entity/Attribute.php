@@ -430,7 +430,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Retrieve attribute codes by front-end type
      *
      * @param string $frontendType
-     * @return list<DbValue>
+     * @return list<string>
      */
     public function getAttributeCodesByFrontendType($frontendType)
     {
@@ -503,7 +503,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Retrieve store labels by given attribute id
      *
      * @param int $attributeId
-     * @return array<int|string, DbValue> The labels by store ID
+     * @return array<int|string, ?string> The labels by store ID
      */
     public function getStoreLabelsByAttributeId($attributeId)
     {

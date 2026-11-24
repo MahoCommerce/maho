@@ -10,9 +10,6 @@
 
 declare(strict_types=1);
 
-/**
- * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
- */
 abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
 {
     /**
@@ -83,7 +80,7 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     /**
      * Return forms in which the attribute
      *
-     * @return list<DbValue> The form codes
+     * @return list<string> The form codes
      */
     public function getUsedInForms()
     {
