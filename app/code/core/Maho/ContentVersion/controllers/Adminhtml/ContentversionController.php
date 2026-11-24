@@ -56,12 +56,19 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
 
         Mage::register('contentversion_preview', $version);
 
+        try {
+            $changes = Mage::helper('contentversion')->getRestoreChanges($version);
+        } catch (Mage_Core_Exception) {
+            $changes = null;
+        }
+
         $this->loadLayout();
         $this->_setActiveMenu('cms');
 
         /** @var Mage_Adminhtml_Block_Template $block */
         $block = $this->getLayout()->createBlock('adminhtml/template')
-            ->setTemplate('contentversion/preview.phtml');
+            ->setTemplate('contentversion/preview.phtml')
+            ->setData('restore_changes', $changes);
         $this->_addContent($block);
 
         $this->renderLayout();

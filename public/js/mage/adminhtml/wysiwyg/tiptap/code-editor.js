@@ -4,7 +4,7 @@
 import {
     EditorView, basicSetup, htmlLanguage, htmlCompletionSource, autoCloseTags, css, javascript, xml,
     HighlightStyle, LanguageSupport, syntaxHighlighting, syntaxTree, tags, linter,
-    Decoration, MatchDecorator, ViewPlugin, WidgetType, autocompletion, hoverTooltip,
+    Decoration, MatchDecorator, ViewPlugin, WidgetType, autocompletion, hoverTooltip, EditorState, MergeView,
 } from '../../../../codemirror.js';
 import { classDetails, findUnknownClasses, listClasses, shortClasses, sortClasses } from './class-check.js';
 
@@ -346,6 +346,39 @@ export const createCssView = (parent, doc, extensions = []) => new EditorView({
     doc,
     extensions: [basicSetup, css(), syntaxHighlighting(HIGHLIGHT), THEME, EditorView.lineWrapping, ...extensions],
 });
+
+/**
+ * A read-only view of the changes from the HTML `a` to the HTML `b`, side by side, in `parent`.
+ * The view marks the changed lines and the changed text, and it folds the lines that did not change.
+ */
+export const createHtmlMergeView = (parent, a, b) => {
+    const shared = [
+        basicSetup,
+        new LanguageSupport(htmlLanguage, [javascript().support, css().support]),
+        syntaxHighlighting(HIGHLIGHT),
+        THEME,
+        // The merge view scrolls both sides together, so a side has no scroll area of its own
+        EditorView.theme({
+            '.cm-scroller': { maxHeight: 'none' },
+            // `&.cm-editor` outranks the light colors of the base theme of the merge view
+            '&.cm-editor .cm-collapsedLines': {
+                background: 'linear-gradient(transparent, var(--maho-surface-sunken, #f1f1f1) 30% 70%, transparent)',
+                color: 'var(--maho-ink-muted, #666)',
+            },
+        }),
+        EditorView.lineWrapping,
+        EditorState.readOnly.of(true),
+        EditorView.editable.of(false),
+    ];
+    const view = new MergeView({
+        parent,
+        a: { doc: a, extensions: shared },
+        b: { doc: b, extensions: shared },
+        collapseUnchanged: { margin: 3, minSize: 4 },
+    });
+    view.dom.style.maxHeight = '70vh';
+    return view;
+};
 
 /**
  * The source view of a content field: CodeMirror before `content`, the content of the rich text

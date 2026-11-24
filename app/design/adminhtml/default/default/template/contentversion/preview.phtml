@@ -17,6 +17,9 @@ $typeLabels = [
     'cms_block' => $this->__('CMS Block'),
     'blog_post' => $this->__('Blog Post'),
 ];
+/** @var array<string, array{current: string, version: string}>|null $changes */
+$changes = $this->getData('restore_changes');
+$fieldLabel = fn(string $field): string => $this->escapeHtml(ucwords(str_replace('_', ' ', $field)));
 $restoreUrl = $this->getUrl('adminhtml/contentversion/restore', ['version_id' => $versionId]);
 $confirmMsg = $this->jsQuoteEscape(
     $this->__('Are you sure you want to restore this version? The current content will be saved as a new version first.'),
@@ -51,12 +54,64 @@ $confirmMsg = $this->jsQuoteEscape(
 </div>
 
 <div class="entry-edit" style="margin-top: 1rem;">
+    <div class="entry-edit-head"><h4><?= $this->__('Changes on Restore') ?></h4></div>
+    <fieldset class="fieldset-wide">
+        <?php if ($changes === null): ?>
+            <p><?= $this->__('The current content is not available, so this page cannot show the changes.') ?></p>
+        <?php elseif ($changes === []): ?>
+            <p><?= $this->__('This version is the same as the current content.') ?></p>
+        <?php else: ?>
+            <p class="mb-2"><?= $this->__('A restore replaces the current value of each field below with the value of this version.') ?></p>
+            <table class="form-list" cellspacing="0">
+                <?php foreach ($changes as $field => $values): ?>
+                <tr>
+                    <td class="label" style="vertical-align: top;"><?= $fieldLabel($field) ?></td>
+                    <td class="value">
+                        <?php if ($field === 'content' || str_contains($values['current'] . $values['version'], "\n")): ?>
+                            <div class="mb-1 flex gap-2 font-semibold">
+                                <span class="flex-1"><?= $this->__('Current') ?></span>
+                                <span class="flex-1"><?= $this->__('This Version') ?></span>
+                            </div>
+                            <div data-contentversion-diff data-current="<?= $this->escapeHtml($values['current']) ?>" data-version="<?= $this->escapeHtml($values['version']) ?>"></div>
+                        <?php else: ?>
+                            <div class="flex flex-col gap-1">
+                                <?php foreach (['current' => $this->__('Current'), 'version' => $this->__('This Version')] as $side => $label): ?>
+                                <div>
+                                    <span class="d-badge d-badge-sm <?= $side === 'current' ? 'd-badge-error' : 'd-badge-success' ?> d-badge-soft"><?= $label ?></span>
+                                    <?php if ($values[$side] === ''): ?>
+                                        <em><?= $this->__('(empty)') ?></em>
+                                    <?php else: ?>
+                                        <span class="whitespace-pre-wrap"><?= $this->escapeHtml($values[$side]) ?></span>
+                                    <?php endif ?>
+                                </div>
+                                <?php endforeach ?>
+                            </div>
+                        <?php endif ?>
+                    </td>
+                </tr>
+                <?php endforeach ?>
+            </table>
+        <?php endif ?>
+    </fieldset>
+</div>
+
+<script type="module">
+const containers = document.querySelectorAll('[data-contentversion-diff]');
+if (containers.length) {
+    const { createHtmlMergeView } = await import(<?= Mage::helper('core')->jsonEncode($this->getJsUrl('mage/adminhtml/wysiwyg/tiptap/code-editor.js')) ?>);
+    for (const container of containers) {
+        createHtmlMergeView(container, container.dataset.current, container.dataset.version);
+    }
+}
+</script>
+
+<div class="entry-edit" style="margin-top: 1rem;">
     <div class="entry-edit-head"><h4><?= $this->__('Snapshot Data') ?></h4></div>
     <fieldset class="fieldset-wide">
         <table class="form-list" cellspacing="0">
             <?php foreach ($data as $field => $value): ?>
             <tr>
-                <td class="label" style="vertical-align: top;"><?= $this->escapeHtml(ucwords(str_replace('_', ' ', $field))) ?></td>
+                <td class="label" style="vertical-align: top;"><?= $fieldLabel($field) ?></td>
                 <td class="value">
                     <?php if ($field === 'content'): ?>
                         <iframe
