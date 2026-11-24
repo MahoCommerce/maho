@@ -8,6 +8,9 @@
  * @package Mage_Checkout
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Checkout_Block_Cart_Item_Renderer_Configurable extends Mage_Checkout_Block_Cart_Item_Renderer
 {
     public const string CONFIGURABLE_PRODUCT_IMAGE = 'checkout/cart/configurable_product_image';
@@ -86,7 +89,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer_Configurable extends Mage_Checkout_
     /**
      * Get list of all options for product
      *
-     * @return array
+     * @return list<ItemOption>
      */
     #[\Override]
     public function getOptionList()

@@ -97,4 +97,21 @@ describe('Invalid gift card removal on totals collection', function (): void {
         expect((float) $quote->getBaseGiftcardAmount())->toBe(0.0);
         expect((float) $quote->getGiftcardAmount())->toBe(0.0);
     });
+
+    test('collect applies a card whose code is a number', function (): void {
+        $card = Mage::getModel('giftcard/giftcard');
+        $card->setCode((string) random_int(10000000, 99999999));
+        $card->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $card->setWebsiteIds([1]);
+        $card->setBalance(50.00);
+        $card->setInitialBalance(50.00);
+        $card->save();
+
+        $quote = ($this->makeQuote)();
+        $quote->setGiftcardCodes(json_encode([$card->getCode() => 50.00]));
+        $quote->collectTotals();
+
+        expect(json_decode((string) $quote->getGiftcardCodes(), true))->toHaveKey($card->getCode())
+            ->and((float) $quote->getBaseGiftcardAmount())->toBeGreaterThan(0.0);
+    });
 });

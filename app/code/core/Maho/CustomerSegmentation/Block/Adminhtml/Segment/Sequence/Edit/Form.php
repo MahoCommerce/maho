@@ -133,6 +133,8 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit_Form exten
 
     /**
      * Get newsletter template options
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     protected function getTemplateOptions(): array
     {
@@ -151,6 +153,8 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit_Form exten
 
     /**
      * Get sales rule options for coupon generation
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     protected function getSalesRuleOptions(): array
     {

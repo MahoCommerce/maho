@@ -93,7 +93,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     /**
      * Get value select options (not used for source matching)
      *
-     * @return array
+     * @return list<array{value: int|string, label: string}>
      */
     #[\Override]
     public function getValueSelectOptions()
@@ -202,6 +202,10 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
             . '</div>';
     }
 
+    /**
+     * @param array<mixed> $arrAttributes
+     * @return array<string, mixed>
+     */
     #[\Override]
     public function asArray(array $arrAttributes = []): array
     {

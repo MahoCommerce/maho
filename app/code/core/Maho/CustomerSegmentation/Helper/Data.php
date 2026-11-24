@@ -10,12 +10,19 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    /**
+     * @return list<int|string>
+     */
     public function getCustomerSegmentIds(int $customerId, ?int $websiteId = null): array
     {
         $resource = Mage::getResourceModel('customersegmentation/segment');
         return $resource->getCustomerSegmentIds($customerId, $websiteId);
     }
 
+    /**
+     * @param array<int|string>|string|null $segmentIds
+     * @return list<int>
+     */
     public function getQueueSegmentIds(array|string|null $segmentIds): array
     {
         if (!is_array($segmentIds)) {
@@ -31,6 +38,8 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
      * the selected stores.
      *
      * @return array{unknown: int[], outside: string[]}
+     * @param list<int> $segmentIds
+     * @param array<int|string> $storeIds
      */
     public function getQueueSegmentIssues(array $segmentIds, array $storeIds): array
     {
@@ -65,12 +74,20 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Ids that no longer resolve to a segment, deleted between form and save.
+     *
+     * @param list<int> $segmentIds
+     * @return list<int>
      */
     public function getUnknownSegmentIds(array $segmentIds): array
     {
         return $this->getQueueSegmentIssues($segmentIds, [])['unknown'];
     }
 
+    /**
+     * @param list<int> $segmentIds
+     * @param array<int|string> $storeIds
+     * @return list<string>
+     */
     public function getSegmentsOutsideStores(array $segmentIds, array $storeIds): array
     {
         if ($storeIds === []) {

@@ -415,7 +415,11 @@ final class AdminPageTool
         return $lines === false ? '' : implode('', array_slice($lines, $start - 1, $end - $start + 1));
     }
 
-    /** API resource path segment => ACL resource of its admin page, from the API resource classes. */
+    /**
+     * API resource path segment => ACL resource of its admin page, from the API resource classes.
+     *
+     * @var array<string, string>|null
+     */
     private ?array $resourceAcl = null;
 
     /**

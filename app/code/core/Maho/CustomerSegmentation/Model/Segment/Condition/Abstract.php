@@ -93,6 +93,9 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return Mage::getSingleton('core/resource')->getTableName('customer/entity');
     }
 
+    /**
+     * @return array{table: string, attribute_id: int|string}|false
+     */
     protected function getCustomerAttributeTable(string $attributeCode): array|false
     {
         $attribute = Mage::getSingleton('eav/config')
@@ -118,6 +121,9 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return Mage::getSingleton('core/resource')->getTableName('sales/quote');
     }
 
+    /**
+     * @return array{table: string, attribute_id: int|string}|false
+     */
     protected function getCustomerAddressAttributeTable(string $attributeCode): array|false
     {
         $attribute = Mage::getSingleton('eav/config')
@@ -348,6 +354,9 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         return count($codes) === 1 ? $valueName . ' ' . reset($codes) : $valueName;
     }
 
+    /**
+     * @param array<mixed> $arr
+     */
     #[\Override]
     public function loadArray($arr, string $key = 'conditions'): self
     {

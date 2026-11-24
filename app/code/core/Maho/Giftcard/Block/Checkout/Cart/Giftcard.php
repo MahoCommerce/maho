@@ -15,6 +15,8 @@ class Maho_Giftcard_Block_Checkout_Cart_Giftcard extends Mage_Core_Block_Templat
 {
     /**
      * Get applied gift card codes from quote
+     *
+     * @return array<int|string, float|int> the applied amount in the base currency by code, an int key for a numeric code
      */
     public function getAppliedGiftcardCodes(): array
     {

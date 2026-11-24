@@ -382,6 +382,8 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Build a placeholder image URL using the configured pattern.
      * Pattern supports {w} and {h} tokens.
+     *
+     * @param array{width?: int, height?: int, ...<string, mixed>} $options
      */
     private function getPlaceholderUrl(array $options, ?int $storeId): string
     {
@@ -547,6 +549,9 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getSingleton('ai/safety_outputSanitizer');
     }
 
+    /**
+     * @param array{input: int, output: int} $tokenUsage
+     */
     private function logRequest(
         string $consumer,
         string $platform,

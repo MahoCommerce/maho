@@ -237,6 +237,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
      * Tree node IDs prefixed with "group_", "section_", or "resource_" are intermediate
      * nodes and are filtered out, only leaf permission IDs (e.g. "products/read") are saved.
      *
+     * @param array<array-key, string|array<array-key, mixed>> $data
      * @return string[]
      */
     private function parsePermissions(array $data): array

@@ -49,6 +49,9 @@ final class RevocationRequestProvider extends Provider
         return $this->provideSingle((int) ($uriVariables['id'] ?? $context['args']['id'] ?? 0));
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function provideMyCollection(array $context): TraversablePaginator
     {
         $email = $this->requireCustomerEmail();
@@ -59,22 +62,29 @@ final class RevocationRequestProvider extends Provider
         return $this->paginate($collection, $context);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function provideAdminCollection(array $context): TraversablePaginator
     {
         $collection = \Mage::getResourceModel('revocation/request_collection');
 
         $filters = $context['filters'] ?? [];
-        if (!empty($filters['processedStatus'])) {
-            $collection->addFieldToFilter('processed_status', $filters['processedStatus']);
+        $processedStatus = $this->stringFilter($filters, 'processedStatus');
+        if ($processedStatus !== null) {
+            $collection->addFieldToFilter('processed_status', $processedStatus);
         }
-        if (!empty($filters['storeId'])) {
-            $collection->addFieldToFilter('store_id', (int) $filters['storeId']);
+        $storeId = $this->intFilter($filters, 'storeId');
+        if ($storeId) {
+            $collection->addFieldToFilter('store_id', $storeId);
         }
-        if (!empty($filters['email'])) {
-            $collection->addFieldToFilter('email', $filters['email']);
+        $email = $this->stringFilter($filters, 'email');
+        if ($email !== null) {
+            $collection->addFieldToFilter('email', $email);
         }
-        if (!empty($filters['orderId'])) {
-            $collection->addFieldToFilter('order_id', (int) $filters['orderId']);
+        $orderId = $this->intFilter($filters, 'orderId');
+        if ($orderId) {
+            $collection->addFieldToFilter('order_id', $orderId);
         }
 
         return $this->paginate($collection, $context);
@@ -96,6 +106,9 @@ final class RevocationRequestProvider extends Provider
         return RevocationRequest::fromModel($model);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function paginate(object $collection, array $context): TraversablePaginator
     {
         foreach ($this->defaultSort as $field => $dir) {

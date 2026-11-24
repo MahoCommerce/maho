@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Sales_Model_Order_Pdf_Abstract<Maho_Giftcard_Model_Giftcard>
+ */
 class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstract
 {
     use Mage_Core_Model_Pdf_Trait;

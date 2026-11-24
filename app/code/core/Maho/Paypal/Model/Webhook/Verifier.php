@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Webhook_Verifier
 {
+    /**
+     * @param array<string, string> $headers
+     */
     public function verify(array $headers, string $body): bool
     {
         /** @var Maho_Paypal_Model_Config $config */

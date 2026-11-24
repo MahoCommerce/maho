@@ -59,6 +59,7 @@ final class EnumSource
     }
 
     /**
+     * @param iterable<mixed> $options
      * @param list<int|string> $values
      */
     private static function collect(iterable $options, array &$values): void
@@ -96,6 +97,9 @@ final class EnumSource
         return \call_user_func($source);
     }
 
+    /**
+     * @return iterable<mixed>
+     */
     private static function modelOptions(string $alias): iterable
     {
         $model = \Mage::getSingleton($alias);

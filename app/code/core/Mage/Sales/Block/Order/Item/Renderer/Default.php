@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Template
 {
     /**
@@ -49,7 +52,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
     }
 
     /**
-     * @return array
+     * @return list<ItemOption>
      */
     public function getItemOptions()
     {
@@ -58,7 +61,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             if (isset($options['options'])) {
                 $result = array_merge($result, $options['options']);
             }
-            $result = array_merge($result, $this->getOrderItem()->getProductAdditionalOptions());
+            $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeOptionValues($this->getOrderItem()->getProductAdditionalOptions()));
             if (isset($options['attributes_info'])) {
                 $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeAttributesInfo($options['attributes_info']));
             }
@@ -69,22 +72,8 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
     /**
      * Accept option value and return its formatted view
      *
-     * @param mixed $optionValue
-     * Method works well with these $optionValue format:
-     *      1. String
-     *      2. Indexed array e.g. [val1, val2, ...]
-     *      3. Associative array, containing additional option info, including option value, e.g.
-     *          [
-     *          (
-     *              [label] => ...,
-     *              [value] => ...,
-     *              [print_value] => ...,
-     *              [option_id] => ...,
-     *              [option_type] => ...,
-     *              [custom_view] =>...,
-     *          )
-     *
-     * @return array
+     * @param string|list<string>|ItemOption $optionValue a value, a list of values, or an option with its value
+     * @return array{value: string|list<string>, full_view?: string}
      */
     public function getFormatedOptionValue($optionValue)
     {

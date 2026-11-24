@@ -17,6 +17,9 @@ class Maho_Paypal_Block_Payment_Info extends Mage_Payment_Block_Info
         $this->setTemplate('maho/paypal/payment/info.phtml');
     }
 
+    /**
+     * @param \Maho\DataObject|array<mixed>|null $transport
+     */
     #[\Override]
     protected function _prepareSpecificInformation($transport = null): \Maho\DataObject
     {

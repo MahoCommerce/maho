@@ -48,10 +48,15 @@ use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
 use OpenTelemetry\SDK\Trace\Sampler\ParentBased;
 use OpenTelemetry\SDK\Trace\Sampler\TraceIdRatioBasedSampler;
 
+/**
+ * @phpstan-import-type SpanAttributes from \Maho\Profiler
+ */
 class Maho_OpenTelemetry_Model_Tracer
 {
     /**
      * Active span stack
+     *
+     * @var list<Maho_OpenTelemetry_Model_Span>
      */
     private array $_spanStack = [];
 
@@ -273,6 +278,7 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Start a root span (top-level span for a trace)
      *
+     * @param SpanAttributes $attributes
      * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      * @param array<string, string> $parentCarrier Trace context this install wrote itself, e.g. onto a
      *        queue message. Trusted without the incoming-header check, which governs remote callers.
@@ -318,6 +324,7 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Start a child span (nested under current active span)
      *
+     * @param SpanAttributes $attributes
      * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
     public function startSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
@@ -332,6 +339,7 @@ class Maho_OpenTelemetry_Model_Tracer
      * body is consumed later, and the caller's work meanwhile must not nest under the
      * request. flush() closes any still open when the request ends.
      *
+     * @param SpanAttributes $attributes
      * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
     public function startDetachedSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
@@ -339,6 +347,9 @@ class Maho_OpenTelemetry_Model_Tracer
         return $this->_startChildSpan($name, $attributes, $kind, detached: true);
     }
 
+    /**
+     * @param SpanAttributes $attributes
+     */
     private function _startChildSpan(string $name, array $attributes, ?string $kind, bool $detached): Maho_OpenTelemetry_Model_Span
     {
         if (!$this->_enabled || !$this->_tracer || !$this->_rootStarted) {
@@ -440,6 +451,8 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Record the http.server.request.duration histogram (no-op unless metric
      * export is enabled)
+     *
+     * @param SpanAttributes $attributes
      */
     public function recordRequestDuration(float $seconds, array $attributes = []): void
     {
@@ -458,6 +471,8 @@ class Maho_OpenTelemetry_Model_Tracer
 
     /**
      * Increment a counter metric (no-op unless metric export is enabled)
+     *
+     * @param SpanAttributes $attributes
      */
     public function addCounter(string $name, int|float $amount = 1, array $attributes = [], string $unit = '{count}'): void
     {
@@ -554,6 +569,8 @@ class Maho_OpenTelemetry_Model_Tracer
     /**
      * Admin headers with OTEL_EXPORTER_OTLP_HEADERS merged over them per key.
      * The SDK map parser does not percent-decode values, so that step stays here.
+     *
+     * @return array<string, string>
      */
     private function _resolveHeaders(Maho_OpenTelemetry_Helper_Data $helper): array
     {
@@ -612,6 +629,7 @@ class Maho_OpenTelemetry_Model_Tracer
      * @param string $host Destination host; baggage only goes to listed ones
      * @param Maho_OpenTelemetry_Model_Span|null $span Span the receiver should parent to,
      *        defaulting to the active one. A detached client span is not the active one.
+     * @return array<string, string>
      */
     public function getTracePropagationHeaders(string $host = '', ?Maho_OpenTelemetry_Model_Span $span = null): array
     {

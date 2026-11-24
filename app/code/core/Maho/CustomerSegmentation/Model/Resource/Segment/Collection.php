@@ -30,6 +30,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
         return $this;
     }
 
+    /**
+     * @param int|array<int> $websiteId
+     */
     public function addWebsiteFilter(int|array $websiteId): self
     {
         $adapter = $this->getConnection();
@@ -82,6 +85,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
         return $this;
     }
 
+    /**
+     * @param string|list<string> $status
+     */
     public function addRefreshStatusFilter(string|array $status): self
     {
         $this->addFieldToFilter('refresh_status', $status);

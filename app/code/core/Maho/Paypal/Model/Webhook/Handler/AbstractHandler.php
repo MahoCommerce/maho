@@ -8,8 +8,20 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type PaypalMoney from Maho_Paypal_Model_Api_Client
+ * @phpstan-import-type PaypalOrder from Maho_Paypal_Model_Api_Client
+ * @phpstan-import-type PaypalPurchaseUnit from Maho_Paypal_Model_Api_Client
+ * @phpstan-import-type PaypalRelatedIds from Maho_Paypal_Model_Api_Client
+ * @phpstan-import-type PaypalPaymentSource from Maho_Paypal_Model_Api_Client
+ * @phpstan-type WebhookResource array{id?: string, status?: string, invoice_id?: string, amount?: PaypalMoney, purchase_units?: list<PaypalPurchaseUnit>, supplementary_data?: PaypalRelatedIds, status_details?: array{reason?: string, ...}, seller_payable_breakdown?: array{total_refunded_amount?: PaypalMoney, ...}, dispute_id?: string, reason?: string, disputed_transactions?: list<array{seller_transaction_id?: string, ...}>, dispute_outcome?: array{outcome_code?: string, ...}, customer?: array{id?: string, ...}, payment_source?: PaypalPaymentSource, ...}
+ * @phpstan-type WebhookEvent array{id?: string, event_type?: string, event_version?: string, resource_type?: string, resource_version?: string, summary?: string, create_time?: string, resource?: WebhookResource, ...}
+ */
 abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 {
+    /**
+     * @param WebhookEvent $payload
+     */
     abstract public function handle(array $payload): void;
 
     protected function _loadOrderByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Order
@@ -51,6 +63,9 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         return $order->getId() ? $order : null;
     }
 
+    /**
+     * @param WebhookEvent $payload
+     */
     protected function _findOrder(array $payload): ?Mage_Sales_Model_Order
     {
         $resource = $payload['resource'] ?? [];
@@ -149,6 +164,9 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         $helper->releaseOrderLock($paypalOrderId);
     }
 
+    /**
+     * @param PaypalOrder $paypalResult
+     */
     protected function _placeOrderFromPaypalResult(
         Mage_Sales_Model_Quote $quote,
         array $paypalResult,

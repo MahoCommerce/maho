@@ -23,6 +23,9 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
         );
     }
 
+    /**
+     * @return list<string>
+     */
     #[\Override]
     protected function _getDefaultAttributes()
     {
@@ -111,6 +114,9 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
         }
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function lookupStoreIds(int $postId): array
     {
         $adapter = $this->_getReadAdapter();
@@ -138,6 +144,9 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
         return $result ? (int) $result : null;
     }
 
+    /**
+     * @param list<int> $store
+     */
     protected function getLoadByUrlKeySelect(string $urlKey, array $store, ?bool $isActive = null): Maho\Db\Select
     {
         $select = $this->_getReadAdapter()->select()
@@ -324,6 +333,9 @@ class Maho_Blog_Model_Resource_Post extends Maho_Blog_Model_Resource_Abstract
         return parent::_afterLoad($object);
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function lookupCategoryIds(int $postId): array
     {
         $adapter = $this->_getReadAdapter();

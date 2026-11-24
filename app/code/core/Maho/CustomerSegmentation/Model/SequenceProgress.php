@@ -119,6 +119,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     /**
      * Get status options for admin forms
+     *
+     * @return array<string, string>
      */
     public static function getStatusOptions(): array
     {
@@ -132,6 +134,8 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
 
     /**
      * Get trigger type options for admin forms
+     *
+     * @return array<string, string>
      */
     public static function getTriggerTypeOptions(): array
     {

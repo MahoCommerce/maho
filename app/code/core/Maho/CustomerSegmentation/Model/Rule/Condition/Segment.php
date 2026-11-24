@@ -39,6 +39,9 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
         return 'select';
     }
 
+    /**
+     * @return list<array{value: int|string, label: string|null}>
+     */
     #[\Override]
     public function getValueSelectOptions(): array
     {

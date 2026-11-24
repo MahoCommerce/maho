@@ -8,6 +8,9 @@
  * @package Mage_Catalog
  */
 
+/**
+ * @phpstan-type ItemOption array{label: string, value: string|list<string>, print_value?: string, option_id?: int|string, option_type?: string, option_value?: string, custom_view?: bool}
+ */
 class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstract implements Mage_Catalog_Helper_Product_Configuration_Interface
 {
     public const string XML_PATH_CONFIGURABLE_ALLOWED_TYPES = 'global/catalog/product/type/configurable/allow_product_types';
@@ -18,7 +21,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves product configuration options
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getCustomOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
     {
@@ -63,7 +66,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
 
         $addOptions = $item->getOptionByCode('additional_options');
         if ($addOptions) {
-            $options = array_merge($options, Mage::helper('core/string')->unserialize($addOptions->getValue()));
+            $options = array_merge($options, $this->escapeOptionValues(Mage::helper('core/string')->unserialize($addOptions->getValue())));
         }
 
         return $options;
@@ -74,7 +77,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      *
      * The option values are HTML, as the custom option values that their option type formats.
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getConfigurableOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
     {
@@ -100,13 +103,27 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      */
     public function escapeAttributesInfo(array $attributesInfo): array
     {
-        foreach ($attributesInfo as $key => $attribute) {
-            if (is_array($attribute) && isset($attribute['value'])) {
-                $attributesInfo[$key]['value'] = $this->escapeHtml($attribute['value']);
+        return $this->escapeOptionValues($attributesInfo);
+    }
+
+    /**
+     * Escape the value of each option in $options for the HTML output.
+     *
+     * Use it for options that hold text, such as configurable attributes and the "additional_options" of an item:
+     * a module can put the text that the customer entered there, for example the message of a gift card.
+     *
+     * @param array<array-key, mixed> $options
+     * @return array<array-key, mixed>
+     */
+    public function escapeOptionValues(array $options): array
+    {
+        foreach ($options as $key => $option) {
+            if (is_array($option) && isset($option['value'])) {
+                $options[$key]['value'] = $this->escapeHtml($option['value']);
             }
         }
 
-        return $attributesInfo;
+        return $options;
     }
 
     /**
@@ -124,7 +141,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves configuration options for grouped product
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getGroupedOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
     {
@@ -144,7 +161,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
                 $qty = $item->getOptionByCode('associated_product_' . $associatedProduct->getId());
                 $option = [
                     'label' => $associatedProduct->getName(),
-                    'value' => ($qty && $qty->getValue()) ? $qty->getValue() : 0,
+                    'value' => ($qty && $qty->getValue()) ? $qty->getValue() : '0',
                 ];
 
                 $options[] = $option;
@@ -159,7 +176,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Retrieves product options list
      *
-     * @return array
+     * @return list<ItemOption>
      */
     #[\Override]
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
@@ -175,26 +192,10 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
     /**
      * Accept option value and return its formatted view
      *
-     * @param mixed $optionValue
-     * Method works well with these $optionValue format:
-     *      1. String
-     *      2. Indexed array e.g. [val1, val2, ...]
-     *      3. Associative array, containing additional option info, including option value, e.g.
-     *          [
-     *          (
-     *              [label] => ...,
-     *              [value] => ...,
-     *              [print_value] => ...,
-     *              [option_id] => ...,
-     *              [option_type] => ...,
-     *              [custom_view] =>...,
-     *          )
-     * @param array $params
-     * All keys are options. Following supported:
-     *  - 'maxLength': truncate option value if needed, default: do not truncate
-     *  - 'cutReplacer': replacer for cut off value part when option value exceeds maxLength
-     *
-     * @return array
+     * @param string|list<string>|ItemOption $optionValue a value, a list of values, or an option with its value
+     * @param array{max_length?: int, cut_replacer?: string}|null $params max_length is the length at which the value
+     *     is cut, with no cut when it is not set. cut_replacer is the text after a cut value.
+     * @return array{value: string|list<string>, full_view?: string}
      */
     public function getFormattedOptionValue($optionValue, $params = null)
     {

@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type MessageRow array{role: string, content?: string|null, display_content?: string|null, tool_calls?: string|null, tool_call_id?: string|null, tool_name?: string|null, tool_arguments?: string|null, tool_status?: string|null, is_write?: int, undo_arguments?: string|null, attachments?: string|null, input_tokens?: int, output_tokens?: int}
+ */
 class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
 {
     public const string STATUS_ACTIVE = 'active';
@@ -284,6 +287,9 @@ class Maho_Ai_Model_Conversation extends Mage_Core_Model_Abstract
         return $collection;
     }
 
+    /**
+     * @param MessageRow $data
+     */
     public function addMessage(array $data): Maho_Ai_Model_Conversation_Message
     {
         /** @var Maho_Ai_Model_Conversation_Message $message */

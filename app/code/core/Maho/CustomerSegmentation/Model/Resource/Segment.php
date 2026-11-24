@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ */
 class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -20,6 +23,8 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
      * Return the customers that match the segment.
      * The websites of the segment form one group for each base currency. The customers of a group match against the
      * orders and carts of the stores of that currency, so that the amounts of one match add up in one currency.
+     *
+     * @return list<int|string>
      */
     public function getMatchingCustomerIds(Maho_CustomerSegmentation_Model_Segment $segment, ?int $websiteId = null): array
     {
@@ -44,6 +49,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
 
     /**
      * @param non-empty-list<int> $websiteIds websites that use one base currency
+     * @return list<int|string>
      */
     protected function getGroupMatchingCustomerIds(Maho_CustomerSegmentation_Model_Segment $segment, array $websiteIds): array
     {
@@ -72,6 +78,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this->_getReadAdapter()->fetchCol($select);
     }
 
+    /**
+     * @param list<int|string> $customerIds
+     */
     public function updateCustomerMembership(Maho_CustomerSegmentation_Model_Segment $segment, array $customerIds): self
     {
         $adapter = $this->_getWriteAdapter();
@@ -153,6 +162,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this;
     }
 
+    /**
+     * @param list<int> $segmentIds
+     */
     public function getSegmentMembershipSql(string $subscriberAlias, array $segmentIds): string
     {
         $select = $this->getSegmentMembershipSelect($subscriberAlias)
@@ -199,6 +211,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
             ->where("segment_customer.customer_id = {$subscriberAlias}.customer_id");
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function getCustomerSegmentIds(int $customerId, ?int $websiteId = null): array
     {
         $select = $this->_getReadAdapter()->select()
@@ -212,6 +227,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this->_getReadAdapter()->fetchCol($select);
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function getActiveSegmentIds(int $websiteId): array
     {
         $adapter = $this->_getReadAdapter();
@@ -248,6 +266,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return parent::_beforeSave($object);
     }
 
+    /**
+     * @return list<string>
+     */
     public function getWebsiteIds(?int $segmentId): array
     {
         if ($segmentId === null) {
@@ -263,6 +284,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $websiteIds ? explode(',', $websiteIds) : [];
     }
 
+    /**
+     * @return list<array<string, DbValue>>
+     */
     public function getCustomerSegmentRelations(int|string $segmentId): array
     {
         $adapter = $this->_getReadAdapter();

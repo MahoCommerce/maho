@@ -52,6 +52,9 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
             || $publishDate <= Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
     }
 
+    /**
+     * @return array<int|string>
+     */
     public function getStores(): array
     {
         if (!$this->hasStores()) {
@@ -104,6 +107,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 
     /**
      * Get list of static attribute codes
+     *
+     * @return list<string>
      */
     public function getStaticAttributes(): array
     {
@@ -135,6 +140,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 
     /**
      * Get category IDs assigned to this post
+     *
+     * @return array<int|string>
      */
     public function getCategories(): array
     {
@@ -196,6 +203,8 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     /**
      * The admin file widget posts an array such as ['delete' => 1], which
      * Maho_Blog_Model_Post_Attribute_Backend_Image consumes on save.
+     *
+     * @return string|array<string, int|string>|null
      */
     public function getImage(): string|array|null
     {
@@ -203,6 +212,9 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $value === null || is_array($value) ? $value : (string) $value;
     }
 
+    /**
+     * @param string|array<string, int|string>|null $value
+     */
     public function setImage(string|array|null $value): static
     {
         return $this->setData('image', $value);

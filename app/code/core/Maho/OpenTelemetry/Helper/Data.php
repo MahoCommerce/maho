@@ -112,6 +112,8 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Admin-configured OTLP headers. OTEL_EXPORTER_OTLP_HEADERS is merged over
      * these in Tracer::_resolveHeaders().
+     *
+     * @return array<string, string>
      */
     public function getHeaders(): array
     {

@@ -26,7 +26,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Build additional options array from buy request for cart/order display
      *
-     * @return array Array of ['label' => string, 'value' => string]
+     * @return list<array{label: string, value: string}>
      */
     public function buildAdditionalOptions(Maho\DataObject $buyRequest): array
     {
@@ -34,7 +34,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 
         foreach (self::DISPLAY_OPTIONS as $field => $label) {
             $value = $buyRequest->getData($field);
-            if ($value) {
+            if (is_string($value) && $value !== '') {
                 $additionalOptions[] = [
                     'label' => $this->__($label),
                     'value' => $value,

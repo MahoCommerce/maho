@@ -27,6 +27,9 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
         );
     }
 
+    /**
+     * @return list<string>
+     */
     #[\Override]
     protected function _getDefaultAttributes()
     {
@@ -404,6 +407,9 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
         }
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function lookupStoreIds(int $categoryId): array
     {
         $adapter = $this->_getReadAdapter();
@@ -414,6 +420,9 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
         return $adapter->fetchCol($select);
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function lookupPostIds(int $categoryId): array
     {
         $adapter = $this->_getReadAdapter();
@@ -449,6 +458,8 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
     /**
      * Resolve a full category URL path (e.g. ['parent-key', 'child-key']) to a category ID,
      * validating each segment matches the expected parent chain.
+     *
+     * @param list<string> $segments
      */
     public function getCategoryIdByFullPath(array $segments, int $storeId): ?int
     {
@@ -486,6 +497,7 @@ class Maho_Blog_Model_Resource_Category extends Maho_Blog_Model_Resource_Abstrac
     /**
      * Batch load url_keys for multiple category IDs
      *
+     * @param array<int> $ids
      * @return array<int, string> Map of entity_id => url_key
      */
     public function getUrlKeysByIds(array $ids): array

@@ -68,6 +68,7 @@ class SocialAuth extends \Maho\ApiPlatform\Resource
     #[SerializedName('expires_in')]
     public ?int $expiresIn = null;
 
+    /** @var array{id: int, email: string|null, firstName: string|null, lastName: string|null}|null */
     #[ApiProperty(description: 'Authenticated customer info', writable: false)]
     public ?array $customer = null;
 

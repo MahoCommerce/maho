@@ -111,6 +111,9 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $prefix ?: 'category';
     }
 
+    /**
+     * @param array<int, string>|null $urlKeys Pre-loaded entity_id => url_key pairs to avoid DB queries
+     */
     public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null, ?array $urlKeys = null): string
     {
         $blogPrefix = $this->getBlogUrlPrefix($storeId);

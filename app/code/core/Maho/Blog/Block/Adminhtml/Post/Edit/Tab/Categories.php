@@ -42,6 +42,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Categories extends Mage_Adminhtml_
 
     /**
      * Get active categories as options with indentation by level
+     *
+     * @return list<array{value: int, label: string}>
      */
     protected function _getCategoryOptions(): array
     {

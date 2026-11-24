@@ -8,11 +8,16 @@
 
 class Maho_AdminActivityLog_Model_Observer
 {
+    /**
+     * @var array<int, array<string, mixed>|null>
+     */
     protected array $_oldData = [];
     protected ?string $_currentActionGroupId = null;
 
     /**
      * Fields to ignore (system fields, timestamps, and form fields)
+     *
+     * @var list<string>
      */
     protected array $ignoreFields = [
         'updated_at', 'created_at', 'entity_id', 'has_options', 'required_options',
@@ -318,6 +323,11 @@ class Maho_AdminActivityLog_Model_Observer
         return $object::class;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @param list<string>|null $dbFields
+     * @return array<string, mixed>
+     */
     protected function filterFields(array $data, ?array $dbFields): array
     {
         if ($dbFields !== null) {

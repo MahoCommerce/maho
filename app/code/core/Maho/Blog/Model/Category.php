@@ -41,6 +41,9 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
             && array_intersect([Mage_Core_Model_App::ADMIN_STORE_ID, $storeId], array_map(intval(...), $this->getStores())) !== [];
     }
 
+    /**
+     * @return array<int|string>
+     */
     public function getStores(): array
     {
         if (!$this->hasStores()) {
@@ -61,6 +64,9 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
         return in_array($attributeCode, $this->getStaticAttributes(), true);
     }
 
+    /**
+     * @return list<string>
+     */
     public function getStaticAttributes(): array
     {
         return $this->_getResource()->getStaticAttributeCodes();
@@ -96,6 +102,8 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 
     /**
      * Get array of category IDs in the path
+     *
+     * @return list<int>
      */
     public function getPathIds(): array
     {
@@ -119,6 +127,8 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 
     /**
      * Get post IDs assigned to this category
+     *
+     * @return array<int|string>
      */
     public function getPostIds(): array
     {

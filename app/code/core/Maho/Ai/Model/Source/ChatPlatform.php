@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_Source_ChatPlatform
 {
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         $options = [['value' => '', 'label' => Mage::helper('ai')->__('Use the default provider')]];

@@ -39,7 +39,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
     /**
      * Reindex temporary (price result data) for defined product(s)
      *
-     * @param int|array $entityIds
+     * @param int|array<mixed> $entityIds
      */
     #[\Override]
     public function reindexEntity($entityIds): static
@@ -58,7 +58,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
      * their price from giftcard_amounts (comma-separated values) or
      * giftcard_min_amount/giftcard_max_amount for custom amounts.
      *
-     * @param int|array|null $entityIds
+     * @param int|array<mixed>|null $entityIds
      */
     protected function _prepareGiftcardPriceData($entityIds = null): self
     {
@@ -177,7 +177,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
     /**
      * Update gift card prices based on their allowed amounts
      *
-     * @param int|array|null $entityIds
+     * @param int|array<mixed>|null $entityIds
      */
     protected function _updateGiftcardPrices($entityIds = null): void
     {

@@ -14,6 +14,9 @@ use Maho\DataObject;
 
 trait ActivityLogTrait
 {
+    /**
+     * @param array<string, mixed>|null $oldData
+     */
     protected function logApiActivity(
         string $entityType,
         string $action,

@@ -51,6 +51,9 @@ class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
         }
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function _getWebhookHeaders(): array
     {
         $headers = [];

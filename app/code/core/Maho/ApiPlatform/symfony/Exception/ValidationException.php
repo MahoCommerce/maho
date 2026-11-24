@@ -14,9 +14,14 @@ namespace Maho\ApiPlatform\Exception;
  * Validation Exception - 422 Unprocessable Content.
  *
  * Use when request data fails validation (missing fields, invalid values, etc.)
+ *
+ * @phpstan-import-type ErrorDetails from ApiException
  */
 class ValidationException extends ApiException
 {
+    /**
+     * @param ErrorDetails $additionalDetails
+     */
     public function __construct(
         string $message,
         ?string $field = null,

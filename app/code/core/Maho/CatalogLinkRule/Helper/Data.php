@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_CatalogLinkRule_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    /**
+     * @return array<int, string>
+     */
     public function getLinkTypes(): array
     {
         return [
@@ -21,6 +24,8 @@ class Maho_CatalogLinkRule_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get available sort orders
+     *
+     * @return array<string, string>
      */
     public function getSortOrders(): array
     {

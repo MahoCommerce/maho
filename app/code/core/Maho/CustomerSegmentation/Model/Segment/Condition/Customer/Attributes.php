@@ -20,6 +20,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         $this->setValue(null);
     }
 
+    /**
+     * @return array{value: string, label: string}
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -81,6 +84,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         };
     }
 
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     #[\Override]
     public function getOperatorSelectOptions(): array
     {
@@ -101,6 +107,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
         return $operators;
     }
 
+    /**
+     * @return list<array{value: int|string|list<array{value: int|string, label: string}>, label: string}>
+     */
     #[\Override]
     public function getValueSelectOptions(): array
     {

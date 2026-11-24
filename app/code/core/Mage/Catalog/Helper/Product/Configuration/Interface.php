@@ -10,12 +10,15 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 interface Mage_Catalog_Helper_Product_Configuration_Interface
 {
     /**
      * Retrieves product options list
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item);
 }

@@ -18,6 +18,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 class ApiUser implements UserInterface
 {
     /**
+     * @param array<string> $roles
+     * @param array<string> $permissions
      * @param array<int>|null $allowedStoreIds null means all stores
      */
     public function __construct(

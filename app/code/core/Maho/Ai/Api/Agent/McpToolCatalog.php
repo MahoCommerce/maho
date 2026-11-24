@@ -62,6 +62,7 @@ final class McpToolCatalog
      * Tool definitions the current token may call.
      *
      * @param list<string> $excludedSections snake_case section prefixes to leave out, for example `reports`
+     * @param list<string>|null $sections
      * @return list<Tool>
      */
     public function tools(array $excludedSections = [], ?array $sections = null): array

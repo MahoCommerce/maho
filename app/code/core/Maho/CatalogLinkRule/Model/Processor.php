@@ -125,6 +125,8 @@ class Maho_CatalogLinkRule_Model_Processor
 
     /**
      * Process all rules for a specific link type
+     *
+     * @param list<Maho_CatalogLinkRule_Model_Rule> $rules
      */
     protected function processLinkType(int $linkTypeId, array $rules): void
     {
@@ -258,6 +260,8 @@ class Maho_CatalogLinkRule_Model_Processor
      * Returns ['targets' => int[], 'max_position' => int] per product.
      *
      * @param Maho\Db\Adapter\AdapterInterface $adapter
+     * @param list<int> $productIds
+     * @return array<int, array{targets: list<int>, max_position: int}>
      */
     protected function getExistingLinks(
         $adapter,
@@ -297,6 +301,7 @@ class Maho_CatalogLinkRule_Model_Processor
      * $websiteIds are the websites of the source product, and null applies no website filter.
      *
      * @param Maho\Db\Adapter\AdapterInterface $adapter
+     * @param list<int> $existingTargetIds
      * @param int[]|null $websiteIds
      */
     protected function applyRuleToProduct(

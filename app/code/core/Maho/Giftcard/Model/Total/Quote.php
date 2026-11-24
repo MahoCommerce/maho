@@ -82,7 +82,8 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
         $quoteBaseCurrency = $quote->getBaseCurrencyCode();
 
         foreach (array_keys($codes) as $code) {
-            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+            // JSON gives a numeric code back as an int key
+            $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
 
             if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
                 continue; // Drop invalid cards or cards from different website

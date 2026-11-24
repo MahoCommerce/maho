@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ */
 class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -82,6 +85,8 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
 
     /**
      * Get active sequences for a segment
+     *
+     * @return list<array<string, DbValue>>
      */
     public function getActiveSequencesForSegment(int $segmentId): array
     {
@@ -158,6 +163,8 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence extends Mage_Core_M
 
     /**
      * Get sequences with their template information
+     *
+     * @return list<array<string, DbValue>>
      */
     public function getSequencesWithTemplates(int $segmentId): array
     {
