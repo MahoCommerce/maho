@@ -41,17 +41,3 @@ parameters:
             identifier: missingType.iterableValue
             paths:
                 - app/code/core/Mage/*
-                - app/code/core/Maho/AdminActivityLog/*
-                - app/code/core/Maho/Ai/*
-                - app/code/core/Maho/ApiPlatform/*
-                - app/code/core/Maho/Blog/*
-                - app/code/core/Maho/CatalogLinkRule/*
-                - app/code/core/Maho/ContentVersion/*
-                - app/code/core/Maho/CustomerSegmentation/*
-                - app/code/core/Maho/Giftcard/*
-                - app/code/core/Maho/MediaCleaner/*
-                - app/code/core/Maho/OpenTelemetry/*
-                - app/code/core/Maho/Paypal/*
-                - app/code/core/Maho/Revocation/*
-                - app/code/core/Maho/ShippingBridge/*
-                - app/code/core/Maho/SocialLogin/*
