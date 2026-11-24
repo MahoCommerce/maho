@@ -5,7 +5,7 @@ description: Configure REST attributes in the Maho admin panel to limit which re
 # REST Attributes Configuration
 
 !!! warning "Legacy API"
-    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead.
+    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](../../v2/migrate-from-legacy-api.md).
 
 REST attributes allow specifying additional filters for different types of users. Attributes allow limiting user access more precisely.
 

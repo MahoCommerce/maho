@@ -27,3 +27,4 @@ Maho's v2 API is built on [API Platform](https://api-platform.com/) and exposes 
 - [API Documentation (Swagger UI / OpenAPI)](openapi.md)
 - [Web Server Configuration](../../hosting/web-server.md)
 - [Extending & Deployment](extending.md) - adding resources, third-party modules, deployment notes
+- [Migrate from the legacy APIs](migrate-from-legacy-api.md) - the map from the legacy REST and SOAP APIs to v2, and a [prompt for AI agents](migration-prompt.md)

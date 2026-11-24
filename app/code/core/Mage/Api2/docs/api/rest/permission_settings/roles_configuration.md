@@ -5,7 +5,7 @@ description: Create, edit, and assign REST roles in the Maho admin panel to cont
 # REST Roles Configuration
 
 !!! warning "Legacy API"
-    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead.
+    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](../../v2/migrate-from-legacy-api.md).
 
 REST roles in Maho are used to limit access to certain resources. Limiting access lies in configuration of a REST role and assigning a user to it. You can select which resources will be available for the user and which will not.
 

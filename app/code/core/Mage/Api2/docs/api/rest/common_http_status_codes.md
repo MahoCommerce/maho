@@ -5,7 +5,7 @@ description: HTTP status codes returned by Maho's legacy REST API and the error 
 # Common HTTP Status Codes
 
 !!! warning "Legacy API"
-    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../v2/index.md) instead.
+    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](../v2/migrate-from-legacy-api.md).
 
 HTTP status codes are an essential part of the REST concept. You can get familiar with all of them on [Wikipedia](http://en.wikipedia.org/wiki/List_of_http_status_codes).
 

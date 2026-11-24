@@ -5,7 +5,7 @@ description: Enable Maho's legacy Magento 1 API protocols - legacy REST, SOAP v1
 # Legacy API Protocols
 
 !!! warning "Legacy API"
-    This page covers Maho's legacy APIs, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](v2/index.md) instead.
+    This page covers Maho's legacy APIs, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](v2/migrate-from-legacy-api.md).
 
 Maho keeps the original Magento 1 API entry points alongside the modern v2 API:
 

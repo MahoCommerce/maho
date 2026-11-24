@@ -5,7 +5,7 @@ description: Configure OAuth for Maho's legacy REST API in the admin panel - reg
 # OAuth Configuration
 
 !!! warning "Legacy API"
-    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead.
+    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../../v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](../../v2/migrate-from-legacy-api.md).
 
 Before starting to use OAuth, you need to perform several steps in the Maho Admin Panel. These steps allow you to enable the OAuth functionality for further actions.
 

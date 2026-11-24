@@ -12,6 +12,8 @@ nav:
   - Architecture: v2/architecture.md
   - OpenAPI & Swagger UI: v2/openapi.md
   - Extending & deployment: v2/extending.md
+  - Migrate from the legacy APIs: v2/migrate-from-legacy-api.md
+  - Migration prompt for AI agents: v2/migration-prompt.md
 - Legacy API:
   - Legacy API protocols: legacy-protocols.md
   - REST API:
