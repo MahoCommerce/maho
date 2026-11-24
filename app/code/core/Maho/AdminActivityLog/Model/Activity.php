@@ -16,6 +16,9 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $this->_init('adminactivitylog/activity');
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function logActivity(array $data): self
     {
         if (!Mage::helper('adminactivitylog')->shouldLogActivity()) {
@@ -57,6 +60,9 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getOldData(): array
     {
         $data = $this->getData('old_data');
@@ -67,6 +73,9 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getNewData(): array
     {
         $data = $this->getData('new_data');

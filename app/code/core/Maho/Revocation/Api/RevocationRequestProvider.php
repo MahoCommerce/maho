@@ -49,6 +49,9 @@ final class RevocationRequestProvider extends Provider
         return $this->provideSingle((int) ($uriVariables['id'] ?? $context['args']['id'] ?? 0));
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function provideMyCollection(array $context): TraversablePaginator
     {
         $email = $this->requireCustomerEmail();
@@ -59,6 +62,9 @@ final class RevocationRequestProvider extends Provider
         return $this->paginate($collection, $context);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function provideAdminCollection(array $context): TraversablePaginator
     {
         $collection = \Mage::getResourceModel('revocation/request_collection');
@@ -96,6 +102,9 @@ final class RevocationRequestProvider extends Provider
         return RevocationRequest::fromModel($model);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function paginate(object $collection, array $context): TraversablePaginator
     {
         foreach ($this->defaultSort as $field => $dir) {

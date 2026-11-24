@@ -14,6 +14,9 @@ use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\ScopeInterface;
 
+/**
+ * @phpstan-import-type SpanAttributes from \Maho\Profiler
+ */
 class Maho_OpenTelemetry_Model_Span
 {
     /**
@@ -104,6 +107,7 @@ class Maho_OpenTelemetry_Model_Span
     /**
      * Set multiple attributes on the span
      *
+     * @param SpanAttributes $attributes
      * @return $this
      */
     public function setAttributes(array $attributes): self
@@ -175,6 +179,7 @@ class Maho_OpenTelemetry_Model_Span
     /**
      * Add an event to the span
      *
+     * @param SpanAttributes $attributes
      * @return $this
      */
     public function addEvent(string $name, array $attributes = []): self

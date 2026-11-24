@@ -218,6 +218,11 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return $html;
     }
 
+    /**
+     * @param list<string> $oldLines
+     * @param list<string> $newLines
+     * @return list<array{type: 'added'|'removed'|'unchanged', content: string}>
+     */
     protected function calculateLineDiff(array $oldLines, array $newLines): array
     {
         $diff = [];

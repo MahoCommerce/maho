@@ -51,7 +51,7 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
     }
 
     /**
-     * @inheritDoc
+     * @param array<mixed> $options
      */
     #[\Override]
     public function request(string $method, string $url, array $options = []): ResponseInterface
@@ -173,7 +173,7 @@ class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
     }
 
     /**
-     * @inheritDoc
+     * @param array<mixed> $options
      */
     #[\Override]
     public function withOptions(array $options): static

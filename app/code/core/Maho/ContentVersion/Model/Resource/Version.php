@@ -24,6 +24,8 @@ class Maho_ContentVersion_Model_Resource_Version extends Mage_Core_Model_Resourc
      * entity cannot produce duplicate numbers. The unique index on
      * (entity_type, entity_id, version_number) acts as a final safety net;
      * on duplicate key the insert is retried with a fresh MAX().
+     *
+     * @param array{entity_type: string, entity_id: int, content_data: string, editor: string|null} $data
      */
     public function insertWithNextVersionNumber(array $data): int
     {

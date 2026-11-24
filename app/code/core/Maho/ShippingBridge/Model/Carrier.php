@@ -8,11 +8,20 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type BridgeMethod array{code: non-empty-string, title: non-empty-string, price: float|int|numeric-string, cost?: mixed, description?: mixed, logo?: mixed}
+ * @phpstan-type BridgeItem array<string, mixed>
+ * @phpstan-type BridgeAddress array{firstname: string|null, lastname: string|null, street: string|null, city: string|null, region: string|null, region_code: string|null, postcode: string|null, country_id: string|null}
+ * @phpstan-type BridgeCustomer array{}|array{customer_id: int|null, email: string|null, group_id: int, group_code: string|null, is_guest: bool}
+ */
 class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
     #[\Override]
     protected $_code = 'shippingbridge';
 
+    /**
+     * @var array<string, string>
+     */
     protected array $_lastMethods = [];
 
     /**
@@ -134,7 +143,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     #[\Override]
     public function getAllowedMethods()
@@ -155,6 +164,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return true;
     }
 
+    /**
+     * @return array{cart: array{items: list<BridgeItem>, totals: array{subtotal: float, weight: float, qty: float}}, shipping_address: BridgeAddress, currency: string|null, store_id: int, customer: BridgeCustomer}
+     */
     protected function _buildRequestPayload(Mage_Shipping_Model_Rate_Request $request): array
     {
         $items = [];
@@ -273,6 +285,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $payload;
     }
 
+    /**
+     * @return array{sku: string|null, name: string|null, qty: float, weight: float, price: float, row_total: float}
+     */
     protected function _buildItemData(Mage_Sales_Model_Quote_Item_Abstract $item, ?float $qty = null): array
     {
         return [
@@ -285,6 +300,11 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         ];
     }
 
+    /**
+     * @param BridgeItem $itemData
+     * @param array<int, string> $attributeCodes
+     * @param array<int, Mage_Catalog_Model_Product> $products
+     */
     protected function _mergeAttributeValues(array &$itemData, int $productId, array $attributeCodes, array $products, ?int $fallbackProductId = null): void
     {
         if (!$attributeCodes || !isset($products[$productId])) {
@@ -299,6 +319,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         }
     }
 
+    /**
+     * @return list<string>
+     */
     protected function _getSuperAttributeCodes(Mage_Catalog_Model_Product $product): array
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
@@ -310,6 +333,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $codes;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function _getAdditionalAttributeCodes(): array
     {
         $value = (string) $this->getConfigData('additional_attributes');
@@ -320,6 +346,8 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     }
 
     /**
+     * @param array<int, int> $productIds
+     * @param array<int, string> $attributeCodes
      * @return array<int, Mage_Catalog_Model_Product>
      */
     protected function _loadProductAttributes(array $productIds, array $attributeCodes): array
@@ -378,6 +406,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $request->getDestRegionCode();
     }
 
+    /**
+     * @return BridgeCustomer
+     */
     protected function _buildCustomerData(Mage_Shipping_Model_Rate_Request $request): array
     {
         $allItems = $request->getAllItems();
@@ -399,6 +430,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         ];
     }
 
+    /**
+     * @return list<BridgeMethod>|null
+     */
     protected function _parseResponse(string $responseBody): ?array
     {
         try {

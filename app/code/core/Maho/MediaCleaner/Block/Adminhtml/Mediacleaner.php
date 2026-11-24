@@ -29,6 +29,8 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
 
     /**
      * Dropdowns rendered in the header, in display order (Scan, then Flush).
+     *
+     * @return list<array{label: string, items: list<array{label: string, url: string, onclick?: string}>}>
      */
     public function getDropdowns(): array
     {
@@ -94,6 +96,10 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
             HTML;
     }
 
+    /**
+     * @param array<string, string> $actionLabels
+     * @return list<array{label: string, url: string}>
+     */
     protected function buildItems(array $actionLabels): array
     {
         $items = [];

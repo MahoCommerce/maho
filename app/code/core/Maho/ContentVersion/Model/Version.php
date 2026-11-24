@@ -16,6 +16,9 @@ class Maho_ContentVersion_Model_Version extends Mage_Core_Model_Abstract
         $this->_init('contentversion/version');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getContentDataDecoded(): array
     {
         $data = $this->getData('content_data');
@@ -25,6 +28,9 @@ class Maho_ContentVersion_Model_Version extends Mage_Core_Model_Abstract
         return [];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function setContentDataEncoded(array $data): self
     {
         $this->setData('content_data', Mage::helper('core')->jsonEncode($data));
