@@ -243,6 +243,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
             }
         }
 
+        // The rate request carries no name, so it comes from the address that the rates are for
+        $shippingAddress = $allItems ? reset($allItems)->getQuote()?->getShippingAddress() : null;
+
         $payload = [
             'cart' => [
                 'items' => $items,
@@ -253,8 +256,8 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 ],
             ],
             'shipping_address' => [
-                'firstname' => $request->getDestFirstname(),
-                'lastname' => $request->getDestLastname(),
+                'firstname' => $shippingAddress?->getFirstname(),
+                'lastname' => $shippingAddress?->getLastname(),
                 'street' => $request->getDestStreet(),
                 'city' => $request->getDestCity(),
                 'region' => $this->_getDestRegionName($request),
