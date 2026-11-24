@@ -142,7 +142,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
-            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
+            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue !== '' ? $this->escapeHtml($oldValue) : '<em>(empty)</em>') . '</div>';
         }
 
 
