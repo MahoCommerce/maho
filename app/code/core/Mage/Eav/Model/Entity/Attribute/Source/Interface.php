@@ -16,7 +16,7 @@ declare(strict_types=1);
  *
  * A source that reads a collection keeps the other columns of the collection, such as the title of a country.
  *
- * @phpstan-type SourceOption array{value: int|string|list<array{value: int|string, label: string}>, label: string, ...<string, mixed>}
+ * @phpstan-type SourceOption array{value: int|string|list<array{value: int|string, label: string}>, label: string, ...<string, string|int|float|bool|null>}
  */
 
 interface Mage_Eav_Model_Entity_Attribute_Source_Interface

@@ -181,9 +181,9 @@ final class CustomAttributes
         $attributes = $form->getUserAttributes();
         $values = array_map(fn(mixed $value): mixed => is_bool($value) ? (int) $value : $value, $values);
         // A form posts texts, and the input filters of the data models read texts: the date filter refuses a number
-        $toText = static fn(mixed $item): mixed => is_scalar($item) ? (string) (is_bool($item) ? (int) $item : $item) : $item;
+        $toText = static fn(string|int|float|bool|array|null $item): string|array|null => is_scalar($item) ? (string) (is_bool($item) ? (int) $item : $item) : $item;
         $request = $form->prepareRequest(array_map(
-            fn(mixed $value): mixed => is_array($value) ? array_map($toText, $value) : $toText($value),
+            fn(string|int|float|bool|array|null $value): string|array|null => is_array($value) ? array_map($toText, $value) : $toText($value),
             $values,
         ));
         $helper = \Mage::helper('customer');

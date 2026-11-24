@@ -350,7 +350,7 @@ class Mage_Eav_Model_Config
     /**
      * Create model instance from array
      *
-     * @param array<string, mixed> $attributeData The row of the attribute and of its additional table
+     * @param array<string, DbValue|AttributeSetInfo> $attributeData The row of the attribute and of its additional table, with the attribute_set_info that the collection adds
      * @return Mage_Eav_Model_Entity_Attribute_Abstract|false
      * @throws Mage_Core_Exception
      */
