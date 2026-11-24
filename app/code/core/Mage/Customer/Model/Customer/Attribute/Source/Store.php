@@ -10,6 +10,11 @@
 
 class Mage_Customer_Model_Customer_Attribute_Source_Store extends Mage_Eav_Model_Entity_Attribute_Source_Table
 {
+    /**
+     * @var array<int|string, string>|null
+     */
+    protected ?array $_storeLabels = null;
+
     #[\Override]
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array
     {
@@ -32,30 +37,28 @@ class Mage_Customer_Model_Customer_Attribute_Source_Store extends Mage_Eav_Model
         if (!$value) {
             $value = '0';
         }
-        $isMultiple = false;
-        if (strpos($value, ',')) {
-            $isMultiple = true;
-            $value = explode(',', $value);
-        }
 
-        if (!$this->_options) {
+        if ($this->_storeLabels === null) {
             $collection = Mage::getResourceModel('core/store_collection');
             if ($this->getAttribute()->getAttributeCode() == 'store_id') {
                 $collection->setWithoutDefaultFilter();
             }
-            $this->_options = $collection->load()->toOptionArray();
+            $options = $collection->load()->toOptionArray();
             if ($this->getAttribute()->getAttributeCode() == 'created_in') {
-                array_unshift($this->_options, ['value' => '0', 'label' => Mage::helper('customer')->__('Admin')]);
+                array_unshift($options, ['value' => '0', 'label' => Mage::helper('customer')->__('Admin')]);
             }
+            $this->_storeLabels = array_column($options, 'label', 'value');
         }
 
-        if ($isMultiple) {
+        if (strpos((string) $value, ',')) {
             $values = [];
-            foreach ($value as $val) {
-                $values[] = $this->_options[$val];
+            foreach (explode(',', (string) $value) as $val) {
+                if (isset($this->_storeLabels[$val])) {
+                    $values[] = $this->_storeLabels[$val];
+                }
             }
             return $values;
         }
-        return $this->_options[$value];
+        return $this->_storeLabels[$value] ?? false;
     }
 }

@@ -296,7 +296,7 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
      * Retrieve apply to products array
      * Return empty array if applied to all products
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getApplyTo()

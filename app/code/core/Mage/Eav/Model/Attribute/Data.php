@@ -20,7 +20,7 @@ class Mage_Eav_Model_Attribute_Data
     /**
      * Array of attribute data models by input type
      *
-     * @var array
+     * @var array<string, Mage_Eav_Model_Attribute_Data_Abstract>
      */
     protected static $_dataModels   = [];
 
@@ -50,6 +50,9 @@ class Mage_Eav_Model_Attribute_Data
             }
         }
 
+        if (!$dataModel instanceof Mage_Eav_Model_Attribute_Data_Abstract) {
+            throw new \RuntimeException("The attribute {$attribute->getAttributeCode()} has no valid data model.");
+        }
         $dataModel->setAttribute($attribute);
         $dataModel->setEntity($entity);
 

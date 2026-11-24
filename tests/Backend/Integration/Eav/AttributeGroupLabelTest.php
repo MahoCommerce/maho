@@ -136,6 +136,42 @@ it('saves the labels that the set editor posts with a group', function () {
         ->and(array_count_values($labels)['Generale'] ?? 0)->toBe(count($posted) - 1);
 });
 
+it('moves an attribute into a group that the same save of the set editor adds', function () {
+    $set = $this->records[] = groupLabelTestCreateSet('customer');
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_read');
+    $groupOf = fn(int $attributeId): int => (int) $adapter->fetchOne($adapter->select()
+        ->from($resource->getTableName('eav/entity_attribute'), ['attribute_group_id'])
+        ->where('attribute_set_id = ?', (int) $set->getId())
+        ->where('attribute_id = ?', $attributeId));
+    $attributeId = (int) $adapter->fetchOne($adapter->select()
+        ->from($resource->getTableName('eav/entity_attribute'), ['attribute_id'])
+        ->where('attribute_set_id = ?', (int) $set->getId())
+        ->order('attribute_id')
+        ->limit(1));
+    $posted = [];
+    foreach (Mage::getResourceModel('eav/entity_attribute_group_collection')->setAttributeSetFilter((int) $set->getId()) as $group) {
+        $posted[] = [$group->getId(), $group->getAttributeGroupName(), (int) $group->getSortOrder(), []];
+    }
+    // The set editor gives a group that it adds an ID that is not a number
+    $posted[] = ['node-pest01', 'Pest Moved', 99, []];
+
+    Mage::getService('eav/attribute_set')->saveTree($set, [
+        'attribute_set_name' => $set->getAttributeSetName(),
+        'groups' => $posted,
+        'attributes' => [[$attributeId, 'node-pest01', 1, null]],
+        'not_attributes' => [],
+        'removeGroups' => [],
+    ]);
+
+    $newGroup = Mage::getResourceModel('eav/entity_attribute_group_collection')
+        ->setAttributeSetFilter((int) $set->getId())
+        ->addFieldToFilter('attribute_group_name', 'Pest Moved')
+        ->getFirstItem();
+    expect($newGroup->getId())->not->toBeNull()
+        ->and($groupOf($attributeId))->toBe((int) $newGroup->getId());
+});
+
 it('splits attributes by group, with the first group and the attributes in no set first', function () {
     $setId = (int) Mage::getSingleton('eav/config')->getEntityType(Maho_Blog_Model_Post::ENTITY)->getDefaultAttributeSetId();
     $firstGroupId = (int) Mage::getResourceModel('eav/entity_attribute_group_collection')

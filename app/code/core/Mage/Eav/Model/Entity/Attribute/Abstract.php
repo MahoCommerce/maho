@@ -14,6 +14,10 @@ declare(strict_types=1);
  * @method bool hasAttributeSetInfo()
  * @method bool hasIsVisible()
  * @method Mage_Eav_Model_Resource_Entity_Attribute _getResource()
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type FormCondition from \Maho\Data\Form\Condition
+ * @phpstan-type AttributeSetInfo array<int|string, array{group_id: DbValue, group_sort: DbValue, sort: DbValue}>
  */
 abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_Abstract implements Mage_Eav_Model_Entity_Attribute_Interface
 {
@@ -57,7 +61,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Attribute id cache
      *
-     * @var array
+     * @var array<string, int|string|false>
      */
     protected $_attributeIdCache            = [];
 
@@ -509,7 +513,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Check if attribute in specified set
      *
-     * @param int|array $setId
+     * @param int|string|array<int|string> $setId
      * @return bool
      */
     public function isInSet($setId)
@@ -597,18 +601,24 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * @return array
+     * @return list<string> The product types of the attribute, or none for all types
      */
     public function getApplyTo()
     {
         return [];
     }
 
+    /**
+     * @return AttributeSetInfo|null The group and the sort order of the attribute by attribute set ID
+     */
     public function getAttributeSetInfo(): ?array
     {
         return $this->getData('attribute_set_info');
     }
 
+    /**
+     * @param AttributeSetInfo|null $value
+     */
     public function setAttributeSetInfo(?array $value): static
     {
         return $this->setData('attribute_set_info', $value);
@@ -622,12 +632,17 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Return the condition that shows this attribute in a form, in the format of Maho\Data\Form\Condition,
      * or null when the attribute is always shown. An invalid stored value is null.
+     *
+     * @return FormCondition|null
      */
     public function getDependsOn(): ?array
     {
         return $this->decodeCondition('depends_on');
     }
 
+    /**
+     * @param FormCondition|null $value
+     */
     public function setDependsOn(?array $value): static
     {
         return $this->setData('depends_on', $value ? Mage::helper('core')->jsonEncode($value) : null);
@@ -636,12 +651,17 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Return the condition that makes this attribute required when the form shows it, in the format of
      * Maho\Data\Form\Condition, or null when only the Required flag decides. An invalid stored value is null.
+     *
+     * @return FormCondition|null
      */
     public function getRequiredWhen(): ?array
     {
         return $this->decodeCondition('required_when');
     }
 
+    /**
+     * @param FormCondition|null $value
+     */
     public function setRequiredWhen(?array $value): static
     {
         return $this->setData('required_when', $value ? Mage::helper('core')->jsonEncode($value) : null);
@@ -694,9 +714,24 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     }
 
     /**
-     * Return the condition that the column $column holds, or null when it holds none or an invalid value.
+     * Return the condition that the column $column holds, or null when it holds none or a value that does not follow
+     * the format of Maho\Data\Form\Condition.
+     *
+     * @return FormCondition|null
      */
     protected function decodeCondition(string $column): ?array
+    {
+        $condition = $this->decodeConditionData($column);
+        return $condition !== null && \Maho\Data\Form\Condition::isValid($condition) ? $condition : null;
+    }
+
+    /**
+     * Return the array that the column $column holds as JSON or as an array, before a check of its format. Return
+     * null when the column holds no array or invalid JSON.
+     *
+     * @return array<array-key, mixed>|null
+     */
+    protected function decodeConditionData(string $column): ?array
     {
         $value = $this->getData($column);
         if (is_string($value) && $value !== '') {
@@ -721,6 +756,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $value === null ? null : (string) $value;
     }
 
+    /**
+     * @return array<int|string, string>|string|null The label, or the labels by store ID that the admin form posts
+     */
     public function getFrontendLabel(): array|string|null
     {
         return $this->getData('frontend_label');
@@ -841,6 +879,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return $value === null ? null : (bool) $value;
     }
 
+    /**
+     * @return array<string, int|string> The rules by name, such as max_text_length or input_validation
+     */
     public function getValidateRules(): array
     {
         $rules = $this->getData('validate_rules');
@@ -853,6 +894,9 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
         return [];
     }
 
+    /**
+     * @param array<string, int|string>|string|null $value
+     */
     public function setValidateRules(array|string|null $value): static
     {
         if (empty($value)) {

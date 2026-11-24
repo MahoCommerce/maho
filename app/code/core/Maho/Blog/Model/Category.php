@@ -86,7 +86,7 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
     /**
      * The attributes of the set of this record, keyed by code.
      *
-     * @return array<string, Maho_Blog_Model_Resource_Eav_Attribute>
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributes(): array
     {

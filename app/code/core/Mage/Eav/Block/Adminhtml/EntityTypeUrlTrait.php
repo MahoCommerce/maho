@@ -12,6 +12,11 @@ declare(strict_types=1);
 
 trait Mage_Eav_Block_Adminhtml_EntityTypeUrlTrait
 {
+    /**
+     * @param string $route
+     * @param array<mixed> $params The route parameters, such as _query, _secure or _store
+     * @return string
+     */
     #[\Override]
     public function getUrl($route = '', $params = [])
     {

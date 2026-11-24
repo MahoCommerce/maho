@@ -11,6 +11,8 @@
 /**
  * @method bool hasEntityTypes()
  * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Form_Type>
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abstract
 {
@@ -40,7 +42,7 @@ class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abst
      * Retrieve form type entity types
      *
      * @param Mage_Eav_Model_Form_Type $object
-     * @return array
+     * @return list<int|string> The entity type IDs
      */
     public function getEntityTypes($object)
     {
@@ -54,7 +56,7 @@ class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abst
             ->from($this->getTable('eav/form_type_entity'), 'entity_type_id')
             ->where('type_id = :type_id');
 
-        return $adapter->fetchCol($select, $bind);
+        return $adapter->fetchIds($select, $bind);
     }
 
     /**
@@ -107,7 +109,7 @@ class Mage_Eav_Model_Resource_Form_Type extends Mage_Core_Model_Resource_Db_Abst
      * Retrieve form type filtered by given attribute
      *
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|int $attribute
-     * @return array
+     * @return list<array<string, DbValue>>
      */
     public function getFormTypesByAttribute($attribute)
     {

@@ -80,7 +80,7 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
     /**
      * Return forms in which the attribute
      *
-     * @return array
+     * @return list<string> The form codes
      */
     public function getUsedInForms()
     {

@@ -120,7 +120,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
             if ($productAttribute && $productAttribute->usesSource()) {
                 $options = [];
                 foreach ($productAttribute->getSource()->getAllOptions() as $option) {
-                    if (is_array($option) && isset($option['value']) && $option['value'] !== '') {
+                    if ($option['value'] !== '') {
                         $options[] = ['value' => $option['value'], 'label' => $option['label']];
                     }
                 }

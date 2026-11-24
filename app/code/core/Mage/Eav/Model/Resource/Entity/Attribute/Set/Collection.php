@@ -39,7 +39,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection extends Mage_Core_
     /**
      * Convert collection items to select options hash array
      *
-     * @return array
+     * @return array<int|string, string> The set names by set ID
      */
     #[\Override]
     public function toOptionHash()

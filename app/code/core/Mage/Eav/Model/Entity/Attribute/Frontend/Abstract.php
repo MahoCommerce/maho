@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type SourceOption from Mage_Eav_Model_Entity_Attribute_Source_Interface
+ */
 abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage_Eav_Model_Entity_Attribute_Frontend_Interface
 {
     /**
@@ -74,7 +77,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage
         $value = $object->getData($this->getAttribute()->getAttributeCode());
         if (in_array($this->getConfigField('input'), ['select','boolean'])) {
             $valueOption = $this->getOption($value);
-            if (!$valueOption) {
+            // Only a Yes/No attribute takes the Yes/No labels: a select must not show "Yes" for an unknown 1
+            if (!$valueOption && $this->getConfigField('input') === 'boolean') {
                 $opt     = Mage::getModel('eav/entity_attribute_source_boolean');
                 $options = $opt->getAllOptions();
                 if ($options) {
@@ -184,7 +188,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage
     /**
      * Get select options in case it's select box and options source is defined
      *
-     * @return array
+     * @return list<SourceOption>
      */
     public function getSelectOptions()
     {

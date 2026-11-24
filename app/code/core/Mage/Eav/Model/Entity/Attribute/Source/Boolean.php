@@ -35,7 +35,7 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
     /**
      * Retrieve option array
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getOptionArray()
     {
@@ -46,6 +46,9 @@ class Mage_Eav_Model_Entity_Attribute_Source_Boolean extends Mage_Eav_Model_Enti
         return $_options;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function toOptionArray(): array
     {
         return $this->getOptionArray();

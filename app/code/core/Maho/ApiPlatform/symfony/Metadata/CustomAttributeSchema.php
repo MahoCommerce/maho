@@ -97,7 +97,7 @@ final class CustomAttributeSchema
         $values = [];
         try {
             foreach ($attribute->getSource()->getAllOptions() as $option) {
-                $value = $option['value'] ?? null;
+                $value = $option['value'];
                 if (is_scalar($value) && (string) $value !== '') {
                     $values[] = is_numeric($value) ? (int) $value : (string) $value;
                 }

@@ -8,12 +8,16 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ * @phpstan-import-type OutputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_Data_Text
 {
     /**
      * Extract data from request and return value
      *
-     * @return array|string
+     * @return InputValue
      */
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
@@ -31,8 +35,8 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
      * Validate data
      * Return true or array of errors
      *
-     * @param array|string|false|null $value
-     * @return true|array<string>
+     * @param InputValue $value
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -91,7 +95,7 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
      * Return formatted attribute value from entity model
      *
      * @param string $format
-     * @return string|array
+     * @return OutputValue
      * @throws Mage_Core_Exception
      */
     #[\Override]

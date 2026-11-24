@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Eav_Model_Resource_Form_Attribute_Collection<Mage_Customer_Model_Attribute>
+ */
 class Mage_Customer_Model_Resource_Form_Attribute_Collection extends Mage_Eav_Model_Resource_Form_Attribute_Collection
 {
     /**

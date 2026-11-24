@@ -13,6 +13,7 @@
  * This Data Model Has to Be Set Up in additional EAV attribute table
  *
  * @package    Mage_Customer
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
  */
 class Mage_Customer_Model_Attribute_Data_Postcode extends Mage_Eav_Model_Attribute_Data_Text
 {
@@ -20,8 +21,8 @@ class Mage_Customer_Model_Attribute_Data_Postcode extends Mage_Eav_Model_Attribu
      * Validate postal/zip code
      * Skip the required check if the zip code of the country is optional
      *
-     * @param array|string|false|null $value
-     * @return true|array<string>
+     * @param InputValue $value
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
