@@ -54,7 +54,7 @@ class Mage_Eav_Model_Form_Fieldset extends Mage_Core_Model_Abstract
     /**
      * Retrieve fieldset labels for stores
      *
-     * @return array
+     * @return array<int|string, string> The labels by store ID
      */
     public function getLabels()
     {
@@ -68,6 +68,7 @@ class Mage_Eav_Model_Form_Fieldset extends Mage_Core_Model_Abstract
      * Set fieldset store labels
      * Input array where key - store_id and value = label
      *
+     * @param array<int|string, string> $labels
      * @return $this
      */
     public function setLabels(array $labels)

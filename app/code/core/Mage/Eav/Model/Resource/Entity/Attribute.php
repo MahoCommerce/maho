@@ -11,13 +11,16 @@
 /**
  * @template TModel of Mage_Eav_Model_Entity_Attribute_Abstract = Mage_Eav_Model_Entity_Attribute_Abstract
  * @extends Mage_Core_Model_Resource_Db_Abstract<TModel>
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
  */
 class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Eav Entity attributes cache
+     * Eav Entity attributes cache: the attribute rows by entity type ID and attribute code
      *
-     * @var array
+     * @var array<int|string, array<string, array<string, DbValue>>>
      */
     protected static $_entityAttributes     = [];
 
@@ -427,7 +430,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Retrieve attribute codes by front-end type
      *
      * @param string $frontendType
-     * @return array
+     * @return list<DbValue>
      */
     public function getAttributeCodesByFrontendType($frontendType)
     {
@@ -444,7 +447,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Returns the column descriptions for a table
      *
      * @param string $table
-     * @return array
+     * @return array<string, ColumnDescription>
      */
     public function describeTable($table)
     {
@@ -500,7 +503,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
      * Retrieve store labels by given attribute id
      *
      * @param int $attributeId
-     * @return array
+     * @return array<int|string, DbValue> The labels by store ID
      */
     public function getStoreLabelsByAttributeId($attributeId)
     {
@@ -516,8 +519,8 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
     /**
      * Load by given attributes ids and return only exist attribute ids
      *
-     * @param array $attributeIds
-     * @return array
+     * @param array<int|string> $attributeIds
+     * @return list<int|string>
      */
     public function getValidAttributeIds($attributeIds)
     {
@@ -526,6 +529,6 @@ class Mage_Eav_Model_Resource_Entity_Attribute extends Mage_Core_Model_Resource_
             ->from($this->getMainTable(), ['attribute_id'])
             ->where('attribute_id IN (?)', $attributeIds);
 
-        return $adapter->fetchCol($select);
+        return $adapter->fetchIds($select);
     }
 }

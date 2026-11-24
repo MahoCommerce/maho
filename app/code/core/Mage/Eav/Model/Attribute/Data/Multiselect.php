@@ -8,12 +8,16 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ * @phpstan-import-type OutputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 class Mage_Eav_Model_Attribute_Data_Multiselect extends Mage_Eav_Model_Attribute_Data_Select
 {
     /**
      * Extract data from request and return value
      *
-     * @return array|string
+     * @return InputValue
      */
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
@@ -41,7 +45,7 @@ class Mage_Eav_Model_Attribute_Data_Multiselect extends Mage_Eav_Model_Attribute
      * Return formatted attribute value from entity model
      *
      * @param string $format
-     * @return string|array
+     * @return OutputValue
      * @throws Mage_Core_Exception
      */
     #[\Override]

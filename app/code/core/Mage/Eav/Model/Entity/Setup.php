@@ -8,6 +8,12 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-type AttributeDefinition array{option?: AttributeOption, ...<string, mixed>}
+ * @phpstan-type AttributeOption array{attribute_id?: int|string|false, value?: array<int|string, array<int, string>>, order?: array<int|string, int>, delete?: array<int|string, bool|int|string>, values?: list<string>}
+ * @phpstan-type EntityDefinition array{entity_model: string, attribute_model?: string, table?: string, table_prefix?: string, id_field?: string, increment_model?: string, increment_per_store?: bool|int, increment_pad_length?: int, increment_pad_char?: string, additional_attribute_table?: string, entity_attribute_collection?: string, frontend_prefix?: string, backend_prefix?: string, source_prefix?: string, attributes?: array<string, AttributeDefinition>}
+ */
 class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 {
     /**
@@ -20,7 +26,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Default attribute group name to id pairs
      *
-     * @var array
+     * @var array<string, int>
      */
     public $defaultGroupIdAssociations  = [
         'General'   => 1,
@@ -98,6 +104,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * If already exists updates the entity type with params data
      *
      * @param string $code
+     * @param EntityDefinition $params
      * @return $this
      */
     public function addEntityType($code, array $params)
@@ -253,7 +260,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param int $id
-     * @param array|string $field
+     * @param array<string, string|int|null>|string $field A column name, or the values by column name
      * @param mixed $value
      * @return $this
      */
@@ -345,7 +352,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * Get identifiers of all attribute sets
      *
      * @param int $entityTypeId
-     * @return array
+     * @return list<int|string>
      * @throws Mage_Core_Exception
      */
     public function getAllAttributeSetIds($entityTypeId = null)
@@ -359,7 +366,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
             $select->where('entity_type_id = :entity_type_id');
         }
 
-        return $this->_conn->fetchCol($select, $bind);
+        return $this->_conn->fetchIds($select, $bind);
     }
 
     public function getDefaultAttributeSetId(string|int $entityType): int
@@ -445,7 +452,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * @param mixed $entityTypeId
      * @param mixed $setId
      * @param mixed $id
-     * @param array|string $field
+     * @param array<string, string|int|null>|string $field A column name, or the values by column name
      * @param mixed $value
      * @return $this
      */
@@ -567,10 +574,10 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Retrieve value from array by key or return default value
      *
-     * @param array $array
+     * @param AttributeDefinition|EntityDefinition $array
      * @param string $key
-     * @param string|int|bool|array $default
-     * @return string|int|bool|array|null
+     * @param string|int|null $default
+     * @return mixed The value of $key, with a boolean as 0 or 1
      */
     protected function _getValue($array, $key, $default = null)
     {
@@ -583,8 +590,8 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Prepare attribute values to save
      *
-     * @param array $attr
-     * @return array
+     * @param AttributeDefinition $attr
+     * @return array<string, mixed>
      */
     protected function _prepareValues($attr)
     {
@@ -609,7 +616,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Validate attribute data before insert into table
      *
-     * @param  array $data
+     * @param  array<string, mixed> $data
      * @throws Mage_Eav_Exception
      * @return true
      */
@@ -636,6 +643,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param string|int $entityTypeId
      * @param string $code
+     * @param AttributeDefinition $attr
      * @return $this
      */
     public function addAttribute($entityTypeId, $code, array $attr)
@@ -702,7 +710,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Add Attribure Option
      *
-     * @param array $option
+     * @param AttributeOption $option
      */
     public function addAttributeOption($option): void
     {
@@ -774,7 +782,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array|string $field
+     * @param array<string, mixed>|string $field A column name, or the values by column name
      * @param mixed $value
      * @param int $sortOrder
      * @return $this
@@ -791,7 +799,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array|string $field
+     * @param array<string, mixed>|string $field A column name, or the values by column name
      * @param mixed $value
      * @param int $sortOrder
      * @return $this
@@ -844,7 +852,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      *
      * @param mixed $entityTypeId
      * @param mixed $id
-     * @param array|string $field
+     * @param array<string, mixed>|string $field A column name, or the values by column name
      * @param mixed $value
      * @return $this
      */
@@ -1156,6 +1164,8 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
 
     /**
      * Return the entities and attributes that installEntities() installs when it gets no list.
+     *
+     * @return array<string, EntityDefinition>
      */
     public function getDefaultEntities(): array
     {
@@ -1165,7 +1175,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Install entities
      *
-     * @param array $entities
+     * @param array<string, EntityDefinition>|null $entities
      * @return $this
      */
     public function installEntities($entities = null)
@@ -1215,7 +1225,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Retrieve attribute table fields
      *
-     * @return array
+     * @return array<string, ColumnDescription>
      */
     protected function _getAttributeTableFields()
     {
@@ -1225,6 +1235,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
     /**
      * Insert attribute and filter data
      *
+     * @param array<string, mixed> $data
      * @return $this
      */
     protected function _insertAttribute(array $data)
@@ -1256,6 +1267,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * Insert attribute additional data
      *
      * @param int $entityTypeId
+     * @param array<string, mixed> $data
      * @return $this
      */
     protected function _insertAttributeAdditionalData($entityTypeId, array $data)

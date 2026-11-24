@@ -8,6 +8,9 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type SourceOption from Mage_Eav_Model_Entity_Attribute_Source_Interface
+ */
 abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage_Eav_Model_Entity_Attribute_Frontend_Interface
 {
     /**
@@ -184,7 +187,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage
     /**
      * Get select options in case it's select box and options source is defined
      *
-     * @return array
+     * @return list<SourceOption>
      */
     public function getSelectOptions()
     {

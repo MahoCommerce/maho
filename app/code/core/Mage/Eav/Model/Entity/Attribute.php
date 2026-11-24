@@ -17,6 +17,8 @@ declare(strict_types=1);
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Collection getResourceCollection()
  *
  * @method $this unsIsVisible()
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Abstract
 {
@@ -370,6 +372,8 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     /**
      * Return the condition that the column $column holds, for a caller outside the attribute.
+     *
+     * @return array<array-key, mixed>|null
      */
     public function decodeConditionOf(string $column): ?array
     {
@@ -644,6 +648,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Turn the posted values of the admin attribute form into the data of this attribute.
      * The attribute is loaded when it exists.
+     *
+     * @param array<string, mixed> $data The values that the admin form posts
+     * @return array<string, mixed>
      */
     public function prepareAdminData(array $data): array
     {
@@ -652,6 +659,8 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
 
     /**
      * Save the posted values of the admin attribute form that the attribute does not save itself.
+     *
+     * @param array<string, mixed> $data The values that the admin form posts
      */
     public function saveAdminData(array $data): void {}
 
@@ -755,7 +764,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * Retrieve attribute codes by frontend type
      *
      * @param string $type
-     * @return array
+     * @return list<DbValue>
      */
     public function getAttributeCodesByFrontendType($type)
     {
@@ -765,7 +774,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Return array of labels of stores
      *
-     * @return array
+     * @return array<int|string, DbValue> The labels by store ID
      */
     public function getStoreLabels()
     {
@@ -822,6 +831,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         return $this->setData('entity_attribute_id', $value);
     }
 
+    /**
+     * @return array<int|string, string>|null The labels of the export filter by value
+     */
     public function getFilterOptions(): ?array
     {
         return $this->getData('filter_options');

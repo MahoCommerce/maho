@@ -128,7 +128,7 @@ final class CustomAttributeProvider extends \Maho\ApiPlatform\Provider
 
         if (in_array($dto->input, ['select', 'multiselect'], true)) {
             foreach ($attribute->getSource()->getAllOptions() as $option) {
-                if (is_array($option['value'] ?? null) || (string) ($option['value'] ?? '') === '') {
+                if (is_array($option['value']) || (string) $option['value'] === '') {
                     continue;
                 }
                 $dto->options[] = [

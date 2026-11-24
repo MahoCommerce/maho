@@ -11,6 +11,8 @@
 /**
  * @template TModel of Mage_Eav_Model_Attribute = Mage_Eav_Model_Attribute
  * @extends Mage_Eav_Model_Resource_Entity_Attribute<TModel>
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource_Entity_Attribute
 {
@@ -143,7 +145,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Return scope values for attribute and website
      *
-     * @return array
+     * @return array<string, DbValue>
      */
     public function getScopeValues(Mage_Eav_Model_Attribute $object)
     {
@@ -169,7 +171,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     /**
      * Return forms in which the attribute
      *
-     * @return array
+     * @return list<DbValue> The form codes
      */
     public function getUsedInForms(Mage_Core_Model_Abstract $object)
     {

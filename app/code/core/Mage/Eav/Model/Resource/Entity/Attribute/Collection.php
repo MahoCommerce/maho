@@ -41,7 +41,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     /**
      * Return array of fields to load attribute values
      *
-     * @return array
+     * @return list<string>
      */
     protected function _getLoadDataFields()
     {
@@ -130,6 +130,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
      * Specify multiple attribute sets filter
      * Result will be ordered by sort_order
      *
+     * @param array<int|string> $setIds
      * @return $this
      */
     public function setAttributeSetsFilter(array $setIds)
@@ -149,6 +150,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     /**
      * Filter for selecting of attributes that is in all sets
      *
+     * @param array<int|string> $setIds
      * @return $this
      */
     public function setInAllAttributeSetsFilter(array $setIds)
@@ -195,7 +197,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     /**
      * Exclude attributes filter
      *
-     * @param array $attributes
+     * @param array<int|string> $attributes The attribute IDs
      * @return $this
      */
     public function setAttributesExcludeFilter($attributes)
@@ -364,7 +366,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     /**
      * Specify collection attribute codes filter
      *
-     * @param string | array $code
+     * @param string|array<string> $code
      * @return $this
      */
     public function setCodeFilter($code)

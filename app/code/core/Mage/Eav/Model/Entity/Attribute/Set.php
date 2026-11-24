@@ -80,7 +80,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
     /**
      * Collect data for save
      *
-     * @param array $data
+     * @param array<string, mixed> $data The tree of the set editor, with the keys attribute_set_name, groups, attributes, not_attributes and removeGroups
      * @return $this
      */
     public function organizeData($data)
@@ -175,6 +175,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
      * Add set info to attributes
      *
      * @param string|Mage_Eav_Model_Entity_Type $entityType
+     * @param array<Mage_Eav_Model_Entity_Attribute_Abstract|int|string> $attributes
      * @param int $setId
      * @return $this
      */
@@ -273,31 +274,49 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
         return $this->setData('entity_type_id', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Group>|null
+     */
     public function getGroups(): ?array
     {
         return $this->getData('groups');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute_Group>|null $value
+     */
     public function setGroups(?array $value): static
     {
         return $this->setData('groups', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute>|null
+     */
     public function getRemoveAttributes(): ?array
     {
         return $this->getData('remove_attributes');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute>|null $value
+     */
     public function setRemoveAttributes(?array $value): static
     {
         return $this->setData('remove_attributes', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Group>|null
+     */
     public function getRemoveGroups(): ?array
     {
         return $this->getData('remove_groups');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute_Group>|null $value
+     */
     public function setRemoveGroups(?array $value): static
     {
         return $this->setData('remove_groups', $value);

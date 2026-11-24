@@ -10,6 +10,11 @@
 
 /**
  * @template TModel of \Maho\DataObject = \Maho\DataObject
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnDescription from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type InsertRow from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-type SaveData array{newObject: Mage_Core_Model_Abstract, entityRow: array<string, mixed>, insert: array<int, mixed>, update: array<int, array{value_id: ?int, value: mixed}>, delete: array<string, list<array{attribute_id: int, value_id: ?int}>>}
  */
 abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_Abstract implements Mage_Eav_Model_Entity_Interface
 {
@@ -37,35 +42,35 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Attributes array by attribute id
      *
-     * @var array
+     * @var array<int|string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     protected $_attributesById              = [];
 
     /**
      * Attributes array by attribute name
      *
-     * @var array
+     * @var array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     protected $_attributesByCode            = [];
 
     /**
      * 2-dimensional array by table name and attribute name
      *
-     * @var array
+     * @var array<string, array<string, Mage_Eav_Model_Entity_Attribute_Abstract>>
      */
     protected $_attributesByTable           = [];
 
     /**
      * Attributes that are static fields in entity table
      *
-     * @var array
+     * @var array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     protected $_staticAttributes = [];
 
     /**
-     * Default Attributes that are static
+     * Default Attributes that are static, by entity type ID and attribute code
      *
-     * @var array
+     * @var array<int|string, array<string, Mage_Eav_Model_Entity_Attribute_Abstract>>
      */
     protected static $_defaultAttributes    = [];
 
@@ -79,7 +84,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Describe data for tables
      *
-     * @var array
+     * @var array<string, array<string, ColumnDescription>>
      */
     protected $_describeTable               = [];
 
@@ -134,14 +139,14 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Entity attribute values per backend table to delete
      *
-     * @var array
+     * @var array<string, list<?int>>
      */
     protected $_attributeValuesToDelete = [];
 
     /**
      * Entity attribute values per backend table to save
      *
-     * @var array
+     * @var array<string, list<InsertRow>>
      */
     protected $_attributeValuesToSave   = [];
 
@@ -149,7 +154,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * Array of describe attribute backend tables
      * The table name as key
      *
-     * @var array
+     * @var array<string, array<string, ColumnDescription>>
      */
     protected static $_attributeBackendTables   = [];
 
@@ -232,7 +237,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve table name
      *
-     * @param string|array $alias
+     * @param string|array{string, string} $alias
      * @return string
      */
     public function getTable($alias)
@@ -293,7 +298,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * If NULL or not supplied removes configuration of all attributes
      * If string - removes only one, if array - all specified
      *
-     * @param array|string|null $attributes
+     * @param list<string>|string|null $attributes
      * @return $this
      */
     public function unsetAttributes($attributes = null)
@@ -502,7 +507,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * Retrieve sorted attributes
      *
      * @param int $setId
-     * @return array
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getSortedAttributes($setId = null)
     {
@@ -528,8 +533,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Compare attributes
      *
-     * @param Mage_Eav_Model_Entity_Attribute $attribute1
-     * @param Mage_Eav_Model_Entity_Attribute $attribute2
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute1
+     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute2
      * @return int
      */
     public function attributesCompare($attribute1, $attribute2)
@@ -571,7 +576,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * for example: $this->walkAttributes('backend/validate');
      *
      * @param string $partMethod
-     * @return array
+     * @param list<TModel> $args
+     * @return array<string, mixed> The result of the method of each attribute, which depends on $partMethod
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      */
     public function walkAttributes($partMethod, array $args = [])
@@ -636,7 +642,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Eav_Model_Entity_Attribute_Backend_Abstract|Mage_Eav_Model_Entity_Attribute_Frontend_Abstract|Mage_Eav_Model_Entity_Attribute_Source_Abstract $instance
      * @param string $method
-     * @param array $args array of arguments
+     * @param list<TModel> $args array of arguments
      * @return bool
      */
     protected function _isCallableAttributeInstance($instance, $method, $args)
@@ -651,7 +657,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Get attributes by name array
      *
-     * @return array
+     * @return array<string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributesByCode()
     {
@@ -661,7 +667,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Get attributes by id array
      *
-     * @return array
+     * @return array<int|string, Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public function getAttributesById()
     {
@@ -671,7 +677,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Get attributes by table and name array
      *
-     * @return array
+     * @return array<string, array<string, Mage_Eav_Model_Entity_Attribute_Abstract>>
      */
     public function getAttributesByTable()
     {
@@ -782,7 +788,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param TModel $object
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
-     * @return true|array
+     * @return true|array<string, true|string>
      */
     public function validate($object)
     {
@@ -888,7 +894,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param   Mage_Core_Model_Abstract $object
      * @param   int $entityId
-     * @param   array|null $attributes
+     * @param   array<int|string>|null $attributes
      * @return  $this
      */
     public function load($object, $entityId, $attributes = [])
@@ -973,6 +979,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Prepare select object for loading entity attributes values
      *
+     * @param list<Maho\Db\Select> $selects
      * @return Maho\Db\Select
      */
     protected function _prepareLoadSelect(array $selects)
@@ -1041,7 +1048,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * Initialize attribute value for object
      *
      * @param TModel $object
-     * @param   array $valueRow
+     * @param   array<string, DbValue> $valueRow
      * @return  $this
      */
     protected function _setAttributeValue($object, $valueRow)
@@ -1098,7 +1105,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Prepare entity object data for save
      *
-     * @return array{newObject: Mage_Core_Model_Abstract, entityRow: array<string, mixed>, insert: array<int, mixed>, update: array<int, array{value_id: ?int, value: mixed}>, delete: array<string, list<array{attribute_id: int, value_id: ?int}>>}
+     * @return SaveData
      */
     protected function _collectSaveData(Mage_Core_Model_Abstract $newObject): array
     {
@@ -1205,6 +1212,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * Return if attribute exists in original data array.
      *
      * @param mixed $v  New value of the attribute. Can be used in subclasses.
+     * @param array<string, mixed> $origData
      * @return bool
      */
     protected function _canUpdateAttribute(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $v, array &$origData)
@@ -1216,7 +1224,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * Retrieve static field properties
      *
      * @param string $field
-     * @return array|false
+     * @return ColumnDescription|false
      */
     protected function _getStaticFieldProperties($field)
     {
@@ -1253,7 +1261,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Save object collected data
      *
-     * @param   array $saveData ['newObject', 'entityRow', 'insert', 'update', 'delete']
+     * @param   SaveData $saveData
      * @return  $this
      */
     protected function _processSaveData($saveData)
@@ -1261,20 +1269,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         $this->_attributeValuesToSave   = [];
         $this->_attributeValuesToDelete = [];
 
-        /**
-         * Import variables from save data array
-         *
-         * @see Mage_Eav_Model_Entity_Attribute_Abstract::_collectSaveData()
-         */
-        /**
-         * @var array{
-         *   newObject: Mage_Core_Model_Abstract,
-         *   entityRow: array,
-         *   insert: array,
-         *   update: array,
-         *   delete: array
-         *   } $saveData
-         */
         $newObject = $saveData['newObject'];
         $entityRow = $saveData['entityRow'];
         $insert    = $saveData['insert'];
@@ -1464,7 +1458,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param \Maho\DataObject $object
      * @param   string $table
-     * @param   array $info
+     * @param   list<array{attribute_id: int, value_id: ?int}> $info
      * @return  $this
      */
     protected function _deleteAttributes($object, $table, $info)
@@ -1674,7 +1668,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve default entity attributes
      *
-     * @return array
+     * @return list<string>
      */
     protected function _getDefaultAttributes()
     {
@@ -1684,7 +1678,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve default entity static attributes
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getDefaultAttributes()
     {

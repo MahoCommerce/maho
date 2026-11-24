@@ -11,20 +11,25 @@
 /**
  * @template TItem of Mage_Core_Model_Abstract = Mage_Core_Model_Abstract
  * @extends \Maho\Data\Collection\Db<TItem>
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type SqlCondition from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-type JoinAttribute array{bind?: string, bindAttribute?: Mage_Eav_Model_Entity_Attribute_Abstract, attribute: Mage_Eav_Model_Entity_Attribute_Abstract, filter?: ?string, store_id?: ?int, condition_alias?: string|Maho\Db\Expr}
+ * @phpstan-type JoinField array{table: string|false, field: string|Maho\Db\Expr}
  */
 abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     /**
      * Array of items with item id key
      *
-     * @var array
+     * @var array<int|string, list<TItem>>
      */
     protected $_itemsById = [];
 
     /**
      * Entity static fields
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_staticFields = [];
 
@@ -38,42 +43,42 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Entity types to be fetched for objects in collection
      *
-     * @var array
+     * @var array<string, array{prefix: string}>
      */
     protected $_selectEntityTypes = [];
 
     /**
-     * Attributes to be fetched for objects in collection
+     * Attributes to be fetched for objects in collection, as attribute IDs by attribute code
      *
-     * @var array
+     * @var array<string, int|string|null>
      */
     protected $_selectAttributes = [];
 
     /**
-     * Attributes to be filtered order sorted by
+     * Attributes to be filtered order sorted by, as attribute IDs by attribute code
      *
-     * @var array
+     * @var array<string, int|string|null>
      */
     protected $_filterAttributes = [];
 
     /**
      * Joined entities
      *
-     * @var array
+     * @var array<string, Mage_Eav_Model_Entity_Abstract>
      */
     protected $_joinEntities = [];
 
     /**
      * Joined attributes
      *
-     * @var array
+     * @var array<string, JoinAttribute>
      */
     protected $_joinAttributes = [];
 
     /**
      * Joined fields data
      *
-     * @var array
+     * @var array<int|string, JoinField>
      */
     protected $_joinFields = [];
 
@@ -88,7 +93,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Cast map for attribute order
      *
-     * @var array
+     * @var list<string>
      */
     protected $_castToIntMap = [
         'validate-digits',
@@ -238,8 +243,8 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * ]
      *
      * @see self::_getConditionSql for $condition
-     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array $attribute
-     * @param null|int|string|array $condition
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|list<SqlCondition>|null $attribute
+     * @param int|string|SqlCondition|null $condition
      * @param string $joinType
      * @return $this
      */
@@ -357,7 +362,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * If $attribute=='*' select all attributes
      *
-     * @param   array|string|integer|Mage_Core_Model_Config_Element $attribute
+     * @param   array<string>|string|integer|Mage_Core_Model_Config_Element $attribute
      * @param   bool|string $joinType flag for joining attribute
      * @return  $this
      */
@@ -436,7 +441,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @param string $alias
      * @param string $expression
-     * @param string|array $attribute
+     * @param string|array<string> $attribute
      * @return $this
      */
     public function addExpressionAttributeToSelect($alias, $expression, $attribute)
@@ -485,7 +490,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Groups results by specified attribute
      *
-     * @param string|array $attribute
+     * @param string|list<string> $attribute
      * @return $this
      */
     public function groupByAttribute($attribute)
@@ -628,7 +633,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * @param string $table 'directory/country_name'
      * @param string $field 'name'
      * @param string $bind 'PK(country_id)=FK(shipping_country_id)'
-     * @param string|array $cond "{{table}}.language_code='en'" OR ['language_code'=>'en']
+     * @param string|array<string, int|string|SqlCondition|null>|null $cond "{{table}}.language_code='en'" OR ['language_code'=>'en']
      * @param string $joinType 'left'
      * @return $this
      */
@@ -688,10 +693,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Join a table
      *
-     * @param array|string|Maho\Db\Expr $table
+     * @param array<string, string|Maho\Db\Expr>|string|Maho\Db\Expr $table
      * @param string $bind
-     * @param string|array $fields
-     * @param string|array|null $cond
+     * @param array<int|string, string|Maho\Db\Expr>|null $fields
+     * @param string|array<string, int|string|SqlCondition|null>|null $cond
      * @param string $joinType
      * @return $this
      */
@@ -894,7 +899,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * If the imported items already exist, update the data for existing objects
      *
-     * @param array $arr
+     * @param iterable<array<string, mixed>> $arr
      * @return $this
      */
     public function importFromArray($arr)
@@ -915,7 +920,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Get collection data as a 2D array
      *
-     * @return array
+     * @return array<int|string, array<string, mixed>>
      */
     public function exportToArray()
     {
@@ -1049,7 +1054,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * Retrieve attributes load select
      *
      * @param   string $table
-     * @param array $attributeIds
+     * @param array<int|string|null> $attributeIds
      * @return  Maho\Db\Select
      * @throws Mage_Core_Exception
      */
@@ -1087,7 +1092,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * $valueInfo is _getLoadAttributesSelect fetch result row
      *
-     * @param   array $valueInfo
+     * @param   array<string, DbValue> $valueInfo
      * @throws Mage_Eav_Exception
      * @return  $this
      */
@@ -1111,7 +1116,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     }
 
     /**
-     * @param array<string, mixed> $valueInfo
+     * @param array<string, DbValue> $valueInfo
      */
     protected function _getAttributeCodeByValueInfo(array $valueInfo): string
     {
@@ -1262,9 +1267,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * Adding join statement to collection select instance
      *
      * @param   string $method
-     * @param   object $attribute
+     * @param   Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param   string $tableAlias
-     * @param   array $condition
+     * @param   list<string> $condition
      * @param   string $fieldCode
      * @param   string $fieldAlias
      * @return  $this
@@ -1284,7 +1289,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * @see self::_getConditionSql
      * @param string $attribute
-     * @param mixed $condition
+     * @param int|string|SqlCondition|null $condition
      * @param string $joinType
      * @return string
      */
@@ -1400,7 +1405,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Returns already loaded element ids
      *
-     * return array
+     * @return list<int|string>
      */
     public function getLoadedIds(): array
     {
