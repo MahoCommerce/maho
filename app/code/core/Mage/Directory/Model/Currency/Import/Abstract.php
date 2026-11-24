@@ -18,14 +18,14 @@
 abstract class Mage_Directory_Model_Currency_Import_Abstract
 {
     /**
-     * @var array
+     * @var list<string>
      */
     protected $_messages = [];
 
     /**
      * Retrieve currency codes
      *
-     * @return array
+     * @return array<int, string>
      */
     protected function _getCurrencyCodes()
     {
@@ -35,7 +35,7 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
     /**
      * Retrieve default currency codes
      *
-     * @return array
+     * @return array<int, string>
      */
     protected function _getDefaultCurrencyCodes()
     {
@@ -54,7 +54,7 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
     /**
      * Saving currency rates
      *
-     * @param   array $rates
+     * @param   array<string, array<string, float|null>> $rates
      * @return  Mage_Directory_Model_Currency_Import_Abstract
      */
     protected function _saveRates($rates)
@@ -81,7 +81,7 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
     }
 
     /**
-     * @return array
+     * @return array<string, array<string, float|null>>
      */
     public function fetchRates()
     {
@@ -115,7 +115,7 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getMessages()
     {

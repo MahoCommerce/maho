@@ -96,8 +96,8 @@ class Mage_Directory_Model_Observer
 
     /**
      * @param string $code The code of an enabled import service
-     * @param array $warnings Filled with whatever went wrong, when the import did not go through
-     * @return array|null Rates, or null when this service could not deliver a complete set
+     * @param list<string> $warnings Filled with whatever went wrong, when the import did not go through
+     * @return array<string, array<string, float|null>>|null Rates, or null when this service could not deliver a complete set
      */
     protected function _fetchRatesFromService(string $code, array &$warnings): ?array
     {
@@ -121,6 +121,9 @@ class Mage_Directory_Model_Observer
         return $warnings === [] && $result['rates'] !== [] ? $result['rates'] : null;
     }
 
+    /**
+     * @param list<string> $importWarnings
+     */
     protected function _sendImportWarnings(array $importWarnings): void
     {
         /** @var Mage_Core_Model_Email_Template $mailTemplate */

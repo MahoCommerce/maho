@@ -17,6 +17,8 @@ use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Country State Provider - Fetches country and region data.
+ *
+ * @phpstan-type CountryCacheRow array{id: ?string, name: string, iso2Code: ?string, iso3Code: ?string, availableRegions: array<int, array<string, mixed>>}
  */
 final class CountryProvider extends \Maho\ApiPlatform\Provider
 {
@@ -107,6 +109,8 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Convert Country DTO to array for caching
+     *
+     * @return CountryCacheRow
      */
     private function dtoToArray(Country $dto): array
     {
@@ -124,6 +128,8 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Reconstruct Country DTO from cached array
+     *
+     * @param array<string, mixed> $data A row that dtoToArray() wrote to the cache, decoded from JSON
      */
     private function arrayToDto(array $data): Country
     {

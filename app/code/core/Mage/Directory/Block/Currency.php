@@ -26,7 +26,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
      * Return array: code => currency name
      * Return empty array if only one currency
      *
-     * @return array
+     * @return array<string, string|false>
      */
     public function getCurrencies()
     {

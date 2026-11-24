@@ -76,6 +76,9 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * @return list<string>|true
+     */
     public function validate(): array|true
     {
         $errors = [];
@@ -135,6 +138,9 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
 
     /**
      * Check the name $data of this region in one locale. With $allowExisting, a name that the locale already has is not an error.
+     *
+     * @param array{locale: string, name: string} $data
+     * @return list<string>|true
      */
     public function validateTranslation(array $data, bool $allowExisting = false): array|true
     {
@@ -166,6 +172,9 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
         return $errors;
     }
 
+    /**
+     * @param array{locale: string, name: string} $data
+     */
     public function saveTranslation(array $data): bool
     {
         if (empty($data['locale']) || empty($data['name'])) {

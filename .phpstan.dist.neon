@@ -59,7 +59,6 @@ parameters:
                 - app/code/core/Mage/CurrencySymbol/*
                 - app/code/core/Mage/Customer/*
                 - app/code/core/Mage/Dataflow/*
-                - app/code/core/Mage/Directory/*
                 - app/code/core/Mage/Downloadable/*
                 - app/code/core/Mage/Eav/*
                 - app/code/core/Mage/GiftMessage/*

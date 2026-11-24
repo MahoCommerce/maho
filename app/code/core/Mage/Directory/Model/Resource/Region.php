@@ -170,6 +170,9 @@ class Mage_Directory_Model_Resource_Region extends Mage_Core_Model_Resource_Db_A
         return new \Maho\DataObject($this->_getReadAdapter()->fetchRow($select));
     }
 
+    /**
+     * @param array{locale: string, name: string} $data
+     */
     public function insertOrUpdateTranslation(Mage_Directory_Model_Region $region, array $data): bool
     {
         $data = array_intersect_key($data, array_flip(['locale', 'name']));
