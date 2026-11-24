@@ -1351,7 +1351,10 @@ class Mage_Checkout_Service_Cart
             $addressData = ['save_in_address_book' => $addressData['save_in_address_book'] ?? false]
                 + array_filter(
                     array_combine(self::ADDRESS_FIELDS, array_map($shippingAddress->getData(...), self::ADDRESS_FIELDS)),
-                    static fn(mixed $value): bool => $value !== null,
+                    // An empty field clears the billing field, or the billing address keeps the region of the old
+                    // country. The email stays: the billing address holds the email of a guest.
+                    static fn(mixed $value, string $field): bool => $value !== null || $field !== 'email',
+                    ARRAY_FILTER_USE_BOTH,
                 );
             $shippingAddress->setSameAsBilling(true);
         }
