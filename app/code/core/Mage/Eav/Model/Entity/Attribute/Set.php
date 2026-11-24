@@ -15,6 +15,8 @@ declare(strict_types=1);
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getCollection()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getResourceCollection()
+ *
+ * @phpstan-type SetTree array{attribute_set_name: string, groups: list<array{0: int|string, 1: string, 2: int, 3?: array<int, string>}>, attributes: list<array{0: int, 1: int|string, 2: int}>, not_attributes: list<int>, removeGroups: list<int>}
  */
 class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
 {
@@ -78,9 +80,11 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Collect data for save
+     * Collect the data for save from the tree of the set editor. Each group is an ID, a name, a sort order and the
+     * optional labels for each store view. Each attribute is an ID, the ID of its group and a sort order. The ID of a
+     * group that the editor added is not a number.
      *
-     * @param array<string, mixed> $data The tree of the set editor, with the keys attribute_set_name, groups, attributes, not_attributes and removeGroups
+     * @param SetTree $data
      * @return $this
      */
     public function organizeData($data)

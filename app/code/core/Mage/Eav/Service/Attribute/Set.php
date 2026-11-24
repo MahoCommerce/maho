@@ -14,6 +14,9 @@ declare(strict_types=1);
 use Mage_Eav_Model_Entity_Attribute_Group as Group;
 use Mage_Eav_Model_Entity_Attribute_Set as Set;
 
+/**
+ * @phpstan-import-type SetTree from Mage_Eav_Model_Entity_Attribute_Set
+ */
 class Mage_Eav_Service_Attribute_Set
 {
     /**
@@ -267,10 +270,11 @@ class Mage_Eav_Service_Attribute_Set
     }
 
     /**
-     * Remove from $tree the groups and the attributes of other sets and of other entity types.
+     * Remove from $tree the groups and the attributes of other sets and of other entity types, and each entry that
+     * does not have the format of the set editor.
      *
      * @param array<string, mixed> $tree
-     * @return array{attribute_set_name: string, groups: list<mixed>, attributes: list<mixed>, not_attributes: list<mixed>, removeGroups: list<mixed>}
+     * @return SetTree
      */
     private function filterTree(Set $set, array $tree): array
     {
@@ -282,30 +286,88 @@ class Mage_Eav_Service_Attribute_Set
         $groupIds = $ids('eav/attribute_group', 'attribute_group_id', 'attribute_set_id', (int) $set->getId());
         $rowIds = $ids('eav/entity_attribute', 'entity_attribute_id', 'attribute_set_id', (int) $set->getId());
         $attributeIds = $ids('eav/attribute', 'attribute_id', 'entity_type_id', (int) $set->getEntityTypeId());
-        $keep = fn(string $key, callable $check): array => array_values(array_filter((array) ($tree[$key] ?? []), $check));
+        $list = fn(string $key): array => is_array($tree[$key] ?? null) ? $tree[$key] : [];
+
+        $groups = [];
+        foreach ($list('groups') as $group) {
+            $id = is_array($group) ? $this->getTreeGroupId($group[0] ?? null, $groupIds) : null;
+            if ($id === null || !is_string($group[1] ?? null) || !is_int($group[2] ?? null)) {
+                continue;
+            }
+            $entry = [$id, $group[1], $group[2]];
+            // The labels for each store view are optional, so an older client keeps the saved ones
+            if (is_array($group[3] ?? null)) {
+                $entry[3] = [];
+                foreach ($group[3] as $storeId => $label) {
+                    if (is_int($storeId) && is_string($label)) {
+                        $entry[3][$storeId] = $label;
+                    }
+                }
+            }
+            $groups[] = $entry;
+        }
+
+        $attributes = [];
+        foreach ($list('attributes') as $attribute) {
+            $id = is_array($attribute) ? $this->getKnownId($attribute[0] ?? null, $attributeIds) : null;
+            $groupId = $id === null ? null : $this->getTreeGroupId($attribute[1] ?? null, $groupIds);
+            if ($groupId !== null && is_int($attribute[2] ?? null)) {
+                $attributes[] = [$id, $groupId, $attribute[2]];
+            }
+        }
+
+        $removed = ['not_attributes' => [], 'removeGroups' => []];
+        foreach (['not_attributes' => $rowIds, 'removeGroups' => $groupIds] as $key => $known) {
+            foreach ($list($key) as $id) {
+                $id = $this->getKnownId($id, $known);
+                if ($id !== null) {
+                    $removed[$key][] = $id;
+                }
+            }
+        }
 
         return [
             'attribute_set_name' => (string) ($tree['attribute_set_name'] ?? $set->getAttributeSetName()),
-            // A group id that is not a number is a group that the editor added
-            'groups' => $keep('groups', fn($group) => !is_numeric($group[0] ?? null) || in_array((int) $group[0], $groupIds, true)),
-            'attributes' => $keep('attributes', fn($attribute) => in_array((int) ($attribute[0] ?? 0), $attributeIds, true)),
-            'not_attributes' => $keep('not_attributes', fn($id) => in_array((int) $id, $rowIds, true)),
-            'removeGroups' => $keep('removeGroups', fn($id) => in_array((int) $id, $groupIds, true)),
+            'groups' => $groups,
+            'attributes' => $attributes,
+            'not_attributes' => $removed['not_attributes'],
+            'removeGroups' => $removed['removeGroups'],
         ];
+    }
+
+    /**
+     * Return $id as an integer when it is a number in $known, or null.
+     *
+     * @param list<int> $known
+     */
+    private function getKnownId(mixed $id, array $known): ?int
+    {
+        return is_numeric($id) && in_array((int) $id, $known, true) ? (int) $id : null;
+    }
+
+    /**
+     * Return the group ID $id of the tree of the set editor: a number in $groupIds, or a text that is not a number for
+     * a group that the editor added. Return null for any other value.
+     *
+     * @param list<int> $groupIds
+     */
+    private function getTreeGroupId(mixed $id, array $groupIds): int|string|null
+    {
+        return is_string($id) && !is_numeric($id) ? $id : $this->getKnownId($id, $groupIds);
     }
 
     /**
      * Return the rows of the attributes that $tree takes out of $set: a removed row, or a row of a removed group,
      * whose attribute the tree does not put into another group.
      *
-     * @param array{attribute_set_name: string, groups: list<mixed>, attributes: list<mixed>, not_attributes: list<mixed>, removeGroups: list<mixed>} $tree
+     * @param SetTree $tree
      * @return list<array{entity_attribute_id: int, attribute_id: int, attribute_group_id: int, is_user_defined: bool, in_removed_group: bool}>
      */
     private function getLeavingRows(Set $set, array $tree): array
     {
-        $removedRows = array_map(intval(...), $tree['not_attributes']);
-        $removedGroups = array_map(intval(...), $tree['removeGroups']);
-        $postedAttributes = array_map(fn($attribute) => (int) $attribute[0], $tree['attributes']);
+        $removedRows = $tree['not_attributes'];
+        $removedGroups = $tree['removeGroups'];
+        $postedAttributes = array_column($tree['attributes'], 0);
 
         $rows = [];
         foreach ($this->getSetRows($set) as $row) {
