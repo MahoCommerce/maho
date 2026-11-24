@@ -4275,16 +4275,19 @@
         }
     }
 
-    /* A long item option shows its cut value. truncateOptions() in js.js adds .show on hover for the full value */
+    /* A long item option shows its cut value, and the full value on hover or when its "..." link has the focus.
+       The panel stays as wide as the option line, so it never leaves a narrow screen */
     .truncated {
         @apply relative cursor-help;
 
         .truncated_full_value {
-            @apply absolute left-0 top-full z-50 hidden w-max max-w-xs whitespace-normal break-words rounded-box border border-line bg-base-100 p-3 text-13 text-base-content shadow-xl;
+            @apply absolute left-0 top-full z-50 hidden w-max max-w-[min(20rem,100%)] whitespace-normal break-words rounded-box border border-line bg-base-100 p-3 text-13 text-base-content shadow-xl;
+        }
 
-            &.show {
-                @apply block;
-            }
+        &:hover .truncated_full_value,
+        &:focus-within .truncated_full_value,
+        .truncated_full_value.show {
+            @apply block;
         }
     }
 }
