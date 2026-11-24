@@ -4274,6 +4274,19 @@
             @apply text-sm;
         }
     }
+
+    /* A long item option shows its cut value. truncateOptions() in js.js adds .show on hover for the full value */
+    .truncated {
+        @apply relative cursor-help;
+
+        .truncated_full_value {
+            @apply absolute left-0 top-full z-50 hidden w-max max-w-xs whitespace-normal break-words rounded-box border border-line bg-base-100 p-3 text-13 text-base-content shadow-xl;
+
+            &.show {
+                @apply block;
+            }
+        }
+    }
 }
 
 /* Unlayered: a textarea is taller than a field, so a pill --radius-field
