@@ -8,8 +8,12 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type CategoryNode array{category: Maho_Blog_Model_Category, children: list<mixed>}
+ */
 class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
 {
+    /** @var list<CategoryNode>|null */
     protected ?array $_categoryTree = null;
 
     /** @var array<int, string> Pre-loaded entity_id => url_key for all loaded categories */
@@ -27,7 +31,9 @@ class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
     /**
      * Get category tree as nested array
      *
-     * @return array<int, array{category: Maho_Blog_Model_Category, children: array}>
+     * Each node of children has the shape of a node of the tree.
+     *
+     * @return list<CategoryNode>
      */
     public function getCategoryTree(): array
     {
@@ -67,6 +73,10 @@ class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
 
     /**
      * Recursively build tree structure
+     *
+     * @param array<int, Maho_Blog_Model_Category> $items
+     * @param array<int, list<int>> $children
+     * @return list<CategoryNode>
      */
     protected function _buildTree(array $items, array $children, int $parentId): array
     {

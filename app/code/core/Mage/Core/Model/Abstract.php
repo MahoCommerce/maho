@@ -64,7 +64,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
      *
      * When you use true - all cache will be clean
      *
-     * @var string|bool|array
+     * @var string|bool|list<string>
      */
     protected $_cacheTag    = false;
 

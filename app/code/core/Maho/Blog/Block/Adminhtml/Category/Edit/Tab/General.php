@@ -122,6 +122,8 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
 
     /**
      * Build parent category options with indentation by level
+     *
+     * @return array<int, string>
      */
     protected function _getParentOptions(?Maho_Blog_Model_Category $currentCategory): array
     {

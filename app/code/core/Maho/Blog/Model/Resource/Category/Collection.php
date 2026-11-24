@@ -18,6 +18,9 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
 
     protected bool $_isFilteringStaticAttribute = false;
 
+    /**
+     * @return list<string>
+     */
     protected function _getStaticAttributes(): array
     {
         return $this->getEntity()->getStaticAttributeCodes();
@@ -102,6 +105,12 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
         return in_array($attribute, $this->_getStaticAttributes(), true);
     }
 
+    /**
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array<mixed> $attribute
+     * @param null|int|string|array<mixed> $condition
+     * @param string $joinType
+     * @return $this
+     */
     #[\Override]
     public function addAttributeToFilter($attribute, $condition = null, $joinType = 'inner')
     {
@@ -115,6 +124,11 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
         return parent::addAttributeToFilter($attribute, $condition, $joinType);
     }
 
+    /**
+     * @param array<mixed>|string|int|Mage_Core_Model_Config_Element $attribute
+     * @param bool|string $joinType
+     * @return $this
+     */
     #[\Override]
     public function addAttributeToSelect($attribute, $joinType = false)
     {
