@@ -53,12 +53,11 @@ class Mage_Catalog_Model_Rule_Condition_Combine extends Mage_Rule_Model_Conditio
         return $conditions;
     }
 
+    #[\Override]
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
         foreach ($this->getConditions() as $condition) {
-            if (method_exists($condition, 'collectValidatedAttributes')) {
-                $condition->collectValidatedAttributes($productCollection);
-            }
+            $condition->collectValidatedAttributes($productCollection);
         }
         return $this;
     }

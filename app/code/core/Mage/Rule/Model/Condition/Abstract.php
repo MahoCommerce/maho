@@ -309,6 +309,18 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
+     * Add the attributes that this condition validates to $productCollection.
+     *
+     * A condition on products overrides it. Every other condition adds nothing.
+     *
+     * @return $this
+     */
+    public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection)
+    {
+        return $this;
+    }
+
+    /**
      * Turn the option array of a config source into a list of value select options.
      *
      * A source can key its options by code, give no label, or add a group that has no value, as the shipping and

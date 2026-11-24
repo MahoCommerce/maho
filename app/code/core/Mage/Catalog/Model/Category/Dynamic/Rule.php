@@ -189,9 +189,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
                 $productCollection->addIdFilter($this->_productsFilter);
             }
 
-            if (method_exists($this->getConditions(), 'collectValidatedAttributes')) {
-                $this->getConditions()->collectValidatedAttributes($productCollection);
-            }
+            $this->getConditions()->collectValidatedAttributes($productCollection);
 
             Mage::getSingleton('core/resource_iterator')->walk(
                 $productCollection->getSelect(),

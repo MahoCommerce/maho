@@ -313,6 +313,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         $attribute = $this->getAttribute();

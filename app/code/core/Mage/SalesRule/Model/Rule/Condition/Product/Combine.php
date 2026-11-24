@@ -176,12 +176,11 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         foreach ($this->getConditions() as $condition) {
-            if (method_exists($condition, 'collectValidatedAttributes')) {
-                $condition->collectValidatedAttributes($productCollection);
-            }
+            $condition->collectValidatedAttributes($productCollection);
         }
         return $this;
     }

@@ -108,6 +108,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         $attribute = $this->getAttribute();
