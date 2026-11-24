@@ -133,9 +133,8 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             $websiteIds = $saveData['website_ids'] ?? null;
             unset($saveData['website_ids']);
 
-            // A form that does not post the balance keeps the balance of the card
-            $saveData['balance'] ??= $model->getData('balance');
-            $model->setData($saveData);
+            // The form of an existing card does not post its code and its initial balance, so the stored values stay
+            $model->addData($saveData);
             if ($websiteIds !== null) {
                 $model->setWebsiteIds(is_array($websiteIds) ? $websiteIds : [$websiteIds]);
             }
