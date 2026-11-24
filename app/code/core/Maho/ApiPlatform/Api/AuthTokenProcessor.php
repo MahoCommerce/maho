@@ -49,6 +49,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         };
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function handleGetToken(array $context): AuthToken
     {
         StoreContext::ensureStore();
@@ -69,6 +72,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         };
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     */
     private function handleCustomerGrant(array $data): AuthToken
     {
         // A value of a wrong type reads as missing, so it gets the invalid_request error of the grant
@@ -95,6 +101,11 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Give a customer token for the token of a magic login link. A customer who uses 2FA sends the code with the
      * same link: the link stays valid until the code is right.
+     *
+     * @param array<array-key, mixed> $data
+     */
+    /**
+     * @param array<array-key, mixed> $data
      */
     private function handleMagicLinkGrant(array $data): AuthToken
     {
@@ -111,6 +122,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         return $this->generateCustomerTokenResponse($service->authenticateByMagicLink(trim($token), $twofaCode), $data);
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     */
     private function generateCustomerTokenResponse(\Mage_Customer_Model_Customer $customer, array $data): AuthToken
     {
         try {
@@ -162,6 +176,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         return $service->authenticateInAnyWebsite($email, $password, (int) \Mage::app()->getStore()->getWebsiteId(), $twofaCode);
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     */
     private function handleClientCredentialsGrant(array $data): AuthToken
     {
         $clientId = RequestInput::toString($data['client_id'] ?? null) ?? '';
@@ -206,6 +223,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     */
     private function handleApiUserGrant(array $data): AuthToken
     {
         $username = RequestInput::toString($data['username'] ?? null) ?? '';
@@ -265,6 +285,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function handleRefreshToken(array $context): AuthToken
     {
         $request = $context['request'] ?? null;
@@ -325,6 +348,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private function handleLogout(array $context): AuthToken
     {
         $request = $context['request'] ?? null;

@@ -22,6 +22,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 trait PaginationTrait
 {
     /**
+     * @param array<string, mixed> $context
      * @return array{page: int, pageSize: int}
      */
     protected function extractPagination(array $context, int $defaultPageSize = 20, int $maxPageSize = 100): array

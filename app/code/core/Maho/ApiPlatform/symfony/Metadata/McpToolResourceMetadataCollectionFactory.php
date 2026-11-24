@@ -330,6 +330,9 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         return ['properties' => $properties, 'required' => $required];
     }
 
+    /**
+     * @param array<string, mixed> $listArguments
+     */
     private function buildTool(
         string $name,
         string $sourceName,

@@ -253,6 +253,8 @@ abstract class CrudResource extends Resource
      *
      * Depth-limited and cycle-safe, a block that references itself, or a
      * chain deeper than 5 levels, falls back to stripping the directive.
+     *
+     * @param array<string, true> $seen
      */
     private static function resolveCmsBlockDirectives(
         string $content,

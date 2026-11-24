@@ -40,6 +40,8 @@ use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
  * AdminAclListener enforces on the REST surface, which is what makes
  * backend field visibility correct here (every caller holds the resource's
  * admin ACL). AdminGraphQlAclCoverageTest keeps that per-handler check honest.
+ *
+ * @phpstan-type AdminContext array{store_id: int, is_admin: bool, admin_user_id: int}
  */
 #[Route('/api/admin/graphql', name: 'api_admin_graphql', methods: ['GET', 'POST'])]
 class AdminGraphQlController
@@ -130,6 +132,11 @@ class AdminGraphQlController
     /** Maximum query length in bytes */
     private const int MAX_QUERY_LENGTH = 10000;
 
+    /**
+     * @param array<array-key, mixed>|null $variables
+     * @param AdminContext $context
+     * @return array{data: array<string, mixed>}|array{errors: list<array{message: string, extensions?: array{code: string}}>}
+     */
     private function executeQuery(string $query, ?array $variables, array $context, ?string $operationName = null): array
     {
         // Parse and execute
@@ -234,6 +241,10 @@ class AdminGraphQlController
      * handler imports its own resource class, no central
      * operation→resource map, so 3rd-party modules can add operations
      * without touching this controller's metadata.
+     *
+     * @param array<array-key, mixed> $variables
+     * @param AdminContext $context
+     * @return array<string, mixed>
      */
     private function resolveOperation(string $operation, array $variables, array $context): array
     {

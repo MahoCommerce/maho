@@ -79,6 +79,9 @@ abstract class Provider implements ProviderInterface
     /**
      * Hook for named operations (custom GraphQL queries, etc.).
      * Return null to fall through to default collection/item routing.
+     *
+     * @param array<string, mixed> $context
+     * @param array<string, mixed> $uriVariables
      */
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
@@ -99,6 +102,8 @@ abstract class Provider implements ProviderInterface
     /**
      * Apply custom filters to a collection.
      * Override to add store filters, search, field filters, etc.
+     *
+     * @param array<string, mixed> $filters
      */
     protected function applyCollectionFilters(object $collection, array $filters): void {}
 
@@ -135,6 +140,7 @@ abstract class Provider implements ProviderInterface
      * Load a paginated collection. Override for custom collection logic
      * (e.g. caching, batch loading).
      *
+     * @param array<string, mixed> $context
      * @return TraversablePaginator<Resource>
      */
     protected function provideCollection(array $context): TraversablePaginator

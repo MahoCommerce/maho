@@ -14,9 +14,14 @@ namespace Maho\ApiPlatform\Exception;
  * Authentication Exception - 401 Unauthorized.
  *
  * Use when user is not authenticated or credentials are invalid.
+ *
+ * @phpstan-import-type ErrorDetails from ApiException
  */
 class AuthenticationException extends ApiException
 {
+    /**
+     * @param ErrorDetails $details
+     */
     public function __construct(
         string $message = 'Authentication required',
         string $errorCode = 'authentication_required',

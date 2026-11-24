@@ -27,8 +27,8 @@ trait CacheTrait
      * @param array<string> $cacheTags
      * @param int $ttl TTL in seconds
      * @param \Closure(): T $compute Builds the result if cache misses
-     * @param \Closure(T): array $serialize Converts result to a cacheable array
-     * @param \Closure(array): T $deserialize Converts cached array back to result
+     * @param \Closure(T): array<mixed> $serialize Converts result to a cacheable array
+     * @param \Closure(array<mixed>): T $deserialize Converts cached array back to result
      * @return T
      */
     protected function remember(

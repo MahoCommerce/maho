@@ -161,7 +161,11 @@ final class McpDispatchProvider implements ProviderInterface
      * context builder, so groups and `OBJECT_TO_POPULATE` match REST. `$data` is the
      * entity the read stage loaded, null for a create.
      *
+     * @param array<string, mixed> $uriVariables
+     * @param array<string, mixed> $context
      * @param array<string, mixed> $arguments
+     * @param object|array<mixed>|null $data
+     * @return object|array<mixed>|null
      */
     private function denormalizeBody(
         HttpOperation $operation,
