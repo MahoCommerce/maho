@@ -577,7 +577,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @param string $partMethod
      * @param list<TModel> $args
-     * @return array<string, mixed> The result of the method of each attribute, which depends on $partMethod
+     * @return ($partMethod is 'backend/validate' ? array<string, Mage_Eav_Model_Entity_Attribute_Backend_Abstract|bool|string> : array<string, mixed>) The result of the method of each attribute, by attribute code
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      */
     public function walkAttributes($partMethod, array $args = [])
