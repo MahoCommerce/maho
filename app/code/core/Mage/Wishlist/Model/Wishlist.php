@@ -52,7 +52,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     /**
      * Entity cache tag
      *
-     * @var string|bool|array
+     * @var string|bool|list<string>
      */
     #[\Override]
     protected $_cacheTag = 'wishlist';

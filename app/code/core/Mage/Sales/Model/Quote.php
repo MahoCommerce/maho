@@ -41,7 +41,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * When you use true - all cache will be clean
      *
-     * @var string|bool|array
+     * @var string|bool|list<string>
      */
     #[\Override]
     protected $_cacheTag = 'quote';
