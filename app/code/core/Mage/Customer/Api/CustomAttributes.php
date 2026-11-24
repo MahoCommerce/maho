@@ -180,7 +180,7 @@ final class CustomAttributes
             ->ignoreInvisible(!str_starts_with($formCode, 'adminhtml_'));
         $attributes = $form->getUserAttributes();
         $values = array_map(fn(mixed $value): mixed => is_bool($value) ? (int) $value : $value, $values);
-        // The input filters of the data models read the text that a form posts: the date filter refuses a number
+        // Send each JSON number as a string, as an HTML form does: the date check of the form accepts only a string
         $toText = static fn(string|int|float|array|null $item): string|array|null => is_scalar($item) ? (string) $item : $item;
         $request = $form->prepareRequest(array_map(
             fn(string|int|float|array|null $value): string|array|null => is_array($value) ? array_map($toText, $value) : $toText($value),
