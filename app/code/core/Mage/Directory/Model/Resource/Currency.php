@@ -240,6 +240,8 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Return currency rates
      *
+     * A null $toCurrencies returns the rates to every currency that has one.
+     *
      * @param string|array<string> $currency
      * @param array<string>|string|null $toCurrencies
      *
@@ -279,8 +281,10 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         ];
         $select  = $adapter->select()
             ->from($this->getTable('directory/currency_rate'), ['currency_to', 'rate'])
-            ->where('currency_from = :currency_from')
-            ->where('currency_to IN(?)', $toCurrencies);
+            ->where('currency_from = :currency_from');
+        if ($toCurrencies !== null) {
+            $select->where('currency_to IN(?)', $toCurrencies);
+        }
         $rowSet  = $adapter->fetchAll($select, $bind);
         $result  = [];
 

@@ -335,6 +335,8 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve currency rates to other currencies
      *
+     * A null $toCurrencies returns the rates to every currency that has one.
+     *
      * @param array<string>|string|Mage_Directory_Model_Currency $currency
      * @param array<string>|string|null $toCurrencies
      * @return ($currency is array ? array<string, array<string, float>> : array<string, float>)
