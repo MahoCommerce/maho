@@ -411,7 +411,8 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             $errors->addError($column, $helper->__('The condition is not valid JSON.'));
             return;
         }
-        foreach (\Maho\Data\Form\Condition::structureErrors($condition) as $message) {
+        $structureErrors = \Maho\Data\Form\Condition::structureErrors($condition);
+        foreach ($structureErrors as $message) {
             $errors->addError($column, $message);
         }
 
@@ -419,6 +420,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
         $dependents = $isShowCondition && $this->getId() ? $this->getDependentAttributeCodes() : [];
         if ($dependents) {
             $errors->addError($column, $helper->__('This attribute cannot have a condition, because the condition of %s reads it.', implode(', ', $dependents)));
+        }
+        if ($structureErrors !== []) {
+            return;
         }
 
         $sources = $this->getDependencySources();
