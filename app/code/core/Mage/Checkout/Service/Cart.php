@@ -1351,7 +1351,8 @@ class Mage_Checkout_Service_Cart
             $addressData = ['save_in_address_book' => $addressData['save_in_address_book'] ?? false]
                 + array_filter(
                     array_combine(self::ADDRESS_FIELDS, array_map($shippingAddress->getData(...), self::ADDRESS_FIELDS)),
-                    static fn(mixed $value): bool => $value !== null,
+                    static fn(mixed $value, string $field): bool => $value !== null || $field !== 'email',
+                    ARRAY_FILTER_USE_BOTH,
                 );
             $shippingAddress->setSameAsBilling(true);
         }
