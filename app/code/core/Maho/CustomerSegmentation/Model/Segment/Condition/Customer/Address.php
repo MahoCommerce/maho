@@ -90,7 +90,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
     }
 
     /**
-     * @return list<array<string, mixed>>
+     * @return list<array{value: int|string, label: string, title?: string|null}>
      */
     #[\Override]
     public function getValueSelectOptions(): array

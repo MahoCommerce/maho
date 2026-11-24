@@ -84,7 +84,9 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
     public function collectValidatedAttributes($productCollection): self
     {
         foreach ($this->getConditions() as $condition) {
-            $condition->collectValidatedAttributes($productCollection);
+            if (method_exists($condition, 'collectValidatedAttributes')) {
+                $condition->collectValidatedAttributes($productCollection);
+            }
         }
         return $this;
     }

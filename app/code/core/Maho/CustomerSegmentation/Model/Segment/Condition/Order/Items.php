@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type ValueSelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
 {
     private const array BASE_AMOUNT_COLUMNS = [
@@ -98,7 +101,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
     }
 
     /**
-     * @return list<array<mixed>>
+     * @return list<ValueSelectOption>
      */
     #[\Override]
     public function getValueSelectOptions(): array
@@ -118,7 +121,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Items extends Maho
                 $options = [];
                 foreach ($productAttribute->getSource()->getAllOptions() as $option) {
                     if (is_array($option) && isset($option['value']) && $option['value'] !== '') {
-                        $options[] = $option;
+                        $options[] = ['value' => $option['value'], 'label' => $option['label']];
                     }
                 }
                 return $options;

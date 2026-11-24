@@ -62,7 +62,9 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Combine extends Mage_Rule_Model_Con
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
         foreach ($this->getConditions() as $condition) {
-            $condition->collectValidatedAttributes($productCollection);
+            if (method_exists($condition, 'collectValidatedAttributes')) {
+                $condition->collectValidatedAttributes($productCollection);
+            }
         }
 
         return $this;
