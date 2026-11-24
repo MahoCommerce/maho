@@ -335,13 +335,11 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve currency rates to other currencies
      *
-     * When $toCurrencies is null, return every rate from $currency that the rate table stores.
-     *
      * @param array<string>|string|Mage_Directory_Model_Currency $currency
-     * @param array<string>|string|null $toCurrencies
+     * @param array<string>|string $toCurrencies
      * @return ($currency is array ? array<string, array<string, float>> : array<string, float>)
      */
-    public function getCurrencyRates($currency, $toCurrencies = null)
+    public function getCurrencyRates($currency, array|string $toCurrencies)
     {
         if ($currency instanceof Mage_Directory_Model_Currency) {
             $currency = $currency->getCode();

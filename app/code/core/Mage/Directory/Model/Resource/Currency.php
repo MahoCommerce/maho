@@ -240,14 +240,12 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Return currency rates
      *
-     * When $toCurrencies is null, return every rate from $currency that the rate table stores.
-     *
      * @param string|array<string> $currency
-     * @param array<string>|string|null $toCurrencies
+     * @param array<string>|string $toCurrencies
      *
      * @return ($currency is array ? array<string, array<string, float>> : array<string, float>)
      */
-    public function getCurrencyRates($currency, $toCurrencies = null)
+    public function getCurrencyRates($currency, array|string $toCurrencies)
     {
         $rates = [];
         if (is_array($currency)) {
@@ -264,14 +262,14 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Protected method used by getCurrencyRates() method
      *
-     * @param array<string>|string|null $toCurrencies
+     * @param array<string>|string $toCurrencies
      * @return array<string, float>
      */
-    protected function _getRatesByCode(string $code, array|string|null $toCurrencies = null): array
+    protected function _getRatesByCode(string $code, array|string $toCurrencies): array
     {
         if (is_array($toCurrencies)) {
             $toCurrencies = array_map($this->_currencyCode(...), $toCurrencies);
-        } elseif ($toCurrencies !== null) {
+        } else {
             $toCurrencies = $this->_currencyCode($toCurrencies);
         }
 
@@ -281,10 +279,8 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
         ];
         $select  = $adapter->select()
             ->from($this->getTable('directory/currency_rate'), ['currency_to', 'rate'])
-            ->where('currency_from = :currency_from');
-        if ($toCurrencies !== null) {
-            $select->where('currency_to IN(?)', $toCurrencies);
-        }
+            ->where('currency_from = :currency_from')
+            ->where('currency_to IN(?)', $toCurrencies);
         $rowSet  = $adapter->fetchAll($select, $bind);
         $result  = [];
 
