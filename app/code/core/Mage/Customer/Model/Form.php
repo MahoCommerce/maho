@@ -8,6 +8,9 @@
  * @package Mage_Customer
  */
 
+/**
+ * @extends Mage_Eav_Model_Form<Mage_Customer_Model_Attribute>
+ */
 class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
 {
     /**
@@ -30,7 +33,7 @@ class Mage_Customer_Model_Form extends Mage_Eav_Model_Form
      * Get EAV Entity Form Attribute Collection for Customer
      * exclude 'created_at'
      *
-     * @return Mage_Customer_Model_Resource_Form_Attribute_Collection
+     * @return Mage_Eav_Model_Resource_Form_Attribute_Collection<Mage_Customer_Model_Attribute>
      */
     #[\Override]
     protected function _getFormAttributeCollection()

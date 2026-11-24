@@ -515,7 +515,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * value (not verified here).
      *
      * @param TModel $object
-     * @return array|true
+     * @return array<string, true|string>|true
      */
     #[\Override]
     public function validate($object)

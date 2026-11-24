@@ -13,8 +13,8 @@ class Mage_Catalog_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
     /**
      * Prepare catalog attribute values to save
      *
-     * @param array $attr
-     * @return array
+     * @param array<string, mixed> $attr
+     * @return array<string, mixed>
      */
     #[\Override]
     protected function _prepareValues($attr)
