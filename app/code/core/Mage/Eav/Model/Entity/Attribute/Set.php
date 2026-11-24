@@ -112,8 +112,9 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
                     foreach ($data['attributes'] as $attribute) {
                         if ($attribute[1] == $group[0] && in_array($attribute[0], $attributeIds)) {
                             $modelAttribute = Mage::getModel('eav/entity_attribute');
+                            // A group that the editor added has no ID yet: its save sets the ID on its attributes
                             $modelAttribute->setId($attribute[0])
-                                ->setAttributeGroupId($attribute[1])
+                                ->setAttributeGroupId(is_numeric($attribute[1]) ? (int) $attribute[1] : null)
                                 ->setAttributeSetId($this->getId())
                                 ->setEntityTypeId($this->getEntityTypeId())
                                 ->setSortOrder($attribute[2]);
