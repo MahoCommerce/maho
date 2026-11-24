@@ -8,19 +8,22 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ */
 class Mage_Eav_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Array of entity types
+     * Array of entity types: the rows of the entity type table by ID in by_id, and by code in by_code
      *
-     * @var array
+     * @var array<string, array<int|string, array<string, DbValue>>>
      */
     protected static $_entityTypes   = [];
 
     /**
-     * Array of attributes
+     * Array of attributes: the rows of the attribute table by entity type ID
      *
-     * @var array
+     * @var array<int|string, list<array<string, DbValue>>>
      */
     protected static $_attributes    = [];
 
@@ -57,7 +60,7 @@ class Mage_Eav_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstrac
      * Load attribute types
      *
      * @param int $typeId
-     * @return array
+     * @return list<array<string, DbValue>>
      */
     protected function _loadTypeAttributes($typeId)
     {
@@ -78,7 +81,7 @@ class Mage_Eav_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abstrac
      * Retrieve entity type data
      *
      * @param string $entityType
-     * @return array
+     * @return array{entity?: array<string, DbValue>, attributes?: array<int|string, array<string, DbValue>|DbValue>} The attribute rows by attribute ID, and the attribute IDs by attribute code
      */
     public function fetchEntityTypeData($entityType)
     {

@@ -8,6 +8,10 @@
  * @package Mage_Eav
  */
 
+/**
+ * @template TItem of Mage_Eav_Model_Attribute = Mage_Eav_Model_Attribute
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<TItem>
+ */
 class Mage_Eav_Model_Resource_Form_Attribute_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     /**

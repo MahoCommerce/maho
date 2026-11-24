@@ -8,13 +8,17 @@
  * @package Mage_Customer
  */
 
+/**
+ * @phpstan-import-type AttributeDefinition from Mage_Eav_Model_Entity_Setup
+ * @phpstan-import-type AttributeRow from Mage_Eav_Model_Entity_Setup
+ */
 class Mage_Customer_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
 {
     /**
      * Prepare customer attribute values to save in additional table
      *
-     * @param array $attr
-     * @return array
+     * @param AttributeDefinition $attr
+     * @return AttributeRow
      */
     #[\Override]
     protected function _prepareValues($attr)

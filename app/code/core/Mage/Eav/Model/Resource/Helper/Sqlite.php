@@ -11,7 +11,7 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
     /**
      * SQLite column - Table DDL type pairs
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_ddlColumnTypes = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'integer',
@@ -80,8 +80,8 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
     /**
      * Groups selects to separate unions depend on type
      *
-     * @param array $selects
-     * @return array
+     * @param array<string, list<Maho\Db\Select>> $selects The selects by backend type
+     * @return list<Maho\Db\Select>
      */
     public function getLoadAttributesSelectGroups($selects)
     {

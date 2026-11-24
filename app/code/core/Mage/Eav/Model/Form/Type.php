@@ -37,7 +37,7 @@ class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
     /**
      * Retrieve assigned Eav Entity types
      *
-     * @return array
+     * @return list<int|string> The entity type IDs
      */
     public function getEntityTypes()
     {
@@ -50,6 +50,7 @@ class Mage_Eav_Model_Form_Type extends Mage_Core_Model_Abstract
     /**
      * Set assigned Eav Entity types
      *
+     * @param list<int|string> $entityTypes The entity type IDs
      * @return $this
      */
     public function setEntityTypes(array $entityTypes)

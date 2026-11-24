@@ -9,6 +9,7 @@
  */
 
 /**
+ * @phpstan-import-type SourceOption from Mage_Eav_Model_Entity_Attribute_Source_Interface
  * @template TCollection of Mage_Eav_Model_Entity_Collection_Abstract = Mage_Eav_Model_Entity_Collection_Abstract
  */
 abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_Eav_Model_Entity_Attribute_Source_Interface
@@ -23,7 +24,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
     /**
      * Options array
      *
-     * @var array|null
+     * @var list<SourceOption>|null
      */
     protected $_options = null;
 
@@ -53,7 +54,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
      * Get a text for option value
      *
      * @param  string|int $value
-     * @return array|string|false
+     * @return string|list<string>|false
      */
     #[\Override]
     public function getOptionText($value)
@@ -67,7 +68,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
                 }
             } // End
         }
-        return $options[$value] ?? false;
+        return false;
     }
 
     /**
