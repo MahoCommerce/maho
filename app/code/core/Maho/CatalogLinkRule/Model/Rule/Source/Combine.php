@@ -27,6 +27,9 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Combine extends Mage_Rule_Model_Con
         return $html;
     }
 
+    /**
+     * @return list<array{value: string|list<array{value: string, label: string}>, label: string}>
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
