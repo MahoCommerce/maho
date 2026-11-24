@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 /**
  * Converts LSP UTF-16 columns to and from UTF-8 byte offsets.
+ *
+ * @phpstan-type LspPosition array{line: int, character: int}
+ * @phpstan-type LspRange array{start: LspPosition, end: LspPosition}
  */
 class Maho_Intelligence_Model_Lsp_Position
 {

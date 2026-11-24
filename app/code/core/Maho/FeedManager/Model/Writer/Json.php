@@ -20,6 +20,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
     protected bool $_firstProduct = true;
     protected bool $_prettyPrint = false;
     protected string $_rootKey = 'products';
+    /** @var array<string, array<string, mixed>> */
     protected array $_structure = [];
 
     #[\Override]
@@ -141,6 +142,8 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
 
     /**
      * Set structure definition from JSON builder
+     *
+     * @param array<string, array<string, mixed>> $structure
      */
     public function setStructure(array $structure): self
     {
@@ -150,6 +153,8 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
 
     /**
      * Get structure definition
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function getStructure(): array
     {

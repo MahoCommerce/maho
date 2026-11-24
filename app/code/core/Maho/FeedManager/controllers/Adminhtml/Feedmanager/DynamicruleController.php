@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type RuleCase from Maho_FeedManager_Model_DynamicRule
+ */
 class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_Adminhtml_Controller_Action
 {
     public const string ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
@@ -147,6 +150,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 
     /**
      * Process cases data from form submission
+     *
+     * @param array<int|string, array<string, mixed>> $casesData
+     * @return list<RuleCase>
      */
     protected function _processCasesData(array $casesData): array
     {
@@ -180,6 +186,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 
     /**
      * Build conditions array from form post data
+     *
+     * @param array<int|string, array<string, mixed>> $conditionsData
+     * @return array<string, mixed>
      */
     protected function _buildConditionsArray(array $conditionsData, string $prefix = 'conditions'): array
     {
@@ -203,6 +212,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
      * Convert flat form conditions data to recursive array structure
      * This mirrors Mage_Rule_Model_Abstract::_convertFlatToRecursive
      *
+     * @param array<int|string, array<string, mixed>> $data
      * @return array<int|string, mixed>
      */
     protected function _convertFlatToRecursive(array $data): array

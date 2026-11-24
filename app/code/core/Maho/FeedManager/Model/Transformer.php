@@ -12,6 +12,9 @@ declare(strict_types=1);
  * Transformer Factory/Registry
  *
  * Manages transformer instances and provides a pipeline for chaining transformations
+ *
+ * @phpstan-type TransformerStep array{transformer: string, options?: array<string, mixed>}
+ * @phpstan-import-type OptionDefinition from Maho_FeedManager_Model_Transformer_TransformerInterface
  */
 class Maho_FeedManager_Model_Transformer
 {
@@ -177,7 +180,7 @@ class Maho_FeedManager_Model_Transformer
      * Apply a chain of transformations (pipeline)
      *
      * @param mixed $value The initial value
-     * @param array<int, array{transformer: string, options?: array}> $transformations List of transformations
+     * @param array<int, TransformerStep> $transformations List of transformations
      * @param array<string, mixed> $productData Full product data for context
      * @return mixed Final transformed value
      */
@@ -198,7 +201,7 @@ class Maho_FeedManager_Model_Transformer
     /**
      * Get option definitions for all transformers
      *
-     * @return array<string, array>
+     * @return array<string, array{name: string, description: string, options: array<string, OptionDefinition>}>
      */
     public static function getAllOptionDefinitions(): array
     {
@@ -249,7 +252,7 @@ class Maho_FeedManager_Model_Transformer
     /**
      * Get all transformer data for JavaScript (includes categories and options)
      *
-     * @return array<string, mixed>
+     * @return array{categories: array<string, array<string, array{code: string, name: string, description: string}>>, definitions: array<string, array{name: string, description: string, options: array<string, OptionDefinition>}>}
      */
     public static function getTransformerDataForJs(): array
     {
@@ -265,7 +268,7 @@ class Maho_FeedManager_Model_Transformer
      * Format: "transformer_code:opt1=val1,opt2=val2|next_transformer:opts..."
      *
      * @param string $chainString The transformer chain string
-     * @return array<int, array{transformer: string, options: array<string, string>}>
+     * @return list<array{transformer: string, options: array<string, string>}>
      */
     public static function parseChainString(string $chainString): array
     {

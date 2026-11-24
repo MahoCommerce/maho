@@ -8,10 +8,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type CursorContext from Maho_Intelligence_Model_Lsp_ContextDetector
+ * @phpstan-type Hover array{contents: array{kind: string, value: string}}
+ */
 class Maho_Intelligence_Model_Lsp_Handler_Hover
 {
     public function __construct(private Maho_Intelligence_Model_Registry $registry, private Maho_Intelligence_Model_Lsp_ContextDetector $detector, private Maho_Intelligence_Model_Lsp_DocumentStore $documents) {}
 
+    /**
+     * @param array<string, mixed> $params
+     * @return Hover|null
+     */
     public function handle(array $params): ?array
     {
         $uri = $params['textDocument']['uri'] ?? '';
@@ -52,6 +60,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         };
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover|null
+     */
     private function hoverAlias(array $context): ?array
     {
         $type = match ($context['context']) {
@@ -83,6 +95,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverEvent(array $context): array
     {
         $observers = $this->registry->get('event', 'getObserversForEvent', [$context['alias']]);
@@ -103,6 +119,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverConfigPath(array $context): array
     {
         $info = $this->registry->get('configPath', 'getPathInfo', [$context['alias']]);
@@ -130,6 +150,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverFqcn(array $context): array
     {
         $className = $context['alias'];
@@ -147,6 +171,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverMethod(array $context): array
     {
         $classAlias = $context['classAlias'] ?? null;
@@ -177,6 +205,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover|null
+     */
     private function hoverCronModel(array $context): ?array
     {
         $classAlias = $context['classAlias'] ?? null;
@@ -208,6 +240,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverTemplate(array $context): array
     {
         $templatePath = $context['alias'];
@@ -228,6 +264,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Hover
+     */
     private function hoverLayoutHandle(array $context): array
     {
         $handle = $context['alias'];
@@ -249,6 +289,9 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         return $this->markdown($markdown);
     }
 
+    /**
+     * @return Hover
+     */
     private function markdown(string $value): array
     {
         return [

@@ -8,10 +8,15 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type LayoutBlock array{type: string, name: string, template: string, children?: list<array<string, mixed>>}|array{reference: string, children: list<array<string, mixed>>}
+ */
 class Maho_Intelligence_Model_Provider_Layout
 {
     /**
      * Get layout handles and their block hierarchy for an area
+     *
+     * @return array<string, array{handle: string, file: string, blocks: list<LayoutBlock>}>
      */
     public function getHandles(string $area = 'frontend'): array
     {
@@ -41,6 +46,9 @@ class Maho_Intelligence_Model_Provider_Layout
         return $result;
     }
 
+    /**
+     * @return array<string, list<LayoutBlock>>
+     */
     private function parseLayoutFile(string $area, string $file): array
     {
         $designPackage = Mage::getSingleton('core/design_package');
@@ -66,6 +74,9 @@ class Maho_Intelligence_Model_Provider_Layout
         return $handles;
     }
 
+    /**
+     * @return list<LayoutBlock>
+     */
     private function extractBlocks(\SimpleXMLElement $node): array
     {
         $blocks = [];

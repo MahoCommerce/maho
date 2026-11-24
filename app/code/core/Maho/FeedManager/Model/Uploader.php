@@ -16,6 +16,7 @@ declare(strict_types=1);
 class Maho_FeedManager_Model_Uploader
 {
     protected Maho_FeedManager_Model_Destination $_destination;
+    /** @var array<string, string> */
     protected array $_config;
 
     public function __construct(Maho_FeedManager_Model_Destination $destination)
@@ -97,6 +98,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test connection to destination
+     *
+     * @return array{success: bool, message: string}
      */
     public function testConnection(): array
     {
@@ -379,6 +382,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test SFTP connection (including authentication)
+     *
+     * @return array{success: bool, message: string}
      */
     protected function _testSftpConnection(): array
     {
@@ -457,6 +462,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test SFTP connection using ssh2 extension
+     *
+     * @return array{success: bool, message: string}
      */
     protected function _testSftpConnectionExtension(): array
     {
@@ -519,6 +526,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test FTP connection (including authentication)
+     *
+     * @return array{success: bool, message: string}
      */
     protected function _testFtpConnection(): array
     {
@@ -564,6 +573,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test Google API connection
+     *
+     * @return array{success: bool, message: string}
      */
     protected function _testGoogleApiConnection(): array
     {
@@ -573,6 +584,8 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Test Facebook API connection
+     *
+     * @return array{success: bool, message: string}
      */
     protected function _testFacebookApiConnection(): array
     {

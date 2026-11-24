@@ -15,7 +15,9 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Validator
 {
+    /** @var list<string> */
     protected array $_errors = [];
+    /** @var list<string> */
     protected array $_warnings = [];
 
     /**
@@ -210,6 +212,7 @@ class Maho_FeedManager_Model_Validator
      * Read one row. Without an enclosure, the row is the line split at each delimiter, as the writer writes it.
      *
      * @param resource $handle
+     * @return list<string|null>|false
      */
     protected function _readCsvRow($handle, string $delimiter, string $enclosure): array|false
     {
@@ -404,6 +407,8 @@ class Maho_FeedManager_Model_Validator
 
     /**
      * Get validation errors
+     *
+     * @return list<string>
      */
     public function getErrors(): array
     {
@@ -412,6 +417,8 @@ class Maho_FeedManager_Model_Validator
 
     /**
      * Get validation warnings
+     *
+     * @return list<string>
      */
     public function getWarnings(): array
     {
@@ -428,6 +435,8 @@ class Maho_FeedManager_Model_Validator
 
     /**
      * Get all messages (errors + warnings)
+     *
+     * @return list<string>
      */
     public function getAllMessages(): array
     {

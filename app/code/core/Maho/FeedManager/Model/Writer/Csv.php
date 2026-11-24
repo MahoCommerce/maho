@@ -12,16 +12,20 @@ declare(strict_types=1);
  * CSV Feed Writer
  *
  * Writes product feed data in CSV format
+ *
+ * @phpstan-type CsvColumn array{name: string, source_type: string, source_value: string, use_parent: string|false, transformers: string, required?: bool}
  */
 class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer_WriterInterface
 {
     /** @var resource|null */
     protected $_handle = null;
+    /** @var list<string> */
     protected array $_headers = [];
     protected bool $_headerWritten = false;
     protected string $_delimiter = ',';
     protected string $_enclosure = '"';
     protected bool $_includeHeader = true;
+    /** @var list<CsvColumn> */
     protected array $_columns = [];
 
     #[\Override]
@@ -141,6 +145,8 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
 
     /**
      * Write a row to the CSV file
+     *
+     * @param list<string> $row
      */
     protected function _writeRow(array $row): void
     {
@@ -191,6 +197,8 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
 
     /**
      * Set headers explicitly
+     *
+     * @param list<string> $headers
      */
     public function setHeaders(array $headers): self
     {
@@ -200,6 +208,8 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
 
     /**
      * Set column definitions from CSV builder
+     *
+     * @param list<CsvColumn> $columns
      */
     public function setColumns(array $columns): self
     {
@@ -211,6 +221,8 @@ class Maho_FeedManager_Model_Writer_Csv implements Maho_FeedManager_Model_Writer
 
     /**
      * Get column definitions
+     *
+     * @return list<CsvColumn>
      */
     public function getColumns(): array
     {

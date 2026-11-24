@@ -17,6 +17,9 @@ declare(strict_types=1);
  * based on the XML path (e.g. global/events/.../observers/.../class
  * resolves as a model alias, while global/models/.../class resolves
  * as a FQCN class prefix).
+ *
+ * @phpstan-type CompletionContext array{context: string, prefix: string, prefixStart: int, suggestions?: list<string>}
+ * @phpstan-type CursorContext array{context: string, alias: string, method?: string, classAlias?: string|null, classType?: string}
  */
 class Maho_Intelligence_Model_Lsp_ContextDetector
 {
@@ -173,7 +176,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Detect completion context at an LSP UTF-16 column.
      *
-     * @return array{context: string, prefix: string, prefixStart: int, suggestions?: list<string>}
+     * @return CompletionContext
      */
     public function detect(string $text, int $line, int $character, string $uri = ''): array
     {
@@ -189,7 +192,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Detect definition or hover context at an LSP UTF-16 column.
      *
-     * @return array{context: string, alias: string, ...}|null
+     * @return CursorContext|null
      */
     public function detectAtCursor(string $text, int $line, int $character, string $uri = ''): ?array
     {
@@ -229,6 +232,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
     }
 
+    /**
+     * @return CursorContext|null
+     */
     private function detectPhpAtCursor(string $text, int $line, int $character): ?array
     {
         $lines = explode("\n", $text);
@@ -319,6 +325,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return $none;
     }
 
+    /**
+     * @return CursorContext|null
+     */
     private function detectXmlAtCursor(string $text, int $line, int $character): ?array
     {
         $lines = explode("\n", $text);
@@ -394,6 +403,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Resolve context for an XML tag at cursor position (hover/definition).
+     *
+     * @param list<string> $lines
+     * @return CursorContext|null
      */
     private function resolveXmlTagAtCursor(string $tagName, string $value, array $lines, int $lineNum, string $parentPath): ?array
     {
@@ -471,6 +483,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Resolve a <model> tag at cursor for hover/definition.
+     *
+     * @return CursorContext|null
      */
     private function resolveModelTagAtCursor(string $value, string $parentPath): ?array
     {
@@ -510,6 +524,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Resolve an XML attribute at cursor for hover/definition.
+     *
+     * @param list<string> $lines
+     * @return CursorContext|null
      */
     private function resolveXmlAttributeAtCursor(
         string $attrName,
@@ -538,6 +555,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Parse layout helper attribute: "module/helper_class/methodName"
+     *
+     * @return CursorContext
      */
     private function resolveHelperAttribute(string $value): array
     {
@@ -584,6 +603,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
      *
      * Example: for cursor on <class> inside an observer definition,
      * returns "config/global/events/some_event/observers/my_observer"
+     *
+     * @param list<string> $lines
      */
     private function getXmlParentPath(array $lines, int $targetLine): string
     {
@@ -603,6 +624,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
      * Handles opening tags, closing tags, inline (self-contained) tags,
      * and multi-line comments.
      *
+     * @param list<string> $stack
      * @return bool Whether we are still inside a multi-line comment after this line
      */
     private function processXmlLineForPath(string $line, array &$stack, bool $inComment): bool
@@ -663,6 +685,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Search sibling lines for a <tagName>value</tagName> near the current line.
      * Used to find <class> sibling of <method> in observer definitions.
+     *
+     * @param list<string> $lines
      */
     private function findSiblingTagValue(array $lines, int $lineNum, string $tagName): ?string
     {
@@ -684,6 +708,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Find the block type from the parent <block type="..."> of an <action method="...">.
+     *
+     * @param list<string> $lines
      */
     private function findBlockTypeFromActionContext(array $lines, int $lineNum): ?string
     {

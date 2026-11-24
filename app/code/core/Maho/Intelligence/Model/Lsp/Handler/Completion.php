@@ -8,10 +8,19 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type LspRange from Maho_Intelligence_Model_Lsp_Position
+ * @phpstan-type CompletionItem array{label: string, kind: int, detail?: string, documentation?: string, sortText?: string, textEdit: array{range: LspRange, newText: string}}
+ * @phpstan-type CompletionList array{isIncomplete: bool, items: list<CompletionItem>}
+ */
 class Maho_Intelligence_Model_Lsp_Handler_Completion
 {
     public function __construct(private Maho_Intelligence_Model_Registry $registry, private Maho_Intelligence_Model_Lsp_ContextDetector $detector, private Maho_Intelligence_Model_Lsp_DocumentStore $documents) {}
 
+    /**
+     * @param array<string, mixed> $params
+     * @return CompletionList
+     */
     public function handle(array $params): ?array
     {
         $uri = $params['textDocument']['uri'] ?? '';
@@ -51,6 +60,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         };
     }
 
+    /**
+     * @param LspRange $range
+     * @return CompletionList
+     */
     private function completeAliases(string $type, string $prefix, array $range): array
     {
         $aliases = $this->registry->get('classAlias', 'getAllAliases', [$type]);
@@ -77,6 +90,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         return ['isIncomplete' => false, 'items' => $items];
     }
 
+    /**
+     * @param LspRange $range
+     * @return CompletionList
+     */
     private function completeConfigPaths(string $prefix, array $range): array
     {
         $paths = $this->registry->get('configPath', 'getAllPaths');
@@ -108,6 +125,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         return ['isIncomplete' => false, 'items' => $items];
     }
 
+    /**
+     * @param LspRange $range
+     * @return CompletionList
+     */
     private function completeEventNames(string $prefix, array $range): array
     {
         $allEvents = $this->registry->get('event', 'getAllEvents');
@@ -144,6 +165,8 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
 
     /**
      * @param list<string> $suggestions
+     * @param LspRange $range
+     * @return CompletionList
      */
     private function completeXmlElements(string $prefix, array $suggestions, array $range): array
     {
@@ -164,6 +187,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         return ['isIncomplete' => false, 'items' => $items];
     }
 
+    /**
+     * @param LspRange $range
+     * @return CompletionList
+     */
     private function completeFqcn(string $prefix, array $range): array
     {
         $prefixes = $this->getAllClassPrefixes();

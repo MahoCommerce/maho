@@ -25,7 +25,7 @@ class Maho_FeedManager_Model_DynamicRule_Evaluator
     /**
      * Evaluate the rule against a product
      *
-     * @param array $rawData Product data array (for backward compatibility)
+     * @param array<string, mixed> $rawData Product data array (for backward compatibility)
      * @param Mage_Catalog_Model_Product|null $product Product model
      * @return mixed The computed output value, or null if conditions don't match
      */
@@ -59,6 +59,8 @@ class Maho_FeedManager_Model_DynamicRule_Evaluator
 
     /**
      * Get supported operators for UI (kept for backward compatibility)
+     *
+     * @return array<string, string>
      */
     public static function getOperatorOptions(): array
     {

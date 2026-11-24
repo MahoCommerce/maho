@@ -12,6 +12,8 @@ class Maho_Intelligence_Model_Provider_AdminMenu
 {
     /**
      * Get admin menu structure from merged adminhtml.xml config
+     *
+     * @return list<array{id: string, title: string, sort_order: int, action?: string, children?: list<array<string, mixed>>}>
      */
     public function getMenu(): array
     {
@@ -24,6 +26,9 @@ class Maho_Intelligence_Model_Provider_AdminMenu
         return $this->buildMenu($menuNode);
     }
 
+    /**
+     * @return list<array{id: string, title: string, sort_order: int, action?: string, children?: list<array<string, mixed>>}>
+     */
     private function buildMenu(\Maho\Simplexml\Element $node): array
     {
         $items = [];

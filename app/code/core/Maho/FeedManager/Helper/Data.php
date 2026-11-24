@@ -87,6 +87,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get available platform options for dropdown
+     *
+     * @return array<string, string>
      */
     public function getPlatformOptions(): array
     {
@@ -106,6 +108,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get file format options for dropdown
+     *
+     * @return array<string, string>
      */
     public function getFileFormatOptions(): array
     {
@@ -119,6 +123,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get file formats supported by a platform
+     *
+     * @return string[]
      */
     public function getPlatformFormats(string $platform): array
     {
@@ -127,6 +133,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Get configurable product mode options
+     *
+     * @return array<string, string>
      */
     public function getConfigurableModeOptions(): array
     {

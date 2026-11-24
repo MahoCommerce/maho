@@ -41,7 +41,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     protected int $_processedCount = 0;
     protected int $_errorCount = 0;
 
-    /** @var array<int|string, mixed>|null Parsed XML structure for xml_structure mode */
+    /** @var list<array<string, mixed>>|null Parsed XML structure for xml_structure mode */
     protected ?array $_xmlStructureParsed = null;
 
     protected string $_xmlItemTag = 'item';
@@ -52,7 +52,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
     /** @var list<array{int, int, array<string, string>}> Offsets, lengths, and field parameters of the last template */
     protected array $_itemTemplateFields = [];
 
-    /** @var array<int|string, mixed>|null Parsed JSON structure for json format */
+    /** @var array<string, array<string, mixed>>|null Parsed JSON structure for json format */
     protected ?array $_jsonStructureParsed = null;
 
     // ──────────────────────────────────────────────────────────────────────
@@ -649,6 +649,8 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      * Apply the legacy 'format' attribute to a value
      *
      * The shared resolver applies the transformer chains, so this method skips them.
+     *
+     * @param array<string, string> $config Parameters of the template field
      */
     protected function _applyFormat(string $value, array $config, Maho_FeedManager_Model_Feed $feed): string
     {
@@ -923,7 +925,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      * With compression, the uncompressed file of an earlier generation is deleted from the mount.
      *
      * @param string $tempPath Path to the local temporary feed file
-     * @param array $errors Errors array, validation errors/warnings are appended by reference
+     * @param list<string> $errors Errors array, validation errors/warnings are appended by reference
      * @return string The local file that holds the published content: $tempPath, or its .gz file. The caller deletes it.
      * @throws RuntimeException if validation or the write to the mount fails
      */
@@ -976,7 +978,7 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
      *
      * @param int $productCount Number of products generated
      * @param int $fileSize Size of the generated file in bytes
-     * @param array $errors Any errors/warnings to save to the log
+     * @param list<string> $errors Any errors/warnings to save to the log
      */
     protected function _finalizeGenerationSuccess(int $productCount, int $fileSize, array $errors): void
     {
@@ -999,6 +1001,8 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 
     /**
      * Save an array of error messages to the log model
+     *
+     * @param list<string> $errors
      */
     protected function _saveErrorsToLog(array $errors): void
     {

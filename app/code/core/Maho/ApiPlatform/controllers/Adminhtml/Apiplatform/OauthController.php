@@ -30,7 +30,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_OauthController extends Mage_Adminh
      * the per-action secret key. The approval itself is a POST and is protected
      * by the admin form key.
      *
-     * @var array
+     * @var string[]
      */
     #[\Override]
     protected $_publicActions = ['authorize'];

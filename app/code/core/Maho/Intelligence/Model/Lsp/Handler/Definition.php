@@ -8,10 +8,19 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type LspRange from Maho_Intelligence_Model_Lsp_Position
+ * @phpstan-import-type CursorContext from Maho_Intelligence_Model_Lsp_ContextDetector
+ * @phpstan-type Location array{uri: string, range: LspRange}
+ */
 class Maho_Intelligence_Model_Lsp_Handler_Definition
 {
     public function __construct(private Maho_Intelligence_Model_Registry $registry, private Maho_Intelligence_Model_Lsp_ContextDetector $detector, private Maho_Intelligence_Model_Lsp_DocumentStore $documents) {}
 
+    /**
+     * @param array<string, mixed> $params
+     * @return Location|null
+     */
     public function handle(array $params): ?array
     {
         $uri = $params['textDocument']['uri'] ?? '';
@@ -46,6 +55,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         };
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Location|null
+     */
     private function definitionForAlias(array $context): ?array
     {
         $type = match ($context['context']) {
@@ -69,6 +82,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         return $this->fileLocation($resolved['file']);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Location|null
+     */
     private function definitionForFqcn(array $context): ?array
     {
         $file = Maho::findClassFile($context['alias']);
@@ -76,6 +93,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         return $file !== false ? $this->fileLocation($file) : null;
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Location|null
+     */
     private function definitionForMethod(array $context): ?array
     {
         $classAlias = $context['classAlias'] ?? null;
@@ -96,6 +117,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         return $this->fileLocation($resolved['file'], $methodLine);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Location|null
+     */
     private function definitionForCronModel(array $context): ?array
     {
         $classAlias = $context['classAlias'] ?? null;
@@ -115,6 +140,10 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         return $this->fileLocation($resolved['file'], $methodLine);
     }
 
+    /**
+     * @param CursorContext $context
+     * @return Location|null
+     */
     private function definitionForTemplate(array $context): ?array
     {
         $templatePath = $context['alias'];
@@ -128,6 +157,9 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
         return file_exists($file) ? $this->fileLocation($file) : null;
     }
 
+    /**
+     * @return Location
+     */
     private function fileLocation(string $filePath, int $line = 0): array
     {
         return [

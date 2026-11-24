@@ -12,6 +12,8 @@ declare(strict_types=1);
  * Dynamic Rule Cases Tab
  *
  * Multi-case editor with conditions and inline output configuration.
+ *
+ * @phpstan-import-type RuleCase from Maho_FeedManager_Model_DynamicRule
  */
 class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_Adminhtml_Block_Template
 {
@@ -28,6 +30,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_A
 
     /**
      * Get cases from the rule
+     *
+     * @return list<RuleCase>
      */
     public function getCases(): array
     {
@@ -52,6 +56,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_A
 
     /**
      * Get output type options
+     *
+     * @return array<string, string>
      */
     public function getOutputTypeOptions(): array
     {
@@ -60,6 +66,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_A
 
     /**
      * Get combined position options
+     *
+     * @return array<string, string>
      */
     public function getCombinedPositionOptions(): array
     {
@@ -68,6 +76,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_A
 
     /**
      * Get attribute options for output
+     *
+     * @return array<string, string>
      */
     public function getAttributeOptions(): array
     {
@@ -107,6 +117,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases extends Mage_A
 
     /**
      * Render the conditions HTML for a case using the Combine model
+     *
+     * @param array<string, mixed>|null $conditionsData
      */
     public function renderConditionsHtml(int $caseIndex, ?array $conditionsData = null): string
     {

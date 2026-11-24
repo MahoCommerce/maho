@@ -18,6 +18,8 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
 
     /**
      * Special attributes that are not EAV attributes
+     *
+     * @var list<string>
      */
     protected array $_specialAttributes = [
         'qty',
@@ -29,6 +31,8 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
 
     /**
      * Get available conditions for adding new child
+     *
+     * @return list<array{value: string|list<array{value: string, label: string}>, label: string}>
      */
     #[\Override]
     public function getNewChildSelectOptions(): array

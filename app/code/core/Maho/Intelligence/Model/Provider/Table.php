@@ -12,6 +12,8 @@ class Maho_Intelligence_Model_Provider_Table
 {
     /**
      * Get all database table name mappings from resource model config
+     *
+     * @return array<string, array{alias: string, table: string, group: string}>
      */
     public function getAllTables(): array
     {

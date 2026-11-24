@@ -13,6 +13,8 @@ class Maho_Intelligence_Model_Provider_TemplateFallback
     /**
      * Get the theme fallback chain for a template, showing all locations
      * where the template could exist and which one is actually resolved.
+     *
+     * @return array{template: string, area: string, resolved_file: string|null, fallback_chain: list<array{theme: string, path: string, exists: bool}>}
      */
     public function getOverrides(string $templatePath, string $area = 'frontend'): array
     {
@@ -29,6 +31,9 @@ class Maho_Intelligence_Model_Provider_TemplateFallback
         ];
     }
 
+    /**
+     * @return list<array{theme: string, path: string, exists: bool}>
+     */
     private function buildFallbackLocations(string $templatePath, string $area): array
     {
         $designRoot = Mage::getBaseDir('design');
@@ -63,6 +68,8 @@ class Maho_Intelligence_Model_Provider_TemplateFallback
 
     /**
      * Get all templates that are overridden in a custom theme (not base/default).
+     *
+     * @return list<array{template: string, theme_file: string, overrides_base: bool}>
      */
     public function getThemeOverrides(string $area = 'frontend'): array
     {

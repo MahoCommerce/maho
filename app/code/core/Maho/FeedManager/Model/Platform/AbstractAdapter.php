@@ -12,22 +12,30 @@ declare(strict_types=1);
  * Abstract Platform Adapter
  *
  * Base implementation for platform adapters
+ *
+ * @phpstan-import-type PlatformAttribute from Maho_FeedManager_Model_Platform_AdapterInterface
+ * @phpstan-import-type DefaultMapping from Maho_FeedManager_Model_Platform_AdapterInterface
  */
 abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_FeedManager_Model_Platform_AdapterInterface
 {
     protected string $_code = '';
     protected string $_name = '';
+    /** @var list<string> */
     protected array $_supportedFormats = ['xml'];
     protected string $_defaultFormat = 'xml';
     protected string $_rootElement = 'feed';
     protected string $_itemElement = 'item';
+    /** @var array<string, string> */
     protected array $_namespaces = [];
+    /** @var array<string, PlatformAttribute> */
     protected array $_requiredAttributes = [];
+    /** @var array<string, PlatformAttribute> */
     protected array $_optionalAttributes = [];
+    /** @var array<string, DefaultMapping> */
     protected array $_defaultMappings = [];
     protected ?string $_taxonomyFile = null;
 
-    /** @var array<string, array<string, mixed>>|null */
+    /** @var array<string, PlatformAttribute>|null */
     protected ?array $_allAttributes = null;
 
     #[\Override]

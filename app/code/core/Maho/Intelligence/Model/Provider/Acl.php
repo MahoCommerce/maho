@@ -12,6 +12,8 @@ class Maho_Intelligence_Model_Provider_Acl
 {
     /**
      * Get ACL resource tree from merged adminhtml.xml config
+     *
+     * @return list<array{id: string, title: string, children?: list<array<string, mixed>>}>
      */
     public function getTree(): array
     {
@@ -24,6 +26,9 @@ class Maho_Intelligence_Model_Provider_Acl
         return $this->buildTree($aclNode);
     }
 
+    /**
+     * @return list<array{id: string, title: string, children?: list<array<string, mixed>>}>
+     */
     private function buildTree(\Maho\Simplexml\Element $node): array
     {
         $result = [];

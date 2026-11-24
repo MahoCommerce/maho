@@ -8,11 +8,16 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type ObservedEvent array{event: string, area: string, method: string, observer_name: string}
+ */
 class Maho_Intelligence_Model_Provider_ClassContext
 {
     /**
      * Get full context for a class alias: resolution, rewrites, events,
      * class hierarchy, and module info.
+     *
+     * @return array{alias: string, type: string, class: string|null, file: string|null, rewritten_by: string|null, error?: string, hierarchy?: array{parents: list<class-string>, interfaces: list<string>}, module?: string|null, events_observed?: list<ObservedEvent>, all_rewrites_for_group?: array<string, string>}
      */
     public function getContext(string $type, string $alias): array
     {
@@ -24,7 +29,7 @@ class Maho_Intelligence_Model_Provider_ClassContext
             'type' => $type,
             'class' => $resolved['class'],
             'file' => $resolved['file'],
-            'rewritten_by' => $resolved['rewritten_by'] ?? null,
+            'rewritten_by' => $resolved['rewritten_by'],
         ];
 
         if (isset($resolved['error'])) {
@@ -45,6 +50,9 @@ class Maho_Intelligence_Model_Provider_ClassContext
         return $result;
     }
 
+    /**
+     * @return array{parents: list<class-string>, interfaces: list<string>}
+     */
     private function getClassHierarchy(string $className): array
     {
         $parents = [];
@@ -70,6 +78,9 @@ class Maho_Intelligence_Model_Provider_ClassContext
         return null;
     }
 
+    /**
+     * @return list<ObservedEvent>
+     */
     private function findObservedEvents(string $alias, ?string $className): array
     {
         if ($className === null) {
@@ -99,6 +110,9 @@ class Maho_Intelligence_Model_Provider_ClassContext
         return $observed;
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function findGroupRewrites(string $type, string $alias): array
     {
         $group = explode('/', $alias)[0];

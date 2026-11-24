@@ -79,6 +79,8 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Conditions extends M
 
     /**
      * Get product attribute options for output
+     *
+     * @return array<string, string>
      */
     protected function _getAttributeOptions(): array
     {

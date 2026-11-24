@@ -285,6 +285,8 @@ JS;
 
     /**
      * Get template options for combined dropdown
+     *
+     * @return list<array{label: string, value: list<array{value: string, label: string}>}>
      */
     protected function _getTemplateOptions(): array
     {

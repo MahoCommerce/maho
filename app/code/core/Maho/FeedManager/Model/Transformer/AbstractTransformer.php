@@ -12,12 +12,15 @@ declare(strict_types=1);
  * Abstract Transformer
  *
  * Base implementation for transformers
+ *
+ * @phpstan-import-type OptionDefinition from Maho_FeedManager_Model_Transformer_TransformerInterface
  */
 abstract class Maho_FeedManager_Model_Transformer_AbstractTransformer implements Maho_FeedManager_Model_Transformer_TransformerInterface
 {
     protected string $_code = '';
     protected string $_name = '';
     protected string $_description = '';
+    /** @var array<string, OptionDefinition> */
     protected array $_optionDefinitions = [];
 
     #[\Override]
@@ -60,6 +63,8 @@ abstract class Maho_FeedManager_Model_Transformer_AbstractTransformer implements
 
     /**
      * Get option value with default
+     *
+     * @param array<string, mixed> $options
      */
     protected function _getOption(array $options, string $key, mixed $default = null): mixed
     {

@@ -28,7 +28,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
     /**
      * Array of actions which can be processed without secret key validation
      *
-     * @var array
+     * @var string[]
      */
     protected $_publicActions = [];
 

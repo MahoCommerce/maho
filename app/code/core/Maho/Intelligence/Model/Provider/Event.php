@@ -8,10 +8,15 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type EventObserver array{name: string, class: string, method: string, type: string, module: string|null, alias: string|null, source: string}
+ * @phpstan-type EventInfo array{event: string, area: string, observers: list<EventObserver>}
+ */
 class Maho_Intelligence_Model_Provider_Event
 {
     private const array AREAS = ['global', 'frontend', 'adminhtml', 'crontab', 'install'];
 
+    /** @var array<string, array<string, EventInfo>>|null */
     private ?array $cachedEvents = null;
 
     /**
@@ -25,6 +30,8 @@ class Maho_Intelligence_Model_Provider_Event
      *
      * Default observer `type` differs by source ('singleton' for XML, 'model' for
      * attribute) to match each system's own default.
+     *
+     * @return array<string, array<string, EventInfo>>
      */
     public function getAllEvents(): array
     {
@@ -94,6 +101,8 @@ class Maho_Intelligence_Model_Provider_Event
 
     /**
      * Get observers for a specific event across all areas
+     *
+     * @return array<string, list<EventObserver>>
      */
     public function getObserversForEvent(string $eventName): array
     {

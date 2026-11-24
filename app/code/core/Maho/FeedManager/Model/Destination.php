@@ -44,6 +44,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
      * Get config as decrypted array
      *
      * Handles both encrypted config (from database) and plaintext JSON (before save).
+     *
+     * @return array<string, string>
      */
     public function getConfigArray(): array
     {
@@ -58,6 +60,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     /**
      * Set config from array (will be encrypted on save)
+     *
+     * @param array<string, string> $config
      */
     public function setConfigArray(array $config): self
     {
@@ -104,6 +108,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     /**
      * Get destination type options
+     *
+     * @return array<string, string>
      */
     public static function getTypeOptions(): array
     {
@@ -120,6 +126,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     /**
      * Get required config fields for each type
+     *
+     * @return list<string>
      */
     public static function getRequiredConfigFields(?string $type): array
     {
@@ -134,6 +142,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     /**
      * Get config field definitions for admin form
+     *
+     * @return array<string, array{label: string, type: string, required: bool, default?: string, note?: string, options?: array<int|string, string>}>
      */
     public static function getConfigFieldDefinitions(string $type): array
     {
@@ -182,6 +192,8 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
     /**
      * Validate config for this destination type
+     *
+     * @return list<string>
      */
     public function validateConfig(): array
     {

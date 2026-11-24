@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type LogError from Maho_FeedManager_Model_Log
+ */
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Errors extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
@@ -50,6 +53,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Errors extend
 
     /**
      * Format errors array for tooltip display
+     *
+     * @param list<LogError> $errors
      */
     protected function formatErrorsForTooltip(array $errors): string
     {

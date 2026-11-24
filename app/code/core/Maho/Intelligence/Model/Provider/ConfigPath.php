@@ -8,12 +8,18 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type ConfigPathInfo array{path: string, label: string, section_label: string, group_label: string, type: string, source_model: string, default: string|null}
+ */
 class Maho_Intelligence_Model_Provider_ConfigPath
 {
+    /** @var array<string, ConfigPathInfo>|null */
     private ?array $cachedPaths = null;
 
     /**
      * Get all system.xml configuration paths with metadata
+     *
+     * @return array<string, ConfigPathInfo>
      */
     public function getAllPaths(): array
     {
@@ -71,6 +77,8 @@ class Maho_Intelligence_Model_Provider_ConfigPath
 
     /**
      * Get metadata for a specific config path
+     *
+     * @return ConfigPathInfo|null
      */
     public function getPathInfo(string $path): ?array
     {
@@ -84,6 +92,9 @@ class Maho_Intelligence_Model_Provider_ConfigPath
         return $node !== false ? (string) $node : null;
     }
 
+    /**
+     * @return list<string>
+     */
     private function findSystemXmlFiles(): array
     {
         $files = [];

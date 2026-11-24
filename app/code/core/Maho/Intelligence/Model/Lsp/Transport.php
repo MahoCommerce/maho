@@ -24,7 +24,7 @@ class Maho_Intelligence_Model_Lsp_Transport
     private WritableResourceStream $stdout;
     private string $buffer = '';
 
-    /** @var callable(array): void */
+    /** @var callable(array<string, mixed>): void */
     private $onMessage;
 
     /** @var callable(): void */
@@ -37,7 +37,7 @@ class Maho_Intelligence_Model_Lsp_Transport
     }
 
     /**
-     * @param callable(array): void $onMessage Called with decoded JSON-RPC message
+     * @param callable(array<string, mixed>): void $onMessage Called with decoded JSON-RPC message
      * @param callable(): void $onClose Called when stdin closes
      */
     public function listen(callable $onMessage, callable $onClose): void
@@ -55,6 +55,9 @@ class Maho_Intelligence_Model_Lsp_Transport
         });
     }
 
+    /**
+     * @param array<string, mixed> $message
+     */
     public function send(array $message): void
     {
         $json = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

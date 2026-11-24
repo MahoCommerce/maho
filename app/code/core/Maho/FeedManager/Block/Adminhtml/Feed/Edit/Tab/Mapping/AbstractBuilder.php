@@ -156,6 +156,8 @@ abstract class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBu
 
     /**
      * Get dynamic rule options as array for JavaScript
+     *
+     * @return array<string, string|null>
      */
     protected function _getDynamicRuleOptionsArray(): array
     {

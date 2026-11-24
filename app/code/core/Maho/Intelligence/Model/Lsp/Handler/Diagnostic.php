@@ -13,6 +13,9 @@ declare(strict_types=1);
  * diagnostics for aliases that cannot be resolved.
  *
  * Supports both PHP and XML files.
+ *
+ * @phpstan-import-type LspRange from Maho_Intelligence_Model_Lsp_Position
+ * @phpstan-type LspDiagnostic array{range: LspRange, severity: int, source: string, message: string}
  */
 class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
 {
@@ -53,7 +56,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
     public function __construct(private Maho_Intelligence_Model_Registry $registry) {}
 
     /**
-     * @return array LSP diagnostic items
+     * @return list<LspDiagnostic>
      */
     public function diagnose(string $uri, string $text): array
     {
@@ -63,6 +66,9 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         return $this->diagnosePhp($text);
     }
 
+    /**
+     * @return list<LspDiagnostic>
+     */
     private function diagnosePhp(string $text): array
     {
         $diagnostics = [];
@@ -95,6 +101,9 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         return $diagnostics;
     }
 
+    /**
+     * @return list<LspDiagnostic>
+     */
     private function diagnoseXml(string $text): array
     {
         $diagnostics = [];
@@ -146,6 +155,9 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         return $diagnostics;
     }
 
+    /**
+     * @return LspDiagnostic
+     */
     private function diagnostic(int $line, string $lineText, int $offset, string $alias, string $message): array
     {
         return [

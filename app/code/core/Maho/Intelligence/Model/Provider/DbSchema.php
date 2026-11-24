@@ -16,6 +16,8 @@ class Maho_Intelligence_Model_Provider_DbSchema
      * Accepts either a raw table name (e.g. "catalog_product_entity") or
      * a resource alias (e.g. "catalog/product_entity") which will be resolved
      * through Maho's table name mapping.
+     *
+     * @return array{error: string}|array{table: string, alias: string|null, columns: array<string, array{type: string, nullable: bool, default: string|int|float|\Doctrine\DBAL\Schema\DefaultExpression|null, primary: bool, identity: bool, unsigned: bool, length: int|string|null, precision: int|null, scale: int|null}>, indexes: array<string, array{type: string, columns: list<string>}>, foreign_keys: array<string, array{column: string, ref_table: string, ref_column: string, on_delete: string, on_update: string}>}
      */
     public function getTableSchema(string $tableName): array
     {

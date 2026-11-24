@@ -18,6 +18,8 @@ declare(strict_types=1);
  * feed. finalize() joins the parts in order, writes the footer, and puts the
  * feed on the media mount. Uses the shared output engine from ProductWriterTrait
  * for all format handling.
+ *
+ * @phpstan-type BatchState array{job_id: string, feed_id: int|string|null, log_id: int|string|null, status: string, total_products: int, processed_count: int, product_count: int, current_page: int, batch_size: int, batches_total: int, batches_processed: int, part_extension: string, writer_state: array<string, mixed>, errors: list<string>, error_count?: int, started_at: string}
  */
 class Maho_FeedManager_Model_Generator_Batch
 {
@@ -42,8 +44,10 @@ class Maho_FeedManager_Model_Generator_Batch
     protected Maho_FeedManager_Model_Mapper $_mapper;
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected int $_batchSize;
+    /** @var BatchState|array{} */
     protected array $_state = [];
     protected string $_jobId;
+    /** @var list<string> */
     protected array $_errors = [];
 
     protected ?string $_lockName = null;
@@ -377,6 +381,8 @@ class Maho_FeedManager_Model_Generator_Batch
 
     /**
      * Cancel a running batch job
+     *
+     * @return array{status: string, message: string}
      */
     public function cancel(string $jobId): array
     {
@@ -410,6 +416,8 @@ class Maho_FeedManager_Model_Generator_Batch
 
     /**
      * Get current job status
+     *
+     * @return array{status: string, message: string}|array{status: string, progress: int, total: int, processed: int, batches_processed: int, batches_total: int, errors: list<string>}
      */
     public function getStatus(string $jobId): array
     {
@@ -521,6 +529,8 @@ class Maho_FeedManager_Model_Generator_Batch
 
     /**
      * Load state from the feeds mount
+     *
+     * @phpstan-assert-if-true BatchState $this->_state
      */
     protected function _loadState(): bool
     {
@@ -564,6 +574,9 @@ class Maho_FeedManager_Model_Generator_Batch
         $this->deleteFeedJobs($feedId, self::STALE_JOB_SECONDS);
     }
 
+    /**
+     * @return array{status: string, message: string}
+     */
     #[\Deprecated(message: 'Use Maho_FeedManager_Service_Feed::upload() instead')]
     protected function _handleUpload(string $localPath): array
     {

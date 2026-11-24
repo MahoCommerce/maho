@@ -55,6 +55,8 @@ class Maho_FeedManager_Model_Transformer_MapValues extends Maho_FeedManager_Mode
 
     /**
      * Parse mapping text into array
+     *
+     * @return array<string, string>
      */
     protected function _parseMappingText(string $text, bool $caseSensitive): array
     {

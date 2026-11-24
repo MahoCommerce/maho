@@ -41,7 +41,7 @@ $attributes = $this->getAttributeOptions();
                         $formId = $this->getFormObjectId($index);
                         $prefix = $this->getConditionsPrefix($index);
                         $newChildUrl = $this->getUrl('*/*/newConditionHtml', ['form' => $formId]);
-                        $conditionsData = $case['conditions'] ?? null;
+                        $conditionsData = $case['conditions'];
                         ?>
                         <div class="case-conditions">
                             <fieldset id="<?= $formId ?>" class="conditions-fieldset">
