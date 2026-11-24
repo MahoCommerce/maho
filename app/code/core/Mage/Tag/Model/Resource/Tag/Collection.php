@@ -27,7 +27,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     /**
      * Mapping for fields
      *
-     * @var array|null
+     * @var array<string, array<string, string|\Maho\Db\Expr>>|null
      */
     #[\Override]
     public $_map               = [

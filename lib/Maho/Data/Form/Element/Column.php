@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Column extends AbstractElement
 {
     /**
      * Column constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

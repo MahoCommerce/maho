@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Checkbox extends AbstractElement
 {
     /**
      * Checkbox constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -27,7 +30,7 @@ class Checkbox extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

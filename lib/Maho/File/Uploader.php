@@ -35,7 +35,7 @@ class Uploader
     /**
      * Uploaded file handle (copy of $_FILES[] element)
      *
-     * @var array
+     * @var array<string, string|int>
      * @access protected
      */
     protected $_file;
@@ -117,19 +117,20 @@ class Uploader
 
     protected bool $_fileExists = false;
 
+    /** @var list<string>|null */
     protected ?array $_allowedExtensions = null;
 
     /**
      * List of valid MIME-Types.
      *
-     * @var array
+     * @var list<string>
      */
     protected $_validMimeTypes = [];
 
     /**
      * Validate callbacks storage
      *
-     * @var array
+     * @var array<string, array{object: object, method: string}>
      * @access protected
      */
     protected $_validateCallbacks = [];
@@ -140,13 +141,15 @@ class Uploader
     /**
      * Resulting of uploaded file
      *
-     * @var array|bool      Array with file info keys: path, file. Result is
+     * @var array<string, string|int>|bool Array with file info keys: path, file. Result is
      *                      FALSE when file not uploaded
      */
     protected $_result;
 
     /**
      * Read the file $fileId from $_FILES. A subclass for a file that is already on the server passes null and sets the file.
+     *
+     * @param string|array<string, string|int>|null $fileId
      */
     public function __construct(string|array|null $fileId = null)
     {
@@ -167,7 +170,7 @@ class Uploader
     /**
      * After save logic
      *
-     * @param  array $result
+     * @param  array<string, string|int> $result
      * @return Uploader
      */
     protected function _afterSave($result)
@@ -182,7 +185,7 @@ class Uploader
      * @param string $destinationFolder
      * @param string $newFileName
      * @access public
-     * @return array|false
+     * @return array<string, string|int>|false
      */
     public function save($destinationFolder, $newFileName = null)
     {
@@ -245,7 +248,7 @@ class Uploader
      * path of the directory in 'path' and the file name in 'file', so a
      * local mount keeps the layout that save() wrote.
      *
-     * @return array<string, mixed>|false
+     * @return array<string, string|int>|false
      */
     public function saveToStorage(Mount $mount, string $directory, ?string $newFileName = null): array|false
     {
@@ -429,7 +432,7 @@ class Uploader
     /**
      * Used to check if uploaded file mime type is valid or not
      *
-     * @param array $validTypes
+     * @param array<string> $validTypes
      * @access public
      * @return bool
      */
@@ -510,6 +513,9 @@ class Uploader
         return $this;
     }
 
+    /**
+     * @param array<string>|string $extensions
+     */
     public function setAllowedExtensions(array|string $extensions = []): static
     {
         foreach ((array) $extensions as $extension) {
@@ -521,7 +527,7 @@ class Uploader
     /**
      * Set valid MIME-types.
      *
-     * @param array $mimeTypes
+     * @param array<string> $mimeTypes
      * @return Uploader
      */
     public function setValidMimeTypes($mimeTypes = [])
@@ -553,6 +559,9 @@ class Uploader
         return $this->_file['type'];
     }
 
+    /**
+     * @param string|array<string, string|int> $fileId
+     */
     private function _setUploadFileId(string|array $fileId): void
     {
         if (empty($_FILES)) {

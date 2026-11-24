@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Radios extends AbstractElement
 {
     /**
      * Radios constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -52,6 +55,9 @@ class Radios extends AbstractElement
         return $html;
     }
 
+    /**
+     * @param array<string, mixed>|\Maho\DataObject $option
+     */
     protected function _optionToHtml(array|\Maho\DataObject $option, mixed $selected): string
     {
         $html = '<input type="radio"' . $this->serialize(['name', 'class', 'style']);

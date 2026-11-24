@@ -108,7 +108,7 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
             if (is_string($conditionString) && str_contains($conditionString, $excludedWherePart)) {
                 $wherePart[$key] = $conditionKey !== null
                     ? [$conditionKey => '1=1']
-                    : new Maho\Db\Expr('1=1');
+                    : '1=1';
                 continue;
             }
 

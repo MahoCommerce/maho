@@ -13,12 +13,15 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Checkboxes extends AbstractElement
 {
     /**
      * Init Element
      *
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -30,7 +33,7 @@ class Checkboxes extends AbstractElement
     /**
      * Retrieve allow attributes
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()
@@ -41,7 +44,7 @@ class Checkboxes extends AbstractElement
     /**
      * Prepare value list
      *
-     * @return array
+     * @return list<array{label: mixed, value: mixed}>
      */
     protected function _prepareValues()
     {
@@ -173,7 +176,7 @@ class Checkboxes extends AbstractElement
     //    }
 
     /**
-     * @param array $option
+     * @param array{label: mixed, value: mixed} $option
      * @return string
      */
     protected function _optionToHtml($option)
@@ -192,6 +195,9 @@ class Checkboxes extends AbstractElement
         return $html;
     }
 
+    /**
+     * @return array<array-key, int|float|string|array<string, mixed>|\Maho\DataObject>|string|null
+     */
     public function getOptions(): array|string|null
     {
         return $this->getData('options');

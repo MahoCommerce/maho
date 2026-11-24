@@ -20,6 +20,9 @@ use Maho\Db\Statement\Pdo\Mysql;
 /**
  * @template TItem of DataObject = DataObject
  * @extends Collection<TItem>
+ * @phpstan-import-type BindValue from AdapterInterface
+ * @phpstan-import-type SqlCondition from AdapterInterface
+ * @phpstan-import-type DbValue from AdapterInterface
  */
 class Db extends Collection
 {
@@ -40,7 +43,7 @@ class Db extends Collection
     /**
      * Cache configuration array
      *
-     * @var array
+     * @var array{object: Mage_Core_Model_Cache, prefix: string, tags: list<string>}|null
      */
     protected $_cacheConf = null;
 
@@ -56,7 +59,7 @@ class Db extends Collection
     /**
      * List of binded variables for select
      *
-     * @var array
+     * @var array<string, BindValue>
      */
     protected $_bindParams = [];
 
@@ -64,14 +67,14 @@ class Db extends Collection
      * All collection data array
      * Used for getData method
      *
-     * @var array|null
+     * @var list<array<string, DbValue>>|null
      */
     protected $_data = null;
 
     /**
      * Fields map for correlation names & real selected fields
      *
-     * @var array|null
+     * @var array<string, array<string, string|Expr>>|null
      */
     protected $_map = null;
 
@@ -110,6 +113,8 @@ class Db extends Collection
 
     /**
      * Initialize collection cache
+     *
+     * @param list<string> $tags
      */
     public function initCache(Mage_Core_Model_Cache $object, string $idPrefix, array $tags): static
     {
@@ -146,7 +151,7 @@ class Db extends Collection
     /**
      * Get collection item identifier
      *
-     * @return mixed
+     * @return int|string|null
      */
     #[\Override]
     protected function _getItemId(\Maho\DataObject $item)
@@ -231,33 +236,6 @@ class Db extends Collection
             $countSelect->columns('COUNT(DISTINCT ' . implode(', ', $group) . ')');
         } else {
             $countSelect->columns('COUNT(*)');
-
-            // Simple optimization - remove all joins if:
-            // - there are no where clauses using joined tables
-            // - all joins are left joins
-            // - there are no join conditions using bind params (for simplicity)
-            $leftJoins = array_filter($countSelect->getPart(Select::FROM), fn($table) => $table['joinType'] == Select::LEFT_JOIN || $table['joinType'] == Select::FROM);
-            if (count($leftJoins) == count($countSelect->getPart(Select::FROM))) {
-                $mainTable = array_key_first(array_filter($leftJoins, fn($table) => $table['joinType'] == Select::FROM));
-                $mainTable = preg_quote($mainTable, '/');
-                $pattern = "/^$mainTable\\.\\w+/";
-                $whereUsingJoin = array_filter($countSelect->getPart(Select::WHERE), function ($clause) use ($pattern): bool {
-                    $clauses = preg_split('/(^|\s+)(AND|OR)\s+/', $clause, -1, PREG_SPLIT_NO_EMPTY);
-                    return array_filter($clauses, function ($clause) use ($pattern): bool {
-                        $clause = preg_replace('/[()`\s]+/', '', $clause);
-                        return !preg_match($pattern, $clause);
-                    }) !== [];
-                });
-                if ($this->_bindParams) {
-                    $bindParams = array_map(fn($placeholder) => ltrim($placeholder, ':'), array_keys($this->_bindParams));
-                    $bindPattern = '/:(' . implode('|', $bindParams) . ')/';
-                    $joinUsingBind = array_filter($leftJoins, fn($table) => !empty($table['joinCondition']) && preg_match($bindPattern, $table['joinCondition']));
-                }
-                if (empty($whereUsingJoin) && empty($joinUsingBind)) {
-                    $from = array_slice($leftJoins, 0, 1);
-                    $countSelect->setPart(Select::FROM, $from);
-                }
-            }
         }
 
         return $countSelect;
@@ -391,8 +369,8 @@ class Db extends Collection
      *
      * @see self::_getConditionSql for $condition
      *
-     * @param   string|array $field
-     * @param   int|string|array|null $condition
+     * @param   string|list<string> $field
+     * @param   int|string|SqlCondition|null $condition
      * @return  $this
      */
     public function addFieldToFilter($field, $condition = null)
@@ -419,8 +397,8 @@ class Db extends Collection
     /**
      * Build sql where condition part
      *
-     * @param   string|array $field
-     * @param   int|string|array $condition
+     * @param   string $field
+     * @param   int|string|SqlCondition|null $condition
      *
      * @return  string
      */
@@ -458,7 +436,7 @@ class Db extends Collection
     /**
      * Retrieve mapper data
      *
-     * @return array|bool|null
+     * @return array<string, array<string, string|Expr>>|bool|null
      */
     protected function _getMapper()
     {
@@ -493,7 +471,7 @@ class Db extends Collection
      * will be built using above mentioned structure
      *
      * @param string $fieldName Field name must be already escaped with AdapterInterface::quoteIdentifier()
-     * @param integer|string|array|null $condition
+     * @param integer|string|SqlCondition|null $condition
      * @return string
      */
     protected function _getConditionSql($fieldName, $condition)
@@ -645,7 +623,7 @@ class Db extends Collection
      *
      * @param   string $valueField
      * @param   string $labelField
-     * @return  array
+     * @return  array<array-key, mixed>
      */
     protected function _toOptionHashOptimized($valueField = 'id', $labelField = 'name')
     {
@@ -659,7 +637,7 @@ class Db extends Collection
     /**
      * Get all data array for collection
      *
-     * @return array
+     * @return list<array<string, DbValue>>
      */
     public function getData()
     {
@@ -763,7 +741,7 @@ class Db extends Collection
      * Fetch collection data
      *
      * @param   Select|string $select
-     * @return  array
+     * @return  list<array<string, DbValue>>
      */
     protected function _fetchAll($select)
     {
@@ -800,7 +778,7 @@ class Db extends Collection
     /**
      * Save collection data to cache
      *
-     * @param array $data
+     * @param list<array<string, DbValue>> $data
      * @param Select $select
      * @return $this
      */
@@ -844,7 +822,7 @@ class Db extends Collection
     /**
      * Get cache tags list
      *
-     * @return array
+     * @return list<string>
      */
     protected function _getCacheTags()
     {

@@ -90,5 +90,8 @@ abstract class AbstractTokenizer
         return trim($char) != $char;
     }
 
+    /**
+     * @return array<array-key, string|array{type: string, name: string, args?: list<float|string>}>
+     */
     abstract public function tokenize(): array;
 }

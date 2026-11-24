@@ -87,7 +87,7 @@ class Mage_Core_Model_Resource_Translate extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Retrieve table checksum
      *
-     * @return array|false
+     * @return array<string, int|string|null>|int|string|null|false
      */
     public function getMainChecksum()
     {

@@ -25,6 +25,8 @@ class Event extends DataObject
      * Constructor
      *
      * Initializes observers collection
+     *
+     * @param array<string, mixed> $data
      */
     public function __construct(array $data = [])
     {

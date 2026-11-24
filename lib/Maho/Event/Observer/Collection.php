@@ -7,6 +7,8 @@
  * SPDX-License-Identifier: OSL-3.0
  */
 
+declare(strict_types=1);
+
 namespace Maho\Event\Observer;
 
 use Maho\Event;
@@ -17,7 +19,7 @@ class Collection
     /**
      * Array of observers
      *
-     * @var array
+     * @var array<string, Observer>
      */
     protected $_observers;
 
@@ -32,7 +34,7 @@ class Collection
     /**
      * Returns all observers in the collection
      *
-     * @return array
+     * @return array<string, Observer>
      */
     public function getAllObservers()
     {

@@ -15,6 +15,8 @@ class Parameter extends AbstractTokenizer
 {
     /**
      * Tokenize string and return getted parameters
+     *
+     * @return array<string, string>
      */
     #[\Override]
     public function tokenize(): array

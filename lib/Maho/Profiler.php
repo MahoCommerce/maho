@@ -11,8 +11,13 @@ declare(strict_types=1);
 
 namespace Maho;
 
+/**
+ * @phpstan-type Timer array{start: float|false, count: int, sum: float|int, realmem: int, emalloc: int, realmem_start?: int, emalloc_start?: int}
+ * @phpstan-type SpanAttributes array<string, string|int|float|bool|null>
+ */
 class Profiler
 {
+    /** @var array<string, Timer> */
     private static array $_timers = [];
     private static bool $_enabled = false;
     private static bool $_memory_get_usage = false;
@@ -31,6 +36,8 @@ class Profiler
      * Only meaningful high-level operations are included to avoid noise.
      * BLOCK: and cache. are the two high-volume sources and each has its own
      * config switch, checked below.
+     *
+     * @var list<string>
      */
     private static array $_spanPrefixes = [
         'mage::app::init',
@@ -90,7 +97,7 @@ class Profiler
      * Start profiling timer and create OpenTelemetry span
      *
      * @param string $timerName The name for the profiler timer (will be used as span name)
-     * @param array|callable(): array $attributes Optional OpenTelemetry span attributes.
+     * @param SpanAttributes|callable(): SpanAttributes $attributes Optional OpenTelemetry span attributes.
      *        Pass a callable on hot paths: it only runs if a span is created.
      */
     public static function start(string $timerName, array|callable $attributes = []): void
@@ -160,6 +167,9 @@ class Profiler
         }
     }
 
+    /**
+     * @return false|Timer|int|float
+     */
     public static function fetch(string $timerName, string $key = 'sum'): false|array|int|float
     {
         if (empty(self::$_timers[$timerName])) {
@@ -196,6 +206,9 @@ class Profiler
         return false;
     }
 
+    /**
+     * @return array<string, Timer>
+     */
     public static function getTimers(): array
     {
         return self::$_timers;

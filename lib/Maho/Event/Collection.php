@@ -17,7 +17,7 @@ class Collection
     /**
      * Array of events in the collection
      *
-     * @var array
+     * @var array<string, MahoEvent>
      */
     protected $_events;
 
@@ -47,7 +47,7 @@ class Collection
     /**
      * Returns all registered events in collection
      *
-     * @return array
+     * @return array<string, MahoEvent>
      */
     public function getAllEvents()
     {
@@ -116,6 +116,7 @@ class Collection
      * Will dispatch specific event and will try all global observers
      *
      * @param string $eventName
+     * @param array<string, mixed> $data
      * @return Collection
      */
     public function dispatch($eventName, array $data = [])

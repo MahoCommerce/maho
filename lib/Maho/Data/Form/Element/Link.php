@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Link extends AbstractElement
 {
     /**
      * Link constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -42,7 +45,7 @@ class Link extends AbstractElement
     /**
      * Prepare array of anchor attributes
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

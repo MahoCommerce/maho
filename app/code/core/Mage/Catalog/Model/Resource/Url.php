@@ -807,7 +807,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param int $categoryId
      * @param string $categoryPath
      * @param bool $includeStart
-     * @return \Maho\DataObject
+     * @return array<int, int|string>
      */
     public function getRootChildrenIds($categoryId, $categoryPath, $includeStart = true)
     {
@@ -924,7 +924,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
             $product->setCategoryIds([]);
             $product->setStoreId($storeId);
             $products[$product->getId()] = $product;
-            $lastEntityId = $product->getId();
+            $lastEntityId = (int) $product->getId();
         }
 
         unset($rowSet);

@@ -15,6 +15,9 @@ use DateTime;
 use DateTimeInterface;
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Date extends AbstractElement
 {
     /**
@@ -24,7 +27,7 @@ class Date extends AbstractElement
 
     /**
      * Date constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

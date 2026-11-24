@@ -15,6 +15,11 @@ use Maho\Db\Helper;
 
 /**
  * PostgreSQL database adapter
+ *
+ * @phpstan-import-type BindValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type InsertRow from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-import-type ColumnInfo from \Maho\Db\Adapter\AdapterInterface
  */
 class Pgsql extends AbstractPdoAdapter
 {
@@ -49,6 +54,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * PostgreSQL column - Table DDL type pairs
+     *
+     * @var array<string, string>
      */
     #[\Override]
     protected array $_ddlColumnTypes = [
@@ -81,6 +88,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * PostgreSQL interval units mapping
+     *
+     * @var array<string, string>
      */
     #[\Override]
     protected array $_intervalUnits = [
@@ -237,7 +246,7 @@ class Pgsql extends AbstractPdoAdapter
      * Run RAW query and Fetch First row
      *
      * @param string|int $field
-     * @return array|string|int|false
+     * @return array<string, DbValue>|string|int|false
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function raw_fetchRow(string $sql, string|int|null $field = null): array|string|int|false
@@ -365,7 +374,7 @@ class Pgsql extends AbstractPdoAdapter
      * Normalizes mixed positional-named bind to positional bind
      *
      * @param string $sql
-     * @param array $bind
+     * @param array<int|string, BindValue> $bind
      * @return $this
      */
     protected function _convertMixedBind(&$sql, &$bind)
@@ -415,7 +424,7 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Sets (removes) query hook.
      *
-     * @param array|null $hook
+     * @param array{object: object, method: string}|null $hook
      * @return mixed
      */
     public function setQueryHook($hook)
@@ -502,6 +511,8 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Generate fragment of SQL for concatenation with separator
      * Uses || operator with quoted separator values
+     *
+     * @param array<string|\Maho\Db\Expr> $data
      */
     #[\Override]
     protected function getConcatWithSeparatorSql(array $data, string $separator): \Maho\Db\Expr
@@ -972,8 +983,8 @@ class Pgsql extends AbstractPdoAdapter
      * PostgreSQL's RETURNING clause allows us to get the inserted ID directly
      * from the INSERT statement, avoiding a separate sequence query.
      *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $bind Column-value pairs.
+     * @param string|array<string>|\Maho\Db\Select $table The table to insert data into.
+     * @param InsertRow $bind Column-value pairs.
      * @return int The number of affected rows.
      */
     #[\Override]
@@ -1068,6 +1079,8 @@ class Pgsql extends AbstractPdoAdapter
      * cached: the pg_get_serial_sequence probe happens once per column, and
      * subsequent inserts only issue the setval for columns actually backed by
      * a sequence (normally none, since auto-increment PKs aren't in $bind).
+     *
+     * @param InsertRow $bind
      */
     private function bumpIdentitySequencesForBind(string $table, array $bind): void
     {
@@ -1269,6 +1282,9 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Get primary key columns for a table
+     *
+     * @param string|array<string>|\Maho\Db\Select $table
+     * @return list<string>
      */
     protected function _getPrimaryKeyColumns(string|array|\Maho\Db\Select $table): array
     {
@@ -1749,6 +1765,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Get column type definition only (without NULL/NOT NULL and DEFAULT)
+     *
+     * @param ColumnInfo $options
      */
     protected function _getColumnTypeOnly(array $options, ?string $ddlType = null): string
     {
@@ -2066,7 +2084,7 @@ class Pgsql extends AbstractPdoAdapter
         $tableColumns = $this->describeTable($tableName);
         $columnTypes = [];
         foreach ($tableColumns as $colName => $colInfo) {
-            $columnTypes[strtolower($colName)] = $colInfo['DATA_TYPE'] ?? null;
+            $columnTypes[strtolower($colName)] = $colInfo['DATA_TYPE'];
         }
 
         // Build SET clause from select columns
@@ -2286,6 +2304,7 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Retrieve column definition fragment for PostgreSQL
      *
+     * @param array<string, scalar|\Maho\Db\Expr|array<string, bool|int|string>|null> $options
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnDefinition(array $options, ?string $ddlType = null): string
@@ -2398,6 +2417,7 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Retrieve columns and primary keys definition array for create table
      *
+     * @return list<string>
      * @throws \Maho\Db\Exception
      */
     protected function _getColumnsDefinition(\Maho\Db\Ddl\Table $table): array
@@ -2435,6 +2455,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Retrieve table indexes definition array for create table
+     *
+     * @return list<string>
      */
     protected function _getIndexesDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2468,6 +2490,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Retrieve table foreign keys definition array for create table
+     *
+     * @return list<string>
      */
     protected function _getForeignKeysDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2496,6 +2520,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Retrieve table options definition array for create table (PostgreSQL version)
+     *
+     * @return list<string>
      */
     protected function _getOptionsDefinition(\Maho\Db\Ddl\Table $table): array
     {
@@ -2957,6 +2983,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Build SQL statement for condition
+     *
+     * @param string|array<string> $fieldName
      */
     #[\Override]
     public function prepareSqlCondition(string|array $fieldName, int|string|array|null $condition): string
@@ -3021,6 +3049,8 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Prepare Sql condition
+     *
+     * @param string|array<string> $fieldName
      */
     protected function _prepareQuotedSqlCondition(string $text, mixed $value, string|array $fieldName): string
     {
@@ -3119,63 +3149,6 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         return $value;
-    }
-
-    /**
-     * Generate select queries for range
-     *
-     * @throws \Maho\Db\Exception
-     */
-    #[\Override]
-    public function selectsByRange(string $rangeField, \Maho\Db\Select $select, int $stepCount = 100): array
-    {
-        $queries = [];
-        $fromSelect = $select->getPart(\Maho\Db\Select::FROM);
-
-        if (empty($fromSelect)) {
-            throw new \Maho\Db\Exception('Select must have correct FROM part');
-        }
-
-        $tableName = [];
-        $correlationName = '';
-        foreach ($fromSelect as $fromName => $formPart) {
-            $correlationName = $fromName;
-            if ($formPart['joinType'] == \Maho\Db\Select::FROM) {
-                $tableName = $formPart['tableName'];
-                break;
-            }
-        }
-
-        $selectRange = $this->select()
-            ->from(
-                $tableName,
-                [
-                    new \Maho\Db\Expr('MIN(' . $this->quoteIdentifier($rangeField) . ') AS min'),
-                    new \Maho\Db\Expr('MAX(' . $this->quoteIdentifier($rangeField) . ') AS max'),
-                ],
-            );
-
-        $rangeResult = $this->fetchRow($selectRange);
-        $min = $rangeResult['min'];
-        $max = $rangeResult['max'];
-
-        while ($min <= $max) {
-            $partialSelect = clone $select;
-            $partialSelect->where(
-                $this->quoteIdentifier($correlationName) . '.'
-                    . $this->quoteIdentifier($rangeField) . ' >= ?',
-                $min,
-            )
-            ->where(
-                $this->quoteIdentifier($correlationName) . '.'
-                    . $this->quoteIdentifier($rangeField) . ' < ?',
-                $min + $stepCount,
-            );
-            $queries[] = $partialSelect;
-            $min += $stepCount;
-        }
-
-        return $queries;
     }
 
     /**

@@ -26,7 +26,7 @@ class Client
     /**
      * Create HTTP client with optional tracing
      *
-     * @param array $options Symfony HttpClient options
+     * @param array<string, mixed> $options Symfony HttpClient options
      */
     public static function create(array $options = []): HttpClientInterface
     {

@@ -71,6 +71,11 @@ class SysDirectoryRegionsImport extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
+    /**
+     * @param list<array{code: string, name: string, locales: array<string, string>}> $importRecords
+     * @param list<array{code: string, name: string, existing: string, locales: array<string, string>}> $updateRecords
+     * @param list<array{code: string, name: string, existing: string}> $skipRecords
+     */
     private function showDryRunDetails(OutputInterface $output, array $importRecords, array $updateRecords, array $skipRecords): void
     {
         if (!empty($importRecords)) {

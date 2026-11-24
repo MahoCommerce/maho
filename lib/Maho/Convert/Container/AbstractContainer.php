@@ -16,6 +16,7 @@ use Maho\Convert\Profile\AbstractProfile;
 
 abstract class AbstractContainer implements ContainerInterface
 {
+    /** @var array<string, string>|null */
     protected ?array $_vars = null;
     protected ?\Maho\Convert\Profile\AbstractProfile $_profile = null;
     protected mixed $_data = null;
@@ -29,11 +30,17 @@ abstract class AbstractContainer implements ContainerInterface
         return $this->_vars[$key];
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getVars(): ?array
     {
         return $this->_vars;
     }
 
+    /**
+     * @param array<string, string>|string $key
+     */
     #[\Override]
     public function setVar(array|string $key, mixed $value = null): static
     {
@@ -45,6 +52,9 @@ abstract class AbstractContainer implements ContainerInterface
         return $this;
     }
 
+    /**
+     * @param array<string, string> $vars
+     */
     #[\Override]
     public function setVars(array $vars): self
     {
@@ -113,6 +123,10 @@ abstract class AbstractContainer implements ContainerInterface
         return true;
     }
 
+    /**
+     * @param array<array<int|string, string|int|float|bool|null>> $grid
+     * @return list<int|string>
+     */
     public function getGridFields(array $grid): array
     {
         $fields = [];

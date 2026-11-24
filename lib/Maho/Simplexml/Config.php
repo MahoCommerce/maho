@@ -30,7 +30,7 @@ class Config
     protected $_cacheId = null;
 
     /**
-     * @var array
+     * @var list<string>
      */
     protected $_cacheTags = [];
 
@@ -193,7 +193,7 @@ class Config
     }
 
     /**
-     * @param array $tags
+     * @param list<string> $tags
      * @return $this
      */
     public function setCacheTags($tags)
@@ -203,7 +203,7 @@ class Config
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     public function getCacheTags()
     {
@@ -325,7 +325,7 @@ class Config
     }
 
     /**
-     * @param array $tags
+     * @param list<string>|null $tags
      * @return $this
      */
     public function saveCache($tags = null)
@@ -383,7 +383,7 @@ class Config
     /**
      * @param string $data
      * @param string $id
-     * @param array $tags
+     * @param list<string> $tags
      * @param int|false|null $lifetime
      * @return bool
      */

@@ -123,7 +123,7 @@ class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
     /**
      * Save cache
      *
-     * @param array $tags
+     * @param list<string>|null $tags
      * @return $this
      */
     #[\Override]

@@ -13,6 +13,10 @@ use Maho\Filter\ArrayFilter;
 
 class Grid extends ArrayFilter
 {
+    /**
+     * @param array<array-key, mixed> $grid
+     * @return array<array-key, array<array-key, mixed>>
+     */
     #[\Override]
     public function filter(array $grid): array
     {

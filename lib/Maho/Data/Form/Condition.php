@@ -39,6 +39,7 @@ final class Condition
     /**
      * Return true when $values meet $condition. A field that $values does not hold has no value.
      *
+     * @param array<array-key, mixed> $condition
      * @param array<string, mixed> $values a list or a comma string is a multiselect value
      */
     public static function evaluate(array $condition, array $values, string $mode = self::MODE_AND): bool
@@ -69,6 +70,7 @@ final class Condition
     /**
      * Return the names of the fields that $condition reads, at every level.
      *
+     * @param array<array-key, mixed> $condition
      * @return list<string>
      */
     public static function fields(array $condition): array
@@ -87,6 +89,7 @@ final class Condition
     /**
      * Return the wanted values of each field in $condition, at every level.
      *
+     * @param array<array-key, mixed> $condition
      * @return array<string, list<string>>
      */
     public static function wantedValues(array $condition): array
@@ -108,6 +111,7 @@ final class Condition
     /**
      * Return an error for each part of $condition that does not follow the format.
      *
+     * @param array<array-key, mixed> $condition
      * @return list<string>
      */
     public static function structureErrors(array $condition): array

@@ -19,6 +19,7 @@ final class Maho
 
     private static ?string $bp = null;
 
+    /** @var array<string, array<string, mixed>>|null */
     private static ?array $compiledAttributes = null;
 
     /**
@@ -42,6 +43,8 @@ final class Maho
 
     /**
      * Return compiled PHP attributes (observers, cron jobs)
+     *
+     * @return array<string, array<string, mixed>>
      */
     public static function getCompiledAttributes(): array
     {
@@ -116,6 +119,8 @@ final class Maho
 
     /**
      * Return a list of all files matching the pattern from installed packages
+     *
+     * @return list<string>
      */
     public static function globPackages(string $pattern, int $flags = 0): array
     {
@@ -142,6 +147,8 @@ final class Maho
 
     /**
      * Return a list of all subdirectories from installed packages
+     *
+     * @return array<int, string>
      */
     public static function listDirectories(string $path): array
     {
@@ -274,6 +281,8 @@ final class Maho
 
     /**
      * Generate an error report and output HTML
+     *
+     * @param array<int|string, string> $reportData
      */
     public static function errorReport(array $reportData = [], int $httpResponseCode = 503): void
     {
@@ -301,6 +310,9 @@ final class Maho
         echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
     }
 
+    /**
+     * @param array<string, bool|string|\Intervention\Image\Interfaces\ColorInterface> $customOptions
+     */
     public static function getImageManager(array $customOptions = []): \Intervention\Image\Interfaces\ImageManagerInterface
     {
         $defaultOptions = [
@@ -370,6 +382,8 @@ final class Maho
 
     /**
      * Sign image transformation parameters into a query string: "t=...&s=..."
+     *
+     * @param array<string, string|int|float|bool|null> $params
      */
     #[\Deprecated(message: 'a resized image has a plain URL, see Mage_Core_Model_Image_Set', since: '26.11')]
     public static function signImageResizeRequest(array $params, string $key): string
@@ -381,6 +395,8 @@ final class Maho
 
     /**
      * Verify a signed image resize request and return decoded parameters, or null on failure.
+     *
+     * @return array<mixed>|null
      */
     public static function verifyImageResizeRequest(string $t, string $s, string $key): ?array
     {
@@ -406,6 +422,8 @@ final class Maho
      * Build the cache file path for a resized product image from transform params.
      * The path holds the complete source file name, so two source files that differ
      * only by extension never share one cache file.
+     *
+     * @param array<string, string|int|float|bool|null> $params
      */
     #[\Deprecated(message: 'see Mage_Core_Model_Image_Set::buildPath()', since: '26.11')]
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string

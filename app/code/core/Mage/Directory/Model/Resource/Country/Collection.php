@@ -175,7 +175,7 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
 
         if (count($options) > 0 && $addEmpty) {
             array_unshift($options, [
-                'title ' => null,
+                'title' => null,
                 'value' => '',
                 'label' => '',
             ]);

@@ -16,6 +16,9 @@ class CommandDiscoverer
     private string $baseDir;
     private string $namespace;
 
+    /**
+     * @return list<Command>
+     */
     public function discover(string $baseDir, string $namespace = 'MahoCLI\\Commands\\'): array
     {
         $this->namespace = $namespace;

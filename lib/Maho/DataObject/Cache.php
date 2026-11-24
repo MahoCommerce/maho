@@ -35,61 +35,61 @@ class Cache
     /**
      * Array of objects
      *
-     * @var array of objects
+     * @var array<string, object>
      */
     protected $_objects = [];
 
     /**
      * SPL object hashes
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $_hashes = [];
 
     /**
      * SPL hashes by object
      *
-     * @var array
+     * @var array<string, int>
      */
     protected $_objectHashes = [];
 
     /**
      * Objects by tags for cleanup
      *
-     * @var array 2D
+     * @var array<string, array<string, true>>
      */
     protected $_tags = [];
 
     /**
      * Tags by objects
      *
-     * @var array 2D
+     * @var array<string, array<string, true>>
      */
     protected $_objectTags = [];
 
     /**
      * References to objects
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_references = [];
 
     /**
      * References by object
      *
-     * @var array 2D
+     * @var array<string, array<string, true>>
      */
     protected $_objectReferences = [];
 
     /**
-     * @var array
+     * @var array<string, array<string, true>>
      */
     protected $_referencesByObject = [];
 
     /**
      * Debug data such as backtrace per class
      *
-     * @var array
+     * @var array<string, list<array{file: string|null, line: int|null, function: string}>>
      */
     protected $_debug = [];
 
@@ -126,7 +126,7 @@ class Cache
      *
      * @param object $object
      * @param string $idx
-     * @param array|string $tags
+     * @param array<string>|string $tags
      * @return string|false
      */
     public function save($object, $idx = null, $tags = null)
@@ -175,7 +175,7 @@ class Cache
     /**
      * Add a reference to an object
      *
-     * @param string|array $refName
+     * @param string|array<string> $refName
      * @param string $idx
      * @return boolean
      */
@@ -259,6 +259,8 @@ class Cache
 
     /**
      * Cleanup objects by tags
+     *
+     * @param array<string>|string $tags
      */
     public function deleteByTags(array|string $tags): bool
     {
@@ -300,6 +302,10 @@ class Cache
         return false;
     }
 
+    /**
+     * @param array<string> $ids
+     * @return array<string, object>
+     */
     public function findByIds(array $ids): array
     {
         $objects = [];
@@ -319,8 +325,8 @@ class Cache
     /**
      * Find objects by tags
      *
-     * @param array|string $tags
-     * @return array
+     * @param array<string>|string $tags
+     * @return array<string, object>
      */
     public function findByTags($tags)
     {
@@ -341,6 +347,8 @@ class Cache
 
     /**
      * Find by class name for objects of subclasses too
+     *
+     * @return array<string, object>
      */
     public function findByClass(string $class): array
     {
@@ -370,8 +378,8 @@ class Cache
     /**
      * Return debug information by ids
      *
-     * @param array|integer $ids
-     * @return array
+     * @param array<string>|string $ids
+     * @return array<string, list<array{file: string|null, line: int|null, function: string}>>
      */
     public function debugByIds($ids)
     {
@@ -388,7 +396,7 @@ class Cache
     /**
      * Get all objects
      *
-     * @return array
+     * @return array<string, object>
      */
     public function getAllObjects()
     {
@@ -398,7 +406,7 @@ class Cache
     /**
      * Get all tags
      *
-     * @return array
+     * @return array<string, array<string, true>>
      */
     public function getAllTags()
     {
@@ -408,7 +416,7 @@ class Cache
     /**
      * Get all tags by object
      *
-     * @return array
+     * @return array<string, array<string, true>>
      */
     public function getAllTagsByObject()
     {
@@ -418,7 +426,7 @@ class Cache
     /**
      * Get all references
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getAllReferences()
     {
@@ -428,7 +436,7 @@ class Cache
     /**
      * Get all references by object
      *
-     * @return array
+     * @return array<string, array<string, true>>
      */
     public function getAllReferencesByObject()
     {

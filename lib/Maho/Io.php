@@ -41,6 +41,8 @@ abstract class Io implements IoInterface
 
     /**
      * Open a connection
+     *
+     * @param array<string, string|int|bool|null> $args
      */
     #[\Override]
     public function open(array $args = []): bool

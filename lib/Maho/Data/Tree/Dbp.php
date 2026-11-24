@@ -73,7 +73,7 @@ class Dbp extends Tree
      *
      * @param AdapterInterface $connection
      * @param string $table
-     * @param array $fields
+     * @param array<string, string> $fields
      */
     public function __construct($connection, $table, $fields)
     {
@@ -188,7 +188,7 @@ class Dbp extends Tree
     }
 
     /**
-     * @param Node|array $children
+     * @param Node|array<array-key, list<array<string, mixed>>> $children
      * @param string $path
      * @param Node|null $parentNode
      * @param int $level
@@ -245,7 +245,8 @@ class Dbp extends Tree
     /**
      * @param Node $node
      * @param bool $recursive
-     * @param array $result
+     * @param list<mixed> $result
+     * @return list<mixed>
      */
     #[\Override]
     public function getChildren($node, $recursive = true, $result = []): array
@@ -362,7 +363,7 @@ class Dbp extends Tree
     }
 
     /**
-     * @param Node|array $children
+     * @param Node|array<array-key, list<array<string, mixed>>> $children
      * @param string $path
      * @param Node $parentNode
      * @param bool $withChildren

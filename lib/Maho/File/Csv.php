@@ -61,7 +61,7 @@ class Csv
      * Retrieve CSV file data as array
      *
      * @param   string $file
-     * @return  array
+     * @return  list<list<string|null>>
      */
     public function getData($file)
     {
@@ -84,7 +84,7 @@ class Csv
      * @param   string $file
      * @param   int $keyIndex
      * @param   int $valueIndex
-     * @return  array
+     * @return  array<int|string, string|null>
      */
     public function getDataPairs($file, $keyIndex = 0, $valueIndex = 1)
     {
@@ -102,7 +102,7 @@ class Csv
      * Saving data row array into file
      *
      * @param   string $file
-     * @param   array $data
+     * @param   array<array<int|string, string|int|float|null>> $data
      * @return Csv
      */
     public function saveData($file, $data)
@@ -115,6 +115,9 @@ class Csv
         return $this;
     }
 
+    /**
+     * @param array<int|string, string|int|float|null> $fields
+     */
     public function fputcsv(mixed &$handle, array $fields = [], string $delimiter = ',', string $enclosure = '"'): int|false
     {
         $str = '';

@@ -83,13 +83,16 @@ class Observer extends \Maho\DataObject
     }
 
     /**
-     * @return array
+     * @return array{object|class-string, string}
      */
     public function getCallback()
     {
         return $this->getData('callback');
     }
 
+    /**
+     * @param array{object|class-string, string} $data
+     */
     public function setCallback(array $data): static
     {
         return $this->setData('callback', $data);

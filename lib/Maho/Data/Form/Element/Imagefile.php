@@ -11,11 +11,14 @@ declare(strict_types=1);
 
 namespace Maho\Data\Form\Element;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Imagefile extends AbstractElement
 {
     /**
      * Imagefile constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {

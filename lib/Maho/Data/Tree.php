@@ -52,6 +52,7 @@ class Tree
     }
 
     /**
+     * @param array<string, mixed>|Node $data
      * @param Node $parentNode
      * @param Node $prevNode
      * @return Node
@@ -123,6 +124,7 @@ class Tree
 
     /**
      * @param Node $node
+     * @return list<mixed>
      */
     public function getChildren($node): array
     {
@@ -162,7 +164,7 @@ class Tree
 
     /**
      * @param Node $node
-     * @return array
+     * @return list<Node>
      */
     public function getPath($node)
     {

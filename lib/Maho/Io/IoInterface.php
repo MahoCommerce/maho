@@ -15,6 +15,8 @@ interface IoInterface
 {
     /**
      * Open a connection
+     *
+     * @param array<string, string|int|bool|null> $args
      */
     public function open(array $args = []): bool;
 
@@ -80,6 +82,8 @@ interface IoInterface
 
     /**
      * Get list of cwd subdirectories and files
+     *
+     * @return list<array<string, string|int|bool>>
      */
     public function ls(?string $grep = null): array;
 

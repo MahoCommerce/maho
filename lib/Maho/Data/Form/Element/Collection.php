@@ -27,7 +27,7 @@ class Collection implements ArrayAccess, IteratorAggregate, Countable
     /**
      * Elements storage
      *
-     * @var array
+     * @var array<array-key, AbstractElement>
      */
     private $_elements;
 

@@ -16,7 +16,7 @@ class Helper
     /**
      * Dictionary for generate short name
      *
-     * @var array
+     * @var array<string, string>
      */
     protected static $_translateMap = [
         'address'       => 'addr',

@@ -29,6 +29,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class DBOptimize extends BaseMahoCommand
 {
+    /**
+     * @param list<string> $requested
+     */
     public function __invoke(
         InputInterface $input,
         OutputInterface $output,

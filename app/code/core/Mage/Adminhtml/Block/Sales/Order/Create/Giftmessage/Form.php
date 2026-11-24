@@ -221,8 +221,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
             [
                 'name'      => $this->_getFieldName('message'),
                 'label'     => Mage::helper('sales')->__('Message'),
-                'rows'      => '5',
-                'cols'      => '20',
+                'rows'      => 5,
+                'cols'      => 20,
             ],
         );
         return $this;

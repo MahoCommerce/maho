@@ -25,13 +25,15 @@ use Maho\Data\Collection;
  * Supports some fancy filters.
  *
  * At least one target directory must be set
+ *
+ * @phpstan-type FileRow array{filename: string, basename: string, mtime: int|false, subdir_count?: int}
  */
 class Filesystem extends Collection
 {
     /**
      * Target directory
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $_targetDirs = [];
 
@@ -98,13 +100,16 @@ class Filesystem extends Collection
      * @see \Maho\Data\Collection::$_isFiltersRendered
      */
     private int $_filterIncrement = 0;
+    /** @var array<int, array{value: string, is_and: bool}> */
     private array $_filterBrackets = [];
     private string $_filterEvalRendered = '';
 
     /**
      * Collecting items helper variables
      */
+    /** @var array<int, string|FileRow> */
     protected array $_collectedDirs  = [];
+    /** @var array<int, string|FileRow> */
     protected array $_collectedFiles = [];
 
     /**
@@ -226,7 +231,7 @@ class Filesystem extends Collection
     /**
      * Get files from specified directory recursively (if needed)
      *
-     * @param string|array $dir
+     * @param string|array<string> $dir
      */
     protected function _collectRecursive($dir): void
     {
@@ -351,8 +356,8 @@ class Filesystem extends Collection
      * Callback for sorting items
      * Currently supports only sorting by one column
      *
-     * @param array $a
-     * @param array $b
+     * @param FileRow $a
+     * @param FileRow $b
      * @return int|void
      */
     protected function _usort($a, $b)
@@ -382,7 +387,7 @@ class Filesystem extends Collection
      * Generate item row basing on the filename
      *
      * @param string $filename
-     * @return array
+     * @return FileRow
      */
     protected function _generateRow($filename)
     {
@@ -433,7 +438,7 @@ class Filesystem extends Collection
      * The filters renderer and caller
      * Aplies to each row, renders once.
      *
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      */
     protected function _filterRow($row)
@@ -467,7 +472,7 @@ class Filesystem extends Collection
      * Skips, if there is no filtered key in the row
      *
      * @param callable $callback
-     * @param array $callbackParams
+     * @param array{0: string, 1: mixed, 2: FileRow} $callbackParams
      * @return bool
      */
     protected function _invokeFilter($callback, $callbackParams)
@@ -603,6 +608,8 @@ class Filesystem extends Collection
 
     /**
      * Does nothing. Intentionally disabled parent method
+     *
+     * @param int|string|array<mixed> $value
      */
     #[\Override]
     public function addFilter(string $field, int|string|array $value, string $type = 'and'): static
@@ -613,7 +620,7 @@ class Filesystem extends Collection
     /**
      * Get all ids of collected items
      *
-     * @return array
+     * @return list<array-key>
      */
     #[\Override]
     public function getAllIds()
@@ -626,7 +633,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -642,7 +649,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -657,7 +664,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -672,7 +679,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -687,7 +694,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()
@@ -702,7 +709,7 @@ class Filesystem extends Collection
      *
      * @param string $field
      * @param mixed $filterValue
-     * @param array $row
+     * @param FileRow $row
      * @return bool
      * @see addFieldToFilter()
      * @see addCallbackFilter()

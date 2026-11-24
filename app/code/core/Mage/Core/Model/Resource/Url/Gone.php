@@ -19,7 +19,7 @@ class Mage_Core_Model_Resource_Url_Gone extends Mage_Core_Model_Resource_Db_Abst
     /**
      * Record request paths as gone. An existing row for the same path and store is refreshed.
      *
-     * @param list<array{request_path: string, store_id: int}> $rows
+     * @param list<array<string, string|int|float|bool|resource|null>> $rows
      * @return int number of rows written
      */
     public function markGone(array $rows, string $entityType): int

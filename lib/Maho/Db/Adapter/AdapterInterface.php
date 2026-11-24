@@ -11,6 +11,21 @@ declare(strict_types=1);
 
 namespace Maho\Db\Adapter;
 
+/**
+ * @phpstan-type DbValue string|int|float|bool|resource|null
+ * @phpstan-type BindValue string|int|float|bool|\DateTime|\Maho\Db\Expr|null
+ * @phpstan-type Bind array<int|string, BindValue>|int|string|float
+ * @phpstan-type QuoteValue \Maho\Db\Select|\Maho\Db\Expr|array<int|string, \Maho\Db\Expr|int|string|float|bool|null>|int|string|float|bool|null
+ * @phpstan-type SqlCondition array<int|string, QuoteValue|\DateTime|array<int|string, QuoteValue|\DateTime>>
+ * @phpstan-type InsertRow array<string, BindValue>
+ * @phpstan-type ColumnDefinition array<string, string|int|float|bool|\Maho\Db\Expr|null>
+ * @phpstan-type ColumnInfo array<string, scalar|\Maho\Db\Expr|\Doctrine\DBAL\Schema\DefaultExpression|null>
+ * @phpstan-type ColumnDescription array{SCHEMA_NAME: ?string, TABLE_NAME: string, COLUMN_NAME: string, COLUMN_POSITION: int, DATA_TYPE: string, DEFAULT: string|int|float|\Doctrine\DBAL\Schema\DefaultExpression|null, NULLABLE: bool, LENGTH: int|string|null, SCALE: ?int, PRECISION: ?int, UNSIGNED: bool, PRIMARY: bool, PRIMARY_POSITION: ?int, IDENTITY: bool}
+ * @phpstan-type IndexDescription array{SCHEMA_NAME: ?string, TABLE_NAME: string, KEY_NAME: string, COLUMNS_LIST: list<string>, INDEX_TYPE: string, INDEX_METHOD: string, type: string, fields: list<string>}
+ * @phpstan-type ForeignKeyDescription array{FK_NAME: string, SCHEMA_NAME: ?string, TABLE_NAME: string, COLUMN_NAME: string, REF_SCHEMA_NAME: ?string, REF_TABLE_NAME: string, REF_COLUMN_NAME: string, ON_DELETE: string, ON_UPDATE: string}
+ * @phpstan-type DdlCacheValue string|array<string, ColumnDescription|IndexDescription|ForeignKeyDescription>
+ * @phpstan-type ConnectionConfig array{host?: string, port?: string|int, unix_socket?: string, username?: string, password?: string, dbname?: string, path?: string, charset?: string, sql_mode?: string, sslmode?: string, gssencmode?: string, initStatements?: string, engine?: string, model?: string, type?: string, pdoType?: string, active?: string, persistent?: string, profiler?: bool, ...<string, mixed>}
+ */
 interface AdapterInterface
 {
     public const string INDEX_TYPE_PRIMARY    = 'primary';
@@ -113,6 +128,8 @@ interface AdapterInterface
 
     /**
      * Returns short table status array
+     *
+     * @return array<string, DbValue>|false
      */
     public function showTableStatus(string $tableName, ?string $schemaName = null): array|false;
 
@@ -139,6 +156,8 @@ interface AdapterInterface
      * PRIMARY          => boolean; true if column is part of the primary key
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
+     *
+     * @return array<string, ColumnDescription>
      */
     public function describeTable(string $tableName, ?string $schemaName = null): array;
 
@@ -149,6 +168,8 @@ interface AdapterInterface
 
     /**
      * Modify the column definition by data from describe table
+     *
+     * @param ColumnDefinition|ColumnDescription|string $definition
      */
     public function modifyColumnByDdl(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self;
 
@@ -160,7 +181,7 @@ interface AdapterInterface
     /**
      * Rename several tables
      *
-     * @param array $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
+     * @param list<array{oldName: string, newName: string}> $tablePairs array('oldName' => 'Name1', 'newName' => 'Name2')
      *
      * @throws \Maho\Db\Exception
      */
@@ -171,6 +192,8 @@ interface AdapterInterface
      *
      * Generally $defintion must be array with column data to keep this call cross-DB compatible.
      * Using string as $definition is allowed only for concrete DB adapter.
+     *
+     * @param ColumnDefinition|string $definition
      */
     public function addColumn(string $tableName, string $columnName, array|string $definition, ?string $schemaName = null): self;
 
@@ -178,6 +201,8 @@ interface AdapterInterface
      * Change the column name and definition
      *
      * For change definition of column - use modifyColumn
+     *
+     * @param ColumnDefinition|string $definition
      */
     public function changeColumn(
         string $tableName,
@@ -190,6 +215,8 @@ interface AdapterInterface
 
     /**
      * Modify the column definition
+     *
+     * @param ColumnDefinition|string $definition
      */
     public function modifyColumn(string $tableName, string $columnName, array|string $definition, bool $flushData = false, ?string $schemaName = null): self;
 
@@ -206,7 +233,7 @@ interface AdapterInterface
     /**
      * Add new index to table name
      *
-     * @param string|array $fields  the table column name or array of ones
+     * @param string|array<string> $fields  the table column name or array of ones
      */
     public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
@@ -232,6 +259,8 @@ interface AdapterInterface
      * INDEX_METHOD     => string; index method using
      * type             => string; see INDEX_TYPE
      * fields           => array; see COLUMNS_LIST
+     *
+     * @return array<string, IndexDescription>
      */
     public function getIndexList(string $tableName, ?string $schemaName = null): array;
 
@@ -275,6 +304,8 @@ interface AdapterInterface
      * REF_COLUMN_NAME  => string; reference column name
      * ON_DELETE        => string; action type on delete row
      * ON_UPDATE        => string; action type on update row
+     *
+     * @return array<string, ForeignKeyDescription>
      */
     public function getForeignKeys(string $tableName, ?string $schemaName = null): array;
 
@@ -286,9 +317,9 @@ interface AdapterInterface
     /**
      * Inserts a table row with specified data.
      *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $data Column-value pairs or array of column-value pairs.
-     * @param array $fields update fields pairs or values
+     * @param string|array<string>|\Maho\Db\Select $table The table to insert data into.
+     * @param InsertRow|array<int, InsertRow> $data Column-value pairs or array of column-value pairs.
+     * @param array<int|string, string|int|float|\Maho\Db\Expr> $fields update fields pairs or values
      * @return int The number of affected rows.
      */
     public function insertOnDuplicate(string|array|\Maho\Db\Select $table, array $data, array $fields = []): int;
@@ -296,8 +327,8 @@ interface AdapterInterface
     /**
      * Inserts a table multiply rows with specified data.
      *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $data Column-value pairs or array of Column-value pairs.
+     * @param string|array<string>|\Maho\Db\Select $table The table to insert data into.
+     * @param InsertRow|array<int, InsertRow> $data Column-value pairs or array of Column-value pairs.
      * @return int The number of affected rows.
      */
     public function insertMultiple(string|array|\Maho\Db\Select $table, array $data): int;
@@ -305,15 +336,16 @@ interface AdapterInterface
     /**
      * Insert array to table based on columns definition
      *
-     * @param array $columns  the data array column map
+     * @param list<string> $columns  the data array column map
+     * @param array<int, BindValue|array<int|string, BindValue>> $data
      */
     public function insertArray(string $table, array $columns, array $data): int;
 
     /**
      * Inserts a table row with specified data.
      *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $bind Column-value pairs.
+     * @param string|array<string>|\Maho\Db\Select $table The table to insert data into.
+     * @param InsertRow $bind Column-value pairs.
      * @return int The number of affected rows.
      */
     public function insert(string|array|\Maho\Db\Select $table, array $bind): int;
@@ -322,6 +354,7 @@ interface AdapterInterface
      * Inserts a table row with specified data
      * Special for Zero values to identity column
      *
+     * @param InsertRow $bind
      * @return int The number of affected rows.
      */
     public function insertForce(string $table, array $bind): int;
@@ -329,9 +362,9 @@ interface AdapterInterface
     /**
      * Updates table rows with specified data based on a WHERE clause.
      *
-     * @param  string|array|\Maho\Db\Select $table The table to update.
-     * @param  array        $bind  Column-value pairs.
-     * @param  string|array $where UPDATE WHERE clause(s).
+     * @param  string|array<string>|\Maho\Db\Select $table The table to update.
+     * @param  InsertRow        $bind  Column-value pairs.
+     * @param  string|array<int|string, QuoteValue> $where UPDATE WHERE clause(s).
      * @return int          The number of affected rows.
      */
     public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int;
@@ -339,8 +372,8 @@ interface AdapterInterface
     /**
      * Inserts a table row with specified data.
      *
-     * @param string|array|\Maho\Db\Select $table The table to insert data into.
-     * @param array $bind Column-value pairs.
+     * @param string|array<string>|\Maho\Db\Select $table The table to insert data into.
+     * @param InsertRow $bind Column-value pairs.
      * @return int The number of affected rows.
      */
     public function insertIgnore(string|array|\Maho\Db\Select $table, array $bind): int;
@@ -348,8 +381,8 @@ interface AdapterInterface
     /**
      * Deletes table rows based on a WHERE clause.
      *
-     * @param  string|array|\Maho\Db\Select $table The table to update.
-     * @param  string|array $where DELETE WHERE clause(s).
+     * @param  string|array<string>|\Maho\Db\Select $table The table to update.
+     * @param  string|array<int|string, QuoteValue> $where DELETE WHERE clause(s).
      * @return int          The number of affected rows.
      */
     public function delete(string|array|\Maho\Db\Select $table, string|array $where = ''): int;
@@ -359,12 +392,14 @@ interface AdapterInterface
      *
      * @param  string|\Maho\Db\Select  $sql  The SQL statement with placeholders.
      *                      May be a string or \Maho\Db\Select.
-     * @param  array|int|string|float  $bind An array of data or data itself to bind to the placeholders.
+     * @param  Bind  $bind An array of data or data itself to bind to the placeholders.
      */
     public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Executes a SQL statement(s)
+     *
+     * @return list<\Maho\Db\Statement\StatementInterface>
      */
     public function multiQuery(string $sql): array;
 
@@ -373,8 +408,9 @@ interface AdapterInterface
      * Uses the current fetchMode for the adapter.
      *
      * @param string|\Maho\Db\Select $sql  An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
      * @param int|null $fetchMode Override current fetch mode.
+     * @return ($fetchMode is null|\Maho\Db\Statement\StatementInterface::FETCH_ASSOC ? list<array<string, DbValue>> : ($fetchMode is \Maho\Db\Statement\StatementInterface::FETCH_NUM ? list<list<DbValue>> : array<int|string, DbValue>))
      */
     public function fetchAll(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array;
 
@@ -383,8 +419,9 @@ interface AdapterInterface
      * Uses the current fetchMode for the adapter.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
      * @param int|null $fetchMode Override current fetch mode.
+     * @return ($fetchMode is \Maho\Db\Statement\StatementInterface::FETCH_NUM ? list<DbValue>|false : array<string, DbValue>|false)
      */
     public function fetchRow(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], ?int $fetchMode = null): array|false;
 
@@ -398,7 +435,8 @@ interface AdapterInterface
      * overwrite previous data.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
+     * @return array<int|string, array<string, DbValue>>
      */
     public function fetchAssoc(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
@@ -408,9 +446,18 @@ interface AdapterInterface
      * The first column in each row is used as the array key.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
+     * @return list<DbValue>
      */
     public function fetchCol(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
+
+    /**
+     * Fetch the first column of all rows. The column must be a key that holds no NULL, such as an entity ID.
+     *
+     * @param Bind $bind Data to bind into SELECT placeholders.
+     * @return list<int|string>
+     */
+    public function fetchIds(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
     /**
      * Fetches all SQL result rows as an array of key-value pairs.
@@ -419,7 +466,8 @@ interface AdapterInterface
      * value.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
+     * @return array<int|string, DbValue>
      */
     public function fetchPairs(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): array;
 
@@ -427,7 +475,7 @@ interface AdapterInterface
      * Fetches the first column of the first row of the SQL result.
      *
      * @param string|\Maho\Db\Select $sql An SQL SELECT statement.
-     * @param array|int|string|float $bind Data to bind into SELECT placeholders.
+     * @param Bind $bind Data to bind into SELECT placeholders.
      */
     public function fetchOne(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): mixed;
 
@@ -437,7 +485,7 @@ interface AdapterInterface
      * If an array is passed as the value, the array values are quoted
      * and then returned as a comma-separated string.
      *
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value A single value to quote into the condition.
+     * @param QuoteValue $value A single value to quote into the condition.
      * @param null|string|int $type The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @return string An SQL-safe quoted value (or string of separated values).
      */
@@ -456,7 +504,7 @@ interface AdapterInterface
      * // $safe = "WHERE date < '2005-01-02'"
      * </code>
      *
-     * @param \Maho\Db\Select|\Maho\Db\Expr|array|null|int|string|float|bool $value A single value to quote into the condition.
+     * @param QuoteValue $value A single value to quote into the condition.
      * @param null|string|int $type The type of the given value e.g. Zend_Db::INT_TYPE, "INT"
      * @param int|null $count count of placeholders to replace
      * @return string An SQL-safe quoted value placed into the original text.
@@ -481,7 +529,7 @@ interface AdapterInterface
      * The actual quote character surrounding the identifiers may vary depending on
      * the adapter.
      *
-     * @param string|array|\Maho\Db\Expr $ident The identifier.
+     * @param string|array<string|\Maho\Db\Expr|null>|\Maho\Db\Expr $ident The identifier.
      * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier.
      */
@@ -490,7 +538,7 @@ interface AdapterInterface
     /**
      * Quote a column identifier and alias.
      *
-     * @param string|array|\Maho\Db\Expr $ident The identifier or expression.
+     * @param string|array<string|\Maho\Db\Expr|null>|\Maho\Db\Expr $ident The identifier or expression.
      * @param string|null $alias An alias for the column.
      * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
@@ -500,7 +548,7 @@ interface AdapterInterface
     /**
      * Quote a table identifier and alias.
      *
-     * @param string|array|\Maho\Db\Expr|\Maho\Db\Select $ident The identifier or expression.
+     * @param string|array<string|\Maho\Db\Expr|null>|\Maho\Db\Expr|\Maho\Db\Select $ident The identifier or expression.
      * @param string|null $alias An alias for the table.
      * @param bool $auto If true, heed the AUTO_QUOTE_IDENTIFIERS config option.
      * @return string The quoted identifier and alias.
@@ -551,6 +599,7 @@ interface AdapterInterface
      *
      * @param string $tableCacheKey the table cache key
      * @param int $ddlType          the DDL constant
+     * @return DdlCacheValue|int|false
      */
     public function loadDdlCache(string $tableCacheKey, int $ddlType): string|array|int|false;
 
@@ -582,6 +631,8 @@ interface AdapterInterface
      *
      * If non matched - sequential array is expected and OR conditions
      * will be built using above mentioned structure
+     *
+     * @param int|string|SqlCondition|null $condition
      */
     public function prepareSqlCondition(string $fieldName, int|string|array|null $condition): string;
 
@@ -589,7 +640,7 @@ interface AdapterInterface
      * Prepare value for save in column
      * Return converted to column data type value
      *
-     * @param array $column     the column describe array
+     * @param ColumnInfo $column     the column describe array
      */
     public function prepareColumnValue(array $column, mixed $value): mixed;
 
@@ -600,7 +651,7 @@ interface AdapterInterface
      * A condition that compares the column with a value it cannot hold matches no row, and PostgreSQL refuses
      * to run it. So check the value first, and do not run the query when the result is false.
      *
-     * @param array $column     the column describe array
+     * @param ColumnInfo $column     the column describe array
      */
     public function canColumnHoldValue(array $column, mixed $value): bool;
 
@@ -616,7 +667,7 @@ interface AdapterInterface
      * Generate fragment of SQL, that check value against multiple condition cases
      * and return different result depends on them
      *
-     * @param array $casesResults Cases and results
+     * @param array<int|string, string|int|float|\Maho\Db\Expr> $casesResults Cases and results
      * @param string|null $defaultValue value to use if value doesn't confirm to any cases
      */
     public function getCaseSql(string $valueName, array $casesResults, ?string $defaultValue = null): \Maho\Db\Expr;
@@ -654,12 +705,15 @@ interface AdapterInterface
      * Generate fragment of SQL, that combine together (concatenate) the results from data array
      * All arguments in data must be quoted
      *
+     * @param array<string|\Maho\Db\Expr> $data
      * @param string|null $separator concatenate with separator
      */
     public function getConcatSql(array $data, ?string $separator = null): \Maho\Db\Expr;
 
     /**
      * Returns the configuration variables in this adapter.
+     *
+     * @return ConnectionConfig
      */
     public function getConfig(): array;
 
@@ -673,6 +727,8 @@ interface AdapterInterface
      * Generate fragment of SQL, that compare with two or more arguments, and returns the smallest
      * (minimum-valued) argument
      * All arguments in data must be quoted
+     *
+     * @param array<string|int|float|\Maho\Db\Expr> $data
      */
     public function getLeastSql(array $data): \Maho\Db\Expr;
 
@@ -680,6 +736,8 @@ interface AdapterInterface
      * Generate fragment of SQL, that compare with two or more arguments, and returns the largest
      * (maximum-valued) argument
      * All arguments in data must be quoted
+     *
+     * @param array<string|int|float|\Maho\Db\Expr> $data
      */
     public function getGreatestSql(array $data): \Maho\Db\Expr;
 
@@ -792,7 +850,7 @@ interface AdapterInterface
      * Retrieve valid index name
      * Check index name length and allowed symbols
      *
-     * @param string|array $fields  the columns list
+     * @param string|array<string> $fields  the columns list
      */
     public function getIndexName(string $tableName, string|array $fields, string $indexType = ''): string;
 
@@ -814,16 +872,22 @@ interface AdapterInterface
 
     /**
      * Get insert from Select object query
+     *
+     * @param array<int|string, string|\Maho\Db\Expr> $fields
      */
     public function insertFromSelect(\Maho\Db\Select $select, string $table, array $fields = [], bool|int $mode = false): string;
 
     /**
      * Get insert queries in array for insert by range with step parameter
+     *
+     * @return list<\Maho\Db\Select>
      */
     public function selectsByRange(string $rangeField, \Maho\Db\Select $select, int $stepCount = 100): array;
 
     /**
      * Get update table query using select object for join and update
+     *
+     * @param string|array<string, string> $table
      */
     public function updateFromSelect(\Maho\Db\Select $select, string|array $table): string;
 
@@ -836,6 +900,9 @@ interface AdapterInterface
 
     /**
      * Return array of table(s) checksum as table name - checksum pairs
+     *
+     * @param list<string>|string $tableNames
+     * @return array<string, int|string|null>
      */
     public function getTablesChecksum(array|string $tableNames, ?string $schemaName = null): array;
 
@@ -916,6 +983,8 @@ interface AdapterInterface
 
     /**
      * Modify table columns, foreign keys, comments and engine
+     *
+     * @param array<string, array{columns: array<string, ColumnDefinition>, comment?: string, engine?: string}> $tables
      */
     public function modifyTables(array $tables): self;
 

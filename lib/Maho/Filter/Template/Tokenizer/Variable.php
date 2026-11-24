@@ -15,6 +15,8 @@ class Variable extends AbstractTokenizer
 {
     /**
      * Tokenize string and return getted variable stack path
+     *
+     * @return list<array{type: string, name: string, args?: list<float|string>}>
      */
     #[\Override]
     public function tokenize(): array
@@ -125,7 +127,7 @@ class Variable extends AbstractTokenizer
     /**
      * Return array of arguments for method.
      *
-     * @return array
+     * @return list<float|string>
      */
     public function getMethodArgs()
     {

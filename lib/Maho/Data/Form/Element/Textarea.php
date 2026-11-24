@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Textarea extends AbstractElement
 {
     /**
      * Textarea constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -29,7 +32,7 @@ class Textarea extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()

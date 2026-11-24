@@ -736,8 +736,8 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     /**
      * Retrieve table checksum
      *
-     * @param string|array $table
-     * @return array|false
+     * @param string|list<string> $table
+     * @return array<string, int|string|null>|int|string|null|false
      */
     public function getChecksum($table)
     {

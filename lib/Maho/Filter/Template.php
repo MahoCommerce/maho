@@ -29,7 +29,7 @@ class Template
     /**
      * Assigned template variables
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected $_templateVars = [];
 
@@ -49,6 +49,8 @@ class Template
 
     /**
      * Sets template variables that's can be called through {var ...} statement
+     *
+     * @param array<string, mixed> $variables
      */
     public function setVariables(array $variables): static
     {
@@ -146,6 +148,9 @@ class Template
         return $result ?? $value;
     }
 
+    /**
+     * @param array<int, string> $construction
+     */
     public function varDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
@@ -160,6 +165,9 @@ class Template
         return (string) $replacedValue;
     }
 
+    /**
+     * @param array<int, string> $construction
+     */
     public function includeDirective(array $construction): string
     {
         // Processing of {include template=... [...]} statement
@@ -184,6 +192,7 @@ class Template
      * Mage_Sales_Model_Order::sales_email/order/template. This directive is useful to include things like a global
      * header/footer.
      *
+     * @param array<int, string> $construction
      * @return mixed|string
      */
     public function templateDirective(array $construction)
@@ -202,6 +211,9 @@ class Template
         return $replacedValue;
     }
 
+    /**
+     * @param array<int, string> $construction
+     */
     public function dependDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
@@ -215,6 +227,9 @@ class Template
         return $construction[2];
     }
 
+    /**
+     * @param array<int, string> $construction
+     */
     public function ifDirective(array $construction): string
     {
         if (count($this->_templateVars) == 0) {
@@ -234,7 +249,7 @@ class Template
      * Return associative array of include construction.
      *
      * @param string $value raw parameters
-     * @return array
+     * @return array<string, mixed>
      */
     protected function _getIncludeParameters($value)
     {

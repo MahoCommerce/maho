@@ -228,7 +228,6 @@ class Mage_Eav_Model_Config
         $this->_entityTypeAttributes[$storeId][$entityType->getId()] = [];
         $attributeCodes = [];
 
-        /** @var Mage_Eav_Model_Entity_Attribute_Abstract $entityAttributeData */
         foreach ($entityAttributes as $entityAttributeData) {
             $attributeId = $entityAttributeData['attribute_id'];
             $attributeCode = $entityAttributeData['attribute_code'];

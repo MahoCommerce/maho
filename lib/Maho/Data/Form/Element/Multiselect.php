@@ -13,11 +13,14 @@ namespace Maho\Data\Form\Element;
 
 use Maho\Data\Form\Element\AbstractElement;
 
+/**
+ * @phpstan-import-type ElementConfig from AbstractElement
+ */
 class Multiselect extends AbstractElement
 {
     /**
      * Multiselect constructor.
-     * @param array $attributes
+     * @param ElementConfig $attributes
      */
     public function __construct($attributes = [])
     {
@@ -82,7 +85,7 @@ class Multiselect extends AbstractElement
     }
 
     /**
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     public function getHtmlAttributes()
@@ -140,8 +143,8 @@ class Multiselect extends AbstractElement
     }
 
     /**
-     * @param array $option
-     * @param array $selected
+     * @param array<string, mixed> $option
+     * @param array<mixed> $selected
      * @return string
      */
     protected function _optionToHtml($option, $selected)

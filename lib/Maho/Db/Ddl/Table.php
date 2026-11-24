@@ -13,6 +13,12 @@ namespace Maho\Db\Ddl;
 
 use Maho\Db\Adapter\Pdo\Mysql;
 
+/**
+ * @phpstan-type DdlColumn array{COLUMN_NAME: string, COLUMN_TYPE: string, COLUMN_POSITION: int, DATA_TYPE: string, DEFAULT: string|int|float|bool|\Maho\Db\Expr|null, NULLABLE: bool, LENGTH: string|int|array<int|string, int|string>|null, SCALE: string|int|null, PRECISION: string|int|null, UNSIGNED: bool, PRIMARY: bool, PRIMARY_POSITION: int, IDENTITY: bool, COMMENT: string}
+ * @phpstan-type DdlIndexColumn array{NAME: string, SIZE: ?int, POSITION: int}
+ * @phpstan-type DdlIndex array{INDEX_NAME: string, COLUMNS: array<string, DdlIndexColumn>, TYPE: string}
+ * @phpstan-type DdlForeignKey array{FK_NAME: string, COLUMN_NAME: string, REF_TABLE_NAME: string, REF_COLUMN_NAME: string, ON_DELETE: string, ON_UPDATE: string}
+ */
 class Table
 {
     /**
@@ -132,6 +138,8 @@ class Table
      * PRIMARY_POSITION => integer; position of column in primary key
      * IDENTITY         => integer; true if column is auto-generated with unique values
      * COMMENT          => string; column description
+     *
+     * @var array<string, DdlColumn>
      */
     protected array $_columns = [];
 
@@ -153,6 +161,8 @@ class Table
      * NAME             => string; The column name
      * SIZE             => int|null; Length of index column (always null if index is unique)
      * POSITION         => int; Position in index
+     *
+     * @var array<string, DdlIndex>
      */
     protected array $_indexes = [];
 
@@ -172,11 +182,15 @@ class Table
      *
      * Valid Integrity Actions:
      * CASCADE | SET NULL | NONE | RESTRICT | SET DEFAULT
+     *
+     * @var array<string, DdlForeignKey>
      */
     protected array $_foreignKeys = [];
 
     /**
      * Additional table options
+     *
+     * @var array<string, string|int>
      */
     protected array $_options = [
         'type'          => 'INNODB',
@@ -257,8 +271,8 @@ class Table
      *
      * @param string $name the column name
      * @param string $type the column data type
-     * @param string|int|array $size the column length
-     * @param array $options array of additional options
+     * @param string|int|array<int|string, int|string>|null $size the column length
+     * @param array<string, string|int|float|bool|\Maho\Db\Expr|null> $options array of additional options
      * @param string $comment column description
      * @throws \Maho\Db\Exception
      */
@@ -444,6 +458,9 @@ class Table
 
     /**
      * Add index to table
+     *
+     * @param array<string|array{name: string, size?: int|string|null, position?: int|string|null}>|string $fields
+     * @param array<string, string> $options
      */
     public function addIndex(string $indexName, array|string $fields, array $options = []): self
     {
@@ -503,6 +520,8 @@ class Table
 
     /**
      * Retrieve array of table columns
+     *
+     * @return array<string, DdlColumn>
      */
     public function getColumns(bool $normalized = true): array
     {
@@ -514,6 +533,8 @@ class Table
 
     /**
      * Set column, formatted according to DDL Table format, into columns structure
+     *
+     * @param DdlColumn $column
      */
     public function setColumn(array $column): self
     {
@@ -524,6 +545,8 @@ class Table
 
     /**
      * Retrieve array of table indexes
+     *
+     * @return array<string, DdlIndex>
      */
     public function getIndexes(): array
     {
@@ -532,6 +555,8 @@ class Table
 
     /**
      * Retrieve array of table foreign keys
+     *
+     * @return array<string, DdlForeignKey>
      */
     public function getForeignKeys(): array
     {
@@ -541,7 +566,7 @@ class Table
     /**
      * Set table option
      */
-    public function setOption(string $key, mixed $value): self
+    public function setOption(string $key, string|int $value): self
     {
         $this->_options[$key] = $value;
         return $this;
@@ -551,7 +576,7 @@ class Table
      * Retrieve table option value by option name
      * Return null if option does not exits
      */
-    public function getOption(string $key): mixed
+    public function getOption(string $key): string|int|null
     {
         if (!isset($this->_options[$key])) {
             return null;
@@ -561,6 +586,8 @@ class Table
 
     /**
      * Retrieve array of table options
+     *
+     * @return array<string, string|int>
      */
     public function getOptions(): array
     {
@@ -569,6 +596,9 @@ class Table
 
     /**
      * Index column position comparison function
+     *
+     * @param DdlIndexColumn $a
+     * @param DdlIndexColumn $b
      */
     protected function _sortIndexColumnPosition(array $a, array $b): int
     {
@@ -577,6 +607,9 @@ class Table
 
     /**
      * table column position comparison function
+     *
+     * @param DdlColumn $a
+     * @param DdlColumn $b
      */
     protected function _sortColumnPosition(array $a, array $b): int
     {
@@ -585,6 +618,9 @@ class Table
 
     /**
      * Normalize position of index columns array
+     *
+     * @param array<string, DdlIndexColumn> $columns
+     * @return array<string, DdlIndexColumn>
      */
     protected function _normalizeIndexColumnPosition(array $columns): array
     {
@@ -599,6 +635,9 @@ class Table
 
     /**
      * Normalize position of table columns array
+     *
+     * @param array<string, DdlColumn> $columns
+     * @return array<string, DdlColumn>
      */
     protected function _normalizeColumnPosition(array $columns): array
     {

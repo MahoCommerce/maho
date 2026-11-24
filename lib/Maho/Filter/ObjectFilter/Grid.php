@@ -15,6 +15,9 @@ class Grid extends ObjectFilter
 {
     /**
      * Filter grid of \Maho\DataObjects
+     *
+     * @param \Maho\DataObject|array<array-key, mixed> $grid
+     * @return \Maho\DataObject|array<array-key, \Maho\DataObject|array<array-key, mixed>>
      */
     #[\Override]
     public function filter(\Maho\DataObject|array $grid): \Maho\DataObject|array

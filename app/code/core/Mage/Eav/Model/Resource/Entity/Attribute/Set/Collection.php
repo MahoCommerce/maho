@@ -27,6 +27,9 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection extends Mage_Core_
         return $this->addFieldToFilter('entity_type_id', $typeId);
     }
 
+    /**
+     * @return list<array{value: mixed, label: mixed}>
+     */
     #[\Override]
     public function toOptionArray(): array
     {

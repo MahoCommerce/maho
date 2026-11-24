@@ -12,9 +12,12 @@ namespace Maho\Filter;
 class ArrayFilter
 {
     /**
-     * @var array
+     * @var list<callable|object>
      */
     protected $_filters = [];
+    /**
+     * @var array<string, list<callable|object>>
+     */
     protected array $_columnFilters = [];
 
     /**
@@ -32,6 +35,9 @@ class ArrayFilter
 
     /**
      * Filter array values
+     *
+     * @param array<array-key, mixed> $array
+     * @return array<array-key, mixed>
      */
     public function filter(array $array): array
     {

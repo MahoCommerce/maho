@@ -154,6 +154,7 @@ describe('DDL Operations - Table Creation', function () {
         $fks = $this->adapter->getForeignKeys($this->testTableName);
         expect($fks)->toBeArray();
         expect(count($fks))->toBeGreaterThan(0);
+        expect(reset($fks))->toHaveKeys(['FK_NAME', 'REF_SCHEMA_NAME', 'REF_TABLE_NAME', 'REF_COLUMN_NAME']);
 
         // Cleanup
         $this->adapter->dropTable($this->testTableName);
