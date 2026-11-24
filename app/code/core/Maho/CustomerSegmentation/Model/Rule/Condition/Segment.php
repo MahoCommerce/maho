@@ -40,7 +40,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
     }
 
     /**
-     * @return list<array{value: int|string, label: string|null}>
+     * @return list<array{value: int|string, label: string}>
      */
     #[\Override]
     public function getValueSelectOptions(): array
@@ -54,7 +54,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
             foreach ($segments as $segment) {
                 $options[] = [
                     'value' => $segment->getId(),
-                    'label' => $segment->getName(),
+                    'label' => (string) $segment->getName(),
                 ];
             }
             $this->setData('value_select_options', $options);

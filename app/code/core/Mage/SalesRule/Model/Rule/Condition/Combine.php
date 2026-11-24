@@ -8,6 +8,9 @@
  * @package Mage_SalesRule
  */
 
+/**
+ * @phpstan-import-type ChildSelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 class Mage_SalesRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condition_Combine
 {
     public function __construct()
@@ -17,7 +20,7 @@ class Mage_SalesRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condit
     }
 
     /**
-     * @return array
+     * @return list<ChildSelectOption>
      */
     #[\Override]
     public function getNewChildSelectOptions()

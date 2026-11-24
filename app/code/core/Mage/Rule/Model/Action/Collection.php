@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type ActionArray from Mage_Rule_Model_Action_Abstract
+ */
 class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
 {
     public function __construct()
@@ -28,7 +31,8 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
      *   {action::asArray}
      * ]
      *
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return ActionArray
      */
     #[\Override]
     public function asArray(array $arrAttributes = [])
@@ -42,6 +46,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
+     * @param array<string, mixed> $arr
      * @return $this
      */
     #[\Override]
@@ -163,11 +168,17 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
         return $this;
     }
 
+    /**
+     * @return list<Mage_Rule_Model_Action_Abstract>|null
+     */
     public function getActions(): ?array
     {
         return $this->getData('actions');
     }
 
+    /**
+     * @param list<Mage_Rule_Model_Action_Abstract>|null $value
+     */
     public function setActions(?array $value): static
     {
         return $this->setData('actions', $value);

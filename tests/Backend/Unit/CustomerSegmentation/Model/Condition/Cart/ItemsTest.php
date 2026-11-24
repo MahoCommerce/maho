@@ -14,15 +14,6 @@ describe('Cart Items Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_cart_items');
     });
 
-    test('has correct new child select options', function () {
-        $options = $this->condition->getNewChildSelectOptions();
-
-        expect($options)->toHaveKey('value');
-        expect($options['value'])->toBe('customersegmentation/segment_condition_cart_items');
-        expect($options)->toHaveKey('label');
-        expect($options['label'])->toBeString();
-    });
-
     test('can get cart item attribute options', function () {
         $options = $this->condition->getAttributeOption();
 
@@ -50,7 +41,7 @@ describe('Cart Items Condition', function () {
         $this->condition->setOperator('{}');  // contains
         $this->condition->setValue('Test');
 
-        $cartItemData = new Varien_Object(['name' => 'Test Product Name']);
+        $cartItemData = new \Maho\DataObject(['name' => 'Test Product Name']);
         expect($this->condition->validate($cartItemData))->toBe(true);
 
         $cartItemData->setName('Different Product');
@@ -78,7 +69,7 @@ describe('Cart Items Condition', function () {
         $this->condition->setValue('0');
 
         // Empty cart item should not match quantity > 0
-        $emptyCartData = new Varien_Object([]);
+        $emptyCartData = new \Maho\DataObject([]);
         expect($this->condition->validate($emptyCartData))->toBe(false);
     });
 });

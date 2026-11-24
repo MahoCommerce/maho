@@ -221,7 +221,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      * Format price to currency format
      *
      * @param float $price
-     * @param array $options
+     * @param array{precision?: int, currency?: string} $options
      * @param bool $includeContainer
      * @param bool $addBrackets
      * @return string
@@ -236,7 +236,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      *
      * @param   float $price
      * @param   int $precision
-     * @param   array $options
+     * @param   array{precision?: int, currency?: string} $options
      * @param   bool $includeContainer
      * @param   bool $addBrackets
      * @return  string
@@ -260,7 +260,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      * Returns the formatted price
      *
      * @param float $price
-     * @param null|array $options
+     * @param null|array{precision?: int, currency?: string} $options
      * @return string
      */
     public function formatTxt($price, $options = [])
@@ -269,7 +269,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
             $price = Mage::app()->getLocale()->getNumber($price);
         }
 
-        return Mage::app()->getLocale()->formatCurrency($price, $this->getCode());
+        return Mage::app()->getLocale()->formatCurrency($price, $options['currency'] ?? $this->getCode());
     }
 
     /**
@@ -293,7 +293,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve allowed currencies according to config
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getConfigAllowCurrencies()
     {
@@ -315,7 +315,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve default currencies according to config
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getConfigDefaultCurrencies()
     {
@@ -325,7 +325,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve base currencies according to config
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getConfigBaseCurrencies()
     {
@@ -335,11 +335,11 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Retrieve currency rates to other currencies
      *
-     * @param array|string|Mage_Directory_Model_Currency $currency
-     * @param array $toCurrencies
-     * @return array
+     * @param array<string>|string|Mage_Directory_Model_Currency $currency
+     * @param array<string>|string $toCurrencies
+     * @return ($currency is array ? array<string, array<string, float>> : array<string, float>)
      */
-    public function getCurrencyRates($currency, $toCurrencies = null)
+    public function getCurrencyRates($currency, array|string $toCurrencies)
     {
         if ($currency instanceof Mage_Directory_Model_Currency) {
             $currency = $currency->getCode();
@@ -350,7 +350,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * Save currency rates
      *
-     * @param array $rates
+     * @param array<string, array<string, float|int|string|null>> $rates
      * @return object
      */
     public function saveRates($rates)
@@ -365,8 +365,8 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
     /**
      * The pairs the resource kept, so a listener is never told about a cell it rejected.
      *
-     * @param array<string, array<string, mixed>> $rates
-     * @return array<string, array<string, mixed>>
+     * @param array<string, array<string, float|int|string|null>> $rates
+     * @return array<string, array<string, float>>
      */
     protected function _storedRates(array $rates): array
     {
@@ -374,7 +374,7 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
         foreach ($rates as $currencyFrom => $currencies) {
             foreach ((array) $currencies as $currencyTo => $value) {
                 if (Mage_Directory_Model_Resource_Currency::isStorableRate($value)) {
-                    $stored[$currencyFrom][$currencyTo] = $value;
+                    $stored[$currencyFrom][$currencyTo] = abs((float) $value);
                 }
             }
         }

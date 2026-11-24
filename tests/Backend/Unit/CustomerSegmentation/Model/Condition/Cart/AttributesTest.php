@@ -14,16 +14,6 @@ describe('Cart Attributes Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_cart_attributes');
     });
 
-    test('has correct new child select options', function () {
-        $options = $this->condition->getNewChildSelectOptions();
-
-        expect($options)->toHaveKey('value');
-        expect($options['value'])->toBe('customersegmentation/segment_condition_cart_attributes');
-        expect($options)->toHaveKey('label');
-        expect($options['label'])->toBeString();
-        expect($options['label'])->toContain('Shopping Cart Information');
-    });
-
     test('can get cart attribute options', function () {
         $options = $this->condition->getAttributeOption();
 

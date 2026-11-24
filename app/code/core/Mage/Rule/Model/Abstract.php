@@ -75,6 +75,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Decode a serialized column value, supporting both JSON and legacy PHP serialize format.
      * If legacy serialized data is detected, it is converted to JSON and persisted back to the database.
+     *
+     * @return array<string, mixed>|null
      */
     protected function _decodeRuleData(string $value, string $column): ?array
     {
@@ -141,10 +143,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
          * Backwards compatibility.
          */
         if ($this->hasWebsiteIds()) {
-            $websiteIds = $this->getWebsiteIds();
-            if (is_string($websiteIds) && !empty($websiteIds)) {
-                $this->setWebsiteIds(explode(',', $websiteIds));
-            }
+            $this->setWebsiteIds($this->getWebsiteIds());
         }
 
         /**
@@ -288,6 +287,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Initialize rule model data from array
      *
+     * @param array<string, mixed> $data
      * @return Mage_Rule_Model_Abstract
      */
     public function loadPost(array $data)
@@ -308,7 +308,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      * Set conditions and actions recursively.
      * Convert dates into Y-m-d strings.
      *
-     * @return array
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     protected function _convertFlatToRecursive(array $data)
     {
@@ -351,7 +352,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Validate rule data
      *
-     * @return bool|array - return true if validation passed successfully. Array with errors description otherwise
+     * @return true|list<string> - return true if validation passed successfully. Array with errors description otherwise
      */
     public function validateData(\Maho\DataObject $object)
     {
@@ -541,7 +542,10 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get rule associated website Ids
      *
-     * @return array
+     * Older code sets the websites as a comma-separated string, and the promo form of a single-store setup sets one
+     * ID, so a scalar becomes a list.
+     *
+     * @return list<int|string>
      */
     public function getWebsiteIds()
     {
@@ -549,7 +553,12 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $websiteIds = $this->_getResource()->getWebsiteIds($this->getId());
             $this->setData('website_ids', (array) $websiteIds);
         }
-        return $this->_getData('website_ids');
+        $value = $this->getData('website_ids');
+        if (is_array($value)) {
+            return $value;
+        }
+        $value = (string) $value;
+        return $value === '' ? [] : explode(',', $value);
     }
 
     /**
@@ -594,6 +603,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
 
     /**
      * Older code sets the groups as a comma-separated string, so a string becomes a list.
+     *
+     * @return list<int|string>|null
      */
     public function getCustomerGroupIds(): ?array
     {

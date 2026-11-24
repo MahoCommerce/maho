@@ -61,7 +61,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * ISO2 country codes which have optional Zip/Postal pre-configured
      *
-     * @var array
+     * @var list<string>|null
      */
     protected $_optionalZipCountries = null;
 
@@ -79,6 +79,9 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     protected $_app;
 
+    /**
+     * @param array{factory?: Mage_Core_Model_Factory, app?: Mage_Core_Model_App} $args
+     */
     public function __construct(array $args = [])
     {
         $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
@@ -87,7 +90,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Retrieve region collection
-     * @param string|array|null $countryFilter If string, accepts iso2_code; if array, accepts iso2_code[].
+     * @param string|array<string>|null $countryFilter If string, accepts iso2_code; if array, accepts iso2_code[].
      * @return Mage_Directory_Model_Resource_Region_Collection
      * @throws Mage_Core_Exception
      */
@@ -152,7 +155,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get Regions for specific Countries
      * @param string|int|null $storeId
-     * @return array|null
+     * @return array{config: array{show_all_regions: bool, regions_required: list<string>}, ...<string, array<int, array{code: ?string, name: string}>>}
      * @throws Mage_Core_Exception
      */
     protected function _getRegions($storeId)
@@ -171,12 +174,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             ->addCountryFilter($countryIds)
             ->load();
 
-        $regions = [
-            'config' => [
-                'show_all_regions' => $this->getShowNonRequiredState(),
-                'regions_required' => $this->getCountriesWithStatesRequired(),
-            ],
-        ];
+        $regions = [];
         foreach ($collection as $region) {
             if (!$region->getRegionId()) {
                 continue;
@@ -186,7 +184,12 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
                 'name' => $this->getRegionName($region),
             ];
         }
-        return $regions;
+        return [
+            'config' => [
+                'show_all_regions' => $this->getShowNonRequiredState(),
+                'regions_required' => $this->getCountriesWithStatesRequired(),
+            ],
+        ] + $regions;
     }
 
     /**
@@ -305,18 +308,16 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      * Return ISO2 country codes, which have optional Zip/Postal pre-configured
      *
      * @param bool $asJson
-     * @return array|string
+     * @return ($asJson is true ? string : list<string>)
      */
     public function getCountriesWithOptionalZip($asJson = false)
     {
-        if ($this->_optionalZipCountries === null) {
-            $this->_optionalZipCountries = preg_split(
-                '/\,/',
-                Mage::getStoreConfig(self::OPTIONAL_ZIP_COUNTRIES_CONFIG_PATH),
-                0,
-                PREG_SPLIT_NO_EMPTY,
-            );
-        }
+        $this->_optionalZipCountries ??= preg_split(
+            '/\,/',
+            Mage::getStoreConfig(self::OPTIONAL_ZIP_COUNTRIES_CONFIG_PATH),
+            0,
+            PREG_SPLIT_NO_EMPTY,
+        );
         if ($asJson) {
             return Mage::helper('core')->jsonEncode($this->_optionalZipCountries);
         }
@@ -363,7 +364,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      * Returns the list of countries, for which region is required
      *
      * @param bool $asJson
-     * @return array|string
+     * @return ($asJson is true ? string : list<string>)
      */
     public function getCountriesWithStatesRequired($asJson = false)
     {

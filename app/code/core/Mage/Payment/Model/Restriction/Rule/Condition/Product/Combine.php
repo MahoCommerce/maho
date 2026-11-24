@@ -44,6 +44,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Combine extends Mage
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         foreach ($this->getConditions() as $condition) {

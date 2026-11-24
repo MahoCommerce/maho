@@ -153,7 +153,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Saving currency rates
      *
-     * @param array $rates
+     * @param array<string, array<string, float|int|string|null>> $rates
      * @return int the number of currency pairs stored
      */
     public function saveRates($rates): int
@@ -200,7 +200,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
      * @param Mage_Directory_Model_Currency $model
      * @param string $path
      *
-     * @return array
+     * @return array<int, string>
      */
     public function getConfigCurrencies($model, $path)
     {
@@ -240,12 +240,12 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Return currency rates
      *
-     * @param string|array $currency
-     * @param array $toCurrencies
+     * @param string|array<string> $currency
+     * @param array<string>|string $toCurrencies
      *
-     * @return array
+     * @return ($currency is array ? array<string, array<string, float>> : array<string, float>)
      */
-    public function getCurrencyRates($currency, $toCurrencies = null)
+    public function getCurrencyRates($currency, array|string $toCurrencies)
     {
         $rates = [];
         if (is_array($currency)) {
@@ -262,13 +262,14 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Protected method used by getCurrencyRates() method
      *
+     * @param array<string>|string $toCurrencies
      * @return array<string, float>
      */
-    protected function _getRatesByCode(string $code, array|string|null $toCurrencies = null): array
+    protected function _getRatesByCode(string $code, array|string $toCurrencies): array
     {
         if (is_array($toCurrencies)) {
             $toCurrencies = array_map($this->_currencyCode(...), $toCurrencies);
-        } elseif ($toCurrencies !== null) {
+        } else {
             $toCurrencies = $this->_currencyCode($toCurrencies);
         }
 

@@ -291,7 +291,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * @param array<mixed> $data
+     * @param array<string, mixed> $data
      */
     #[\Override]
     public function loadPost(array $data): self

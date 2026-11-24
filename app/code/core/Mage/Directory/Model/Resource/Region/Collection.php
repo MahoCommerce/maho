@@ -64,7 +64,7 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
     /**
      * Filter by country_id
      *
-     * @param string|array $countryId
+     * @param string|array<string>|null $countryId
      * @return $this
      */
     public function addCountryFilter($countryId)
@@ -100,7 +100,7 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
     /**
      * Filter by Region code
      *
-     * @param string|array $regionCode
+     * @param string|array<string> $regionCode
      * @return $this
      */
     public function addRegionCodeFilter($regionCode)
@@ -118,7 +118,7 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
     /**
      * Filter by region name
      *
-     * @param string|array $regionName
+     * @param string|array<string> $regionName
      * @return $this
      */
     public function addRegionNameFilter($regionName)
@@ -136,7 +136,7 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
     /**
      * Filter region by its code or name
      *
-     * @param string|array $region
+     * @param string|array<string> $region
      * @return $this
      */
     public function addRegionCodeOrNameFilter($region)
@@ -148,6 +148,9 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
         return $this;
     }
 
+    /**
+     * @return array<int|string, string>
+     */
     #[\Override]
     public function toOptionHash(): array
     {
@@ -161,6 +164,9 @@ class Mage_Directory_Model_Resource_Region_Collection extends Mage_Core_Model_Re
         return $res;
     }
 
+    /**
+     * @return list<array{title: ?string, value: int|string, label: string}>
+     */
     #[\Override]
     public function toOptionArray(bool $addEmpty = true): array
     {

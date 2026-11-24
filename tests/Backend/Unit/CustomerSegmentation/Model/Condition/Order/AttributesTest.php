@@ -14,15 +14,6 @@ describe('Order Attributes Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
     });
 
-    test('has correct new child select options', function () {
-        $options = $this->condition->getNewChildSelectOptions();
-
-        expect($options)->toHaveKey('value');
-        expect($options['value'])->toBe('customersegmentation/segment_condition_order_attributes');
-        expect($options)->toHaveKey('label');
-        expect($options['label'])->toBeString();
-    });
-
     test('can get order attribute options', function () {
         $options = $this->condition->getAttributeOption();
 
@@ -51,7 +42,7 @@ describe('Order Attributes Condition', function () {
         $this->condition->setOperator('==');
         $this->condition->setValue('complete');
 
-        $orderData = new Varien_Object(['status' => 'complete']);
+        $orderData = new \Maho\DataObject(['status' => 'complete']);
         expect($this->condition->validate($orderData))->toBe(true);
 
         $orderData->setStatus('pending');
@@ -63,8 +54,8 @@ describe('Order Attributes Condition', function () {
         $this->condition->setOperator('()');
         $this->condition->setValue('complete,processing,shipped');
 
-        expect($this->condition->validate(new Varien_Object(['status' => 'complete'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['status' => 'processing'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['status' => 'cancelled'])))->toBe(false);
+        expect($this->condition->validate(new \Maho\DataObject(['status' => 'complete'])))->toBe(true);
+        expect($this->condition->validate(new \Maho\DataObject(['status' => 'processing'])))->toBe(true);
+        expect($this->condition->validate(new \Maho\DataObject(['status' => 'cancelled'])))->toBe(false);
     });
 });

@@ -26,7 +26,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
      * Return array: code => currency name
      * Return empty array if only one currency
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getCurrencies()
     {
@@ -37,7 +37,7 @@ class Mage_Directory_Block_Currency extends Mage_Core_Block_Template
             if (count($codes) > 1) {
                 foreach ($codes as $code) {
                     $currencies[$code] = Mage::app()->getLocale()
-                        ->getTranslation($code, 'nametocurrency');
+                        ->getTranslation($code, 'currency') ?: $code;
                 }
             }
 

@@ -63,6 +63,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     /**
      * Validate response from external service
      *
+     * @param array<mixed> $response
      * @param string $baseCurrency
      * @return bool
      */

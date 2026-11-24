@@ -81,6 +81,7 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection): self
     {
         foreach ($this->getConditions() as $condition) {

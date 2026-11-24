@@ -19,7 +19,7 @@ class Maho_CatalogLinkRule_Model_Rule_Source_Product extends Mage_CatalogRule_Mo
     /**
      * Add status, visibility and stock status to special attributes
      *
-     * @param array<mixed> $attributes
+     * @param array<string, string> $attributes
      */
     #[\Override]
     protected function _addSpecialAttributes(array &$attributes): void

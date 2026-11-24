@@ -698,14 +698,6 @@ class My_Module_Model_Segment_Condition_Custom
         $this->setValue(null);
     }
 
-    public function getNewChildSelectOptions(): array
-    {
-        return [
-            'value' => $this->getType(),
-            'label' => Mage::helper('mymodule')->__('Custom Condition'),
-        ];
-    }
-
     public function loadAttributeOptions(): self
     {
         $attributes = [

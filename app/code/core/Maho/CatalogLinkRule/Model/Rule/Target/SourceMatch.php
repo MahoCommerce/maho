@@ -14,6 +14,7 @@ declare(strict_types=1);
  * Allows matching target products based on source product attributes
  *
  * @package    Maho_CatalogLinkRule
+ * @phpstan-import-type ConditionArray from Mage_Rule_Model_Condition_Abstract
  */
 class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model_Condition_Abstract
 {
@@ -107,6 +108,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         $attribute = $this->getAttribute();
@@ -203,8 +205,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model
     }
 
     /**
-     * @param array<mixed> $arrAttributes
-     * @return array<string, mixed>
+     * @param list<string> $arrAttributes
+     * @return ConditionArray
      */
     #[\Override]
     public function asArray(array $arrAttributes = []): array

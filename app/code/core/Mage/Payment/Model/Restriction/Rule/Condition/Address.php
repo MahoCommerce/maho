@@ -83,7 +83,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Address extends Mage_Rule_Mo
                     ->toOptionArray(),
                 default => [],
             };
-            $this->setData('value_select_options', $options);
+            $this->setData('value_select_options', $this->_toValueSelectOptions($options));
         }
         return $this->getData('value_select_options');
     }

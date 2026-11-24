@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type ConditionArray from Mage_Rule_Model_Condition_Abstract
+ */
 class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRule_Model_Rule_Source_Product
 {
     /**
@@ -172,10 +175,9 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRul
 
     /**
      * Don't include value in array output for source matching operators
-     */
-    /**
-     * @param array<mixed> $arrAttributes
-     * @return array<string, mixed>
+     *
+     * @param list<string> $arrAttributes
+     * @return ConditionArray
      */
     #[\Override]
     public function asArray(array $arrAttributes = []): array

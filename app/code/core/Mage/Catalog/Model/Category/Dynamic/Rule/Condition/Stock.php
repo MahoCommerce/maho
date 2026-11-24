@@ -98,6 +98,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule_Condition_Stock extends Mage_Rule
      * Mage_Rule_Model_Condition_Product_Abstract::collectValidatedAttributes(). A collection flag keeps
      * repeated conditions on the same attribute from joining the same table twice.
      */
+    #[\Override]
     public function collectValidatedAttributes(Mage_Catalog_Model_Resource_Product_Collection $productCollection): self
     {
         $attribute = $this->getAttribute();

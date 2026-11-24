@@ -21,6 +21,7 @@ declare(strict_types=1);
  */
 class Mage_Directory_Model_Country extends Mage_Core_Model_Abstract
 {
+    /** @var array<string, Mage_Directory_Model_Resource_Country_Format_Collection> */
     public static array $_format = [];
 
     #[\Override]
@@ -166,6 +167,9 @@ T: {{telephone}}';
         return $name;
     }
 
+    /**
+     * @return list<string>|true
+     */
     public function validate(): array|true
     {
         $errors = [];

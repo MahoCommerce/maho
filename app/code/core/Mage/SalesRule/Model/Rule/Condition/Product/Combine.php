@@ -8,6 +8,9 @@
  * @package Mage_SalesRule
  */
 
+/**
+ * @phpstan-import-type ChildSelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Model_Condition_Combine
 {
     /**
@@ -138,7 +141,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
 
     /**
      * Generate a conditions data
-     * @return array
+     * @return list<ChildSelectOption>
      */
     #[\Override]
     public function getNewChildSelectOptions()
@@ -173,6 +176,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Combine extends Mage_Rule_Mode
      * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
      * @return $this
      */
+    #[\Override]
     public function collectValidatedAttributes($productCollection)
     {
         foreach ($this->getConditions() as $condition) {

@@ -355,7 +355,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     }
 
     /**
-     * @param array<mixed> $arr
+     * @param array<string, mixed> $arr
      */
     #[\Override]
     public function loadArray($arr, string $key = 'conditions'): self

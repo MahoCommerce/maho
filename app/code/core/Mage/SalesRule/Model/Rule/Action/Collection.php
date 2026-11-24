@@ -12,6 +12,8 @@
  * Class Mage_SalesRule_Model_Rule_Action_Collection
  *
  * @package    Mage_SalesRule
+ *
+ * @phpstan-import-type SelectOption from Mage_Rule_Model_Condition_Abstract
  */
 class Mage_SalesRule_Model_Rule_Action_Collection extends Mage_Rule_Model_Action_Collection
 {
@@ -22,7 +24,7 @@ class Mage_SalesRule_Model_Rule_Action_Collection extends Mage_Rule_Model_Action
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     #[\Override]
     public function getNewChildSelectOptions()
