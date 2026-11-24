@@ -14,11 +14,21 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
 {
     public string $notInArrayMessage = 'Input type "{{ value }}" not found in the input types list.';
 
+    /**
+     * @var array<string>
+     */
     public array $haystack = [];
     public bool $strict = true;
 
+    /**
+     * @var list<string>
+     */
     protected array $messages = [];
 
+    /**
+     * @param list<string>|null $groups
+     * @param array<string>|null $haystack
+     */
     public function __construct(
         mixed $options = null,
         ?array $groups = null,
@@ -50,6 +60,9 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
         return true;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getMessages(): array
     {
         return $this->messages;
@@ -65,6 +78,9 @@ class Mage_Eav_Model_Adminhtml_System_Config_Source_Inputtype_Validator
         return $this->validate($value);
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function _getDefaultHaystack(): array
     {
         $helper = Mage::helper('eav');

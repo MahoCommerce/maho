@@ -10,6 +10,8 @@
 
 /**
  * @extends Mage_Core_Model_Resource_Db_Abstract<Mage_Eav_Model_Entity_Attribute_Set>
+ *
+ * @phpstan-import-type AttributeSetInfo from Mage_Eav_Model_Entity_Attribute_Abstract
  */
 class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resource_Db_Abstract
 {
@@ -118,8 +120,9 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Set extends Mage_Core_Model_Resou
     /**
      * Retrieve Set info by attributes
      *
+     * @param array<int|string> $attributeIds
      * @param int|null $setId
-     * @return array
+     * @return array<int|string, AttributeSetInfo> The set info by attribute ID
      */
     public function getSetInfo(array $attributeIds = [], $setId = null)
     {

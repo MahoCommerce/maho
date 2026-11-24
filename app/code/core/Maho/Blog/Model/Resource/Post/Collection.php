@@ -9,6 +9,8 @@
 /**
  * @method Maho_Blog_Model_Resource_Post getEntity()
  * @extends Mage_Eav_Model_Entity_Collection_Abstract<Maho_Blog_Model_Post>
+ *
+ * @phpstan-import-type SqlCondition from \Maho\Db\Adapter\AdapterInterface
  */
 class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Collection_Abstract
 {
@@ -139,8 +141,8 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
      * Override addAttributeToFilter to handle static attributes without infinite loops
      * Only override when explicitly needed - let parent handle most cases
      *
-     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array<mixed> $attribute
-     * @param null|int|string|array<mixed> $condition
+     * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|list<SqlCondition>|null $attribute
+     * @param int|string|SqlCondition|null $condition
      * @param string $joinType
      * @return $this
      */
@@ -165,26 +167,15 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     /**
      * Override addAttributeToSelect to avoid unnecessary JOINs for static attributes
      *
-     * @param array<mixed>|string|int|Mage_Core_Model_Config_Element $attribute
+     * @param array<string>|string|int $attribute
      * @param bool|string $joinType
      * @return $this
      */
     #[\Override]
     public function addAttributeToSelect($attribute, $joinType = false)
     {
-        if ($attribute === '*' || (is_array($attribute) && in_array('*', $attribute))) {
-            // Select all attributes
-            $this->_selectAttributes = [];
-
-            // Add all static attributes to selection (they're already in main table)
-            foreach ($this->getEntity()->getStaticAttributeCodes() as $staticAttr) {
-                $this->_selectAttributes[] = $staticAttr;
-            }
-        }
-
+        // The main table holds the static attributes, so the select reads them without a join
         if (is_string($attribute) && $this->isStaticAttribute($attribute)) {
-            // Static attributes are already selected from main table, just track them
-            $this->_selectAttributes[] = $attribute;
             return $this;
         }
 
@@ -192,9 +183,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
             $eavAttrs = [];
 
             foreach ($attribute as $attr) {
-                if ($this->isStaticAttribute($attr)) {
-                    $this->_selectAttributes[] = $attr;
-                } else {
+                if (!$this->isStaticAttribute($attr)) {
                     $eavAttrs[] = $attr;
                 }
             }

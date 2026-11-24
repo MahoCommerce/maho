@@ -15,6 +15,8 @@ declare(strict_types=1);
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getCollection()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection getResourceCollection()
+ *
+ * @phpstan-type SetTree array{attribute_set_name: string, groups: list<array{0: int|string, 1: string, 2: int, 3?: array<int, string>}>, attributes: list<array{0: int, 1: int|string, 2: int}>, not_attributes: list<int>, removeGroups: list<int>}
  */
 class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
 {
@@ -78,9 +80,11 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Collect data for save
+     * Collect the data for save from the tree of the set editor. Each group is an ID, a name, a sort order and the
+     * optional labels for each store view. Each attribute is an ID, the ID of its group and a sort order. The ID of a
+     * group that the editor added is not a number.
      *
-     * @param array $data
+     * @param SetTree $data
      * @return $this
      */
     public function organizeData($data)
@@ -112,8 +116,9 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
                     foreach ($data['attributes'] as $attribute) {
                         if ($attribute[1] == $group[0] && in_array($attribute[0], $attributeIds)) {
                             $modelAttribute = Mage::getModel('eav/entity_attribute');
+                            // A group that the editor added has no ID yet: its save sets the ID on its attributes
                             $modelAttribute->setId($attribute[0])
-                                ->setAttributeGroupId($attribute[1])
+                                ->setAttributeGroupId(is_numeric($attribute[1]) ? (int) $attribute[1] : null)
                                 ->setAttributeSetId($this->getId())
                                 ->setEntityTypeId($this->getEntityTypeId())
                                 ->setSortOrder($attribute[2]);
@@ -175,6 +180,7 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
      * Add set info to attributes
      *
      * @param string|Mage_Eav_Model_Entity_Type $entityType
+     * @param array<Mage_Eav_Model_Entity_Attribute_Abstract|int|string> $attributes
      * @param int $setId
      * @return $this
      */
@@ -273,31 +279,49 @@ class Mage_Eav_Model_Entity_Attribute_Set extends Mage_Core_Model_Abstract
         return $this->setData('entity_type_id', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Group>|null
+     */
     public function getGroups(): ?array
     {
         return $this->getData('groups');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute_Group>|null $value
+     */
     public function setGroups(?array $value): static
     {
         return $this->setData('groups', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute>|null
+     */
     public function getRemoveAttributes(): ?array
     {
         return $this->getData('remove_attributes');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute>|null $value
+     */
     public function setRemoveAttributes(?array $value): static
     {
         return $this->setData('remove_attributes', $value);
     }
 
+    /**
+     * @return list<Mage_Eav_Model_Entity_Attribute_Group>|null
+     */
     public function getRemoveGroups(): ?array
     {
         return $this->getData('remove_groups');
     }
 
+    /**
+     * @param list<Mage_Eav_Model_Entity_Attribute_Group>|null $value
+     */
     public function setRemoveGroups(?array $value): static
     {
         return $this->setData('remove_groups', $value);

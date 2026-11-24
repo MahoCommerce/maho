@@ -67,7 +67,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Collection extends Mage_Eav_
     /**
      * Return array of fields to load attribute values
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     protected function _getLoadDataFields()

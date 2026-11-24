@@ -13,6 +13,10 @@ declare(strict_types=1);
 /**
  * Entity attribute select source interface
  * Source is providing the selection options for user interface
+ *
+ * A source that reads a collection keeps the other columns of the collection, such as the title of a country.
+ *
+ * @phpstan-type SourceOption array{value: int|string|list<array{value: int|string, label: string}>, label: string, ...<string, string|int|float|bool|null>}
  */
 
 interface Mage_Eav_Model_Entity_Attribute_Source_Interface
@@ -22,6 +26,7 @@ interface Mage_Eav_Model_Entity_Attribute_Source_Interface
      *
      * @param bool $withEmpty Add an empty option first
      * @param bool $defaultValues Use the admin values instead of the labels of the current store
+     * @return list<SourceOption>
      */
     public function getAllOptions(bool $withEmpty = true, bool $defaultValues = false): array;
 

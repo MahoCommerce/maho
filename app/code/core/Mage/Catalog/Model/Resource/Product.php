@@ -42,7 +42,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Default product attributes
      *
-     * @return array
+     * @return list<string>
      */
     #[\Override]
     protected function _getDefaultAttributes()

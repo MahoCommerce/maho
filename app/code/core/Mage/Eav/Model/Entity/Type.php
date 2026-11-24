@@ -27,7 +27,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
     /**
      * Array of attributes
      *
-     * @var array
+     * @var array<int|string, Mage_Eav_Model_Resource_Entity_Attribute_Collection>
      */
     protected $_attributesBySet             = [];
 
@@ -300,7 +300,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
     /**
      * Retrieve attribute codes
      *
-     * @return array|null
+     * @return list<string>|null
      */
     public function getAttributeCodes()
     {
@@ -360,6 +360,9 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         return $this->setData('additional_attribute_table', $value);
     }
 
+    /**
+     * @param list<string>|null $value
+     */
     public function setAttributeCodes(?array $value): static
     {
         return $this->setData('attribute_codes', $value);

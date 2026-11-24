@@ -17,14 +17,20 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Eav';
 
+    /**
+     * @var array<string, array<string, list<string>>>
+     */
     protected array $_attributesLockedFields = [];
 
+    /**
+     * @var array<string, list<array{value: string, label: string}>>
+     */
     protected array $_entityTypeFrontendClasses = [];
 
     /**
      * Return default frontend classes value labal array
      *
-     * @return array
+     * @return list<array{value: string, label: string}>
      */
     protected function _getDefaultFrontendClasses()
     {
@@ -64,7 +70,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      * Return merged default and entity type frontend classes value label array
      *
      * @param string $entityTypeCode
-     * @return array
+     * @return list<array{value: string, label: string}>
      */
     public function getFrontendClasses($entityTypeCode)
     {
@@ -96,7 +102,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve attributes locked fields to edit
      *
      * @param string $entityTypeCode
-     * @return array
+     * @return array<string, list<string>> The locked fields by attribute code
      */
     public function getAttributeLockedFields($entityTypeCode)
     {
@@ -120,7 +126,7 @@ class Mage_Eav_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get input types validator data
      *
-     * @return array
+     * @return array<string, string> The input types that the attribute form accepts, by input type
      */
     public function getInputTypesValidatorData()
     {

@@ -18,7 +18,7 @@ trait Maho_Blog_Block_Adminhtml_Edit_AttributeFieldsTrait
     /**
      * Add one field for each attribute to $fieldset. A new $entity takes the default value of each attribute.
      *
-     * @param list<Maho_Blog_Model_Resource_Eav_Attribute> $attributes
+     * @param list<Mage_Eav_Model_Entity_Attribute_Abstract> $attributes
      */
     protected function addAttributeFields(
         \Maho\Data\Form\Element\Fieldset $fieldset,

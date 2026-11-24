@@ -8,12 +8,16 @@
  * @package Mage_Eav
  */
 
+/**
+ * @phpstan-import-type InputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ * @phpstan-import-type OutputValue from Mage_Eav_Model_Attribute_Data_Abstract
+ */
 class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_Abstract
 {
     /**
      * Extract data from request and return value
      *
-     * @return array|string
+     * @return InputValue
      */
     #[\Override]
     public function extractValue(Mage_Core_Controller_Request_Http $request)
@@ -26,8 +30,8 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Validate data
      * Return true or array of errors
      *
-     * @param array|string|false|null $value
-     * @return true|array<string>
+     * @param InputValue $value
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -80,7 +84,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Export attribute value to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      */
     #[\Override]
@@ -99,7 +103,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
     /**
      * Restore attribute value from SESSION to entity model
      *
-     * @param array|string $value
+     * @param InputValue $value
      * @return $this
      */
     #[\Override]
@@ -112,7 +116,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Return formatted attribute value from entity model
      *
      * @param string $format
-     * @return string|array
+     * @return OutputValue
      */
     #[\Override]
     public function outputValue($format = Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_TEXT)
