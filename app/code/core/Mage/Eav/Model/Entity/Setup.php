@@ -578,7 +578,7 @@ class Mage_Eav_Model_Entity_Setup extends Mage_Core_Model_Resource_Setup
      * @param array<string, scalar|AttributeOption|array<string, AttributeDefinition>|null> $array An attribute or an entity definition
      * @param string $key
      * @param string|int|null $default
-     * @return string|int|float|null The value of $key, with a boolean as 0 or 1
+     * @return ($key is 'option' ? AttributeOption|null : ($key is 'attributes' ? array<string, AttributeDefinition>|null : string|int|float|null)) The value of $key, with a boolean as 0 or 1
      */
     protected function _getValue($array, $key, $default = null)
     {
