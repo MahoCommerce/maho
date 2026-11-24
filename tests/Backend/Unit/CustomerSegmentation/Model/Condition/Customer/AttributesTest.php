@@ -14,15 +14,6 @@ describe('Customer Attributes Condition', function () {
         $this->condition = Mage::getModel('customersegmentation/segment_condition_customer_attributes');
     });
 
-    test('has correct new child select options structure', function () {
-        $options = $this->condition->getNewChildSelectOptions();
-
-        expect($options)->toHaveKey('value');
-        expect($options['value'])->toBe('customersegmentation/segment_condition_customer_attributes');
-        expect($options)->toHaveKey('label');
-        expect($options['label'])->toBeString();
-    });
-
     test('can get attribute options', function () {
         $options = $this->condition->getAttributeOption();
 
@@ -41,13 +32,13 @@ describe('Customer Attributes Condition', function () {
 
         // Test equals
         $this->condition->setOperator('==');
-        expect($this->condition->validate(new Varien_Object(['entity_id' => '100'])))->toBe(true);
-        expect($this->condition->validate(new Varien_Object(['entity_id' => '101'])))->toBe(false);
+        expect($this->condition->validate(new \Maho\DataObject(['entity_id' => '100'])))->toBe(true);
+        expect($this->condition->validate(new \Maho\DataObject(['entity_id' => '101'])))->toBe(false);
 
         // Test not equals
         $this->condition->setOperator('!=');
-        expect($this->condition->validate(new Varien_Object(['entity_id' => '100'])))->toBe(false);
-        expect($this->condition->validate(new Varien_Object(['entity_id' => '101'])))->toBe(true);
+        expect($this->condition->validate(new \Maho\DataObject(['entity_id' => '100'])))->toBe(false);
+        expect($this->condition->validate(new \Maho\DataObject(['entity_id' => '101'])))->toBe(true);
     });
 
     test('offers the options of the gender attribute', function () {

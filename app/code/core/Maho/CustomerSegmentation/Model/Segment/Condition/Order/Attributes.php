@@ -26,18 +26,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
         $this->setValue(null);
     }
 
-    /**
-     * @return array{value: string, label: string}
-     */
-    #[\Override]
-    public function getNewChildSelectOptions(): array
-    {
-        return [
-            'value' => $this->getType(),
-            'label' => Mage::helper('customersegmentation')->__('Order Information'),
-        ];
-    }
-
     #[\Override]
     public function loadAttributeOptions(): self
     {

@@ -17,18 +17,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         $this->setValue(null);
     }
 
-    /**
-     * @return array{value: string, label: string}
-     */
-    #[\Override]
-    public function getNewChildSelectOptions(): array
-    {
-        return [
-            'value' => $this->getType(),
-            'label' => Mage::helper('customersegmentation')->__('Viewed Products'),
-        ];
-    }
-
     #[\Override]
     public function loadAttributeOptions(): self
     {

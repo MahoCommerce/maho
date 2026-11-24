@@ -18,15 +18,6 @@ describe('Product Viewed Condition Integration Tests', function () {
         setupTestData();
     });
 
-    test('has correct new child select options', function () {
-        $options = $this->condition->getNewChildSelectOptions();
-
-        expect($options)->toHaveKey('value');
-        expect($options['value'])->toBe('customersegmentation/segment_condition_product_viewed');
-        expect($options)->toHaveKey('label');
-        expect($options['label'])->toBeString();
-    });
-
     test('loads all required attributes correctly', function () {
         $this->condition->loadAttributeOptions();
         $options = $this->condition->getAttributeOption();

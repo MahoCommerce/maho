@@ -20,15 +20,6 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         $this->setValue(null);
     }
 
-    /**
-     * @return array{value: string, label: string}
-     */
-    #[\Override]
-    public function getNewChildSelectOptions(): array
-    {
-        return ['value' => $this->getType(), 'label' => Mage::helper('customersegmentation')->__('Customer Lifetime Value')];
-    }
-
     #[\Override]
     public function loadAttributeOptions(): self
     {
