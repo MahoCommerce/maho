@@ -127,31 +127,21 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
     }
 
     /**
-     * @param array<string>|string|int|Mage_Core_Model_Config_Element $attribute
+     * @param array<string>|string|int $attribute
      * @param bool|string $joinType
      * @return $this
      */
     #[\Override]
     public function addAttributeToSelect($attribute, $joinType = false)
     {
-        if ($attribute === '*' || (is_array($attribute) && in_array('*', $attribute))) {
-            $this->_selectAttributes = [];
-            foreach ($this->_getStaticAttributes() as $staticAttr) {
-                $this->_selectAttributes[] = $staticAttr;
-            }
-        }
-
         if (is_string($attribute) && $this->isStaticAttribute($attribute)) {
-            $this->_selectAttributes[] = $attribute;
             return $this;
         }
 
         if (is_array($attribute)) {
             $eavAttrs = [];
             foreach ($attribute as $attr) {
-                if ($this->isStaticAttribute($attr)) {
-                    $this->_selectAttributes[] = $attr;
-                } else {
+                if (!$this->isStaticAttribute($attr)) {
                     $eavAttrs[] = $attr;
                 }
             }
