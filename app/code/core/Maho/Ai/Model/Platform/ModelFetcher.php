@@ -115,6 +115,7 @@ class Maho_Ai_Model_Platform_ModelFetcher
      *
      * The message never contains the request URL, because the Google URL contains the API key.
      *
+     * @return array<mixed>
      * @throws Mage_Core_Exception
      */
     private function decode(ResponseInterface $response, string $provider): array

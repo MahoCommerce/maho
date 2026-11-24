@@ -487,7 +487,10 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $bag;
     }
 
-    /** @param array<string, mixed> $options @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     protected function mapChatOptions(array $options): array
     {
         $out = [];
@@ -500,7 +503,10 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $out;
     }
 
-    /** @param array<string, mixed> $options @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     protected function mapEmbedOptions(array $options): array
     {
         $out = [];
@@ -510,7 +516,10 @@ class Maho_Ai_Model_Platform_Symfony implements
         return $out;
     }
 
-    /** @param array<string, mixed> $options @return array<string, mixed> */
+    /**
+     * @param array<string, mixed> $options
+     * @return array<string, mixed>
+     */
     protected function mapImageOptions(array $options): array
     {
         $out = [];

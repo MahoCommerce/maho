@@ -37,6 +37,8 @@ class Maho_Ai_Model_Platform
 
     /**
      * Get all registered providers as code => label, sorted by sort_order.
+     *
+     * @return array<string, string>
      */
     public static function getAll(): array
     {
