@@ -307,11 +307,13 @@ class Mage_Eav_Service_Attribute_Set
             $groups[] = $entry;
         }
 
+        // The editor posts every group, so an attribute of a group that is left out does not stay in the set
+        $treeGroupIds = array_column($groups, 0);
         $attributes = [];
         foreach ($list('attributes') as $attribute) {
             $id = is_array($attribute) ? $this->getKnownId($attribute[0] ?? null, $attributeIds) : null;
             $groupId = $id === null ? null : $this->getTreeGroupId($attribute[1] ?? null, $groupIds);
-            if ($groupId !== null && is_int($attribute[2] ?? null)) {
+            if ($groupId !== null && in_array($groupId, $treeGroupIds, true) && is_int($attribute[2] ?? null)) {
                 $attributes[] = [$id, $groupId, $attribute[2]];
             }
         }
