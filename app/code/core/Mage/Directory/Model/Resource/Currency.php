@@ -240,7 +240,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Return currency rates
      *
-     * A null $toCurrencies returns the rates to every currency that has one.
+     * When $toCurrencies is null, return every rate from $currency that the rate table stores.
      *
      * @param string|array<string> $currency
      * @param array<string>|string|null $toCurrencies
