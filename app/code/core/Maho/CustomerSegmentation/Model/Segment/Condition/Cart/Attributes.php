@@ -17,6 +17,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         $this->setValue(null);
     }
 
+    /**
+     * @return array{value: string, label: string}
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -79,6 +82,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Attributes extends 
         };
     }
 
+    /**
+     * @return list<array{value: int|string|list<array{value: int|string, label: string}>, label: string}>
+     */
     #[\Override]
     public function getValueSelectOptions(): array
     {

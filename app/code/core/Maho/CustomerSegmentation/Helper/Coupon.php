@@ -149,6 +149,8 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
 
     /**
      * Get template variables for coupon
+     *
+     * @return array<string, string|float|null>
      */
     public function getCouponTemplateVariables(
         string $couponCode,
@@ -186,6 +188,8 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
 
     /**
      * Validate sales rule for coupon generation
+     *
+     * @return list<string>
      */
     public function validateSalesRule(int $ruleId): array
     {
@@ -226,6 +230,8 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
 
     /**
      * Get available sales rules for coupon generation
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     public function getAvailableSalesRules(): array
     {

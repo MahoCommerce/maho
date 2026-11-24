@@ -18,6 +18,8 @@ declare(strict_types=1);
  * - Critical errors (database issues, missing templates): Log exception, mark failed, re-throw
  * - Expected conditions (unsubscribed, no email): Mark as skipped, log info, continue silently
  * - All exceptions are logged to customer_segmentation.log for debugging
+ *
+ * @phpstan-import-type ReadySequence from Maho_CustomerSegmentation_Model_Resource_SequenceProgress
  */
 class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 {
@@ -61,6 +63,9 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Process segment membership changes and trigger appropriate sequences
+     *
+     * @param list<int|string> $currentMatchedCustomers
+     * @param list<int|string> $previousCustomers
      */
     protected function processSegmentChanges(
         Maho_CustomerSegmentation_Model_Segment $segment,
@@ -100,6 +105,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Handle customers entering a segment
+     *
+     * @param array<int|string> $customerIds
      */
     protected function handleCustomersEntering(
         Maho_CustomerSegmentation_Model_Segment $segment,
@@ -125,6 +132,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Handle customers exiting a segment
+     *
+     * @param array<int|string> $customerIds
      */
     protected function handleCustomersExiting(
         Maho_CustomerSegmentation_Model_Segment $segment,
@@ -307,6 +316,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Send individual sequence email
+     *
+     * @param ReadySequence $sequenceData
      */
     protected function sendSequenceEmail(array $sequenceData): void
     {
@@ -420,6 +431,9 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Get template variables for email
+     *
+     * @param ReadySequence $sequenceData
+     * @return array<string, mixed>
      */
     protected function getTemplateVariables(Mage_Customer_Model_Customer $customer, array $sequenceData): array
     {
@@ -437,6 +451,8 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
     /**
      * Generate coupon for sequence email
+     *
+     * @param ReadySequence $sequenceData
      */
     protected function generateSequenceCoupon(int $customerId, array $sequenceData): ?string
     {

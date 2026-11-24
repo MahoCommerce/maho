@@ -21,6 +21,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         $this->loadAttributeOptions();
     }
 
+    /**
+     * @return array{value: string, label: string}
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {

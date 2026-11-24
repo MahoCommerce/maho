@@ -16,6 +16,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
         $this->setType('customersegmentation/segment_condition_combine');
     }
 
+    /**
+     * @return list<array{value: string|list<array{value: string, label: string}>, label: string}>
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -183,6 +186,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
     /**
      * Get time-based conditions from condition class
+     *
+     * @return list<array{label: string, value: string}>
      */
     protected function getTimebasedConditions(): array
     {
@@ -201,6 +206,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Combine extends Mage_Rul
 
     /**
      * Get newsletter conditions from condition class
+     *
+     * @return list<array{label: string, value: string}>
      */
     protected function getNewsletterConditions(): array
     {

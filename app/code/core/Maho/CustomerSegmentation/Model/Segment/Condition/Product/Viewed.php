@@ -17,6 +17,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         $this->setValue(null);
     }
 
+    /**
+     * @return array{value: string, label: string}
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -75,6 +78,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Viewed extends M
         };
     }
 
+    /**
+     * @return list<array{value: int|string|list<array{value: int|string, label: string}>, label: string}>
+     */
     #[\Override]
     public function getValueSelectOptions(): array
     {
