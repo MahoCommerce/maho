@@ -362,7 +362,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      *
      * If $attribute=='*' select all attributes
      *
-     * @param   array<string>|string|integer|Mage_Core_Model_Config_Element $attribute
+     * @param   array<string>|string|integer $attribute
      * @param   bool|string $joinType flag for joining attribute
      * @return  $this
      */
@@ -440,7 +440,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * For some functions like SUM use groupByAttribute.
      *
      * @param string $alias
-     * @param string $expression
+     * @param string|Maho\Db\Expr $expression
      * @param string|array<string> $attribute
      * @return $this
      */
@@ -693,7 +693,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Join a table
      *
-     * @param array<string, string|Maho\Db\Expr>|string|Maho\Db\Expr $table
+     * @param array<string, string|Maho\Db\Expr>|string $table
      * @param string $bind
      * @param array<int|string, string|Maho\Db\Expr>|null $fields
      * @param string|array<string, int|string|SqlCondition|null>|null $cond
@@ -1145,7 +1145,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
      * Retrieve attribute field name by attribute code
      *
      * @param string $attributeCode
-     * @return string
+     * @return string|Maho\Db\Expr
      */
     protected function _getAttributeFieldName($attributeCode)
     {

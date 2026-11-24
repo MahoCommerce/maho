@@ -31,7 +31,7 @@ class Mage_Eav_Model_Attribute_Data_Text extends Mage_Eav_Model_Attribute_Data_A
      * Return true or array of errors
      *
      * @param InputValue $value
-     * @return true|array<string>
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)

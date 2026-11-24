@@ -13,7 +13,7 @@ class Mage_Eav_Model_Attribute_Data_Boolean extends Mage_Eav_Model_Attribute_Dat
     /**
      * Return a text for option value
      *
-     * @param int $value
+     * @param int|string $value
      * @return string
      */
     #[\Override]

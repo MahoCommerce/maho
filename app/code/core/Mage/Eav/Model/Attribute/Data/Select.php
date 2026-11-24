@@ -30,7 +30,7 @@ class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data
      * Return true or array of errors
      *
      * @param InputValue $value
-     * @return true|array<string>
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
@@ -89,8 +89,8 @@ class Mage_Eav_Model_Attribute_Data_Select extends Mage_Eav_Model_Attribute_Data
     /**
      * Return a text for option value
      *
-     * @param int $value
-     * @return string
+     * @param int|string $value
+     * @return string|list<string>|false
      */
     protected function _getOptionText($value)
     {

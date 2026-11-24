@@ -11,9 +11,11 @@
 /**
  * A value is a text, a list of texts for a multiline or multiselect attribute, or an upload of $_FILES for a file
  * attribute: the keys name, type, tmp_name, error and size, and the key delete when the form removes the file.
+ * extractValue() returns false when the request does not hold the field. A caller that passes the data of a model,
+ * such as the cart service with a quote address, passes the types of the database: an int, a float or a bool.
  *
- * @phpstan-type InputValue string|array<int|string, bool|int|string>|false|null
- * @phpstan-type OutputValue string|array<int|string, int|string>|null
+ * @phpstan-type InputValue string|int|float|bool|array<int|string, scalar|null>|null
+ * @phpstan-type OutputValue string|int|float|false|array<int|string, int|string>|null
  */
 abstract class Mage_Eav_Model_Attribute_Data_Abstract
 {
@@ -56,7 +58,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      * Array of full extracted data
      * Needed for depends attributes
      *
-     * @var array<string, InputValue>
+     * @var array<string, mixed>
      */
     protected $_extractedData       = [];
 
@@ -139,7 +141,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Set array of full extracted data
      *
-     * @param array<string, InputValue> $data
+     * @param array<string, mixed> $data The data of the entity, which the conditions of the attributes read
      * @return $this
      */
     public function setExtractedData(array $data)
@@ -420,7 +422,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
      *
      * @param InputValue $value
      * @throws Mage_Core_Exception
-     * @return true|array<string>
+     * @return true|list<string>
      */
     abstract public function validateValue($value);
 

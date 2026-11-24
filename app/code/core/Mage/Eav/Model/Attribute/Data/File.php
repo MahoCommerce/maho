@@ -131,7 +131,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
      *
      * @param InputValue $value
      * @throws Mage_Core_Exception
-     * @return true|array<string>
+     * @return true|list<string>
      */
     #[\Override]
     public function validateValue($value)
