@@ -124,8 +124,8 @@ abstract class AbstractContainer implements ContainerInterface
     }
 
     /**
-     * @param array<array<int|string, string|int|float|bool|null>> $grid
-     * @return list<int|string>
+     * @param array<array<array-key, scalar|null>> $grid
+     * @return list<array-key>
      */
     public function getGridFields(array $grid): array
     {

@@ -185,7 +185,7 @@ class Excel extends AbstractParser
     /**
      * Convert an array to Excel 2003 XML Document a Row XML fragment
      *
-     * @param array<int|string, string|int|float|bool|null> $row
+     * @param array<array-key, scalar|null> $row
      * @return string
      */
     public function getRowXml(array $row)
