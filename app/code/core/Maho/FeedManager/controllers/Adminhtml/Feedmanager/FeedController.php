@@ -140,11 +140,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             $feed->save();
 
-            // Save attribute mappings
-            if (isset($data['mapping'])) {
-                $this->_saveMappings($feed, $data['mapping']);
-            }
-
             $this->_getSession()->addSuccess($this->__('The feed has been saved.'));
 
             // Check if we should generate after save
@@ -170,34 +165,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $this->_getSession()->setFormData($data);
             $this->_redirect('*/*/edit', ['id' => $id]);
             return;
-        }
-    }
-
-    /**
-     * Save attribute mappings for a feed
-     *
-     * @param array<string, array{source_type?: string, source_value?: string}> $mappings
-     */
-    protected function _saveMappings(Maho_FeedManager_Model_Feed $feed, array $mappings): void
-    {
-        // Delete existing mappings
-        $existingMappings = $feed->getAttributeMappings();
-        foreach ($existingMappings as $mapping) {
-            $mapping->delete();
-        }
-
-        // Save new mappings
-        foreach ($mappings as $feedAttribute => $config) {
-            if (empty($config['source_type'])) {
-                continue;
-            }
-
-            $mapping = Mage::getModel('feedmanager/attributeMapping');
-            $mapping->setFeedId((int) $feed->getId())
-                ->setPlatformAttribute($feedAttribute)
-                ->setSourceType($config['source_type'])
-                ->setSourceValue($config['source_value'] ?? '')
-                ->save();
         }
     }
 
