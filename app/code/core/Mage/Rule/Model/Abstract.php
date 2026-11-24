@@ -143,10 +143,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
          * Backwards compatibility.
          */
         if ($this->hasWebsiteIds()) {
-            $websiteIds = $this->getWebsiteIds();
-            if (is_string($websiteIds) && !empty($websiteIds)) {
-                $this->setWebsiteIds(explode(',', $websiteIds));
-            }
+            $this->setWebsiteIds($this->getWebsiteIds());
         }
 
         /**
@@ -545,6 +542,9 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get rule associated website Ids
      *
+     * Older code sets the websites as a comma-separated string, and the promo form of a single-store setup sets one
+     * ID, so a scalar becomes a list.
+     *
      * @return list<int|string>
      */
     public function getWebsiteIds()
@@ -553,7 +553,12 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $websiteIds = $this->_getResource()->getWebsiteIds($this->getId());
             $this->setData('website_ids', (array) $websiteIds);
         }
-        return $this->_getData('website_ids');
+        $value = $this->getData('website_ids');
+        if (is_array($value)) {
+            return $value;
+        }
+        $value = (string) $value;
+        return $value === '' ? [] : explode(',', $value);
     }
 
     /**

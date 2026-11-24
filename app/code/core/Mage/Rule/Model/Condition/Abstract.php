@@ -19,8 +19,8 @@ declare(strict_types=1);
  *
  * @phpstan-type SelectOption array{value: string, label: string}
  * @phpstan-type ValueSelectOption array{value: int|string|list<array{value: int|string, label: string}>, label: string, ...<string, mixed>}
- * @phpstan-type ChildSelectOption array{value: string|list<SelectOption>, label: string}
- * @phpstan-type ConditionArray array{type: ?string, attribute: string|false|null, operator: string|false|null, value: string|int|array<int|string>|null, is_value_processed: ?bool, aggregator?: int|string|null, conditions?: list<array<string, mixed>>}
+ * @phpstan-type ChildSelectOption array{value: string|array<array-key, SelectOption>, label: string}
+ * @phpstan-type ConditionArray array{type: ?string, attribute: string|false|null, operator: string|false|null, value: array<int|string>|string|int|float|bool|null, is_value_processed: ?bool, aggregator?: int|string|null, conditions?: list<array<string, mixed>>}
  */
 abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Condition_Interface
 {
@@ -326,7 +326,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Retrieve parsed value
      *
-     * @return array<int|string>|string|int|float
+     * @return array<int|string>|string|int|float|bool|null
      */
     public function getValueParsed()
     {
@@ -354,7 +354,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return string|int|array<int|string>|null
+     * @return array<int|string>|string|int|float|bool|null
      */
     public function getValue()
     {
