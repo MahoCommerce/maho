@@ -309,6 +309,39 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
+     * Turn the option array of a config source into a list of value select options.
+     *
+     * A source can key its options by code, give no label, or add a group that has no value, as the shipping and
+     * payment method sources do. Such a group has nothing to select, so it is left out.
+     *
+     * @param array<array-key, mixed> $options
+     * @return list<ValueSelectOption>
+     */
+    protected function _toValueSelectOptions(array $options): array
+    {
+        $result = [];
+        foreach ($options as $option) {
+            if (!is_array($option) || !isset($option['value'])) {
+                continue;
+            }
+            $value = $option['value'];
+            if (is_array($value)) {
+                $group = [];
+                foreach ($value as $item) {
+                    if (is_array($item) && isset($item['value']) && (is_int($item['value']) || is_string($item['value']))) {
+                        $group[] = ['value' => $item['value'], 'label' => (string) ($item['label'] ?? '')];
+                    }
+                }
+                $value = $group;
+            } elseif (!is_int($value) && !is_string($value)) {
+                continue;
+            }
+            $result[] = ['value' => $value, 'label' => (string) ($option['label'] ?? '')] + $option;
+        }
+        return $result;
+    }
+
+    /**
      * @return list<ValueSelectOption>
      */
     public function getValueSelectOptions()

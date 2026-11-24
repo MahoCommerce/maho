@@ -29,7 +29,7 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
      *
      * @param string $field
      * @param string $operator
-     * @param string|array<int|string> $value
+     * @param array<int|string>|string|int|float|bool|null $value
      * @return string
      */
     public function getOperatorCondition($field, $operator, $value)
