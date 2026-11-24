@@ -18,6 +18,11 @@ declare(strict_types=1);
  * - Attribute getters: Return empty string if attribute not found, never throw
  * - Category mapping: Returns empty string if no mapping found
  * - Transformers: Applied in try/catch, failures logged and original value returned
+ *
+ * @phpstan-import-type TransformerStep from Maho_FeedManager_Model_Transformer
+ * @phpstan-import-type MappingCondition from Maho_FeedManager_Model_AttributeMapping
+ * @phpstan-import-type CsvColumn from Maho_FeedManager_Model_Writer_Csv
+ * @phpstan-type FieldMapping array{source_type: string|null, source_value: string|null, transformers: list<TransformerStep>, conditions: list<MappingCondition>, use_parent?: string, unit?: string, unit_target?: string, json_type?: string}
  */
 class Maho_FeedManager_Model_Mapper
 {
@@ -87,8 +92,11 @@ class Maho_FeedManager_Model_Mapper
 
     protected Maho_FeedManager_Model_Feed $_feed;
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
+    /** @var array<string, FieldMapping> */
     protected array $_mappings = [];
+    /** @var array<int, string> Platform category ID by category ID */
     protected array $_categoryMappings = [];
+    /** @var array<string, array<int, array{path: string, depth: int}>> */
     protected array $_taxonomyMappingsByPlatform = [];
     protected ?int $_storeId = null;
 
@@ -101,7 +109,7 @@ class Maho_FeedManager_Model_Mapper
     /** @var array<int, int|null> Cache of child ID => parent ID mappings */
     protected array $_childParentMap = [];
 
-    /** @var array<int, array|null> Cache of parent product data by parent ID */
+    /** @var array<int, array<string, mixed>> Cache of parent product data by parent ID */
     protected array $_parentDataCache = [];
 
     /** @var array<int, array<string, array{0: float, 1: array<string, array<string, float>>}|null>> Cache of the prices and option prices of a configurable parent by parent ID */
@@ -462,6 +470,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Extract raw product data into array
+     *
+     * @return array<string, mixed>
      */
     public function extractProductData(Mage_Catalog_Model_Product $product): array
     {
@@ -816,6 +826,9 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Get source value based on mapping type
+     *
+     * @param array<string, mixed> $config Field configuration
+     * @param array<string, mixed> $rawData
      */
     protected function _getSourceValue(array $config, array $rawData, Mage_Catalog_Model_Product $product): mixed
     {
@@ -841,6 +854,8 @@ class Maho_FeedManager_Model_Mapper
      * the loaded parent model when the child evaluation produced nothing;
      * "always" evaluates the parent first. Without this, rule sources silently
      * ignored use_parent while attribute sources honoured it.
+     *
+     * @param array<string, mixed> $rawData
      */
     protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
     {
@@ -898,6 +913,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Evaluate a dynamic rule-based source
+     *
+     * @param array<string, mixed> $rawData
      */
     protected function _evaluateRule(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product): mixed
     {
@@ -941,6 +958,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Evaluate a combined source (template-based)
+     *
+     * @param array<string, mixed> $rawData
      */
     protected function _evaluateCombined(string $template, array $rawData): string
     {
@@ -955,6 +974,9 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Evaluate conditions for including an attribute
+     *
+     * @param list<MappingCondition> $conditions
+     * @param array<string, mixed> $rawData
      */
     protected function _evaluateConditions(array $conditions, array $rawData): bool
     {
@@ -1185,6 +1207,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Get category names for product
+     *
+     * @return list<string>
      */
     protected function _getCategoryNames(Mage_Catalog_Model_Product $product): array
     {
@@ -1446,6 +1470,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Get source type options for dropdown
+     *
+     * @return array<string, string>
      */
     public static function getSourceTypeOptions(): array
     {
@@ -1464,6 +1490,8 @@ class Maho_FeedManager_Model_Mapper
      * Get available taxonomy platforms for dropdown
      * Uses Platform model for consistency with Category Mapping screen,
      * plus any custom platforms from existing category mappings
+     *
+     * @return array<string, string>
      */
     public static function getTaxonomyPlatformOptions(): array
     {
@@ -1495,6 +1523,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Get available rules for dropdown
+     *
+     * @return array<string, string>
      */
     public static function getAvailableRules(): array
     {
@@ -1517,7 +1547,7 @@ class Maho_FeedManager_Model_Mapper
      * - It exists and is greater than 0
      * - Current date is within the special_from_date and special_to_date range (if set)
      *
-     * @param array $productData Product data array containing special_price, special_from_date, special_to_date
+     * @param array<string, mixed> $productData Product data array containing special_price, special_from_date, special_to_date
      * @return float|null The valid special price or null if invalid/expired
      */
     public static function getValidSpecialPrice(array $productData): ?float
@@ -1554,7 +1584,7 @@ class Maho_FeedManager_Model_Mapper
      * returns the parent value instead.
      *
      * @param string $attribute Attribute code
-     * @param array $productData Product data array (should contain both attribute and parent_attribute)
+     * @param array<string, mixed> $productData Product data array (should contain both attribute and parent_attribute)
      * @param bool $useParentFallback Whether to fall back to parent value if empty
      * @return mixed The attribute value (child or parent)
      */
@@ -1586,7 +1616,7 @@ class Maho_FeedManager_Model_Mapper
      * - "always": Always use parent value
      *
      * @param string $attribute Attribute code
-     * @param array $productData Product data array (should contain both attribute and parent_attribute)
+     * @param array<string, mixed> $productData Product data array (should contain both attribute and parent_attribute)
      * @param string $useParentMode The parent mode: "", "if_empty", or "always"
      * @return mixed The attribute value
      */
@@ -1639,6 +1669,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Set mappings from CSV builder column definitions
+     *
+     * @param list<CsvColumn> $columns
      */
     public function setMappingsFromCsvColumns(array $columns): self
     {
@@ -1669,6 +1701,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Set mappings from JSON builder structure definition
+     *
+     * @param array<string, array<string, mixed>> $structure
      */
     public function setMappingsFromJsonStructure(array $structure): self
     {
@@ -1679,6 +1713,8 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Recursively build mappings from JSON structure
+     *
+     * @param array<string, array<string, mixed>> $structure
      */
     protected function _buildMappingsFromJsonStructure(array $structure, string $prefix): void
     {
@@ -1717,6 +1753,9 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Map product to JSON structure format
+     *
+     * @param array<string, array<string, mixed>> $structure
+     * @return array<string, mixed>
      */
     public function mapProductToJsonStructure(Mage_Catalog_Model_Product $product, array $structure): array
     {
@@ -1726,6 +1765,10 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Build JSON object from structure definition
+     *
+     * @param array<string, array<string, mixed>> $structure
+     * @param array<string, mixed> $rawData
+     * @return array<string, mixed>
      */
     protected function _buildJsonObject(array $structure, array $rawData, Mage_Catalog_Model_Product $product): array
     {
@@ -1773,7 +1816,7 @@ class Maho_FeedManager_Model_Mapper
      * Map product to XML structure format
      *
      * @param Mage_Catalog_Model_Product $product Product to map
-     * @param array $structure XML structure definition (array of elements)
+     * @param list<array<string, mixed>> $structure XML structure definition (array of elements)
      * @param string $itemTag Tag name for item wrapper (empty = no wrapper)
      * @param int $indent Indentation level
      * @return string XML string for this product
@@ -1803,6 +1846,9 @@ class Maho_FeedManager_Model_Mapper
 
     /**
      * Build XML elements from structure definition
+     *
+     * @param list<array<string, mixed>> $structure
+     * @param array<string, mixed> $rawData
      */
     protected function _buildXmlElements(array $structure, array $rawData, Mage_Catalog_Model_Product $product, int $indent = 0): string
     {

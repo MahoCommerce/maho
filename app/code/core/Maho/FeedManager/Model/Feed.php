@@ -190,6 +190,8 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 
     /**
      * Get configurable mode options
+     *
+     * @return array<string, string>
      */
     public static function getConfigurableModeOptions(): array
     {

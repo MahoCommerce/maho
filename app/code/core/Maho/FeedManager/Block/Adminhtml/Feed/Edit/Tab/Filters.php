@@ -76,6 +76,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
     /**
      * Get product type options formatted for form multiselect
+     *
+     * @return list<array{value: string, label: string}>
      */
     protected function _getProductTypeOptionsForForm(): array
     {

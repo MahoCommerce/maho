@@ -19,7 +19,9 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
     protected $_handle = null;
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected string $_itemElement = 'item';
+    /** @var array<string, string> */
     protected array $_namespaces = [];
+    /** @var string[] */
     protected array $_namespacedAttributes = [];
     protected bool $_isRss = false;
 
@@ -146,6 +148,8 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
 
     /**
      * Build XML for a single item
+     *
+     * @param array<string, mixed> $data
      */
     protected function _buildItemXml(array $data): string
     {

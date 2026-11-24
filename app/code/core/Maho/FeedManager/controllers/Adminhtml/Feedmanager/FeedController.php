@@ -175,6 +175,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
     /**
      * Save attribute mappings for a feed
+     *
+     * @param array<string, array{source_type?: string, source_value?: string}> $mappings
      */
     protected function _saveMappings(Maho_FeedManager_Model_Feed $feed, array $mappings): void
     {
@@ -201,6 +203,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
     /**
      * Build conditions array from form post data
+     *
+     * @param array<int|string, array<string, mixed>> $conditionsData
+     * @return array<string, mixed>
      */
     protected function _buildConditionsArray(array $conditionsData): array
     {
@@ -216,6 +221,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Convert flat form conditions data to recursive array structure
      *
+     * @param array<int|string, array<string, mixed>> $data
      * @return array<int|string, mixed>
      */
     protected function _convertFlatToRecursive(array $data): array
@@ -585,6 +591,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
     /**
      * Format output as CSV string
+     *
+     * @param list<array<int, mixed>> $rows
      */
     protected function _formatCsvOutput(array $rows, string $delimiter, string $enclosure): string
     {

@@ -13,7 +13,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
     /**
      * Array of actions which can be processed without secret key validation
      *
-     * @var array
+     * @var string[]
      */
     #[\Override]
     protected $_publicActions = ['edit'];

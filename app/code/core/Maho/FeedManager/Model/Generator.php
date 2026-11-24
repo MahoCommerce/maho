@@ -29,6 +29,7 @@ class Maho_FeedManager_Model_Generator
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected ?Maho_FeedManager_Model_Log $_log = null;
     protected int $_batchSize = 1000;
+    /** @var list<string> */
     protected array $_errors = [];
     protected ?string $_tempPath = null;
 
@@ -199,6 +200,8 @@ class Maho_FeedManager_Model_Generator
 
     /**
      * Get errors from last generation
+     *
+     * @return list<string>
      */
     public function getErrors(): array
     {

@@ -17,6 +17,9 @@ declare(strict_types=1);
  *
  * @method Maho_FeedManager_Model_Resource_AttributeMapping getResource()
  * @method Maho_FeedManager_Model_Resource_AttributeMapping _getResource()
+ *
+ * @phpstan-type MappingCondition array{field: string, operator: string, value: string}
+ * @phpstan-import-type TransformerStep from Maho_FeedManager_Model_Transformer
  */
 class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 {
@@ -39,6 +42,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     /**
      * Get conditions as array
+     *
+     * @return list<MappingCondition>
      */
     public function getConditionsArray(): array
     {
@@ -51,6 +56,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     /**
      * Set conditions from array
+     *
+     * @param list<MappingCondition> $conditions
      */
     public function setConditionsArray(array $conditions): self
     {
@@ -60,6 +67,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     /**
      * Get transformers as array
+     *
+     * @return list<TransformerStep>
      */
     public function getTransformersArray(): array
     {
@@ -72,6 +81,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     /**
      * Set transformers from array
+     *
+     * @param list<TransformerStep> $transformers
      */
     public function setTransformersArray(array $transformers): self
     {
@@ -81,6 +92,8 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 
     /**
      * Get source type options
+     *
+     * @return array<string, string>
      */
     public static function getSourceTypeOptions(): array
     {

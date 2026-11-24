@@ -26,7 +26,7 @@ class Maho_FeedManager_Model_Notifier
     /**
      * Send failure notification for a feed
      *
-     * @param array $errors List of error messages
+     * @param list<string> $errors List of error messages
      * @param string $failureType Type of failure (generation, upload, timeout)
      * @return bool Whether notification was sent
      */
@@ -91,6 +91,8 @@ class Maho_FeedManager_Model_Notifier
 
     /**
      * Send email notification
+     *
+     * @param list<string> $errors
      */
     protected function _sendEmail(
         Maho_FeedManager_Model_Feed $feed,
@@ -161,6 +163,8 @@ class Maho_FeedManager_Model_Notifier
 
     /**
      * Add admin inbox notification
+     *
+     * @param list<string> $errors
      */
     protected function _addAdminNotification(
         Maho_FeedManager_Model_Feed $feed,
@@ -204,6 +208,8 @@ class Maho_FeedManager_Model_Notifier
 
     /**
      * Get available notification modes for admin dropdown
+     *
+     * @return list<array{value: string, label: string}>
      */
     public static function getModeOptions(): array
     {
@@ -218,6 +224,8 @@ class Maho_FeedManager_Model_Notifier
 
     /**
      * Get available frequency options for admin dropdown
+     *
+     * @return list<array{value: string, label: string}>
      */
     public static function getFrequencyOptions(): array
     {

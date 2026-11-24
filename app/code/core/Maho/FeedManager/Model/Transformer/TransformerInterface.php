@@ -12,6 +12,8 @@ declare(strict_types=1);
  * Transformer Interface
  *
  * Defines the contract for data transformation operations
+ *
+ * @phpstan-type OptionDefinition array{label: string, type: string, required?: bool, note?: string, options?: array<string, string>|list<array{value: string, label: string}>}
  */
 interface Maho_FeedManager_Model_Transformer_TransformerInterface
 {
@@ -43,7 +45,7 @@ interface Maho_FeedManager_Model_Transformer_TransformerInterface
     /**
      * Get option definitions for admin form
      *
-     * @return array<string, array{label: string, type: string, required?: bool, note?: string}>
+     * @return array<string, OptionDefinition>
      */
     public function getOptionDefinitions(): array;
 

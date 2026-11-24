@@ -12,6 +12,8 @@ declare(strict_types=1);
  * Dynamic Attribute Rule Model
  *
  * Supports multiple condition→output cases with first-match-wins evaluation.
+ *
+ * @phpstan-type RuleCase array{conditions: array<string, mixed>|null, output_type: string, output_value: string|null, output_attribute: string|null, combined_position: string, is_default: bool}
  */
 class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 {
@@ -24,6 +26,8 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Cached cases array
+     *
+     * @var list<RuleCase>|null
      */
     protected ?array $_cases = null;
 
@@ -112,7 +116,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     /**
      * Get cases array
      *
-     * @return array Array of case data
+     * @return list<RuleCase>
      */
     public function getCases(): array
     {
@@ -130,7 +134,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     /**
      * Set cases array
      *
-     * @param array $cases Array of case data
+     * @param list<RuleCase> $cases
      * @return $this
      */
     public function setCases(array $cases): self
@@ -143,7 +147,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     /**
      * Add a new case
      *
-     * @param array $conditions Conditions array (null for default case)
+     * @param array<string, mixed>|null $conditions Conditions array (null for default case)
      * @param string $outputType Output type
      * @param string|null $outputValue Static value or prefix/suffix
      * @param string|null $outputAttribute Attribute code
@@ -173,6 +177,8 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Get output type options for dropdown
+     *
+     * @return array<string, string>
      */
     public static function getOutputTypeOptions(): array
     {
@@ -185,6 +191,8 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Get combined position options
+     *
+     * @return array<string, string>
      */
     public static function getCombinedPositionOptions(): array
     {
@@ -196,6 +204,8 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Get available product attributes for output
+     *
+     * @return list<array{value: string, label: string}>
      */
     public static function getOutputAttributeOptions(): array
     {
@@ -234,6 +244,8 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Validate rule data before save
+     *
+     * @return list<string>|true
      */
     public function validateData(\Maho\DataObject $dataObject): array|bool
     {
@@ -330,10 +342,12 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Evaluate case conditions against a product
+     *
+     * @param RuleCase $case
      */
     protected function _evaluateCaseConditions(array $case, Mage_Catalog_Model_Product $product): bool
     {
-        $conditions = $case['conditions'] ?? null;
+        $conditions = $case['conditions'];
 
         // No conditions = always match (unless it's a default case)
         if (empty($conditions)) {
@@ -354,12 +368,14 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
 
     /**
      * Get output value for a case
+     *
+     * @param RuleCase $case
      */
     protected function _getCaseOutput(array $case, Mage_Catalog_Model_Product $product): mixed
     {
         $outputType = $case['output_type'] ?? self::OUTPUT_TYPE_STATIC;
-        $outputValue = $case['output_value'] ?? null;
-        $outputAttribute = $case['output_attribute'] ?? null;
+        $outputValue = $case['output_value'];
+        $outputAttribute = $case['output_attribute'];
         $combinedPosition = $case['combined_position'] ?? self::COMBINED_POSITION_PREFIX;
 
         return match ($outputType) {

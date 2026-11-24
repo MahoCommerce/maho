@@ -56,6 +56,8 @@ class Maho_FeedManager_Block_Adminhtml_Category_Edit extends Mage_Adminhtml_Bloc
 
     /**
      * Get store categories as tree
+     *
+     * @return list<array{id: int|string|null, name: string, level: int, path: string}>
      */
     public function getCategoriesTree(): array
     {

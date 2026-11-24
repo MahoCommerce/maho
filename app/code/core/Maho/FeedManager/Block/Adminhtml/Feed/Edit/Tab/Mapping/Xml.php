@@ -13,6 +13,8 @@ declare(strict_types=1);
  *
  * Provides a tree-based interface for defining XML structure with element properties,
  * attribute/value mapping, CDATA options, transformer configuration, and live preview.
+ *
+ * @phpstan-import-type XmlElement from Maho_FeedManager_Model_Platform_AdapterInterface
  */
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBuilder
 {
@@ -622,6 +624,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
     /**
      * Derives the structure from the feed's platform adapter when one is set,
      * otherwise falls back to a generic Google-flavoured short list.
+     *
+     * @return list<XmlElement>
      */
     protected function _getDefaultXmlStructure(): array
     {

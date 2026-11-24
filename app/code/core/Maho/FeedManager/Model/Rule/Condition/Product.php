@@ -182,6 +182,8 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
 
     /**
      * Add is_empty / is_not_empty operators for matching null / missing / blank EAV values.
+     *
+     * @return array<string, string>
      */
     #[\Override]
     public function getDefaultOperatorOptions()
@@ -308,6 +310,8 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
 
     /**
      * Get value select options
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     #[\Override]
     public function getValueSelectOptions(): array
@@ -330,6 +334,8 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
 
     /**
      * Get category options
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     protected function _getCategoryOptions(): array
     {
@@ -357,6 +363,8 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
 
     /**
      * Get product type options
+     *
+     * @return list<array{value: string, label: string}>
      */
     protected function _getProductTypeOptions(): array
     {
@@ -369,6 +377,8 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
 
     /**
      * Get attribute set options
+     *
+     * @return list<array{value: int|string, label: string}>
      */
     protected function _getAttributeSetOptions(): array
     {

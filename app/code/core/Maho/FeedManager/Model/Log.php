@@ -19,6 +19,8 @@ declare(strict_types=1);
  *
  * @method Maho_FeedManager_Model_Resource_Log getResource()
  * @method Maho_FeedManager_Model_Resource_Log _getResource()
+ *
+ * @phpstan-type LogError array{sku?: string, message: string, time: string}
  */
 class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 {
@@ -44,6 +46,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     /**
      * Get errors as array
+     *
+     * @return list<LogError>
      */
     public function getErrorsArray(): array
     {
@@ -56,6 +60,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     /**
      * Set errors from array
+     *
+     * @param list<LogError> $errors
      */
     public function setErrorsArray(array $errors): self
     {
@@ -93,6 +99,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     /**
      * Get error messages as simple array of strings
+     *
+     * @return list<string>
      */
     public function getErrorMessagesArray(): array
     {
@@ -192,6 +200,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     /**
      * Get status options
+     *
+     * @return array<string, string>
      */
     public static function getStatusOptions(): array
     {
@@ -204,6 +214,8 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 
     /**
      * Get upload status options
+     *
+     * @return array<string, string>
      */
     public static function getUploadStatusOptions(): array
     {

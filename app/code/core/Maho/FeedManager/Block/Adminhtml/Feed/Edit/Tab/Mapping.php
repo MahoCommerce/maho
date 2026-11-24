@@ -240,6 +240,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
 
     /**
      * Get available currency options from store configuration
+     *
+     * @return list<array{value: string, label: string}>
      */
     protected function _getCurrencyOptions(): array
     {

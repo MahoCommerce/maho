@@ -174,6 +174,9 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
      *
      * For existing destinations, sensitive fields (passwords, keys, tokens) preserve
      * their old values when submitted empty, since password fields don't show existing values.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, string>
      */
     protected function _extractConfigFields(array $data, Maho_FeedManager_Model_Destination $destination): array
     {
