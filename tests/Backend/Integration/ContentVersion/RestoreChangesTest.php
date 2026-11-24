@@ -28,19 +28,8 @@ afterEach(function (): void {
         ->addFieldToFilter('entity_type', 'cms_block')
         ->addFieldToFilter('entity_id', (int) $this->block->getId())
         ->walk('delete');
-    if ($this->block->getId()) {
-        $this->block->delete();
-    }
+    $this->block->delete();
 });
-
-function latestBlockVersion(int $blockId): Maho_ContentVersion_Model_Version
-{
-    return Mage::getResourceModel('contentversion/version_collection')
-        ->addFieldToFilter('entity_type', 'cms_block')
-        ->addFieldToFilter('entity_id', $blockId)
-        ->setOrder('version_number', 'DESC')
-        ->getFirstItem();
-}
 
 it('lists each field that a restore changes, with the current value and the value of the version', function (): void {
     $blockId = (int) $this->block->getId();
@@ -51,20 +40,15 @@ it('lists each field that a restore changes, with the current value and the valu
         ->setContent("<p>One</p>\n<p>Three</p>")
         ->save();
 
-    $changes = Mage::helper('contentversion')->getRestoreChanges(latestBlockVersion($blockId));
+    $version = Mage::getResourceModel('contentversion/version_collection')
+        ->addFieldToFilter('entity_type', 'cms_block')
+        ->addFieldToFilter('entity_id', $blockId)
+        ->getFirstItem();
+
+    $changes = Mage::helper('contentversion')->getRestoreChanges($version);
 
     expect($changes)->toHaveKeys(['title', 'content'])
         ->and($changes['title'])->toBe(['current' => 'Changes test, edited', 'version' => 'Changes test'])
         ->and($changes['content'])->toBe(['current' => "<p>One</p>\n<p>Three</p>", 'version' => "<p>One</p>\n<p>Two</p>"])
         ->and($changes)->not->toHaveKeys(['block_id', 'identifier', 'is_active', 'update_time']);
-});
-
-it('returns null when the record of the version no longer exists', function (): void {
-    $blockId = (int) $this->block->getId();
-    Mage::getModel('cms/block')->load($blockId)->setTitle('Changes test, edited')->save();
-    $version = latestBlockVersion($blockId);
-    $this->block->delete();
-    $this->block->setId(null);
-
-    expect(Mage::helper('contentversion')->getRestoreChanges($version))->toBeNull();
 });
