@@ -75,6 +75,8 @@ class CrudProvider extends Provider
      * Whether the caller requested a cross-store, unfiltered listing (?scope=all)
      * on a resource that supports it. Backend only: guests and customers must
      * never see draft or foreign-store content, so anyone else gets a 403.
+     *
+     * @param array<string, mixed> $filters
      */
     protected function isScopeAll(array $filters): bool
     {
@@ -116,6 +118,7 @@ class CrudProvider extends Provider
      * GraphQL passes arguments in context['args'], not context['filters'];
      * surface only `scope` so isScopeAll() sees it on both protocols.
      *
+     * @param array<string, mixed> $context
      * @return TraversablePaginator<Resource>
      */
     #[\Override]
@@ -171,6 +174,8 @@ class CrudProvider extends Provider
     /**
      * Auto-apply store filtering and EAV attribute loading.
      * Subclasses should call parent::applyCollectionFilters() first, then add their own filters.
+     *
+     * @param array<string, mixed> $filters
      */
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void

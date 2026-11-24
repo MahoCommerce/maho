@@ -87,6 +87,9 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
         return $this->getUrl('*/*/postsGrid', ['_current' => true]);
     }
 
+    /**
+     * @return array<int|string>
+     */
     protected function _getSelectedPostIds(): array
     {
         $postIds = $this->getPostsCategory();
@@ -96,6 +99,9 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Posts extends Mage_Adminhtml_B
         return $postIds;
     }
 
+    /**
+     * @return list<int|string>
+     */
     public function getSelectedCategoryPosts(): array
     {
         $category = $this->getCategory();

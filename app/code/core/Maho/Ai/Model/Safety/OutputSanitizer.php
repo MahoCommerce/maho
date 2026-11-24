@@ -27,6 +27,8 @@ class Maho_Ai_Model_Safety_OutputSanitizer
 
     /**
      * Sanitize AI output for safe use
+     *
+     * @param array{pii_flagged?: bool, pii_types?: list<string>} $metadata
      */
     public function sanitize(string $output, bool $isHtml = false, array &$metadata = []): string
     {
@@ -41,6 +43,9 @@ class Maho_Ai_Model_Safety_OutputSanitizer
         return $output;
     }
 
+    /**
+     * @param array{pii_flagged?: bool, pii_types?: list<string>} $metadata
+     */
     private function detectPii(string $text, array &$metadata): void
     {
         $foundTypes = [];

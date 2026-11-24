@@ -231,7 +231,7 @@ Your API must return JSON with a `methods` array. Each method needs `code`, `tit
 - **Non-2xx status codes**: No shipping methods are shown; an error is logged
 - **Invalid JSON**: Logged as an error; no methods shown
 - **Missing `methods` array**: Logged as an error; no methods shown
-- **Individual method missing required fields**: That method is skipped with a warning; other valid methods still appear
+- **Individual method with a missing or invalid required field** (a `code` or `title` that is not a string, a `price` that is not a number): That method is skipped with a warning; other valid methods still appear
 
 Return an empty `methods` array if no shipping options are available:
 

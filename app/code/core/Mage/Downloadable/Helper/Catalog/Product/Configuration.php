@@ -8,6 +8,9 @@
  * @package Mage_Downloadable
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_Abstract implements Mage_Catalog_Helper_Product_Configuration_Interface
 {
     #[\Override]
@@ -57,7 +60,7 @@ class Mage_Downloadable_Helper_Catalog_Product_Configuration extends Mage_Core_H
      *
      * The option values are HTML, as the custom option values that their option type formats.
      *
-     * @return array
+     * @return list<ItemOption>
      */
     #[\Override]
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)

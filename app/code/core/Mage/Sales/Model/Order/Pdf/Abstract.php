@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @template TDocument of \Maho\DataObject = \Maho\DataObject
+ */
 abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
 {
     use Mage_Core_Model_Pdf_Trait;
@@ -26,6 +29,8 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
 
     /**
      * Retrieve PDF
+     *
+     * @param array<TDocument>|\Maho\Data\Collection<TDocument> $documents
      */
     abstract public function getPdf(array|\Maho\Data\Collection $documents = []): string;
 

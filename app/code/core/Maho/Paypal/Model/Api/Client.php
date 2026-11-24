@@ -18,6 +18,29 @@ use PaypalServerSdkLib\Logging\ResponseLoggingConfigurationBuilder;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
+/**
+ * @phpstan-import-type OrderRequest from Maho_Paypal_Model_Api_OrderBuilder
+ * @phpstan-type PaypalMoney array{currency_code?: string, value?: string, ...}
+ * @phpstan-type PaypalProcessorResponse array{avs_code?: string, cvv_code?: string, response_code?: string, payment_advice_code?: string, ...}
+ * @phpstan-type PaypalRelatedIds array{related_ids?: array{order_id?: string, authorization_id?: string, capture_id?: string, ...}, ...}
+ * @phpstan-type PaypalCapture array{id?: string, status?: string, status_details?: array{reason?: string, ...}, amount?: PaypalMoney, invoice_id?: string, final_capture?: bool, processor_response?: PaypalProcessorResponse, supplementary_data?: PaypalRelatedIds, ...}
+ * @phpstan-type PaypalAuthorization array{id?: string, status?: string, status_details?: array{reason?: string, ...}, amount?: PaypalMoney, invoice_id?: string, expiration_time?: string, processor_response?: PaypalProcessorResponse, supplementary_data?: PaypalRelatedIds, ...}
+ * @phpstan-type PaypalRefund array{id?: string, status?: string, amount?: PaypalMoney, invoice_id?: string, ...}
+ * @phpstan-type PaypalAddress array{address_line_1?: string, address_line_2?: string, admin_area_1?: string, admin_area_2?: string, postal_code?: string, country_code?: string, ...}
+ * @phpstan-type PaypalPurchaseUnit array{reference_id?: string, invoice_id?: string, amount?: PaypalMoney, shipping?: array{name?: array{full_name?: string, ...}, address?: PaypalAddress, ...}, payments?: array{captures?: list<PaypalCapture>, authorizations?: list<PaypalAuthorization>, refunds?: list<PaypalRefund>, ...}, ...}
+ * @phpstan-type PaypalPayer array{payer_id?: string, email_address?: string, name?: array{given_name?: string, surname?: string, ...}, phone?: array{phone_number?: array{national_number?: string, ...}, ...}, address?: PaypalAddress, ...}
+ * @phpstan-type PaypalVault array{id?: string, status?: string, customer?: array{id?: string, ...}, ...}
+ * @phpstan-type PaypalCard array{name?: string, last_digits?: string, brand?: string, type?: string, expiry?: string, attributes?: array{vault?: PaypalVault, ...}, authentication_result?: array{liability_shift?: string, three_d_secure?: array{enrollment_status?: string, authentication_status?: string, ...}, ...}, ...}
+ * @phpstan-type PaypalWallet array{account_id?: string, email_address?: string, name?: array{given_name?: string, surname?: string, ...}, attributes?: array{vault?: PaypalVault, ...}, ...}
+ * @phpstan-type PaypalPaymentSource array{card?: PaypalCard, paypal?: PaypalWallet, ...}
+ * @phpstan-type PaypalOrder array{id?: string, status?: string, intent?: string, payer?: PaypalPayer, purchase_units?: list<PaypalPurchaseUnit>, payment_source?: PaypalPaymentSource, ...}
+ * @phpstan-type PaypalPaymentToken array{id?: string, status?: string, customer?: array{id?: string, ...}, payment_source?: PaypalPaymentSource, ...}
+ * @phpstan-type PaypalPaymentTokenList array{customer?: array{id?: string, ...}, payment_tokens?: list<PaypalPaymentToken>, total_items?: int, total_pages?: int, ...}
+ * @phpstan-type PaypalWebhook array{id?: string, url?: string, event_types?: list<array{name?: string, ...}>, ...}
+ * @phpstan-type PaypalToken array{access_token?: string, token_type?: string, expires_in?: int, scope?: string, app_id?: string, nonce?: string, ...}
+ * @phpstan-type AmountRequest array{currency_code: string|null, value: string}
+ * @phpstan-type VaultTokenRequest array{payment_source: array<string, array<string, mixed>>, customer?: array{id?: string, merchant_customer_id?: string}}
+ */
 class Maho_Paypal_Model_Api_Client
 {
     /** Seconds before a token request gives up. The token endpoint answers in less than one second. */
@@ -34,6 +57,9 @@ class Maho_Paypal_Model_Api_Client
     protected ?bool $_explicitSandbox = null;
     protected ?string $_cachedAccessToken = null;
 
+    /**
+     * @param array{store_id?: int|string|null} $args
+     */
     public function __construct(array $args = [])
     {
         if (isset($args['store_id'])) {
@@ -98,6 +124,10 @@ class Maho_Paypal_Model_Api_Client
         return $this->_client;
     }
 
+    /**
+     * @param array{body: OrderRequest, paypalRequestId?: string, prefer?: string} $orderRequest
+     * @return PaypalOrder
+     */
     public function createOrder(array $orderRequest): array
     {
         $orderRequest['paypalRequestId'] ??= uniqid('maho-', true);
@@ -106,6 +136,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalOrder
+     */
     public function getOrder(string $orderId, ?string $fields = null): array
     {
         $options = ['id' => $orderId];
@@ -116,6 +149,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @param list<array{op: 'add'|'remove'|'replace'|'move'|'copy'|'test', path: string, value?: mixed, from?: string}> $patchOperations
+     */
     public function patchOrder(string $orderId, array $patchOperations): void
     {
         $client = $this->_createHttpClient();
@@ -131,6 +167,9 @@ class Maho_Paypal_Model_Api_Client
         }
     }
 
+    /**
+     * @return PaypalOrder
+     */
     public function authorizeOrder(string $orderId): array
     {
         $response = $this->getSdkClient()->getOrdersController()->authorizeOrder([
@@ -140,6 +179,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalOrder
+     */
     public function captureOrder(string $orderId): array
     {
         $response = $this->getSdkClient()->getOrdersController()->captureOrder([
@@ -149,6 +191,10 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @param array{amount?: AmountRequest, final_capture?: bool} $body
+     * @return PaypalCapture
+     */
     public function captureAuthorization(string $authorizationId, array $body = []): array
     {
         $response = $this->getSdkClient()->getPaymentsController()->captureAuthorizedPayment([
@@ -158,6 +204,10 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @param array{amount?: AmountRequest} $body
+     * @return PaypalRefund
+     */
     public function refundCapture(string $captureId, array $body = []): array
     {
         $response = $this->getSdkClient()->getPaymentsController()->refundCapturedPayment([
@@ -167,6 +217,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalAuthorization
+     */
     public function voidAuthorization(string $authorizationId): array
     {
         $response = $this->getSdkClient()->getPaymentsController()->voidPayment([
@@ -175,6 +228,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalAuthorization
+     */
     public function getAuthorization(string $authorizationId): array
     {
         $response = $this->getSdkClient()->getPaymentsController()->getAuthorizedPayment([
@@ -183,6 +239,9 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalCapture
+     */
     public function getCapture(string $captureId): array
     {
         $response = $this->getSdkClient()->getPaymentsController()->getCapturedPayment([
@@ -191,18 +250,29 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @param VaultTokenRequest $body
+     * @return PaypalPaymentToken
+     */
     public function createSetupToken(array $body): array
     {
         $response = $this->getSdkClient()->getVaultController()->createSetupToken(['body' => $body]);
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @param VaultTokenRequest $body
+     * @return PaypalPaymentToken
+     */
     public function createPaymentToken(array $body): array
     {
         $response = $this->getSdkClient()->getVaultController()->createPaymentToken(['body' => $body]);
         return $this->_decodeResponse($response);
     }
 
+    /**
+     * @return PaypalPaymentTokenList
+     */
     public function listPaymentTokens(string $customerId): array
     {
         $response = $this->getSdkClient()->getVaultController()->listCustomerPaymentTokens([
@@ -242,6 +312,10 @@ class Maho_Paypal_Model_Api_Client
         return $clientToken;
     }
 
+    /**
+     * @param list<string> $eventTypes
+     * @return PaypalWebhook
+     */
     public function createWebhook(string $url, array $eventTypes): array
     {
         $body = [
@@ -271,6 +345,9 @@ class Maho_Paypal_Model_Api_Client
         return Mage::helper('core')->jsonDecode($response->getContent());
     }
 
+    /**
+     * @param array<string, string> $headers
+     */
     public function verifyWebhookSignature(array $headers, string $body, string $webhookId): bool
     {
         $certUrl = $headers['PAYPAL-CERT-URL'] ?? '';
@@ -314,6 +391,8 @@ class Maho_Paypal_Model_Api_Client
      * must be spliced into the request verbatim — a decode/encode round-trip changes
      * JSON semantics (PHP folds {} into []), which fails verification for any payload
      * containing an empty object, e.g. every CHECKOUT.ORDER.APPROVED event.
+     *
+     * @param array<string, string> $headers
      */
     public static function buildVerificationRequest(array $headers, string $webhookId, string $rawBody): string
     {
@@ -339,6 +418,9 @@ class Maho_Paypal_Model_Api_Client
         return true;
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function _decodeResponse(mixed $response): array
     {
         if (is_object($response) && method_exists($response, 'getResult')) {
@@ -386,6 +468,9 @@ class Maho_Paypal_Model_Api_Client
         return $base . $path;
     }
 
+    /**
+     * @return array{Authorization: string, 'Content-Type': string}
+     */
     protected function _getAuthHeaders(): array
     {
         if ($this->_cachedAccessToken !== null) {
@@ -413,7 +498,7 @@ class Maho_Paypal_Model_Api_Client
     /**
      * Request an OAuth token from PayPal. Send the request again once if it does not reach PayPal.
      *
-     * @return array<string, mixed>
+     * @return PaypalToken
      */
     protected function _requestToken(string $body): array
     {
@@ -453,6 +538,9 @@ class Maho_Paypal_Model_Api_Client
         return \Maho\Http\Client::create(['timeout' => 30]);
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     protected function _log(string $message, array $context = []): void
     {
         if ($this->getConfig()->isDebug($this->_storeId)) {

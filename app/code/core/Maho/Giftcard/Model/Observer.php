@@ -326,7 +326,7 @@ class Maho_Giftcard_Model_Observer
             // Format codes for display
             $displayCodes = [];
             foreach (array_keys($codes) as $code) {
-                $displayCodes[] = Mage::helper('giftcard')->maskCode($code);
+                $displayCodes[] = Mage::helper('giftcard')->maskCode((string) $code);
             }
 
             $additionalInfo['gift_cards_used'] = implode(', ', $displayCodes);

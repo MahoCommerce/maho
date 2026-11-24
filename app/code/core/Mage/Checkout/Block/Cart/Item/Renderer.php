@@ -17,6 +17,7 @@ declare(strict_types=1);
  *
  * @method bool hasProductName()
  * @method bool hasDeleteUrl()
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
  */
 class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
 {
@@ -163,7 +164,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     /**
      * Get product customize options
      *
-     * @return array | false
+     * @return list<ItemOption>
      */
     public function getProductOptions()
     {
@@ -175,7 +176,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     /**
      * Get list of all options for product
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getOptionList()
     {
@@ -344,22 +345,8 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     /**
      * Accept option value and return its formatted view
      *
-     * @param mixed $optionValue
-     * Method works well with these $optionValue format:
-     *      1. String
-     *      2. Indexed array e.g. [val1, val2, ...]
-     *      3. Associative array, containing additional option info, including option value, e.g.
-     *          [
-     *          (
-     *              [label] => ...,
-     *              [value] => ...,
-     *              [print_value] => ...,
-     *              [option_id] => ...,
-     *              [option_type] => ...,
-     *              [custom_view] =>...,
-     *          )
-     *
-     * @return array
+     * @param string|list<string>|ItemOption $optionValue a value, a list of values, or an option with its value
+     * @return array{value: string|list<string>, full_view?: string}
      */
     public function getFormatedOptionValue($optionValue)
     {

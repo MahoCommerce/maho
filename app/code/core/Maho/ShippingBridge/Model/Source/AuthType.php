@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_ShippingBridge_Model_Source_AuthType
 {
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         $helper = Mage::helper('shippingbridge');

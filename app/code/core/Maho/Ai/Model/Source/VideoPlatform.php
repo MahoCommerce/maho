@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_Ai_Model_Source_VideoPlatform
 {
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         $options = [];

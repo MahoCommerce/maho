@@ -129,7 +129,7 @@ final class McpDispatchProvider implements ProviderInterface
             return $data;
         }
 
-        return $this->denormalizeBody($operation, $uriVariables, $context, $arguments, $data);
+        return $this->denormalizeBody($operation, $uriVariables, $context['request'] ?? null, $arguments, $data);
     }
 
     private function enforce(Operation $operation, mixed $request): void
@@ -161,12 +161,15 @@ final class McpDispatchProvider implements ProviderInterface
      * context builder, so groups and `OBJECT_TO_POPULATE` match REST. `$data` is the
      * entity the read stage loaded, null for a create.
      *
+     * @param array<string, mixed> $uriVariables
      * @param array<string, mixed> $arguments
+     * @param object|array<array-key, object>|null $data
+     * @return object|array<array-key, object>|null
      */
     private function denormalizeBody(
         HttpOperation $operation,
         array $uriVariables,
-        array $context,
+        ?Request $request,
         array $arguments,
         object|array|null $data,
     ): object|array|null {
@@ -175,7 +178,6 @@ final class McpDispatchProvider implements ProviderInterface
             return $data;
         }
 
-        $request = $context['request'] ?? null;
         $serializerContext = $request !== null
             ? $this->serializerContextBuilder->createFromRequest($request, false, [
                 'resource_class' => $resourceClass,

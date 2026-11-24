@@ -11,6 +11,8 @@ declare(strict_types=1);
 /**
  * @method Maho_CustomerSegmentation_Model_Resource_Segment getResource()
  * @method Maho_CustomerSegmentation_Model_Resource_Segment _getResource()
+ *
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 {
@@ -105,6 +107,8 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     /**
      * Get matching customer IDs for this segment
+     *
+     * @return list<int|string>
      */
     public function getMatchingCustomerIds(?int $websiteId = null): array
     {
@@ -262,6 +266,9 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getRefreshModeOptions(): array
     {
         return [
@@ -270,6 +277,9 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getRefreshStatusOptions(): array
     {
         return [
@@ -280,6 +290,9 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         ];
     }
 
+    /**
+     * @param array<mixed> $data
+     */
     #[\Override]
     public function loadPost(array $data): self
     {
@@ -332,6 +345,8 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     /**
      * Get automation trigger options for admin form
+     *
+     * @return array<string, string>
      */
     public function getAutoEmailTriggerOptions(): array
     {
@@ -422,6 +437,8 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
 
     /**
      * Get email automation statistics for this segment
+     *
+     * @return array<string, DbValue>
      */
     public function getEmailAutomationStats(): array
     {

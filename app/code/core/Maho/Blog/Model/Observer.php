@@ -137,6 +137,9 @@ class Maho_Blog_Model_Observer
         }
     }
 
+    /**
+     * @return array<Maho_Blog_Model_Category>
+     */
     protected function getBlogCategoriesForSitemap(int $storeId): array
     {
         /** @var Maho_Blog_Model_Resource_Category_Collection $collection */
@@ -148,6 +151,9 @@ class Maho_Blog_Model_Observer
         return $collection->getItems();
     }
 
+    /**
+     * @return list<Maho_Blog_Model_Post>
+     */
     protected function getBlogPostsForSitemap(int $storeId): array
     {
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */

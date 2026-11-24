@@ -142,7 +142,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
 
         // If values are identical, just show the value
         if ($oldValue === $newValue) {
-            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue ?: '<em>(empty)</em>') . '</div>';
+            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue !== '' ? $this->escapeHtml($oldValue) : '<em>(empty)</em>') . '</div>';
         }
 
 
@@ -218,6 +218,11 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return $html;
     }
 
+    /**
+     * @param list<string> $oldLines
+     * @param list<string> $newLines
+     * @return list<array{type: 'added'|'removed'|'unchanged', content: string}>
+     */
     protected function calculateLineDiff(array $oldLines, array $newLines): array
     {
         $diff = [];

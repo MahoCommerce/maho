@@ -18,6 +18,8 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
 
     /**
      * Get applied gift card codes with their data
+     *
+     * @return list<array{code: string, display_code: string, applied_amount: float, applied_amount_formatted: string, balance: float, balance_formatted: string}>
      */
     public function getAppliedGiftcards(): array
     {
@@ -37,6 +39,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
         $baseCurrency = $quote->getBaseCurrencyCode();
 
         foreach ($codes as $code => $appliedAmount) {
+            $code = (string) $code;
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if ($giftcard->getId()) {
@@ -48,7 +51,6 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
                     'applied_amount_formatted' => $this->formatPrice($appliedAmount),
                     'balance' => $balance,
                     'balance_formatted' => $this->formatPrice($balance),
-                    'status' => $giftcard->getStatusLabel(),
                 ];
             }
         }

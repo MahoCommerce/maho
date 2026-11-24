@@ -17,6 +17,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         $this->setValue(null);
     }
 
+    /**
+     * @return array{value: string, label: string}
+     */
     #[\Override]
     public function getNewChildSelectOptions(): array
     {
@@ -85,6 +88,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         };
     }
 
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     #[\Override]
     public function getOperatorSelectOptions(): array
     {
@@ -95,6 +101,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Address extends
         return parent::getOperatorSelectOptions();
     }
 
+    /**
+     * @return list<array<string, mixed>>
+     */
     #[\Override]
     public function getValueSelectOptions(): array
     {

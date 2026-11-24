@@ -8,6 +8,9 @@
  * @package Mage_Adminhtml
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     /**
@@ -69,7 +72,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
     /**
      * Returns list of options and their values for product configuration
      *
-     * @return array
+     * @return list<ItemOption>
      */
     protected function getOptionList()
     {
@@ -82,8 +85,8 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
     /**
      * Returns formatted option value for an item
      *
-     * @param Mage_Wishlist_Model_Item_Option $option
-     * @return array
+     * @param ItemOption $option
+     * @return array{value: string|list<string>, full_view?: string}
      */
     protected function getFormattedOptionValue($option)
     {

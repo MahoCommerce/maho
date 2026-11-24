@@ -20,7 +20,7 @@ These operations check the token: `POST /contact`, `POST /newsletter/subscribe`,
 
 | Event | Purpose | Observer parameters |
 |-------|---------|---------------------|
-| `api_captcha_config` | Describe the active provider to the frontend | `config` (DataObject, set `enabled`, `provider`, and any provider-specific fields like `challengeUrl` or `siteKey`) |
+| `api_captcha_config` | Describe the active provider to the frontend | `config` (DataObject, set `enabled`, `provider`, and any provider-specific fields like `challenge_url` or `site_key`) |
 | `api_verify_captcha` | Verify a submitted token | `result` (DataObject, set `verified` to `false` and `error` to a message string to reject), `data` (array, the fields of the request that the endpoint gives, always with the token in `captchaToken`) |
 
 ### Helper methods

@@ -12,6 +12,9 @@ class Maho_ShippingBridge_Model_Source_ProductAttribute
 {
     protected const array EXCLUDED_CODES = ['sku', 'name', 'price', 'weight'];
 
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         /** @var Mage_Catalog_Model_Resource_Product_Attribute_Collection $collection */

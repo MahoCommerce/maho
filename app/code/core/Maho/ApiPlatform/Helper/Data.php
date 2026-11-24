@@ -279,6 +279,8 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get captcha configuration for the frontend.
      * Dispatches api_captcha_config so any captcha module can describe itself.
+     *
+     * @return array<string, mixed>
      */
     public function getCaptchaConfig(): array
     {

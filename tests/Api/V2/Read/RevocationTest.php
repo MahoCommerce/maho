@@ -49,6 +49,18 @@ describe('GET /api/rest/v2/revocation-requests', function (): void {
         expect(count(getItems($response)))->toBeLessThanOrEqual(5);
     });
 
+    it('rejects a list where a filter takes one value', function (string $query, string $name): void {
+        $response = apiGet("/api/rest/v2/revocation-requests?{$query}", adminToken());
+
+        expect($response['status'])->toBe(400);
+        expect($response['json']['message'] ?? $response['json']['detail'] ?? '')->toContain($name);
+    })->with([
+        'processedStatus' => ['processedStatus[]=accepted', 'processedStatus'],
+        'storeId' => ['storeId[]=1', 'storeId'],
+        'email' => ['email[like]=%25', 'email'],
+        'orderId' => ['orderId[]=1', 'orderId'],
+    ]);
+
 });
 
 describe('GET /api/rest/v2/revocation-requests/{id}', function (): void {
@@ -116,7 +128,7 @@ function anyRevocationRequestId(): ?int
             ->setPageSize(1)
             ->getFirstItem();
         return $request->getId() ? (int) $request->getId() : null;
-    } catch (\Throwable $e) {
+    } catch (\Throwable) {
         return null;
     }
 }
@@ -136,7 +148,7 @@ function foreignRevocationRequestId(?string $customerEmail): ?int
         }
         $request = $collection->getFirstItem();
         return $request->getId() ? (int) $request->getId() : null;
-    } catch (\Throwable $e) {
+    } catch (\Throwable) {
         return null;
     }
 }

@@ -297,6 +297,9 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         }
     }
 
+    /**
+     * @return list<string|false>
+     */
     public function getAllCSSFilesContents(): array
     {
         $files = $this->getAllCSSFiles(Mage::getBaseDir('skin') . '/frontend');
@@ -307,6 +310,9 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         return $files;
     }
 
+    /**
+     * @return list<string>
+     */
     public function getAllCSSFiles(string $dir): array
     {
         $result = [];
@@ -345,6 +351,9 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
         ));
     }
 
+    /**
+     * @param list<string> $blacklistedPatterns
+     */
     public function isBlacklisted(string $path, array $blacklistedPatterns): bool
     {
         return array_any($blacklistedPatterns, fn($blacklistedPattern) => fnmatch('*/' . $blacklistedPattern, $path));

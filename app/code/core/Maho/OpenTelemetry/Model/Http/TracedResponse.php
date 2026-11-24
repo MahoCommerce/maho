@@ -92,6 +92,9 @@ class Maho_OpenTelemetry_Model_Http_TracedResponse implements ResponseInterface,
         return $content;
     }
 
+    /**
+     * @return array<mixed>
+     */
     #[\Override]
     public function toArray(bool $throw = true): array
     {

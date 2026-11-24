@@ -8,6 +8,10 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
+ * @phpstan-type ReadySequence array<string, DbValue>
+ */
 class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]
@@ -18,6 +22,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Get customers with active sequences for a segment and trigger type
+     *
+     * @return list<int|string>
      */
     public function getActiveSequenceCustomers(int $segmentId, string $triggerType): array
     {
@@ -35,6 +41,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Stop sequences for specific customers
+     *
+     * @param array<int|string> $customerIds
      */
     public function stopSequencesForCustomers(int $segmentId, array $customerIds, string $triggerType): int
     {
@@ -60,6 +68,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Get scheduled sequences ready to send
+     *
+     * @return list<ReadySequence>
      */
     public function getReadyToSendSequences(int $limit = 100): array
     {
@@ -136,6 +146,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Get progress statistics for a sequence
+     *
+     * @return array<string, DbValue>
      */
     public function getSequenceStats(int $sequenceId): array
     {
@@ -156,6 +168,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Get progress statistics for a segment
+     *
+     * @return array<string, DbValue>
      */
     public function getSegmentStats(int $segmentId): array
     {
@@ -198,6 +212,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Get customer's automation history
+     *
+     * @return list<array<string, DbValue>>
      */
     public function getCustomerHistory(int $customerId, int $limit = 50): array
     {
@@ -229,6 +245,8 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
     /**
      * Create progress records for a customer entering a sequence
+     *
+     * @param list<array{sequence_id: int|string, step_number: int|null, delay_minutes: int|null}> $sequences
      */
     public function createSequenceProgress(
         int $customerId,

@@ -52,6 +52,7 @@ final class CustomerSegmentProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * @return TraversablePaginator<\Maho_CustomerSegmentation_Model_Segment>
+     * @param array<string, mixed> $context
      */
     private function segments(array $context): TraversablePaginator
     {

@@ -25,6 +25,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRul
 
     /**
      * Add source matching operators to default operator options
+     *
+     * @return array<string, string>
      */
     #[\Override]
     public function getDefaultOperatorOptions(): array
@@ -45,6 +47,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRul
 
     /**
      * Add source matching operators to all input types
+     *
+     * @return array<string, list<string>>
      */
     #[\Override]
     public function getDefaultOperatorInputByType(): array
@@ -168,6 +172,10 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Maho_CatalogLinkRul
 
     /**
      * Don't include value in array output for source matching operators
+     */
+    /**
+     * @param array<mixed> $arrAttributes
+     * @return array<string, mixed>
      */
     #[\Override]
     public function asArray(array $arrAttributes = []): array

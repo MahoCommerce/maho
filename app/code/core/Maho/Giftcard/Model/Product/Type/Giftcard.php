@@ -47,6 +47,8 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      *
      * Transfer gift card fields from request to buyRequest so they get
      * serialized into info_buyRequest by the parent _prepareProduct method.
+     *
+     * @return array<int, int|string> the value of each custom option by option ID
      */
     #[\Override]
     protected function _prepareOptions(Maho\DataObject $buyRequest, $product, $processMode)
@@ -83,7 +85,9 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Prepare product for cart
      * Set custom price based on gift card amount
      *
-     * @throws Mage_Core_Exception_Input when the delivery date is not a date in the format Y-m-d
+     * @return list<Mage_Catalog_Model_Product>|string
+     * @throws Mage_Core_Exception_Input when the delivery date is not a date in the format Y-m-d, or when a name,
+     *     an email or the message is not a text
      */
     #[\Override]
     public function prepareForCartAdvanced(Maho\DataObject $buyRequest, $product = null, $processMode = null)
@@ -102,6 +106,12 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 'giftcard_delivery_date',
                 Mage::helper('giftcard')->__('Please enter the delivery date in the format YYYY-MM-DD.'),
             );
+        }
+        foreach (array_keys(Maho_Giftcard_Helper_Data::DISPLAY_OPTIONS) as $field) {
+            $value = $buyRequest->getData($field);
+            if ($value !== null && !is_string($value)) {
+                throw new Mage_Core_Exception_Input()->addError($field, Mage::helper('giftcard')->__('Please enter a text value.'));
+            }
         }
 
         // Validate and set the price to the gift card amount
@@ -280,7 +290,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      *
      * @param Mage_Catalog_Model_Product $product
      * @param Maho\DataObject $buyRequest
-     * @return array
+     * @return array<string, mixed>
      */
     #[\Override]
     public function processBuyRequest($product, $buyRequest)

@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_Template
 {
     /**
@@ -21,7 +24,7 @@ class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_T
     }
 
     /**
-     * @return array
+     * @return list<ItemOption>
      */
     public function getItemOptions()
     {
@@ -30,7 +33,7 @@ class Mage_Sales_Block_Order_Email_Items_Order_Default extends Mage_Core_Block_T
             if (isset($options['options'])) {
                 $result = array_merge($result, $options['options']);
             }
-            $result = array_merge($result, $this->getItem()->getProductAdditionalOptions());
+            $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeOptionValues($this->getItem()->getProductAdditionalOptions()));
             if (isset($options['attributes_info'])) {
                 $result = array_merge($result, Mage::helper('catalog/product_configuration')->escapeAttributesInfo($options['attributes_info']));
             }

@@ -206,6 +206,8 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 
     /**
      * Get matching source product IDs
+     *
+     * @return list<int>
      */
     public function getMatchingSourceProductIds(): array
     {

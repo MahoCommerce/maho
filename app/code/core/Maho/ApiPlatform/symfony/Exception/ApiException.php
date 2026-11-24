@@ -15,9 +15,14 @@ namespace Maho\ApiPlatform\Exception;
  *
  * All API-specific exceptions should extend this class.
  * Provides structured error response data for consistent API error handling.
+ *
+ * @phpstan-type ErrorDetails array<string, int|string|list<array{field: string, message: string}>>
  */
 class ApiException extends \RuntimeException
 {
+    /**
+     * @param ErrorDetails $details
+     */
     public function __construct(
         string $message,
         protected string $errorCode = 'api_error',
@@ -38,6 +43,9 @@ class ApiException extends \RuntimeException
         return $this->code;
     }
 
+    /**
+     * @return ErrorDetails
+     */
     public function getDetails(): array
     {
         return $this->details;
@@ -45,6 +53,8 @@ class ApiException extends \RuntimeException
 
     /**
      * Convert exception to array for JSON response
+     *
+     * @return array{error: string, message: string, code: int, details?: ErrorDetails}
      */
     public function toArray(): array
     {

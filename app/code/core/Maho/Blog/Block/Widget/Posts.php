@@ -46,6 +46,9 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
         return max(1, (int) $this->getData('posts_count'));
     }
 
+    /**
+     * @return array<int|string, int|string|null>
+     */
     #[\Override]
     public function getCacheKeyInfo()
     {

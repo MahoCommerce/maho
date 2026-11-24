@@ -26,11 +26,6 @@ class Maho_Blog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_Attri
     #[\Override]
     protected $_eventObject = 'attribute';
 
-    /**
-     * Array with labels
-     */
-    protected static ?array $_labels = null;
-
     #[\Override]
     protected function _construct()
     {

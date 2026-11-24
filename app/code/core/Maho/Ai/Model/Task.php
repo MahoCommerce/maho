@@ -108,6 +108,9 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
         return $this->getData('status') === self::STATUS_PROCESSING;
     }
 
+    /**
+     * @return list<array{role: string, content: string}>
+     */
     public function getMessagesArray(): array
     {
         $json = $this->getData('messages');
@@ -117,6 +120,9 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
         return Mage::helper('core')->jsonDecode($json) ?? [];
     }
 
+    /**
+     * @return array{mode?: string, schedule_id?: int, manual?: bool, entity_type?: string, entity_id?: int, ...<string, mixed>}
+     */
     public function getContextArray(): array
     {
         $json = $this->getData('context');

@@ -8,11 +8,20 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type BridgeMethod array{code: non-empty-string, title: non-empty-string, price: float|int|numeric-string, cost?: float|int|numeric-string, description?: string, logo?: string}
+ * @phpstan-type BridgeItem array<string, mixed>
+ * @phpstan-type BridgeAddress array{firstname: string|null, lastname: string|null, street: string|null, city: string|null, region: string|null, region_code: string|null, postcode: string|null, country_id: string|null}
+ * @phpstan-type BridgeCustomer array{}|array{customer_id: int|null, email: string|null, group_id: int, group_code: string|null, is_guest: bool}
+ */
 class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
 {
     #[\Override]
     protected $_code = 'shippingbridge';
 
+    /**
+     * @var array<string, string>
+     */
     protected array $_lastMethods = [];
 
     /**
@@ -114,7 +123,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 if (!empty($methodData['description'])) {
                     $method->setMethodDescription($methodData['description']);
                 }
-                if (!empty($methodData['logo']) && is_string($methodData['logo'])) {
+                if (!empty($methodData['logo'])) {
                     $method->setMethodLogo($methodData['logo']);
                 }
 
@@ -134,7 +143,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     #[\Override]
     public function getAllowedMethods()
@@ -155,6 +164,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return true;
     }
 
+    /**
+     * @return array{cart: array{items: list<BridgeItem>, totals: array{subtotal: float, weight: float, qty: float}}, shipping_address: BridgeAddress, currency: string|null, store_id: int, customer: BridgeCustomer}
+     */
     protected function _buildRequestPayload(Mage_Shipping_Model_Rate_Request $request): array
     {
         $items = [];
@@ -243,6 +255,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
             }
         }
 
+        // The rate request carries no name, so it comes from the address that the rates are for
+        $shippingAddress = $allItems ? reset($allItems)->getQuote()?->getShippingAddress() : null;
+
         $payload = [
             'cart' => [
                 'items' => $items,
@@ -253,8 +268,8 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 ],
             ],
             'shipping_address' => [
-                'firstname' => $request->getDestFirstname(),
-                'lastname' => $request->getDestLastname(),
+                'firstname' => $shippingAddress?->getFirstname(),
+                'lastname' => $shippingAddress?->getLastname(),
                 'street' => $request->getDestStreet(),
                 'city' => $request->getDestCity(),
                 'region' => $this->_getDestRegionName($request),
@@ -270,6 +285,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $payload;
     }
 
+    /**
+     * @return array{sku: string|null, name: string|null, qty: float, weight: float, price: float, row_total: float}
+     */
     protected function _buildItemData(Mage_Sales_Model_Quote_Item_Abstract $item, ?float $qty = null): array
     {
         return [
@@ -282,6 +300,11 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         ];
     }
 
+    /**
+     * @param BridgeItem $itemData
+     * @param array<int, string> $attributeCodes
+     * @param array<int, Mage_Catalog_Model_Product> $products
+     */
     protected function _mergeAttributeValues(array &$itemData, int $productId, array $attributeCodes, array $products, ?int $fallbackProductId = null): void
     {
         if (!$attributeCodes || !isset($products[$productId])) {
@@ -296,6 +319,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         }
     }
 
+    /**
+     * @return list<string>
+     */
     protected function _getSuperAttributeCodes(Mage_Catalog_Model_Product $product): array
     {
         /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
@@ -307,6 +333,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $codes;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function _getAdditionalAttributeCodes(): array
     {
         $value = (string) $this->getConfigData('additional_attributes');
@@ -317,6 +346,8 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     }
 
     /**
+     * @param array<int, int> $productIds
+     * @param array<int, string> $attributeCodes
      * @return array<int, Mage_Catalog_Model_Product>
      */
     protected function _loadProductAttributes(array $productIds, array $attributeCodes): array
@@ -375,6 +406,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         return $request->getDestRegionCode();
     }
 
+    /**
+     * @return BridgeCustomer
+     */
     protected function _buildCustomerData(Mage_Shipping_Model_Rate_Request $request): array
     {
         $allItems = $request->getAllItems();
@@ -396,6 +430,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         ];
     }
 
+    /**
+     * @return list<BridgeMethod>|null
+     */
     protected function _parseResponse(string $responseBody): ?array
     {
         try {
@@ -420,15 +457,28 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
 
         $methods = [];
         foreach ($data['methods'] as $i => $method) {
-            if (empty($method['code']) || empty($method['title']) || !isset($method['price'])) {
+            if (empty($method['code']) || !is_string($method['code'])
+                || empty($method['title']) || !is_string($method['title'])
+                || !isset($method['price']) || !is_numeric($method['price'])
+            ) {
                 Mage::log(
-                    "Shipping Bridge: Method at index {$i} missing required fields (code, title, price)",
+                    "Shipping Bridge: Method at index {$i} has a missing or invalid required field (code, title, price)",
                     Mage::LOG_WARNING,
                     'shipping_bridge.log',
                 );
                 continue;
             }
-            $methods[] = $method;
+            $valid = ['code' => $method['code'], 'title' => $method['title'], 'price' => $method['price']];
+            if (isset($method['cost']) && is_numeric($method['cost'])) {
+                $valid['cost'] = $method['cost'];
+            }
+            if (isset($method['description']) && is_string($method['description'])) {
+                $valid['description'] = $method['description'];
+            }
+            if (isset($method['logo']) && is_string($method['logo'])) {
+                $valid['logo'] = $method['logo'];
+            }
+            $methods[] = $valid;
         }
 
         return $methods;

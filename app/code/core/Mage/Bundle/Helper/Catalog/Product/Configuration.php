@@ -8,6 +8,9 @@
  * @package Mage_Bundle
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_Abstract implements Mage_Catalog_Helper_Product_Configuration_Interface
 {
     #[\Override]
@@ -54,7 +57,7 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
      * Returns array of options objects.
      * Each option object will contain array of selections objects
      *
-     * @return array
+     * @return list<array{label: string, value: list<string>}>
      */
     public function getBundleOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)
     {
@@ -118,7 +121,7 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
     /**
      * Retrieves product options list
      *
-     * @return array
+     * @return list<ItemOption>
      */
     #[\Override]
     public function getOptions(Mage_Catalog_Model_Product_Configuration_Item_Interface $item)

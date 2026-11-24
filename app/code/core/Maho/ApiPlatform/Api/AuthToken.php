@@ -63,9 +63,11 @@ class AuthToken extends \Maho\ApiPlatform\Resource
     #[SerializedName('expires_in')]
     public ?int $expiresIn = null;
 
+    /** @var array{id: int, email: string|null, firstName: string|null, lastName: string|null}|null */
     #[ApiProperty(description: 'Authenticated customer info')]
     public ?array $customer = null;
 
+    /** @var array{id: int, username: string|null}|null */
     #[ApiProperty(description: 'API user info (for client_credentials/api_user grants)')]
     public ?array $apiUser = null;
 
@@ -78,6 +80,7 @@ class AuthToken extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Customer cart items quantity')]
     public ?float $cartItemsQty = null;
 
+    /** @var list<string>|null */
     #[ApiProperty(description: 'API user permissions')]
     public ?array $permissions = null;
 

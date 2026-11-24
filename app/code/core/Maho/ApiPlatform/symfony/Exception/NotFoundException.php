@@ -14,9 +14,14 @@ namespace Maho\ApiPlatform\Exception;
  * Not Found Exception - 404 Not Found.
  *
  * Use when a requested resource does not exist.
+ *
+ * @phpstan-import-type ErrorDetails from ApiException
  */
 class NotFoundException extends ApiException
 {
+    /**
+     * @param ErrorDetails $details
+     */
     public function __construct(
         string $message = 'Resource not found',
         string $errorCode = 'not_found',

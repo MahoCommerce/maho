@@ -26,6 +26,7 @@ final class CustomerSegmentConditionsTransform implements TransformCallableInter
     use ConditionMetadataTrait;
 
     private ?string $locale = null;
+    /** @var array<string, mixed>|null */
     private ?array $document = null;
 
     public function __construct(Security $security)

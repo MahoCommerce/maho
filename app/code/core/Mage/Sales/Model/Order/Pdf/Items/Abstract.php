@@ -8,6 +8,9 @@
  * @package Mage_Sales
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block_Template
 {
     /**
@@ -287,7 +290,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     /**
      * Get item options
      *
-     * @return array
+     * @return list<ItemOption>
      */
     public function getItemOptions()
     {

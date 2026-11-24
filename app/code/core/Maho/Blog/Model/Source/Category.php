@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Source_Category
 {
+    /**
+     * @return list<array{value: int|string, label: string}>
+     */
     public function toOptionArray(): array
     {
         $options = [

@@ -13,6 +13,9 @@ class Maho_Ai_Model_Source_Models
     /** Provider being filtered to. Empty string = all providers. */
     protected string $provider = '';
 
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         return $this->getForProvider($this->provider);
@@ -26,6 +29,8 @@ class Maho_Ai_Model_Source_Models
      * saved value is always preserved as an option so saving the form
      * doesn't blank it out when the cache hasn't been populated yet (e.g.
      * first install, or a fetch failure).
+     *
+     * @return list<array{value: string, label: string}>
      */
     protected function getForProvider(string $provider): array
     {
