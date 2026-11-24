@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
 {
+    /** The save of a restore writes the current time to these fields, not the value of the version. */
+    private const array SAVE_TIME_FIELDS = ['update_time', 'updated_at'];
+
     public function getMaxVersions(): int
     {
         return (int) Mage::getStoreConfig('general/contentversion/max_versions');
@@ -96,6 +99,43 @@ class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
         };
 
         return ['entity_type' => $entityType, 'entity_id' => $entityId];
+    }
+
+    /**
+     * The fields that a restore of $version changes, with the current value and the value of the
+     * version. Returns null when the record of the version no longer exists.
+     *
+     * @return array<string, array{current: string, version: string}>|null
+     */
+    public function getRestoreChanges(Maho_ContentVersion_Model_Version $version): ?array
+    {
+        $model = $this->loadEntity((string) $version->getData('entity_type'), (int) $version->getData('entity_id'));
+        if (!$model->getId()) {
+            return null;
+        }
+
+        $changes = [];
+        foreach ($version->getContentDataDecoded() as $field => $value) {
+            if (in_array($field, self::SAVE_TIME_FIELDS, true)) {
+                continue;
+            }
+            $current = $this->formatValue($model->getData($field));
+            $restored = $this->formatValue($value);
+            if ($current !== $restored) {
+                $changes[$field] = ['current' => $current, 'version' => $restored];
+            }
+        }
+        return $changes;
+    }
+
+    private function formatValue(mixed $value): string
+    {
+        return match (true) {
+            $value === null => '',
+            is_array($value) => implode(', ', array_map($this->formatValue(...), $value)),
+            is_scalar($value) => (string) $value,
+            default => Mage::helper('core')->jsonEncode($value),
+        };
     }
 
     private function loadEntity(string $entityType, int $entityId): Mage_Core_Model_Abstract

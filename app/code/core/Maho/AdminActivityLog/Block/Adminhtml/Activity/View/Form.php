@@ -70,57 +70,30 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
                          . ($groupActivity->getEntityId() ? ' (ID: ' . $groupActivity->getEntityId() . ')' : ''),
             ]);
 
-            $oldData = $groupActivity->getOldData();
+            $oldData = $groupActivity->getActionType() === 'create' ? [] : $groupActivity->getOldData();
             $newData = $groupActivity->getNewData();
-
-            if (!empty($oldData) || !empty($newData)) {
-
-                // For updates, the data already contains only changed fields
-                // For creates, show all new data
-                if ($groupActivity->getActionType() === 'create') {
-                    $changedFields = [];
-                    foreach ($newData as $key => $newValue) {
-                        $changedFields[$key] = [
-                            'old' => 'N/A',
-                            'new' => $newValue,
-                        ];
-                    }
-                } else {
-                    // For updates, combine old and new data to show changes
-                    $changedFields = [];
-                    $allChangedFields = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
-
-                    foreach ($allChangedFields as $key) {
-                        $changedFields[$key] = [
-                            'old' => $oldData[$key] ?? 'N/A',
-                            'new' => $newData[$key] ?? 'N/A',
-                        ];
-                    }
+            $changesHtml = '';
+            foreach (array_unique(array_merge(array_keys($oldData), array_keys($newData))) as $field) {
+                $oldValue = $this->formatValue($oldData[$field] ?? '');
+                $newValue = $this->formatValue($newData[$field] ?? '');
+                if ($oldValue === '' && $newValue === '') {
+                    continue;
                 }
+                $changesHtml .= '<div style="margin-bottom: 1rem;"><strong>' . $this->escapeHtml($field) . ':</strong>'
+                    . $this->getLayout()->createBlock('adminhtml/template')->setTemplate('widget/diff.phtml')->addData([
+                        'old' => $oldValue,
+                        'new' => $newValue,
+                        'old_label' => Mage::helper('adminactivitylog')->__('Before'),
+                        'new_label' => Mage::helper('adminactivitylog')->__('After'),
+                    ])->toHtml()
+                    . '</div>';
+            }
 
-                if (!empty($changedFields)) {
-                    $changesHtml = '<div style="margin-top: 10px;">';
-                    foreach ($changedFields as $field => $values) {
-                        $oldValue = is_array($values['old']) ? json_encode($values['old']) : (string) $values['old'];
-                        $newValue = is_array($values['new']) ? json_encode($values['new']) : (string) $values['new'];
-
-                        // Skip fields where both values are N/A or empty
-                        if (($oldValue === 'N/A' || $oldValue === '') && ($newValue === 'N/A' || $newValue === '')) {
-                            continue;
-                        }
-
-                        $changesHtml .= '<div style="margin-bottom: 15px;">';
-                        $changesHtml .= '<strong>' . $this->escapeHtml($field) . ':</strong>';
-                        $changesHtml .= $this->generateDiffHtml($oldValue, $newValue);
-                        $changesHtml .= '</div>';
-                    }
-                    $changesHtml .= '</div>';
-
-                    $activityFieldset->addField('activity_' . $groupActivity->getId() . '_changes', 'note', [
-                        'label' => Mage::helper('adminactivitylog')->__('Changes'),
-                        'text' => $changesHtml,
-                    ]);
-                }
+            if ($changesHtml !== '') {
+                $activityFieldset->addField('activity_' . $groupActivity->getId() . '_changes', 'note', [
+                    'label' => Mage::helper('adminactivitylog')->__('Changes'),
+                    'text' => $changesHtml,
+                ]);
             }
         }
 
@@ -130,137 +103,8 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_View_Form extends Mage_Admi
         return parent::_prepareForm();
     }
 
-    protected function generateDiffHtml(string $oldValue, string $newValue): string
+    private function formatValue(mixed $value): string
     {
-        // Convert N/A to empty string for better display
-        if ($oldValue === 'N/A') {
-            $oldValue = '';
-        }
-        if ($newValue === 'N/A') {
-            $newValue = '';
-        }
-
-        // If values are identical, just show the value
-        if ($oldValue === $newValue) {
-            return '<div style="white-space: pre-wrap; font-family: monospace;">' . ($oldValue !== '' ? $this->escapeHtml($oldValue) : '<em>(empty)</em>') . '</div>';
-        }
-
-
-        // Always use the same diff format for consistency
-        $html = '<div style="font-family: monospace; font-size: 12px;">';
-        $html .= '<div style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; border-radius: 4px; overflow-x: auto;">';
-
-        // For single-line values, use the same grouped view as multiline
-        if (!str_contains($oldValue, "\n") && !str_contains($newValue, "\n")) {
-            // Single line diff - show as two groups (removed and added)
-            if ($oldValue !== '') {
-                $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
-                $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($oldValue) . '</div>';
-                $html .= '</div>';
-            }
-            if ($newValue !== '') {
-                $html .= '<div style="background-color: #ddffdd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #008800;">';
-                $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($newValue) . '</div>';
-                $html .= '</div>';
-            }
-        } else {
-            // Multi-line diff
-            $oldLines = explode("\n", $oldValue);
-            $newLines = explode("\n", $newValue);
-
-            // Use a more sophisticated diff algorithm for multiline content
-            $diff = $this->calculateLineDiff($oldLines, $newLines);
-
-            // Group consecutive lines of the same type
-            $groups = [];
-            $currentGroup = null;
-
-            foreach ($diff as $line) {
-                if ($currentGroup === null || $currentGroup['type'] !== $line['type']) {
-                    if ($currentGroup !== null) {
-                        $groups[] = $currentGroup;
-                    }
-                    $currentGroup = ['type' => $line['type'], 'lines' => []];
-                }
-                $currentGroup['lines'][] = $line['content'];
-            }
-            if ($currentGroup !== null) {
-                $groups[] = $currentGroup;
-            }
-
-            // Render grouped lines
-            foreach ($groups as $group) {
-                if ($group['type'] === 'removed') {
-                    $html .= '<div style="background-color: #ffdddd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #cc0000;">';
-                    foreach ($group['lines'] as $line) {
-                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">- ' . $this->escapeHtml($line) . '</div>';
-                    }
-                    $html .= '</div>';
-                } elseif ($group['type'] === 'added') {
-                    $html .= '<div style="background-color: #ddffdd; margin: 4px 0; padding: 6px 8px; border-left: 3px solid #008800;">';
-                    foreach ($group['lines'] as $line) {
-                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">+ ' . $this->escapeHtml($line) . '</div>';
-                    }
-                    $html .= '</div>';
-                } else {
-                    $html .= '<div style="margin: 4px 0; padding: 6px 8px; color: #666;">';
-                    foreach ($group['lines'] as $line) {
-                        $html .= '<div style="white-space: pre-wrap; word-wrap: break-word;">&nbsp;&nbsp;' . $this->escapeHtml($line) . '</div>';
-                    }
-                    $html .= '</div>';
-                }
-            }
-        }
-        $html .= '</div>';
-
-        $html .= '</div>';
-
-        return $html;
+        return is_array($value) ? Mage::helper('core')->jsonEncode($value) : (string) $value;
     }
-
-    /**
-     * @param list<string> $oldLines
-     * @param list<string> $newLines
-     * @return list<array{type: 'added'|'removed'|'unchanged', content: string}>
-     */
-    protected function calculateLineDiff(array $oldLines, array $newLines): array
-    {
-        $diff = [];
-        $oldCount = count($oldLines);
-        $newCount = count($newLines);
-        $maxCount = max($oldCount, $newCount);
-
-        // Simple longest common subsequence approach
-        for ($i = 0; $i < $maxCount; $i++) {
-            $oldLine = $oldLines[$i] ?? null;
-            $newLine = $newLines[$i] ?? null;
-
-            if ($oldLine === null && $newLine !== null) {
-                // Line added
-                $diff[] = ['type' => 'added', 'content' => $newLine];
-            } elseif ($oldLine !== null && $newLine === null) {
-                // Line removed
-                $diff[] = ['type' => 'removed', 'content' => $oldLine];
-            } elseif ($oldLine === $newLine) {
-                // Line unchanged
-                $diff[] = ['type' => 'unchanged', 'content' => $oldLine];
-            } else {
-                // Check if lines are similar after trimming whitespace
-                $oldTrimmed = trim($oldLine);
-                $newTrimmed = trim($newLine);
-
-                if ($oldTrimmed === $newTrimmed && $oldTrimmed !== '') {
-                    // Lines are the same except for whitespace - treat as unchanged
-                    $diff[] = ['type' => 'unchanged', 'content' => $oldLine];
-                } else {
-                    // Line changed - show as removed then added
-                    $diff[] = ['type' => 'removed', 'content' => $oldLine];
-                    $diff[] = ['type' => 'added', 'content' => $newLine];
-                }
-            }
-        }
-
-        return $diff;
-    }
-
 }
