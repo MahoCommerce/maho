@@ -18,7 +18,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
     /**
      * Cached EUR-based rates from the service
      *
-     * @var array<string, mixed>|null
+     * @var array<string, float>|null
      */
     protected $_eurRates = null;
 
@@ -95,7 +95,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
      * Fetch EUR-based rates for all currencies in one request
      *
      * @param array<int, string> $currencies
-     * @return array<string, mixed>|null Returns rates array or null on error
+     * @return array<string, float>|null Returns rates array or null on error
      */
     protected function _fetchEurRates(array $currencies)
     {
@@ -128,8 +128,15 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
             return null;
         }
 
-        $rates['EUR'] = 1.0;
-        $this->_eurRates = $rates;
+        // The service can send any JSON value, so a rate that is not a number counts as missing
+        $eurRates = [];
+        foreach ($rates as $code => $rate) {
+            if (is_numeric($rate)) {
+                $eurRates[$code] = (float) $rate;
+            }
+        }
+        $eurRates['EUR'] = 1.0;
+        $this->_eurRates = $eurRates;
 
         return $this->_eurRates;
     }
@@ -139,7 +146,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
      *
      * Formula: rate(FROM→TO) = rate(EUR→TO) / rate(EUR→FROM)
      *
-     * @param array<string, mixed> $eurRates
+     * @param array<string, float> $eurRates
      * @param string $currencyFrom
      * @param string $currencyTo
      * @return float|null
@@ -155,7 +162,7 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
             return null;
         }
 
-        return (float) $eurToTo / (float) $eurToFrom;
+        return $eurToTo / $eurToFrom;
     }
 
     /**
