@@ -336,7 +336,7 @@ class Maho_Intelligence_Model_Mcp_Server
 
         try {
             $result = ($this->tools[$name]['handler'])($arguments);
-            $text = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            $text = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
             return [
                 'content' => [['type' => 'text', 'text' => $text]],
             ];
