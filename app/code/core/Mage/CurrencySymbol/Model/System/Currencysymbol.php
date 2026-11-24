@@ -164,7 +164,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
                     $symbol = $currencyCode;
                 }
 
-                $name = $locale->getTranslation($currencyCode, 'nametocurrency');
+                $name = $locale->getTranslation($currencyCode, 'currency');
                 if (!$name) {
                     $name = $currencyCode;
                 }
