@@ -84,7 +84,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
      *              [custom_view] =>...,
      *          )
      *
-     * @return array
+     * @return array{value: mixed, full_view?: string}
      */
     public function getFormatedOptionValue($optionValue)
     {

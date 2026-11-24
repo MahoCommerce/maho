@@ -18,6 +18,8 @@ class Maho_Giftcard_Block_Cart_Total extends Mage_Checkout_Block_Total_Default
 
     /**
      * Get applied gift card codes
+     *
+     * @return array<int|string, float|int> the applied amount in the base currency by code, an int key for a numeric code
      */
     public function getGiftCardCodes(): array
     {

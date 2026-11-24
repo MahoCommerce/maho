@@ -26,7 +26,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Build additional options array from buy request for cart/order display
      *
-     * @return array Array of ['label' => string, 'value' => string]
+     * @return list<array{label: string, value: mixed}>
      */
     public function buildAdditionalOptions(Maho\DataObject $buyRequest): array
     {

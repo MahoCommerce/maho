@@ -31,6 +31,7 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
     /**
      * Set gift cards for PDF generation
      *
+     * @param array<Maho_Giftcard_Model_Giftcard> $giftcards
      * @return $this
      */
     public function setGiftcards(array $giftcards): self
@@ -50,6 +51,8 @@ class Maho_Giftcard_Block_Pdf_Giftcard extends Mage_Core_Block_Pdf
 
     /**
      * Get gift cards
+     *
+     * @return array<Maho_Giftcard_Model_Giftcard>
      */
     public function getGiftcards(): array
     {

@@ -47,6 +47,8 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      *
      * Transfer gift card fields from request to buyRequest so they get
      * serialized into info_buyRequest by the parent _prepareProduct method.
+     *
+     * @return array<int|string, mixed> the value of each custom option by option ID
      */
     #[\Override]
     protected function _prepareOptions(Maho\DataObject $buyRequest, $product, $processMode)
@@ -83,6 +85,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      * Prepare product for cart
      * Set custom price based on gift card amount
      *
+     * @return list<Mage_Catalog_Model_Product>|string
      * @throws Mage_Core_Exception_Input when the delivery date is not a date in the format Y-m-d
      */
     #[\Override]
@@ -280,7 +283,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
      *
      * @param Mage_Catalog_Model_Product $product
      * @param Maho\DataObject $buyRequest
-     * @return array
+     * @return array<string, mixed>
      */
     #[\Override]
     public function processBuyRequest($product, $buyRequest)

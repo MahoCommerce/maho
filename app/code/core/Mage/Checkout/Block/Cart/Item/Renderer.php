@@ -359,7 +359,7 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
      *              [custom_view] =>...,
      *          )
      *
-     * @return array
+     * @return array{value: mixed, full_view?: string}
      */
     public function getFormatedOptionValue($optionValue)
     {

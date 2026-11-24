@@ -194,7 +194,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      *  - 'maxLength': truncate option value if needed, default: do not truncate
      *  - 'cutReplacer': replacer for cut off value part when option value exceeds maxLength
      *
-     * @return array
+     * @return array{value: mixed, full_view?: string}
      */
     public function getFormattedOptionValue($optionValue, $params = null)
     {

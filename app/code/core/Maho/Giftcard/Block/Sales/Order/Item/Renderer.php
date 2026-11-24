@@ -12,6 +12,8 @@ class Maho_Giftcard_Block_Sales_Order_Item_Renderer extends Mage_Sales_Block_Ord
 {
     /**
      * Get formatted option value with date formatting support
+     *
+     * @return array{value: mixed, full_view?: string}
      */
     #[\Override]
     public function getFormatedOptionValue($optionValue): array

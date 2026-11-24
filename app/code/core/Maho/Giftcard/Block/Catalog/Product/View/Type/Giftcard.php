@@ -55,6 +55,8 @@ class Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard extends Mage_Catalo
 
     /**
      * Get available gift card amounts as array
+     *
+     * @return list<string>
      */
     public function getGiftcardAmounts(): array
     {

@@ -16,6 +16,8 @@ class Maho_Giftcard_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Bloc
 {
     /**
      * Get formatted option value with date formatting support
+     *
+     * @return array{value: mixed, full_view?: string}
      */
     #[\Override]
     public function getFormatedOptionValue(mixed $optionValue): array
