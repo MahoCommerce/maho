@@ -48,20 +48,8 @@ it('drops the region of the old country when the shipping address moves to a cou
     $this->service->setBillingAddress($this->quote, [], true);
 
     $billing = Mage::getModel('sales/quote')->loadByIdWithoutStore($this->quote->getId())->getBillingAddress();
-    expect([$billing->getCountryId(), $billing->getRegionId(), $billing->getRegion(), $billing->getCity()])
-        ->toBe(['GB', null, null, 'London']);
-});
-
-it('clears a field of the billing address that the shipping address leaves empty', function () {
-    expect($this->quote->getBillingAddress()->getCompany())->toBe('Example Inc.');
-
-    $this->service->setShippingAddress($this->quote, sameAsShippingAddress([
-        'city' => 'New York', 'region' => 'New York', 'postcode' => '10001', 'countryId' => 'US',
-    ]));
-    $this->service->setBillingAddress($this->quote, [], true);
-
-    expect(Mage::getModel('sales/quote')->loadByIdWithoutStore($this->quote->getId())->getBillingAddress()->getCompany())
-        ->toBeNull();
+    expect([$billing->getCountryId(), $billing->getRegionId(), $billing->getRegion(), $billing->getCity(), $billing->getCompany()])
+        ->toBe(['GB', null, null, 'London', null]);
 });
 
 it('keeps the email of the billing address when the shipping address has none', function () {
