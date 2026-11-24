@@ -8,6 +8,9 @@
  * @package Mage_CatalogRule
  */
 
+/**
+ * @phpstan-import-type SelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 class Mage_CatalogRule_Model_Rule_Action_Collection extends Mage_Rule_Model_Action_Collection
 {
     public function __construct()
@@ -17,7 +20,7 @@ class Mage_CatalogRule_Model_Rule_Action_Collection extends Mage_Rule_Model_Acti
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     #[\Override]
     public function getNewChildSelectOptions()

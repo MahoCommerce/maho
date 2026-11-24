@@ -8,6 +8,8 @@
 
 /**
  * Payment restriction rule product subselect condition
+ *
+ * @phpstan-import-type ConditionArray from Mage_Rule_Model_Condition_Abstract
  */
 class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Mage_Payment_Model_Restriction_Rule_Condition_Product_Combine
 {
@@ -38,7 +40,8 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
     /**
      * Return as array
      *
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return ConditionArray
      */
     #[\Override]
     public function asArray(array $arrAttributes = [])

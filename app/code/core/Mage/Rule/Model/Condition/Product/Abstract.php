@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 /**
  * Abstract Rule product condition data model
+ *
+ * @phpstan-import-type ValueSelectOption from Mage_Rule_Model_Condition_Abstract
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Model_Condition_Abstract
 {
@@ -36,7 +39,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      *
      * Will be set only for not global scope attribute
      *
-     * @var array
+     * @var array<int|string, array<int|string, DbValue>>|null
      */
     protected $_entityAttributeValues = null;
 
@@ -50,7 +53,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Customize default operator input by type mapper for some types
      *
-     * @return array
+     * @return array<string, list<string>>
      */
     #[\Override]
     public function getDefaultOperatorInputByType()
@@ -69,8 +72,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Prepare bind array of ids from string or array
      *
-     * @param string|int|array $value
-     * @return array
+     * @param string|int|array<int|string> $value
+     * @return array<string>
      */
     public function bindArrayOfIds($value)
     {
@@ -141,6 +144,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Add special attributes
+     *
+     * @param array<string, string> $attributes
      */
     protected function _addSpecialAttributes(array &$attributes): void
     {
@@ -247,6 +252,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * Retrieve value options
+     *
+     * @return array<int|string, string>|null
      */
     #[\Override]
     public function getValueOption(): ?array
@@ -258,7 +265,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Retrieve select option values
      *
-     * @return array
+     * @return list<ValueSelectOption>
      */
     #[\Override]
     public function getValueSelectOptions()
@@ -417,6 +424,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         return false;
     }
 
+    /**
+     * @param array<string, mixed> $arr
+     */
     #[\Override]
     public function loadArray($arr)
     {
@@ -540,6 +550,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
         return $operator;
     }
 
+    /**
+     * @param array<string, string>|null $value
+     */
     public function setAttributeOption(?array $value): static
     {
         return $this->setData('attribute_option', $value);

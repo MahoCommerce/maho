@@ -8,6 +8,9 @@
  * @package Mage_SalesRule
  */
 
+/**
+ * @phpstan-import-type SelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mage_Rule_Model_Condition_Product_Abstract
 {
     /**
@@ -70,7 +73,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
 
     /**
      * Retrieves unary operators of the attribute assignment state
-     * @return array
+     * @return list<SelectOption>
      */
     #[\Override]
     public function getOperatorSelectOptions()

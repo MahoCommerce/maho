@@ -10,6 +10,10 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type ActionArray array{type: ?string, attribute: ?string, operator: ?string, value: ?string, actions?: list<array<string, mixed>>}
+ * @phpstan-import-type SelectOption from Mage_Rule_Model_Condition_Abstract
+ */
 abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Action_Interface
 {
     /**
@@ -48,7 +52,8 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return ActionArray
      */
     public function asArray(array $arrAttributes = [])
     {
@@ -72,6 +77,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
+     * @param array<string, mixed> $arr
      * @return $this
      */
     public function loadArray(array $arr)
@@ -98,7 +104,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getAttributeSelectOptions()
     {
@@ -130,7 +136,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getOperatorSelectOptions()
     {
@@ -159,7 +165,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @return list<array{value: int|string, label: string}>
      */
     public function getValueSelectOptions()
     {
@@ -180,7 +186,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getNewChildSelectOptions()
     {
@@ -339,11 +345,17 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
         return $this->setData('attribute', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getAttributeOption(): ?array
     {
         return $this->getData('attribute_option');
     }
 
+    /**
+     * @param array<string, string>|null $value
+     */
     public function setAttributeOption(?array $value): static
     {
         return $this->setData('attribute_option', $value);
@@ -360,11 +372,17 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
         return $this->setData('operator', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getOperatorOption(): ?array
     {
         return $this->getData('operator_option');
     }
 
+    /**
+     * @param array<string, string>|null $value
+     */
     public function setOperatorOption(?array $value): static
     {
         return $this->setData('operator_option', $value);
@@ -392,11 +410,17 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
         return $value === null ? null : (string) $value;
     }
 
+    /**
+     * @return array<int|string, string>|null
+     */
     public function getValueOption(): ?array
     {
         return $this->getData('value_option');
     }
 
+    /**
+     * @param array<int|string, string>|null $value
+     */
     public function setValueOption(?array $value): static
     {
         return $this->setData('value_option', $value);

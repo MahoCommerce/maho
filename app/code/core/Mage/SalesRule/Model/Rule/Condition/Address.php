@@ -14,6 +14,8 @@ declare(strict_types=1);
  * Class Mage_SalesRule_Model_Rule_Condition_Address
  *
  * @package    Mage_SalesRule
+ *
+ * @phpstan-import-type ValueSelectOption from Mage_Rule_Model_Condition_Abstract
  */
 class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condition_Abstract
 {
@@ -77,7 +79,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     }
 
     /**
-     * @return array
+     * @return list<ValueSelectOption>
      */
     #[\Override]
     public function getValueSelectOptions()

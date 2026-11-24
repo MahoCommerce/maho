@@ -47,7 +47,9 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Combine extends Mage
     public function collectValidatedAttributes($productCollection)
     {
         foreach ($this->getConditions() as $condition) {
-            $condition->collectValidatedAttributes($productCollection);
+            if (method_exists($condition, 'collectValidatedAttributes')) {
+                $condition->collectValidatedAttributes($productCollection);
+            }
         }
         return $this;
     }

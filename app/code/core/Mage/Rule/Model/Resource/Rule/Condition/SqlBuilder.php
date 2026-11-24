@@ -16,6 +16,9 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
      */
     protected $_adapter;
 
+    /**
+     * @param array{adapter?: Maho\Db\Adapter\AdapterInterface} $config
+     */
     public function __construct(array $config = [])
     {
         $this->_adapter = $config['adapter'] ?? Mage::getSingleton('core/resource')->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE);
@@ -26,7 +29,7 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
      *
      * @param string $field
      * @param string $operator
-     * @param string|array $value
+     * @param string|array<int|string> $value
      * @return string
      */
     public function getOperatorCondition($field, $operator, $value)

@@ -16,6 +16,11 @@ declare(strict_types=1);
  * @method bool hasValueParsed()
  * @method bool hasValueOption()
  * @method Mage_Rule_Model_Abstract getRule()
+ *
+ * @phpstan-type SelectOption array{value: string, label: string}
+ * @phpstan-type ValueSelectOption array{value: int|string|list<array{value: int|string, label: string}>, label: string, ...<string, mixed>}
+ * @phpstan-type ChildSelectOption array{value: string|list<SelectOption>, label: string}
+ * @phpstan-type ConditionArray array{type: ?string, attribute: string|false|null, operator: string|false|null, value: string|int|array<int|string>|null, is_value_processed: ?bool, aggregator?: int|string|null, conditions?: list<array<string, mixed>>}
  */
 abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Condition_Interface
 {
@@ -36,19 +41,19 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
 
     /**
      * Default values for possible operator options
-     * @var array
+     * @var array<string, string>|null
      */
     protected $_defaultOperatorOptions = null;
 
     /**
      * Default combinations of operator options, depending on input type
-     * @var array
+     * @var array<string, list<string>>|null
      */
     protected $_defaultOperatorInputByType = null;
 
     /**
      * List of input types for values which should be array
-     * @var array
+     * @var list<string>
      */
     protected $_arrayInputTypes = [];
 
@@ -106,7 +111,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Default operator input by type map getter
      *
-     * @return array
+     * @return array<string, list<string>>
      */
     public function getDefaultOperatorInputByType()
     {
@@ -130,26 +135,24 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
      * Default operator options getter
      * Provides all possible operator options
      *
-     * @return array
+     * @return array<string, string>
      */
     public function getDefaultOperatorOptions()
     {
-        if ($this->_defaultOperatorOptions === null) {
-            $this->_defaultOperatorOptions = [
-                '=='  => static::$translate ? Mage::helper('rule')->__('is') : 'is',
-                '!='  => static::$translate ? Mage::helper('rule')->__('is not') : 'is not',
-                '>='  => static::$translate ? Mage::helper('rule')->__('equals or greater than') : 'equals or greater than',
-                '<='  => static::$translate ? Mage::helper('rule')->__('equals or less than') : 'equals or less than',
-                '>'   => static::$translate ? Mage::helper('rule')->__('greater than') : 'greater than',
-                '<'   => static::$translate ? Mage::helper('rule')->__('less than') : 'less than',
-                '{}'  => static::$translate ? Mage::helper('rule')->__('contains') : 'contains',
-                '!{}' => static::$translate ? Mage::helper('rule')->__('does not contain') : 'does not contain',
-                '[]'  => static::$translate ? Mage::helper('rule')->__('contains') : 'contains',
-                '![]' => static::$translate ? Mage::helper('rule')->__('does not contain') : 'does not contain',
-                '()'  => static::$translate ? Mage::helper('rule')->__('is one of') : 'is one of',
-                '!()' => static::$translate ? Mage::helper('rule')->__('is not one of') : 'is not one of',
-            ];
-        }
+        $this->_defaultOperatorOptions ??= [
+            '=='  => static::$translate ? Mage::helper('rule')->__('is') : 'is',
+            '!='  => static::$translate ? Mage::helper('rule')->__('is not') : 'is not',
+            '>='  => static::$translate ? Mage::helper('rule')->__('equals or greater than') : 'equals or greater than',
+            '<='  => static::$translate ? Mage::helper('rule')->__('equals or less than') : 'equals or less than',
+            '>'   => static::$translate ? Mage::helper('rule')->__('greater than') : 'greater than',
+            '<'   => static::$translate ? Mage::helper('rule')->__('less than') : 'less than',
+            '{}'  => static::$translate ? Mage::helper('rule')->__('contains') : 'contains',
+            '!{}' => static::$translate ? Mage::helper('rule')->__('does not contain') : 'does not contain',
+            '[]'  => static::$translate ? Mage::helper('rule')->__('contains') : 'contains',
+            '![]' => static::$translate ? Mage::helper('rule')->__('does not contain') : 'does not contain',
+            '()'  => static::$translate ? Mage::helper('rule')->__('is one of') : 'is one of',
+            '!()' => static::$translate ? Mage::helper('rule')->__('is not one of') : 'is not one of',
+        ];
         return $this->_defaultOperatorOptions;
     }
 
@@ -162,7 +165,8 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return ConditionArray
      */
     public function asArray(array $arrAttributes = [])
     {
@@ -187,7 +191,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @param array $arr
+     * @param array<string, mixed> $arr
      * @return $this
      */
     public function loadArray($arr)
@@ -224,7 +228,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return array
+     * @return array<string, string>
      */
     public function getAttributeOptions()
     {
@@ -232,7 +236,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getAttributeSelectOptions()
     {
@@ -273,7 +277,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getOperatorSelectOptions()
     {
@@ -305,7 +309,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return array
+     * @return list<ValueSelectOption>
      */
     public function getValueSelectOptions()
     {
@@ -322,7 +326,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Retrieve parsed value
      *
-     * @return array|string|int|float
+     * @return array<int|string>|string|int|float
      */
     public function getValueParsed()
     {
@@ -350,7 +354,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     }
 
     /**
-     * @return string|int|array|null
+     * @return string|int|array<int|string>|null
      */
     public function getValue()
     {
@@ -418,7 +422,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Get inherited conditions selectors
      *
-     * @return array
+     * @return list<ChildSelectOption>
      */
     public function getNewChildSelectOptions()
     {
@@ -838,6 +842,9 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         return $this->setData('attribute', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getAttributeOption(): ?array
     {
         return $this->getData('attribute_option');
@@ -875,26 +882,41 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         return $this->setData('operator', $value);
     }
 
+    /**
+     * @return array<string, list<string>>|null
+     */
     public function getOperatorByInputType(): ?array
     {
         return $this->getData('operator_by_input_type');
     }
 
+    /**
+     * @param array<string, list<string>>|null $value
+     */
     public function setOperatorByInputType(?array $value): static
     {
         return $this->setData('operator_by_input_type', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getOperatorOption(): ?array
     {
         return $this->getData('operator_option');
     }
 
+    /**
+     * @param array<string, string>|null $value
+     */
     public function setOperatorOption(?array $value): static
     {
         return $this->setData('operator_option', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getOperatorOptions(): ?array
     {
         return $this->getData('operator_options');
@@ -917,6 +939,9 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         return $this->setData('type', $value);
     }
 
+    /**
+     * @param array<int|string>|string|int|float|bool|null $value
+     */
     public function setValue(array|string|int|float|bool|null $value): static
     {
         return $this->setData('value', $value);
@@ -934,16 +959,25 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
         return $value === null ? null : (string) $value;
     }
 
+    /**
+     * @return array<int|string, string>|null
+     */
     public function getValueOption(): ?array
     {
         return $this->getData('value_option');
     }
 
+    /**
+     * @param array<int|string, string>|null $value
+     */
     public function setValueOption(?array $value): static
     {
         return $this->setData('value_option', $value);
     }
 
+    /**
+     * @param array<int|string>|string|int|float|bool|null $value
+     */
     public function setValueParsed(array|string|int|float|bool|null $value): static
     {
         return $this->setData('value_parsed', $value);

@@ -10,12 +10,17 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type SelectOption from Mage_Rule_Model_Condition_Abstract
+ * @phpstan-import-type ChildSelectOption from Mage_Rule_Model_Condition_Abstract
+ * @phpstan-import-type ConditionArray from Mage_Rule_Model_Condition_Abstract
+ */
 class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstract
 {
     /**
      * Store all used condition models
      *
-     * @var array
+     * @var array<string, Mage_Rule_Model_Condition_Abstract|false>
      */
     protected static $_conditionModels = [];
 
@@ -100,7 +105,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     }
 
     /**
-     * @return array
+     * @return list<SelectOption>
      */
     public function getAggregatorSelectOptions()
     {
@@ -202,7 +207,8 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      *   ]
      * ]
      *
-     * @return array
+     * @param list<string> $arrAttributes
+     * @return ConditionArray
      */
     #[\Override]
     public function asArray(array $arrAttributes = [])
@@ -236,7 +242,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     }
 
     /**
-     * @param array $arr
+     * @param array<string, mixed> $arr
      * @param string $key
      * @return $this
      */
@@ -376,7 +382,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * Get conditions, if current prefix is undefined use 'conditions' key
      *
-     * @return array
+     * @return array<int, Mage_Rule_Model_Condition_Abstract>
      */
     public function getConditions()
     {
@@ -387,7 +393,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     /**
      * Set conditions, if current prefix is undefined use 'conditions' key
      *
-     * @param array $conditions
+     * @param array<int, Mage_Rule_Model_Condition_Abstract> $conditions
      * @return $this
      */
     public function setConditions($conditions)
@@ -398,12 +404,17 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
 
     /**
      * Getter for "Conditions Combination" select option for recursive combines
+     *
+     * @return array{value: ?string, label: string}
      */
     protected function _getRecursiveChildSelectOption(): array
     {
         return ['value' => $this->getType(), 'label' => Mage::helper('rule')->__('Conditions Combination')];
     }
 
+    /**
+     * @param array<int, Mage_Rule_Model_Condition_Abstract>|null $value
+     */
     public function setActions(?array $value): static
     {
         return $this->setData('actions', $value);
@@ -419,16 +430,25 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         return $this->setData('aggregator', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getAggregatorOption(): ?array
     {
         return $this->getData('aggregator_option');
     }
 
+    /**
+     * @param array<string, string>|null $value
+     */
     public function setAggregatorOption(?array $value): static
     {
         return $this->setData('aggregator_option', $value);
     }
 
+    /**
+     * @return array<string, string>|null
+     */
     public function getAggregatorOptions(): ?array
     {
         return $this->getData('aggregator_options');

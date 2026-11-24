@@ -12,13 +12,14 @@ declare(strict_types=1);
 
 /**
  * @extends Mage_Rule_Model_Resource_Rule_Collection_Abstract<Mage_CatalogRule_Model_Rule>
+ * @phpstan-import-type AssociatedEntityInfo from Mage_Rule_Model_Resource_Abstract
  */
 class Mage_CatalogRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Resource_Rule_Collection_Abstract
 {
     /**
      * Store associated with rule entities information map
      *
-     * @var array
+     * @var array<string, AssociatedEntityInfo>
      */
     #[\Override]
     protected $_associatedEntitiesMap = [

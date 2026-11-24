@@ -11,6 +11,8 @@
 /**
  * @template TItem of Mage_Rule_Model_Abstract = Mage_Rule_Model_Abstract
  * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<TItem>
+ * @phpstan-import-type AssociatedEntityInfo from Mage_Rule_Model_Resource_Abstract
+ * @phpstan-import-type SqlCondition from \Maho\Db\Adapter\AdapterInterface
  */
 abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
@@ -32,7 +34,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
      *    ....
      * ]
      *
-     * @var array
+     * @var array<string, AssociatedEntityInfo>
      */
     protected $_associatedEntitiesMap = [];
 
@@ -71,7 +73,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
     /**
      * Limit rules collection by specific websites
      *
-     * @param int|array|Mage_Core_Model_Website $websiteId
+     * @param int|string|SqlCondition|Mage_Core_Model_Website|null $websiteId
      *
      * @return $this
      */
@@ -98,8 +100,8 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
     /**
      * Provide support for website id filter
      *
-     * @param string|array $field
-     * @param mixed $condition
+     * @param string|list<string> $field
+     * @param int|string|SqlCondition|null $condition
      *
      * @return $this
      */
@@ -136,7 +138,7 @@ abstract class Mage_Rule_Model_Resource_Rule_Collection_Abstract extends Mage_Co
      *
      * @param string $entityType
      *
-     * @return array
+     * @return AssociatedEntityInfo
      */
     protected function _getAssociatedEntityInfo($entityType)
     {

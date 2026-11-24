@@ -11,6 +11,7 @@
 /**
  * @template TModel of Mage_Rule_Model_Abstract = Mage_Rule_Model_Abstract
  * @extends Mage_Core_Model_Resource_Db_Abstract<TModel>
+ * @phpstan-type AssociatedEntityInfo array{associations_table: string, rule_id_field: string, entity_id_field: string}
  */
 abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
@@ -32,7 +33,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      *    ....
      * ]
      *
-     * @var array
+     * @var array<string, AssociatedEntityInfo>
      */
     protected $_associatedEntitiesMap = [];
 
@@ -55,8 +56,8 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     /**
      * Bind specified rules to entities
      *
-     * @param array|int|string $ruleIds
-     * @param array|int|string $entityIds
+     * @param array<int|string>|int|string $ruleIds
+     * @param array<int|string>|int|string $entityIds
      * @param string $entityType
      * @param bool $deleteOldResults
      *
@@ -129,8 +130,8 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
     /**
      * Unbind specified rules from entities
      *
-     * @param array|int|string $ruleIds
-     * @param array|int|string $entityIds
+     * @param array<int|string>|int|string $ruleIds
+     * @param array<int|string>|int|string $entityIds
      * @param string $entityType
      *
      * @return Mage_Rule_Model_Resource_Abstract
@@ -166,7 +167,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * @param int $ruleId
      * @param string $entityType
      *
-     * @return array
+     * @return list<int|string>
      */
     public function getAssociatedEntityIds($ruleId, $entityType)
     {
@@ -188,7 +189,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * Retrieve website ids of specified rule
      *
      * @param int $ruleId
-     * @return array
+     * @return list<int|string>
      */
     public function getWebsiteIds($ruleId)
     {
@@ -199,7 +200,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * Retrieve customer group ids of specified rule
      *
      * @param int $ruleId
-     * @return array
+     * @return list<int|string>
      */
     public function getCustomerGroupIds($ruleId)
     {
@@ -212,7 +213,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      *
      * @param string $entityType
      *
-     * @return array
+     * @return AssociatedEntityInfo
      */
     protected function _getAssociatedEntityInfo($entityType)
     {
