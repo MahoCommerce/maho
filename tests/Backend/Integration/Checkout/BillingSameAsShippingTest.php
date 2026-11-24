@@ -40,7 +40,8 @@ afterEach(function () {
 });
 
 it('drops the region of the old country when the shipping address moves to a country without regions', function () {
-    expect($this->quote->getBillingAddress()->getRegionId())->not->toBeNull();
+    expect($this->quote->getBillingAddress()->getRegionId())->not->toBeNull()
+        ->and($this->quote->getBillingAddress()->getCompany())->toBe('Example Inc.');
 
     $this->service->setShippingAddress($this->quote, sameAsShippingAddress([
         'city' => 'London', 'postcode' => 'SW1A 1AA', 'countryId' => 'GB',
