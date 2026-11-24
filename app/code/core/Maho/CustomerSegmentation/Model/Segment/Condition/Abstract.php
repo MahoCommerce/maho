@@ -257,10 +257,13 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         if (!in_array($attribute->getFrontendInput(), ['select', 'multiselect'], true) || !$attribute->usesSource()) {
             return [];
         }
-        return array_values(array_filter(
-            $attribute->getSource()->getAllOptions(),
-            fn(array $option): bool => ($option['value'] ?? '') !== '',
-        ));
+        $options = [];
+        foreach ($attribute->getSource()->getAllOptions() as $option) {
+            if (!is_array($option['value']) && $option['value'] !== '') {
+                $options[] = ['value' => $option['value'], 'label' => $option['label']];
+            }
+        }
+        return $options;
     }
 
     /**

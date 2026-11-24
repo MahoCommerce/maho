@@ -65,7 +65,7 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
         $byGroup = [];
         foreach ($entity->getResource()->loadAllAttributes($entity)->getSortedAttributes($setId) as $attribute) {
             $groupId = (int) $attribute->getData("attribute_set_info/{$setId}/group_id");
-            if ($groupId && $attribute->getIsUserDefined()) {
+            if ($groupId && $attribute->getIsUserDefined() && $attribute instanceof Maho_Blog_Model_Resource_Eav_Attribute) {
                 $byGroup[$groupId][] = $attribute;
             }
         }

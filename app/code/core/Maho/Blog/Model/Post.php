@@ -133,9 +133,10 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
      */
     public function getAttributes(): array
     {
-        return $this->_getResource()
-            ->loadAllAttributes($this)
-            ->getSortedAttributes($this->getAttributeSetId() ?: null);
+        return array_filter(
+            $this->_getResource()->loadAllAttributes($this)->getSortedAttributes($this->getAttributeSetId() ?: null),
+            fn($attribute) => $attribute instanceof Maho_Blog_Model_Resource_Eav_Attribute,
+        );
     }
 
     /**
