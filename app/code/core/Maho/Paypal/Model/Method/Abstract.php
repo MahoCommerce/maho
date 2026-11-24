@@ -299,6 +299,9 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         $order->addRelatedObject($invoice);
     }
 
+    /**
+     * @param array<string, mixed> $result
+     */
     protected function _importPaymentInfo(array $result, Mage_Payment_Model_Info $payment): void
     {
         $payer = $result['payer'] ?? [];

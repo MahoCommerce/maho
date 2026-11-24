@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 {
+    /**
+     * @param array<string, mixed> $payload
+     */
     abstract public function handle(array $payload): void;
 
     protected function _loadOrderByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Order
@@ -51,6 +54,9 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         return $order->getId() ? $order : null;
     }
 
+    /**
+     * @param array<string, mixed> $payload
+     */
     protected function _findOrder(array $payload): ?Mage_Sales_Model_Order
     {
         $resource = $payload['resource'] ?? [];
@@ -149,6 +155,9 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         $helper->releaseOrderLock($paypalOrderId);
     }
 
+    /**
+     * @param array<string, mixed> $paypalResult
+     */
     protected function _placeOrderFromPaypalResult(
         Mage_Sales_Model_Quote $quote,
         array $paypalResult,

@@ -10,6 +10,9 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_System_Config_Source_DisableFunding
 {
+    /**
+     * @return list<array{value: string, label: string}>
+     */
     public function toOptionArray(): array
     {
         $helper = Mage::helper('paypal');

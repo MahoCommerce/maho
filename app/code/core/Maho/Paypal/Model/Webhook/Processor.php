@@ -27,6 +27,9 @@ class Maho_Paypal_Model_Webhook_Processor
         'VAULT.PAYMENT-TOKEN.DELETED'    => 'paypal/webhook_handler_vaultTokenDeleted',
     ];
 
+    /**
+     * @param array<string, mixed> $payload
+     */
     public function process(array $payload): void
     {
         $eventId = $payload['id'] ?? '';
@@ -69,6 +72,8 @@ class Maho_Paypal_Model_Webhook_Processor
 
     /**
      * Process a webhook payload without signature verification (for CLI simulate)
+     *
+     * @param array<string, mixed> $payload
      */
     public function processUnsafe(array $payload): void
     {
@@ -78,6 +83,8 @@ class Maho_Paypal_Model_Webhook_Processor
     /**
      * Attempt to create an event record, relying on the UNIQUE constraint
      * on paypal_event_id to handle concurrent duplicate deliveries.
+     *
+     * @param array<string, mixed> $payload
      */
     protected function _createEventRecord(array $payload): ?Maho_Paypal_Model_Webhook_Event
     {

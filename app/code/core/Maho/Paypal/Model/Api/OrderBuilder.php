@@ -8,10 +8,20 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type Money array{currency_code: string, value: string}
+ * @phpstan-type Breakdown array{item_total: Money, tax_total: Money, shipping?: Money, discount?: Money}
+ * @phpstan-type LineItem array{name: string, quantity: string, sku: string, unit_amount: Money, category: 'DIGITAL_GOODS'|'PHYSICAL_GOODS'}
+ * @phpstan-type Shipping array{name: array{full_name: string}, address?: array{address_line_1: string, admin_area_2: string, admin_area_1: string, postal_code: string, country_code: string, address_line_2?: string}}
+ * @phpstan-type PurchaseUnit array{reference_id: string, amount: array{currency_code: string, value: string, breakdown?: Breakdown}, invoice_id: string|null, items?: list<LineItem>, shipping?: Shipping}
+ * @phpstan-type OrderRequest array{intent: string, purchase_units: list<PurchaseUnit>, payment_source?: array<string, mixed>}
+ */
 class Maho_Paypal_Model_Api_OrderBuilder
 {
     /**
      * Build a PayPal OrderRequest from a Mage quote
+     *
+     * @return OrderRequest
      */
     public function buildFromQuote(
         Mage_Sales_Model_Quote $quote,
@@ -75,6 +85,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         return $orderRequest;
     }
 
+    /**
+     * @param OrderRequest $orderRequest
+     */
     protected function _addVaultAttributes(array &$orderRequest, string $paymentSource, string $customerId): void
     {
         $vaultData = [
@@ -96,6 +109,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         }
     }
 
+    /**
+     * @param OrderRequest $orderRequest
+     */
     protected function _addVaultTokenPaymentSource(array &$orderRequest, string $paypalTokenId, string $sourceType): void
     {
         if ($sourceType === 'card') {
@@ -116,6 +132,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         }
     }
 
+    /**
+     * @return PurchaseUnit
+     */
     protected function _buildPurchaseUnit(
         Mage_Sales_Model_Quote $quote,
         string $currency,
@@ -147,6 +166,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         return $purchaseUnit;
     }
 
+    /**
+     * @return Breakdown|null
+     */
     public function buildBreakdown(Mage_Sales_Model_Quote $quote, string $currency): ?array
     {
         $address = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
@@ -194,7 +216,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
     }
 
     /**
-     * @return list<array{name: string, quantity: string, sku: string, unit_amount: array{currency_code: string, value: string}, category: 'DIGITAL_GOODS'|'PHYSICAL_GOODS'}>
+     * @return list<LineItem>
      */
     protected function _buildLineItems(Mage_Sales_Model_Quote $quote, string $currency): array
     {
@@ -230,6 +252,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         return $items;
     }
 
+    /**
+     * @return Shipping
+     */
     protected function _buildShipping(Mage_Sales_Model_Quote_Address $address): array
     {
         $shipping = [

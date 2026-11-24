@@ -90,6 +90,9 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 
+    /**
+     * @return array{client_id: string, client_secret: string, sandbox: string}
+     */
     protected function _getPostedCredentials(): array
     {
         return [
@@ -99,6 +102,9 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         ];
     }
 
+    /**
+     * @param array{client_id: string, client_secret: string, sandbox: string} $params
+     */
     protected function _createClientFromParams(array $params): Maho_Paypal_Model_Api_Client
     {
         $storeId = $this->_resolveStoreId();
