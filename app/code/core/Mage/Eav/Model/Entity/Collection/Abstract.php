@@ -1383,6 +1383,18 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     }
 
     /**
+     * Remove the loaded items, so the next load() reads the entities and their attribute values again
+     *
+     * @return $this
+     */
+    #[\Override]
+    public function clear()
+    {
+        $this->_itemsById = [];
+        return parent::clear();
+    }
+
+    /**
      * Reset collection
      *
      * @return $this
@@ -1392,6 +1404,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     {
         parent::_reset();
 
+        $this->_itemsById         = [];
         $this->_selectEntityTypes = [];
         $this->_selectAttributes  = [];
         $this->_filterAttributes  = [];
