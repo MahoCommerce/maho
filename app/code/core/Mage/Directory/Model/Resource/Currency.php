@@ -153,7 +153,7 @@ class Mage_Directory_Model_Resource_Currency extends Mage_Core_Model_Resource_Db
     /**
      * Saving currency rates
      *
-     * @param array<string, array<string, float|null>> $rates
+     * @param array<string, array<string, float|int|string|null>> $rates
      * @return int the number of currency pairs stored
      */
     public function saveRates($rates): int
