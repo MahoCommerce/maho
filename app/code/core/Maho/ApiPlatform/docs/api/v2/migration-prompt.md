@@ -53,7 +53,8 @@ Write the field changes of each call: the new names, the new types and the new v
 If neither source has a counterpart, mark the row "no counterpart". Do not invent an endpoint, a parameter or a field.
 
 STEP 3: REPLACE THE AUTHENTICATION
-- Make one client for all v2 calls. Base URL: <STORE_URL>/api/rest/v2. Send and accept application/json.
+- Make one client for all v2 calls. Send and accept application/json.
+- Read the base URL from the configuration of the integration, in the same way as the legacy URL. Do not write a store URL in code. Use <STORE_URL>/api/rest/v2 only in the test configuration.
 - Get a token with POST /auth/token and the client_credentials grant. Send it as "Authorization: Bearer <token>".
 - Keep the token until expires_in. If a request gives 401, get a new token one time and send the request again.
 - A flow that logs in a customer uses the customer grant and the /customers/me routes.
@@ -82,7 +83,8 @@ STEP 6: REPORT
 - The table of step 1, with the v2 method and path of each call, and its status: "done" or "no counterpart".
 - The fields that have no counterpart, or that have a different meaning in v2.
 - The API resources that the role of the v2 API user needs.
-- The changes that I must make in the store: the role, the user, and when to turn off the legacy protocols.
+- The configuration values that the integration needs in each environment: the base URL, the client ID and the client secret.
+- The changes that I must make in the store: the role and the user.
 ```
 
 ## After the migration
@@ -90,4 +92,4 @@ STEP 6: REPORT
 1. Read the report of the agent. Do the changes in the store that it lists.
 2. If the report has a call with no counterpart, read [No counterpart in v2](migrate-from-legacy-api.md#no-counterpart-in-v2).
 3. Use the integration on the test store, then on the production store.
-4. When the access log shows no request to the legacy paths, turn off the legacy protocols.
+4. Turn off the legacy protocols as the [procedure](migrate-from-legacy-api.md#procedure) of the guide tells. Other integrations can still use them.

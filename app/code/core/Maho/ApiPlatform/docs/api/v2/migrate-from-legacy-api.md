@@ -105,8 +105,8 @@ The legacy routes use the ID of the stock item. v2 uses the SKU to write and the
 | Legacy | v2 | Notes |
 |--------|----|-------|
 | `GET /stockitems` | `GET /products` | Each product has `stockQty` and `stockStatus`. v2 has no list of the stock settings. |
-| `GET /stockitems/:id` | `GET /products/{id}`, field `stockItem` | |
-| `PUT /stockitems/:id` | `PUT /inventory` | Send `sku` in the body. |
+| `GET /stockitems/:id` | `GET /products/{id}`, field `stockItem` | Use the `product_id` of the stock item, not its `item_id`. |
+| `PUT /stockitems/:id` | `PUT /inventory` | Send the `sku` of the product in the body. |
 | `PUT /stockitems` | `PUT /inventory/bulk` | Maximum 100 items in one request |
 
 ### Customers and addresses
@@ -135,7 +135,7 @@ The items, the addresses and the comments of an order are fields of the order in
 | `GET /orders/:order_id/addresses` | `GET /orders/{id}`, fields `billingAddress` and `shippingAddress` | |
 | `GET /orders/:order_id/addresses/:address_type` | `GET /orders/{id}`, field `billingAddress` or `shippingAddress` | |
 | `GET /orders/:id/comments` | `GET /orders/{id}`, field `statusHistory` | |
-| `GET /orders/comments/:id` | `GET /orders/{id}`, field `statusHistory` | v2 has no route for one comment. |
+| `GET /orders/comments/:id` | `GET /orders/{id}`, field `statusHistory` | Use the ID of the order, not the ID of the comment. v2 has no route for one comment. |
 | `POST /orders/:id/comments` | `POST /orders/{id}/comments` | Send `comment`, `status`, `notifyCustomer` and `visibleOnFront`. |
 
 v2 also has the order actions that the legacy REST API did not have: invoices, shipments, credit memos, hold, unhold and cancel. See [Orders](endpoints.md#orders).
@@ -289,5 +289,8 @@ If your integration needs one of these operations, [open an issue](https://githu
 5. Move the reads of one resource. Compare the answers of both APIs for the same records.
 6. Move the writes of the same resource.
 7. Do steps 5 and 6 for each resource.
-8. When the access log of the web server shows no request to `/api/rest` outside `/api/rest/v2`, turn off the legacy protocol.
-9. Delete the OAuth consumers and the REST roles of the integration.
+8. Make a list of the clients of each legacy protocol. Include the clients that run rarely, such as a monthly export.
+9. Turn off a legacy protocol only when these two conditions are true:
+    - All the clients of the protocol use v2.
+    - The access log of the web server shows no request to the path of the protocol for a period longer than the longest interval between two runs of a client. The paths are `/api/rest` (outside `/api/rest/v2`), `/api/soap`, `/api/v2_soap`, `/api/xmlrpc` and `/api/jsonrpc`.
+10. Delete the OAuth consumers, the REST roles and the SOAP API users of the integration.
