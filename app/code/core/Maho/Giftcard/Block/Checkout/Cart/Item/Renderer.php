@@ -11,13 +11,16 @@ declare(strict_types=1);
 /**
  * Gift Card cart item renderer
  * Extends default renderer to format date fields in additional options
+ *
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
  */
 class Maho_Giftcard_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_Cart_Item_Renderer
 {
     /**
      * Get formatted option value with date formatting support
      *
-     * @return array{value: mixed, full_view?: string}
+     * @param string|list<string>|ItemOption $optionValue
+     * @return array{value: string|list<string>, full_view?: string}
      */
     #[\Override]
     public function getFormatedOptionValue(mixed $optionValue): array

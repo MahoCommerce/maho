@@ -14,7 +14,10 @@ declare(strict_types=1);
  * @phpstan-type LineItem array{name: string, quantity: string, sku: string, unit_amount: Money, category: 'DIGITAL_GOODS'|'PHYSICAL_GOODS'}
  * @phpstan-type Shipping array{name: array{full_name: string}, address?: array{address_line_1: string, admin_area_2: string, admin_area_1: string, postal_code: string, country_code: string, address_line_2?: string}}
  * @phpstan-type PurchaseUnit array{reference_id: string, amount: array{currency_code: string, value: string, breakdown?: Breakdown}, invoice_id: string|null, items?: list<LineItem>, shipping?: Shipping}
- * @phpstan-type OrderRequest array{intent: string, purchase_units: list<PurchaseUnit>, payment_source?: array<string, mixed>}
+ * @phpstan-type ExperienceContext array{user_action: string, return_url?: string, cancel_url?: string, shipping_preference?: string, order_update_callback_config?: array{callback_events: list<string>, callback_url: string}}
+ * @phpstan-type VaultAttributes array{vault?: array{store_in_vault: string, usage_type: string, customer_type: string}, customer?: array{id: string}}
+ * @phpstan-type PaymentSource array{paypal?: array{experience_context?: ExperienceContext, vault_id?: string, attributes?: VaultAttributes}, card?: array{vault_id?: string, attributes?: VaultAttributes}}
+ * @phpstan-type OrderRequest array{intent: string, purchase_units: list<PurchaseUnit>, payment_source?: PaymentSource}
  */
 class Maho_Paypal_Model_Api_OrderBuilder
 {

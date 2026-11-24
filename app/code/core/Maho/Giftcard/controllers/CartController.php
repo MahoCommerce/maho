@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 /**
  * Gift Card cart controller
+ *
+ * @phpstan-type CartGiftcards array{giftcards: list<array{code: string, display_code: string, amount: float, amount_formatted: string, balance: float|int}>, total_giftcard_amount: float, total_giftcard_amount_formatted: string, amount_due: float|int, amount_due_formatted: string, subtotal_before_giftcard: float, subtotal_before_giftcard_formatted: string, is_fully_covered: bool}
  */
 class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 {
@@ -184,7 +186,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Get gift card data for JSON response
      *
-     * @return array{giftcards: list<array{code: string, display_code: string, amount: float, amount_formatted: string, balance: float|int}>, total_giftcard_amount: float, total_giftcard_amount_formatted: string, amount_due: float|int, amount_due_formatted: string, subtotal_before_giftcard: float, subtotal_before_giftcard_formatted: string, is_fully_covered: bool}
+     * @return CartGiftcards
      */
     protected function _getGiftcardData(Mage_Sales_Model_Quote $quote): array
     {
@@ -247,7 +249,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Send JSON response
      *
-     * @param array<string, mixed> $data
+     * @param array{success: bool, message?: string, html?: string, data?: array{balance: float, balance_formatted: string}|CartGiftcards, payment_methods_html?: string} $data
      */
     protected function _sendJsonResponse(array $data): void
     {

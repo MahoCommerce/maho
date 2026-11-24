@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type PaypalOrder from Maho_Paypal_Model_Api_Client
+ */
 class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 {
     #[\Override]
@@ -54,7 +57,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
      * total was changed since: invoice_id must equal the reserved order id, and currency
      * and amount must match (1-cent tolerance for rounding drift).
      *
-     * @param array<string, mixed> $paypalResult
+     * @param PaypalOrder $paypalResult
      */
     public function assertPaypalOrderMatchesQuoteOrOrder(array $paypalResult, Mage_Sales_Model_Quote|Mage_Sales_Model_Order $target): void
     {
@@ -95,7 +98,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param array<string, mixed> $paypalResult
+     * @param PaypalOrder $paypalResult
      */
     public function importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {
@@ -183,7 +186,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param array<string, mixed> $paypalResult
+     * @param PaypalOrder $paypalResult
      */
     public function placeOrderFromPaypalResult(
         Mage_Sales_Model_Quote $quote,
@@ -301,7 +304,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
      * placeable (e.g. missing shipping method), so no money moves for an order
      * that cannot be created.
      *
-     * @param array<string, mixed> $paypalResult
+     * @param PaypalOrder $paypalResult
      */
     public function prepareQuoteForPaypalOrder(
         Mage_Sales_Model_Quote $quote,
@@ -329,7 +332,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param array<string, mixed> $paypalResult
+     * @param PaypalOrder $paypalResult
      */
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {

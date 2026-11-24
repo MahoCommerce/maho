@@ -135,7 +135,7 @@ class AdminGraphQlController
     /**
      * @param array<array-key, mixed>|null $variables
      * @param AdminContext $context
-     * @return array{data: array<string, mixed>}|array{errors: list<array{message: string, extensions?: array{code: string}}>}
+     * @return array{data: array<string, array<array-key, mixed>|null>}|array{errors: list<array{message: string, extensions?: array{code: string}}>}
      */
     private function executeQuery(string $query, ?array $variables, array $context, ?string $operationName = null): array
     {
@@ -244,7 +244,7 @@ class AdminGraphQlController
      *
      * @param array<array-key, mixed> $variables
      * @param AdminContext $context
-     * @return array<string, mixed>
+     * @return array<string, array<array-key, mixed>|null>
      */
     private function resolveOperation(string $operation, array $variables, array $context): array
     {

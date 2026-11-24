@@ -8,12 +8,16 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Maho_Giftcard_Block_Sales_Order_Item_Renderer extends Mage_Sales_Block_Order_Item_Renderer_Default
 {
     /**
      * Get formatted option value with date formatting support
      *
-     * @return array{value: mixed, full_view?: string}
+     * @param string|list<string>|ItemOption $optionValue
+     * @return array{value: string|list<string>, full_view?: string}
      */
     #[\Override]
     public function getFormatedOptionValue($optionValue): array

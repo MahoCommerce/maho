@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 /**
- * @phpstan-type BridgeMethod array{code: non-empty-string, title: non-empty-string, price: float|int|numeric-string, cost?: mixed, description?: mixed, logo?: mixed}
+ * @phpstan-type BridgeMethod array{code: non-empty-string, title: non-empty-string, price: float|int|numeric-string, cost?: float|int|numeric-string, description?: string, logo?: string}
  * @phpstan-type BridgeItem array<string, mixed>
  * @phpstan-type BridgeAddress array{firstname: string|null, lastname: string|null, street: string|null, city: string|null, region: string|null, region_code: string|null, postcode: string|null, country_id: string|null}
  * @phpstan-type BridgeCustomer array{}|array{customer_id: int|null, email: string|null, group_id: int, group_code: string|null, is_guest: bool}
@@ -123,7 +123,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 if (!empty($methodData['description'])) {
                     $method->setMethodDescription($methodData['description']);
                 }
-                if (!empty($methodData['logo']) && is_string($methodData['logo'])) {
+                if (!empty($methodData['logo'])) {
                     $method->setMethodLogo($methodData['logo']);
                 }
 
@@ -468,7 +468,17 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 );
                 continue;
             }
-            $methods[] = $method;
+            $valid = ['code' => $method['code'], 'title' => $method['title'], 'price' => $method['price']];
+            if (isset($method['cost']) && is_numeric($method['cost'])) {
+                $valid['cost'] = $method['cost'];
+            }
+            if (isset($method['description']) && is_string($method['description'])) {
+                $valid['description'] = $method['description'];
+            }
+            if (isset($method['logo']) && is_string($method['logo'])) {
+                $valid['logo'] = $method['logo'];
+            }
+            $methods[] = $valid;
         }
 
         return $methods;

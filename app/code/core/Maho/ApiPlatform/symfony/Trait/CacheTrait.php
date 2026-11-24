@@ -24,11 +24,12 @@ trait CacheTrait
      * Get or compute a cached value.
      *
      * @template T
+     * @template TCached of array<array-key, mixed>
      * @param array<string> $cacheTags
      * @param int $ttl TTL in seconds
      * @param \Closure(): T $compute Builds the result if cache misses
-     * @param \Closure(T): array<mixed> $serialize Converts result to a cacheable array
-     * @param \Closure(array<mixed>): T $deserialize Converts cached array back to result
+     * @param \Closure(T): TCached $serialize Converts result to a cacheable array
+     * @param \Closure(TCached): T $deserialize Converts cached array back to result
      * @return T
      */
     protected function remember(

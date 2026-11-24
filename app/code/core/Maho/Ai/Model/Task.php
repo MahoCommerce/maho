@@ -121,7 +121,7 @@ class Maho_Ai_Model_Task extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{mode?: string, schedule_id?: int, manual?: bool, entity_type?: string, entity_id?: int, ...<string, mixed>}
      */
     public function getContextArray(): array
     {

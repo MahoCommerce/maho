@@ -488,7 +488,7 @@ class Maho_Ai_Model_Platform_Symfony implements
     }
 
     /**
-     * @param array<string, mixed> $options
+     * @param array{temperature?: float, max_tokens?: int, ...<string, mixed>} $options
      * @return array<string, mixed>
      */
     protected function mapChatOptions(array $options): array
@@ -504,7 +504,7 @@ class Maho_Ai_Model_Platform_Symfony implements
     }
 
     /**
-     * @param array<string, mixed> $options
+     * @param array{dimensions?: int, ...<string, mixed>} $options
      * @return array<string, mixed>
      */
     protected function mapEmbedOptions(array $options): array
@@ -517,7 +517,7 @@ class Maho_Ai_Model_Platform_Symfony implements
     }
 
     /**
-     * @param array<string, mixed> $options
+     * @param array{width?: int, height?: int, quality?: string, style?: string, ...<string, mixed>} $options
      * @return array<string, mixed>
      */
     protected function mapImageOptions(array $options): array

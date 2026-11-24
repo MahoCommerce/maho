@@ -17,7 +17,8 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array{action_type: string, action_group_id?: string, entity_type?: string, entity_id?: int|string|null, username?: string, consumer_id?: int, ip_address?: string, request_url?: string, old_data?: array<string, mixed>|null, new_data?: array<string, mixed>|null} $data
+     *     old_data and new_data hold the data of the model before and after the change
      */
     public function logActivity(array $data): self
     {

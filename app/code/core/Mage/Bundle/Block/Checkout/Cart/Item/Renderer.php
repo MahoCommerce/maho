@@ -8,6 +8,9 @@
  * @package Mage_Bundle
  */
 
+/**
+ * @phpstan-import-type ItemOption from Mage_Catalog_Helper_Product_Configuration
+ */
 class Mage_Bundle_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_Cart_Item_Renderer
 {
     /**
@@ -17,7 +20,7 @@ class Mage_Bundle_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_
      * Each option object will contain array of selections objects
      *
      * @param bool $useCache
-     * @return array
+     * @return list<array{label: string, value: list<string>}>
      */
     protected function _getBundleOptions($useCache = true)
     {
@@ -51,7 +54,7 @@ class Mage_Bundle_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_
      * Overloaded method for getting list of bundle options
      * Caches result in quote item, because it can be used in cart 'recent view' and on same page in cart checkout
      *
-     * @return array
+     * @return list<ItemOption>
      */
     #[\Override]
     public function getOptionList()

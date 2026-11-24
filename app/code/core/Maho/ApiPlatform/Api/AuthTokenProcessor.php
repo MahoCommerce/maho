@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
 use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -40,24 +41,22 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): AuthToken
     {
         $operationName = $operation->getName();
+        $request = $context['request'] ?? null;
 
         return match ($operationName) {
-            'get_token', '_api_AuthToken_get_token' => $this->handleGetToken($context),
-            'refresh_token', '_api_AuthToken_refresh_token' => $this->handleRefreshToken($context),
-            'logout', '_api_AuthToken_logout' => $this->handleLogout($context),
+            'get_token', '_api_AuthToken_get_token' => $this->handleGetToken($request),
+            'refresh_token', '_api_AuthToken_refresh_token' => $this->handleRefreshToken($request),
+            'logout', '_api_AuthToken_logout' => $this->handleLogout($request),
             default => throw new BadRequestHttpException('Unknown operation'),
         };
     }
 
-    /**
-     * @param array<string, mixed> $context
-     */
-    private function handleGetToken(array $context): AuthToken
+    private function handleGetToken(?Request $request): AuthToken
     {
         StoreContext::ensureStore();
 
         // A body that does not decode reads as empty, so it gets the invalid_request error of the grant
-        $body = RequestInput::tryDecode($context['request'] ?? null) ?? [];
+        $body = RequestInput::tryDecode($request) ?? [];
 
         $this->checkRateLimitByIp('auth_token', 'auth_token_ip', 60);
 
@@ -102,9 +101,6 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
      * Give a customer token for the token of a magic login link. A customer who uses 2FA sends the code with the
      * same link: the link stays valid until the code is right.
      *
-     * @param array<array-key, mixed> $data
-     */
-    /**
      * @param array<array-key, mixed> $data
      */
     private function handleMagicLinkGrant(array $data): AuthToken
@@ -285,12 +281,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
-    /**
-     * @param array<string, mixed> $context
-     */
-    private function handleRefreshToken(array $context): AuthToken
+    private function handleRefreshToken(?Request $request): AuthToken
     {
-        $request = $context['request'] ?? null;
         $authHeader = $request?->headers->get('Authorization', '') ?? '';
 
         if (!str_starts_with($authHeader, 'Bearer ')) {
@@ -348,12 +340,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    /**
-     * @param array<string, mixed> $context
-     */
-    private function handleLogout(array $context): AuthToken
+    private function handleLogout(?Request $request): AuthToken
     {
-        $request = $context['request'] ?? null;
         $authHeader = $request?->headers->get('Authorization', '') ?? '';
 
         if (str_starts_with($authHeader, 'Bearer ')) {

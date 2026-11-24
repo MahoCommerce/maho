@@ -40,6 +40,9 @@ use Maho\Config\ApiResource as MahoApiResource;
  * resource, `mcp: []` on any resource, or `extraProperties: ['maho_mcp' => false]`
  * on a single operation. The last one is for operations MCP can't represent, such
  * as one returning a raw file download.
+ *
+ * @phpstan-type PropertySchema array{type: string, enum?: mixed, description?: string}
+ * @phpstan-type ArgumentSchema array{}|array{properties: array<string, PropertySchema>, required: list<string>}
  */
 final class McpToolResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
@@ -216,7 +219,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * (`/customers/me/orders` beside `/orders`) read a different set in the provider,
      * and advertising a filter one ignores is worse than advertising nothing.
      *
-     * @return array<string, mixed>
+     * @return ArgumentSchema
      */
     private function listArguments(ApiResource $resource): array
     {
@@ -238,8 +241,8 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * A resource without a GraphQL list query declares its filters here. A GraphQL arg with the
      * same name wins.
      *
-     * @param array<string, mixed> $arguments
-     * @return array<string, mixed>
+     * @param ArgumentSchema $arguments
+     * @return ArgumentSchema
      */
     private function withQueryParameters(array $arguments, HttpOperation $operation): array
     {
@@ -294,7 +297,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * non-null, which becomes a required property.
      *
      * @param array<string, mixed> $args
-     * @return array<string, mixed>
+     * @return ArgumentSchema
      */
     private function argumentSchema(array $args): array
     {
@@ -331,7 +334,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     }
 
     /**
-     * @param array<string, mixed> $listArguments
+     * @param ArgumentSchema $listArguments
      */
     private function buildTool(
         string $name,

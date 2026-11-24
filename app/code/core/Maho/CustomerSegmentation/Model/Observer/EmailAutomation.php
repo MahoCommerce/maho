@@ -20,6 +20,7 @@ declare(strict_types=1);
  * - All exceptions are logged to customer_segmentation.log for debugging
  *
  * @phpstan-import-type ReadySequence from Maho_CustomerSegmentation_Model_Resource_SequenceProgress
+ * @phpstan-import-type DbValue from \Maho\Db\Adapter\AdapterInterface
  */
 class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 {
@@ -433,7 +434,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Get template variables for email
      *
      * @param ReadySequence $sequenceData
-     * @return array<string, mixed>
+     * @return array{customer: Mage_Customer_Model_Customer, customer_name: string, customer_firstname: ?string, customer_lastname: ?string, customer_email: ?string, segment_name: DbValue, step_number: DbValue, store: Mage_Core_Model_Store}
      */
     protected function getTemplateVariables(Mage_Customer_Model_Customer $customer, array $sequenceData): array
     {

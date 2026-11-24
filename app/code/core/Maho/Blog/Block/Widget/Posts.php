@@ -47,7 +47,7 @@ class Maho_Blog_Block_Widget_Posts extends Mage_Core_Block_Template implements M
     }
 
     /**
-     * @return array<int|string, mixed>
+     * @return array<int|string, int|string|null>
      */
     #[\Override]
     public function getCacheKeyInfo()

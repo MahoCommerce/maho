@@ -8,6 +8,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-import-type PaypalOrder from Maho_Paypal_Model_Api_Client
+ */
 abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
 {
     #[\Override]
@@ -300,7 +303,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
     }
 
     /**
-     * @param array<string, mixed> $result
+     * @param PaypalOrder $result
      */
     protected function _importPaymentInfo(array $result, Mage_Payment_Model_Info $payment): void
     {
