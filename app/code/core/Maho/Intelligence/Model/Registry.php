@@ -10,7 +10,9 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Registry
 {
+    /** @var array<string, mixed> Provider results by provider, method and arguments */
     private array $cache = [];
+    /** @var array<string, object> */
     private array $providers = [];
 
     public function getProvider(string $name): object
@@ -19,6 +21,9 @@ class Maho_Intelligence_Model_Registry
         return $this->providers[$name];
     }
 
+    /**
+     * @param list<string> $args
+     */
     public function get(string $provider, string $method, array $args = []): mixed
     {
         $key = $provider . '::' . $method . '::' . json_encode($args);

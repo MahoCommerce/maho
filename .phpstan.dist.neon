@@ -49,7 +49,6 @@ parameters:
                 - app/code/core/Maho/ContentVersion/*
                 - app/code/core/Maho/CustomerSegmentation/*
                 - app/code/core/Maho/Giftcard/*
-                - app/code/core/Maho/Intelligence/*
                 - app/code/core/Maho/MediaCleaner/*
                 - app/code/core/Maho/OpenTelemetry/*
                 - app/code/core/Maho/Paypal/*

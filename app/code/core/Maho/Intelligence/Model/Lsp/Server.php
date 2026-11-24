@@ -81,6 +81,9 @@ class Maho_Intelligence_Model_Lsp_Server
         $loop->run();
     }
 
+    /**
+     * @param array<string, mixed> $message
+     */
     private function handleMessage(array $message): void
     {
         $method = $message['method'] ?? null;
@@ -103,6 +106,9 @@ class Maho_Intelligence_Model_Lsp_Server
         }
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function handleNotification(?string $method, array $params): void
     {
         match ($method) {
@@ -117,6 +123,7 @@ class Maho_Intelligence_Model_Lsp_Server
     }
 
     /**
+     * @param array<string, mixed> $params
      * @return array{bool, mixed} [methodFound, result]
      */
     private function handleRequest(?string $method, array $params): array
@@ -131,6 +138,9 @@ class Maho_Intelligence_Model_Lsp_Server
         };
     }
 
+    /**
+     * @return array{capabilities: array{textDocumentSync: array{openClose: bool, change: int, save: bool}, completionProvider: array{triggerCharacters: list<string>, resolveProvider: bool}, definitionProvider: bool, hoverProvider: bool}, serverInfo: array{name: string, version: string}}
+     */
     private function handleInitialize(): array
     {
         return [
@@ -159,6 +169,9 @@ class Maho_Intelligence_Model_Lsp_Server
         return null;
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function handleDidOpen(array $params): void
     {
         $uri = $params['textDocument']['uri'];
@@ -167,6 +180,9 @@ class Maho_Intelligence_Model_Lsp_Server
         $this->scheduleDiagnostics($uri, $text);
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function handleDidChange(array $params): void
     {
         $uri = $params['textDocument']['uri'] ?? '';
@@ -180,6 +196,9 @@ class Maho_Intelligence_Model_Lsp_Server
         }
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function handleDidSave(array $params): void
     {
         $uri = $params['textDocument']['uri'] ?? '';
@@ -188,6 +207,9 @@ class Maho_Intelligence_Model_Lsp_Server
         }
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function handleDidClose(array $params): void
     {
         $uri = $params['textDocument']['uri'];
@@ -244,6 +266,9 @@ class Maho_Intelligence_Model_Lsp_Server
         ]);
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     private function sendNotification(string $method, array $params): void
     {
         $this->transport->send([

@@ -12,6 +12,8 @@ class Maho_Intelligence_Model_Provider_EavAttribute
 {
     /**
      * Get all EAV entity types
+     *
+     * @return array<string, array{entity_type_id: int, entity_type_code: string, entity_model: string, attribute_model: string|null, entity_table: string, increment_model: string|null}>
      */
     public function getEntityTypes(): array
     {
@@ -36,6 +38,8 @@ class Maho_Intelligence_Model_Provider_EavAttribute
 
     /**
      * Get all attributes for a given entity type code
+     *
+     * @return array<string, array{attribute_id: int, attribute_code: string, backend_type: string, frontend_input: string|null, frontend_label: string|null, is_required: bool, is_user_defined: bool, is_unique: bool, default_value: string|null, source_model: string|null, backend_model: string|null}>
      */
     public function getAttributes(string $entityTypeCode): array
     {

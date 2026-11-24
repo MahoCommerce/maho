@@ -18,6 +18,8 @@ class Maho_Intelligence_Model_Provider_Cron
      * Collisions: if the same job name exists in both XML and as an attribute,
      * the attribute version wins (the XML entry is replaced). This matches the
      * runtime cron registration order.
+     *
+     * @return array<string, array{name: string, model: string, schedule: string, config_path: string|null, module: string|null, source: string}>
      */
     public function getAllJobs(): array
     {

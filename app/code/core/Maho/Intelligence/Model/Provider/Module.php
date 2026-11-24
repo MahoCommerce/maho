@@ -12,6 +12,8 @@ class Maho_Intelligence_Model_Provider_Module
 {
     /**
      * Get all active modules with versions and dependencies
+     *
+     * @return array<string, array{name: string, version: string, code_pool: string, depends: list<string>}>
      */
     public function getAllModules(): array
     {

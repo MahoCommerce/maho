@@ -8,19 +8,28 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type ResolvedAlias array{alias: string, class: string|null, file: string|null, rewritten_by: string|null, error?: string}
+ * @phpstan-type AliasInfo array{alias: string, class: string, group: string}
+ * @phpstan-type RewriteInfo array{alias: string, type: string, original_class: string, rewrites: list<string>, conflict: bool}
+ */
 class Maho_Intelligence_Model_Provider_ClassAlias
 {
     private const array TYPES = ['model', 'block', 'helper'];
 
-    /** @var array<string, array> */
+    /** @var array<string, array<string, AliasInfo>> */
     private array $cachedAliases = [];
 
+    /** @var array<string, RewriteInfo>|null */
     private ?array $cachedRewrites = null;
 
+    /** @var array<string, AliasInfo>|null */
     private ?array $cachedResourceModelAliases = null;
 
     /**
      * Resolve a single alias to its class name, file path, and rewrite info
+     *
+     * @return ResolvedAlias
      */
     public function resolveAlias(string $type, string $alias): array
     {
@@ -71,6 +80,9 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         ];
     }
 
+    /**
+     * @return ResolvedAlias
+     */
     private function resolveResourceModelAlias(
         Mage_Core_Model_Config $config,
         string $alias,
@@ -128,6 +140,8 @@ class Maho_Intelligence_Model_Provider_ClassAlias
 
     /**
      * Get all aliases for a given type (model, block, helper, resource_model)
+     *
+     * @return array<string, AliasInfo>
      */
     public function getAllAliases(string $type): array
     {
@@ -175,6 +189,8 @@ class Maho_Intelligence_Model_Provider_ClassAlias
 
     /**
      * Get all class rewrites with conflict detection
+     *
+     * @return array<string, RewriteInfo>
      */
     public function getAllRewrites(): array
     {
@@ -218,6 +234,9 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         return $rewrites;
     }
 
+    /**
+     * @return array<string, AliasInfo>
+     */
     private function getAllResourceModelAliases(): array
     {
         if ($this->cachedResourceModelAliases !== null) {
@@ -278,6 +297,9 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         return $file !== false ? $file : null;
     }
 
+    /**
+     * @return list<string>
+     */
     private function findClassesWithPrefix(string $prefix): array
     {
         $relativePart = str_replace('_', DIRECTORY_SEPARATOR, $prefix);

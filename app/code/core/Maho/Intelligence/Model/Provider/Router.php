@@ -8,6 +8,10 @@
 
 declare(strict_types=1);
 
+/**
+ * @phpstan-type XmlRouter array{name: string, area: string, type: string, module: string, front_name: string, module_overrides?: array<string, array{module: string, before?: string, after?: string}>}
+ * @phpstan-type AttributeRoute array{name: string, area: string|null, path: string, methods: list<string>, class: string, action: string, module: string|null, controller_name: string|null, path_variables: list<string>, defaults: array<string, string|int|float|bool|null>, requirements: array<string, string>}
+ */
 class Maho_Intelligence_Model_Provider_Router
 {
     /**
@@ -18,7 +22,7 @@ class Maho_Intelligence_Model_Provider_Router
      * are per-URL Symfony routes compiled from #[Maho\Config\Route]
      * attributes into vendor/composer/maho_attributes.php.
      *
-     * @return array{xml_routers: array, attribute_routes: array}
+     * @return array{xml_routers: array<string, XmlRouter>, attribute_routes: array<string, AttributeRoute>}
      */
     public function getAllRoutes(): array
     {
@@ -28,6 +32,9 @@ class Maho_Intelligence_Model_Provider_Router
         ];
     }
 
+    /**
+     * @return array<string, XmlRouter>
+     */
     private function getXmlRouters(): array
     {
         $config = Mage::getConfig();
@@ -75,6 +82,9 @@ class Maho_Intelligence_Model_Provider_Router
         return $result;
     }
 
+    /**
+     * @return array<string, AttributeRoute>
+     */
     private function getAttributeRoutes(): array
     {
         $routes = Maho::getCompiledAttributes()['routes'] ?? [];

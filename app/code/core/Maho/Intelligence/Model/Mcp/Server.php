@@ -11,6 +11,11 @@ declare(strict_types=1);
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 
+/**
+ * @phpstan-import-type EventInfo from Maho_Intelligence_Model_Provider_Event
+ * @phpstan-import-type ConfigPathInfo from Maho_Intelligence_Model_Provider_ConfigPath
+ * @phpstan-type ToolResult array{content: list<array{type: string, text: string}>, isError?: bool}
+ */
 class Maho_Intelligence_Model_Mcp_Server
 {
     private const string PROTOCOL_VERSION = '2024-11-05';
@@ -19,7 +24,7 @@ class Maho_Intelligence_Model_Mcp_Server
     private LoopInterface $loop;
     private Maho_Intelligence_Model_Mcp_Transport $transport;
     private Maho_Intelligence_Model_Registry $registry;
-    /** @var array<string, array{description: string, inputSchema: array, handler: callable}> */
+    /** @var array<string, array{description: string, inputSchema: array<string, mixed>, handler: callable(array<string, mixed>): mixed}> */
     private array $tools = [];
 
     public function run(): void
@@ -237,6 +242,10 @@ class Maho_Intelligence_Model_Mcp_Server
         );
     }
 
+    /**
+     * @param array<string, mixed> $inputSchema JSON Schema of the arguments
+     * @param callable(array<string, mixed>): mixed $handler
+     */
     private function addTool(string $name, string $description, array $inputSchema, callable $handler): void
     {
         $this->tools[$name] = [
@@ -246,6 +255,9 @@ class Maho_Intelligence_Model_Mcp_Server
         ];
     }
 
+    /**
+     * @param array<string, mixed> $message
+     */
     private function handleMessage(array $message): void
     {
         $method = $message['method'] ?? null;
@@ -272,6 +284,9 @@ class Maho_Intelligence_Model_Mcp_Server
         }
     }
 
+    /**
+     * @return array{protocolVersion: string, capabilities: array{tools: array{listChanged: bool}}, serverInfo: array{name: string, version: string}, instructions: string}
+     */
     private function handleInitialize(): array
     {
         return [
@@ -287,6 +302,9 @@ class Maho_Intelligence_Model_Mcp_Server
         ];
     }
 
+    /**
+     * @return array{tools: list<array{name: string, description: string, inputSchema: array<string, mixed>}>}
+     */
     private function handleToolsList(): array
     {
         $tools = [];
@@ -300,6 +318,10 @@ class Maho_Intelligence_Model_Mcp_Server
         return ['tools' => $tools];
     }
 
+    /**
+     * @param array<string, mixed> $params
+     * @return ToolResult
+     */
     private function handleToolsCall(array $params): array
     {
         $name = $params['name'] ?? '';
@@ -369,6 +391,9 @@ Key concepts:
 INSTRUCTIONS;
     }
 
+    /**
+     * @return array<string, array<string, EventInfo>>
+     */
     private function filterEvents(?string $pattern): array
     {
         $events = $this->registry->get('event', 'getAllEvents');
@@ -388,6 +413,9 @@ INSTRUCTIONS;
         return $filtered;
     }
 
+    /**
+     * @return array<string, ConfigPathInfo>
+     */
     private function filterConfigPaths(?string $section): array
     {
         $paths = $this->registry->get('configPath', 'getAllPaths');
@@ -398,6 +426,9 @@ INSTRUCTIONS;
         return array_filter($paths, fn($info) => str_starts_with($info['path'], $section . '/'));
     }
 
+    /**
+     * @return array<int|string, array<mixed>|string>|string|null
+     */
     private function getMergedConfig(string $path): array|string|null
     {
         $node = Mage::getConfig()->getNode($path);
