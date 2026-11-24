@@ -244,7 +244,7 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
     }
 
     /**
-     * @return list<array{value: int|string, label: string}>
+     * @return list<array{value: int|string|list<array{value: int|string, label: string}>, label: string}>
      */
     protected function getCustomValueOptions(Mage_Eav_Model_Entity_Attribute_Abstract $attribute): array
     {
@@ -259,7 +259,18 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
         }
         $options = [];
         foreach ($attribute->getSource()->getAllOptions() as $option) {
-            if (!is_array($option['value']) && $option['value'] !== '') {
+            if (is_array($option['value'])) {
+                // A group keeps its children, which the select shows as an optgroup
+                $group = [];
+                foreach ($option['value'] as $child) {
+                    if ($child['value'] !== '') {
+                        $group[] = ['value' => $child['value'], 'label' => $child['label']];
+                    }
+                }
+                if ($group) {
+                    $options[] = ['value' => $group, 'label' => $option['label']];
+                }
+            } elseif ($option['value'] !== '') {
                 $options[] = ['value' => $option['value'], 'label' => $option['label']];
             }
         }
