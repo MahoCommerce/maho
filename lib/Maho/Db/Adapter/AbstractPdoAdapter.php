@@ -1332,7 +1332,12 @@ abstract class AbstractPdoAdapter implements AdapterInterface
 
         // The first FROM entry is the main table: Select writes every table as a join type
         $correlationName = array_key_first($fromSelect);
+        $schema = $fromSelect[$correlationName]['schema'];
         $tableName = $fromSelect[$correlationName]['tableName'];
+        // Select stores a table with a schema as [schema, table]
+        if (is_array($tableName)) {
+            $tableName = $tableName[1];
+        }
 
         $selectRange = $this->select()
             ->from(
@@ -1341,6 +1346,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
                     new \Maho\Db\Expr('MIN(' . $this->quoteIdentifier($rangeField) . ') AS min'),
                     new \Maho\Db\Expr('MAX(' . $this->quoteIdentifier($rangeField) . ') AS max'),
                 ],
+                $schema,
             );
 
         $rangeResult = $this->fetchRow($selectRange);
