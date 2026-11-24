@@ -1,0 +1,43 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/**
+ * The changes from the value `old` to the value `new`, each with its label (`old_label`, `new_label`).
+ * A value of one line shows as text. A value of more lines shows in a merge view that marks the changed words.
+ *
+ * @var Mage_Adminhtml_Block_Template $this
+ */
+$values = ['old' => (string) $this->getData('old'), 'new' => (string) $this->getData('new')];
+$labels = ['old' => (string) $this->getData('old_label'), 'new' => (string) $this->getData('new_label')];
+?>
+<?php if (str_contains($values['old'] . $values['new'], "\n")): ?>
+<div class="mb-1 flex gap-2 font-semibold">
+    <span class="flex-1"><?= $this->escapeHtml($labels['old']) ?></span>
+    <span class="flex-1"><?= $this->escapeHtml($labels['new']) ?></span>
+</div>
+<div data-merge-view data-old="<?= $this->escapeHtml($values['old']) ?>" data-new="<?= $this->escapeHtml($values['new']) ?>"></div>
+<script type="module">
+const { createHtmlMergeView } = await import(<?= Mage::helper('core')->jsonEncode($this->getJsUrl('mage/adminhtml/wysiwyg/tiptap/code-editor.js')) ?>);
+for (const container of document.querySelectorAll('[data-merge-view]')) {
+    container.removeAttribute('data-merge-view');
+    createHtmlMergeView(container, container.dataset.old, container.dataset.new);
+}
+</script>
+<?php else: ?>
+<div class="flex flex-col gap-1">
+    <?php foreach ($values as $side => $value): ?>
+    <div>
+        <span class="d-badge d-badge-sm <?= $side === 'old' ? 'd-badge-error' : 'd-badge-success' ?> d-badge-soft"><?= $this->escapeHtml($labels[$side]) ?></span>
+        <?php if ($value === ''): ?>
+            <em><?= $this->__('(empty)') ?></em>
+        <?php else: ?>
+            <span class="whitespace-pre-wrap"><?= $this->escapeHtml($value) ?></span>
+        <?php endif ?>
+    </div>
+    <?php endforeach ?>
+</div>
+<?php endif ?>
