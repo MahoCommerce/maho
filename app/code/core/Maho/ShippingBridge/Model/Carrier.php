@@ -420,9 +420,12 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
 
         $methods = [];
         foreach ($data['methods'] as $i => $method) {
-            if (empty($method['code']) || empty($method['title']) || !isset($method['price'])) {
+            if (empty($method['code']) || !is_string($method['code'])
+                || empty($method['title']) || !is_string($method['title'])
+                || !isset($method['price']) || !is_numeric($method['price'])
+            ) {
                 Mage::log(
-                    "Shipping Bridge: Method at index {$i} missing required fields (code, title, price)",
+                    "Shipping Bridge: Method at index {$i} has a missing or invalid required field (code, title, price)",
                     Mage::LOG_WARNING,
                     'shipping_bridge.log',
                 );
