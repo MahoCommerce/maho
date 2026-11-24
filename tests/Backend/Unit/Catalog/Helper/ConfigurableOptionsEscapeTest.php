@@ -69,6 +69,59 @@ it('escapes the configurable option labels in the order email', function (): voi
     ]);
 });
 
+it('escapes the additional options that an order keeps', function (string $blockClass): void {
+    $orderItem = Mage::getModel('sales/order_item')->setProductOptions(['additional_options' => rawAttributesInfo()]);
+    $item = $blockClass === Mage_Sales_Block_Order_Email_Items_Default::class
+        ? Mage::getModel('sales/order_invoice_item')->setOrderItem($orderItem)
+        : $orderItem;
+    $block = new $blockClass();
+    $block->setItem($item);
+
+    expect(array_column($block->getItemOptions(), 'value'))->toBe([
+        '&lt;img src=x onerror=alert(1)&gt;',
+        'Black &amp; &quot;White&quot;',
+    ]);
+})->with([
+    Mage_Sales_Block_Order_Item_Renderer_Default::class,
+    Mage_Sales_Block_Order_Email_Items_Default::class,
+    Mage_Sales_Block_Order_Email_Items_Order_Default::class,
+]);
+
+it('escapes the additional options of a cart item', function (): void {
+    $item = new class implements Mage_Catalog_Model_Product_Configuration_Item_Interface {
+        #[\Override]
+        public function getProduct()
+        {
+            return Mage::getModel('catalog/product');
+        }
+
+        #[\Override]
+        public function getOptionByCode($code)
+        {
+            return $code === 'additional_options'
+                ? new Maho\DataObject(['value' => Mage::helper('core')->jsonEncode(rawAttributesInfo())])
+                : null;
+        }
+
+        #[\Override]
+        public function getFileDownloadParams()
+        {
+            return null;
+        }
+
+        #[\Override]
+        public function getQty(): ?float
+        {
+            return 1.0;
+        }
+    };
+
+    expect(array_column(Mage::helper('catalog/product_configuration')->getCustomOptions($item), 'value'))->toBe([
+        '&lt;img src=x onerror=alert(1)&gt;',
+        'Black &amp; &quot;White&quot;',
+    ]);
+});
+
 it('escapes the titles of downloadable links in the item options', function (): void {
     $product = Mage::getModel('catalog/product')
         ->setTypeId('downloadable')

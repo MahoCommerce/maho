@@ -66,7 +66,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
 
         $addOptions = $item->getOptionByCode('additional_options');
         if ($addOptions) {
-            $options = array_merge($options, Mage::helper('core/string')->unserialize($addOptions->getValue()));
+            $options = array_merge($options, $this->escapeOptionValues(Mage::helper('core/string')->unserialize($addOptions->getValue())));
         }
 
         return $options;
@@ -103,13 +103,27 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      */
     public function escapeAttributesInfo(array $attributesInfo): array
     {
-        foreach ($attributesInfo as $key => $attribute) {
-            if (is_array($attribute) && isset($attribute['value'])) {
-                $attributesInfo[$key]['value'] = $this->escapeHtml($attribute['value']);
+        return $this->escapeOptionValues($attributesInfo);
+    }
+
+    /**
+     * Escape the value of each option in $options for the HTML output.
+     *
+     * Use it for options that hold text, such as configurable attributes and the "additional_options" of an item:
+     * a module can put the text that the customer entered there, for example the message of a gift card.
+     *
+     * @param array<array-key, mixed> $options
+     * @return array<array-key, mixed>
+     */
+    public function escapeOptionValues(array $options): array
+    {
+        foreach ($options as $key => $option) {
+            if (is_array($option) && isset($option['value'])) {
+                $options[$key]['value'] = $this->escapeHtml($option['value']);
             }
         }
 
-        return $attributesInfo;
+        return $options;
     }
 
     /**
