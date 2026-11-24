@@ -46,7 +46,7 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
      * Return the user-defined attributes of the first group of the set of $entity. The main tab of
      * the edit page shows them.
      *
-     * @return list<Maho_Blog_Model_Resource_Eav_Attribute>
+     * @return list<Mage_Eav_Model_Entity_Attribute_Abstract>
      */
     public static function getMainTabAttributes(Maho_Blog_Model_Post|Maho_Blog_Model_Category $entity): array
     {
@@ -57,7 +57,7 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
      * Return the groups of the set of $entity in the order of the set, each with its user-defined
      * attributes in the order of the group. A new record uses the default set.
      *
-     * @return list<array{group: Mage_Eav_Model_Entity_Attribute_Group, attributes: list<Maho_Blog_Model_Resource_Eav_Attribute>}>
+     * @return list<array{group: Mage_Eav_Model_Entity_Attribute_Group, attributes: list<Mage_Eav_Model_Entity_Attribute_Abstract>}>
      */
     public static function getAttributeGroups(Maho_Blog_Model_Post|Maho_Blog_Model_Category $entity): array
     {
@@ -65,7 +65,7 @@ abstract class Maho_Blog_Block_Adminhtml_Edit_Tabs extends Mage_Adminhtml_Block_
         $byGroup = [];
         foreach ($entity->getResource()->loadAllAttributes($entity)->getSortedAttributes($setId) as $attribute) {
             $groupId = (int) $attribute->getData("attribute_set_info/{$setId}/group_id");
-            if ($groupId && $attribute->getIsUserDefined() && $attribute instanceof Maho_Blog_Model_Resource_Eav_Attribute) {
+            if ($groupId && $attribute->getIsUserDefined()) {
                 $byGroup[$groupId][] = $attribute;
             }
         }
