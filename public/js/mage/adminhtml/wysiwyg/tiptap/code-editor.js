@@ -347,33 +347,6 @@ export const createCssView = (parent, doc, extensions = []) => new EditorView({
     extensions: [basicSetup, css(), syntaxHighlighting(HIGHLIGHT), THEME, EditorView.lineWrapping, ...extensions],
 });
 
-// The merge view folds unchanged lines into a widget that takes a click only. Give it a tab stop and the keys of a button.
-const KEYBOARD_FOLDS = [
-    ViewPlugin.define((view) => {
-        const mark = () => view.requestMeasure({
-            read() {},
-            write() {
-                for (const fold of view.contentDOM.querySelectorAll('.cm-collapsedLines:not([tabindex])')) {
-                    fold.tabIndex = 0;
-                    fold.role = 'button';
-                }
-            },
-        });
-        mark();
-        return { update: mark };
-    }),
-    EditorView.domEventHandlers({
-        keydown(event) {
-            if ((event.key !== 'Enter' && event.key !== ' ') || !event.target.matches?.('.cm-collapsedLines')) {
-                return false;
-            }
-            event.preventDefault();
-            event.target.click();
-            return true;
-        },
-    }),
-];
-
 /**
  * A read-only view of the changes from the HTML `a` to the HTML `b`, side by side, in `parent`.
  * The view marks the changed lines and the changed text, and it folds the lines that did not change.
@@ -396,7 +369,6 @@ export const createHtmlMergeView = (parent, a, b) => {
         EditorView.lineWrapping,
         EditorState.readOnly.of(true),
         EditorView.editable.of(false),
-        KEYBOARD_FOLDS,
     ];
     const view = new MergeView({
         parent,
