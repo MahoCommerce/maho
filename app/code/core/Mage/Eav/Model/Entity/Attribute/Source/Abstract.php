@@ -67,7 +67,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Source_Abstract implements Mage_E
                 }
             } // End
         }
-        return $options[$value] ?? false;
+        return false;
     }
 
     /**
