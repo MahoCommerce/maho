@@ -423,13 +423,13 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
 
             if ($type === 'products' && $includeProductImages && $item->getImage() && $item->getImage() !== 'no_selection') {
-                $imageUrl = Mage::getBaseUrl('media') . 'catalog/product' . $item->getImage();
+                $imageUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $item->getImage();
                 $imageTitle = $item->getName();
             }
 
             // Handle category images for sitemap (only if enabled in configuration)
             if ($type === 'categories' && $includeCategoryImages && $item->getImage()) {
-                $imageUrl = Mage::getBaseUrl('media') . 'catalog/category/' . $item->getImage();
+                $imageUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/category/' . $item->getImage();
                 $imageTitle = $item->getName();
             }
 
