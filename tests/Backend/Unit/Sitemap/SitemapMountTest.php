@@ -180,6 +180,33 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         'saved, not generated' => [null, true, false],
     ]);
 
+    it('writes catalog image URLs using the media base URL of the sitemap store', function (string $type, string $configPath, string $image, string $expectedPath): void {
+        $store = Mage::app()->getStore($this->storeId);
+        $store->setConfig($configPath, '1');
+        foreach (['secure', 'unsecure'] as $scheme) {
+            $store->setConfig("web/$scheme/base_media_url", 'https://images.example.test/shop/');
+        }
+        $item = new \Maho\DataObject(['url' => 'gear.html', 'image' => $image, 'name' => 'Gear']);
+
+        Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => $this->sitemap->writeSingleSitemapFile(
+            $type,
+            [$item],
+            'https://shop.example.test/',
+            '',
+            '',
+            0.0,
+            1,
+            1,
+            100,
+        ));
+
+        expect($this->mount->read("sitemaps/sitemap-$type.xml"))
+            ->toContain("<image:loc>https://images.example.test/shop/$expectedPath</image:loc>");
+    })->with([
+        'product' => ['products', 'sitemap/product/include_images', '/g/gear.jpg', 'catalog/product/g/gear.jpg'],
+        'category' => ['categories', 'sitemap/category/include_images', 'gear.jpg', 'catalog/category/gear.jpg'],
+    ]);
+
     it('writes the index and every file that it lists on the mount', function (): void {
         $this->sitemap->save();
         $this->sitemap->generateXml();
