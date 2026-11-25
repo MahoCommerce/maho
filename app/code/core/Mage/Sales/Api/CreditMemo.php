@@ -59,6 +59,16 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/creditmemo'],
             description: 'Create a credit memo / refund for an order',
         ),
+        new Post(
+            uriTemplate: '/credit-memos/{id}/comments',
+            name: 'creditmemo_add_comment',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
+            description: 'Add a comment to an existing credit memo',
+            // The processor reads the body and rejects an unknown field, and the input class describes the body
+            deserialize: false,
+            input: DocumentCommentInput::class,
+        ),
     ],
     graphQlOperations: [
         new Query(

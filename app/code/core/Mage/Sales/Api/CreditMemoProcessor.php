@@ -34,7 +34,33 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     {
         $this->normalizeGraphQlInput($context);
 
-        return $this->createCreditMemo($uriVariables, $context);
+        return match ($operation->getName()) {
+            'creditmemo_add_comment' => $this->addComment($uriVariables, $context),
+            default => $this->createCreditMemo($uriVariables, $context),
+        };
+    }
+
+    /**
+     * Add a comment to an existing credit memo. Email the comment to the customer when notifyCustomer is true.
+     */
+    private function addComment(array $uriVariables, array $context): CreditMemo
+    {
+        $service = \Mage::getService('sales/order_document');
+        $creditmemo = $service->requireCreditmemo((int) ($uriVariables['id'] ?? 0));
+        $this->assertStoreAllowed($creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
+
+        // An MCP tool call also sends the path parameters in the body
+        $body = array_diff_key($context['args']['input'] ?? [], $uriVariables);
+        self::rejectUnknownFields($body, DocumentCommentInput::FIELDS);
+        $input = RequestInput::of($body);
+        $creditmemo = $service->addComment(
+            $creditmemo,
+            $input->string('comment') ?? '',
+            $input->bool('notifyCustomer') ?? false,
+            $input->bool('visibleOnFront') ?? false,
+        );
+
+        return CreditMemo::fromModel(\Mage::getModel('sales/order_creditmemo')->load($creditmemo->getId()));
     }
 
     private function createCreditMemo(array $uriVariables, array $context): CreditMemo

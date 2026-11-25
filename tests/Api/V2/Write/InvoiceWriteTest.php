@@ -275,7 +275,67 @@ describe('POST /api/rest/v2/invoices/{id}/capture|void|cancel', function (): voi
 
 });
 
+describe('POST /api/rest/v2/invoices/{id}/comments', function (): void {
+
+    it('adds a comment that comes back in the invoice', function (): void {
+        $invoiceId = seedPaidInvoice();
+        if (!$invoiceId) {
+            $this->markTestSkipped('Could not seed an invoice in this store');
+        }
+
+        $response = apiPost("/api/rest/v2/invoices/{$invoiceId}/comments", [
+            'comment' => 'Invoice comment via API',
+            'notifyCustomer' => false,
+            'visibleOnFront' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((int) $response['json']['id'])->toBe($invoiceId);
+        $comments = array_column($response['json']['comments'] ?? [], null, 'comment');
+        expect($comments)->toHaveKey('Invoice comment via API');
+        expect($comments['Invoice comment via API']['isVisibleOnFront'])->toBeTrue();
+        expect($comments['Invoice comment via API']['isCustomerNotified'])->toBeFalse();
+
+        $stored = array_map(
+            static fn($comment): string => (string) $comment->getComment(),
+            iterator_to_array(Mage::getModel('sales/order_invoice')->load($invoiceId)->getCommentsCollection()),
+        );
+        expect($stored)->toContain('Invoice comment via API');
+    });
+
+    it('needs the invoices/create permission', function (): void {
+        $invoiceId = seedPaidInvoice();
+        if (!$invoiceId) {
+            $this->markTestSkipped('Could not seed an invoice in this store');
+        }
+
+        $denied = apiPost("/api/rest/v2/invoices/{$invoiceId}/comments", ['comment' => 'Denied'], serviceToken(['invoices/read']));
+        $allowed = apiPost("/api/rest/v2/invoices/{$invoiceId}/comments", ['comment' => 'Allowed'], serviceToken(['invoices/create']));
+
+        expect($denied['status'])->toBe(403)
+            ->and($allowed['status'])->toBeIn([200, 201]);
+    });
+
+});
+
 // ---- setup helpers ----
+
+/**
+ * Invoice a fresh order offline through the API and return the invoice id, or null when the store cannot do it.
+ */
+function seedPaidInvoice(): ?int
+{
+    $orderId = seedInvoiceableOrder();
+    if (!$orderId) {
+        return null;
+    }
+
+    $created = apiPost("/api/rest/v2/orders/{$orderId}/invoices", ['capture' => 'offline'], adminToken());
+
+    return in_array($created['status'], [200, 201], true) && !empty($created['json']['id'])
+        ? (int) $created['json']['id']
+        : null;
+}
 
 /**
  * Id of the first visible item of an order, or null when it has none.

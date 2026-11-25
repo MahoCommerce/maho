@@ -236,7 +236,69 @@ describe('POST /api/rest/v2/orders/{orderId}/credit-memos', function (): void {
 
 });
 
-// ---- setup helper ----
+describe('POST /api/rest/v2/credit-memos/{id}/comments', function (): void {
+
+    it('adds a comment that comes back in the credit memo', function (): void {
+        $creditmemoId = seedCreditmemo();
+        if (!$creditmemoId) {
+            $this->markTestSkipped('Could not seed a credit memo in this store');
+        }
+
+        $response = apiPost("/api/rest/v2/credit-memos/{$creditmemoId}/comments", [
+            'comment' => 'Credit memo comment via API',
+            'notifyCustomer' => false,
+            'visibleOnFront' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect((int) $response['json']['id'])->toBe($creditmemoId);
+        $comments = array_column($response['json']['comments'] ?? [], null, 'comment');
+        expect($comments)->toHaveKey('Credit memo comment via API');
+        expect($comments['Credit memo comment via API']['isVisibleOnFront'])->toBeTrue();
+        expect($comments['Credit memo comment via API']['isCustomerNotified'])->toBeFalse();
+
+        $creditmemo = Mage::getModel('sales/order_creditmemo')->load($creditmemoId);
+        $stored = array_map(
+            static fn($comment): string => (string) $comment->getComment(),
+            iterator_to_array($creditmemo->getCommentsCollection()),
+        );
+        expect($stored)->toContain('Credit memo comment via API');
+        expect((int) $creditmemo->getState())->toBe(Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED);
+    });
+
+    it('needs the credit-memos/create permission', function (): void {
+        $creditmemoId = seedCreditmemo();
+        if (!$creditmemoId) {
+            $this->markTestSkipped('Could not seed a credit memo in this store');
+        }
+
+        $denied = apiPost("/api/rest/v2/credit-memos/{$creditmemoId}/comments", ['comment' => 'Denied'], serviceToken(['credit-memos/read']));
+        $allowed = apiPost("/api/rest/v2/credit-memos/{$creditmemoId}/comments", ['comment' => 'Allowed'], serviceToken(['credit-memos/create']));
+
+        expect($denied['status'])->toBe(403)
+            ->and($allowed['status'])->toBeIn([200, 201]);
+    });
+
+});
+
+// ---- setup helpers ----
+
+/**
+ * Refund a fresh order offline through the API and return the credit memo id, or null when the store cannot do it.
+ */
+function seedCreditmemo(): ?int
+{
+    $orderId = seedRefundableOrder();
+    if (!$orderId) {
+        return null;
+    }
+
+    $created = apiPost("/api/rest/v2/orders/{$orderId}/credit-memos", ['offlineRefund' => true], adminToken());
+
+    return in_array($created['status'], [200, 201], true) && !empty($created['json']['id'])
+        ? (int) $created['json']['id']
+        : null;
+}
 
 /**
  * Place a fresh order through the API, invoice it (offline) via the model layer

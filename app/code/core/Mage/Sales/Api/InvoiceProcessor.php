@@ -31,6 +31,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             'invoice_capture' => $this->executeLifecycleAction('captureInvoice', $uriVariables),
             'invoice_void' => $this->executeLifecycleAction('voidInvoice', $uriVariables),
             'invoice_cancel' => $this->executeLifecycleAction('cancelInvoice', $uriVariables),
+            'invoice_add_comment' => $this->addComment($uriVariables, $context),
             default => $this->createInvoice($uriVariables, $context),
         };
     }
@@ -57,6 +58,29 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer));
+    }
+
+    /**
+     * Add a comment to an existing invoice. Email the comment to the customer when notifyCustomer is true.
+     */
+    private function addComment(array $uriVariables, array $context): Invoice
+    {
+        $service = \Mage::getService('sales/order_document');
+        $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
+        $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
+
+        // An MCP tool call also sends the path parameters in the body
+        $body = array_diff_key($context['args']['input'] ?? [], $uriVariables);
+        self::rejectUnknownFields($body, DocumentCommentInput::FIELDS);
+        $input = RequestInput::of($body);
+        $invoice = $service->addComment(
+            $invoice,
+            $input->string('comment') ?? '',
+            $input->bool('notifyCustomer') ?? false,
+            $input->bool('visibleOnFront') ?? false,
+        );
+
+        return Invoice::fromModel(\Mage::getModel('sales/order_invoice')->load($invoice->getId()));
     }
 
     /**

@@ -120,6 +120,16 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             security: "is_granted('ROLE_ADMIN') or is_granted('invoices/write')",
             description: 'Cancel an open invoice',
         ),
+        new Post(
+            uriTemplate: '/invoices/{id}/comments',
+            name: 'invoice_add_comment',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('invoices/create')",
+            description: 'Add a comment to an existing invoice',
+            // The processor reads the body and rejects an unknown field, and the input class describes the body
+            deserialize: false,
+            input: DocumentCommentInput::class,
+        ),
     ],
     // No GraphQL surface: the provider resolves invoices through their order,
     // and auto-generated operations would dangle off the class-level security.

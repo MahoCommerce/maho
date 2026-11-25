@@ -24,7 +24,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         parent::__construct($security);
     }
 
-    private const array WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel'];
+    private const array WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel', 'invoice_add_comment'];
 
     /**
      * @return Invoice[]|Invoice|TraversablePaginator<Invoice>|Response|null
