@@ -65,8 +65,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // GraphQL invocations already populate $context['args']['input'].
         $this->normalizeGraphQlInput($context);
         if ($operationName === 'order_add_comment') {
-            // GraphQL checks its own arguments. An MCP tool call also sends the path parameters in the body.
-            self::rejectUnknownFields(array_diff_key($context['args']['input'] ?? [], $uriVariables), self::COMMENT_FIELDS);
+            // GraphQL checks its own arguments
+            self::rejectUnknownFields(self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables), self::COMMENT_FIELDS);
         }
 
         return match ($operationName) {

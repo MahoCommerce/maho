@@ -204,19 +204,19 @@ describe('PUT /api/rest/v2/customers/{id}', function (): void {
         expect($update['status'])->toBe(403);
     });
 
-    it('refuses a read-only field with a 400 that names it, and changes nothing', function (): void {
+    it('refuses a field that the update does not write with a 400 that names it, and changes nothing', function (array $field): void {
         [$create] = createTestCustomer();
         $id = (int) $create['json']['id'];
 
-        $update = apiPut("/api/rest/v2/customers/{$id}", [
-            'firstname' => 'Changed',
-            'createdAt' => '2020-01-01 00:00:00',
-        ], adminToken());
+        $update = apiPut("/api/rest/v2/customers/{$id}", ['firstname' => 'Changed'] + $field, adminToken());
 
         expect($update['status'])->toBe(400)
-            ->and(array_column($update['json']['details']['errors'] ?? [], 'field'))->toBe(['createdAt']);
+            ->and(array_column($update['json']['details']['errors'] ?? [], 'field'))->toBe(array_keys($field));
         expect(apiGet("/api/rest/v2/customers/{$id}", adminToken())['json']['firstname'])->toBe('Pest');
-    });
+    })->with([
+        'read-only' => [['createdAt' => '2020-01-01 00:00:00']],
+        'password' => [['password' => 'NewPassword1234!']],
+    ]);
 
 });
 

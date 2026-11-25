@@ -16,12 +16,16 @@ use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 /**
  * Customer State Processor - Handles customer mutations for API Platform.
  */
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
+    /** Writable fields of other operations, which an update of the account does not read. */
+    private const array FIELDS_NOT_UPDATED = ['password', 'newPassword', 'captchaToken', 'twofaEnabled', 'twofaCode', 'twofaSecret'];
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Customer
     {
@@ -35,9 +39,17 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $input = RequestInput::of($args);
 
+        $isAdminUpdate = $operation instanceof Put && isset($uriVariables['id']);
+        if ($operationName === 'update_profile' || $isAdminUpdate) {
+            $ignored = array_intersect(array_keys($args), $isAdminUpdate ? [...self::FIELDS_NOT_UPDATED, 'currentPassword'] : self::FIELDS_NOT_UPDATED);
+            if ($ignored !== []) {
+                throw new ExtraAttributesException(array_values($ignored));
+            }
+        }
+
         return match (true) {
             $operationName === 'update_profile' => $this->updateProfile($data->firstname, $data->lastname, $data->email !== '' ? $data->email : null, $this->extractProfileFields($data), $data->customAttributes, $data->currentPassword),
-            $operation instanceof Put && isset($uriVariables['id']) => $this->updateCustomerAdmin((int) $uriVariables['id'], $data),
+            $isAdminUpdate => $this->updateCustomerAdmin((int) $uriVariables['id'], $data),
             $operationName === 'change_password' => $this->changePassword($data->currentPassword ?? '', $data->newPassword ?? ''),
             $operationName === 'forgot_password_rest', $operationName === 'forgotPassword' => $this->forgotPassword($args),
             $operationName === 'reset_password_rest', $operationName === 'resetPassword' => $this->resetPassword($args),

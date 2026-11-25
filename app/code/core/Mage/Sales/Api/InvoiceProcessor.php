@@ -69,8 +69,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
-        // An MCP tool call also sends the path parameters in the body
-        $body = array_diff_key($context['args']['input'] ?? [], $uriVariables);
+        $body = self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables);
         self::rejectUnknownFields($body, DocumentCommentInput::FIELDS);
         $input = RequestInput::of($body);
         $invoice = $service->addComment(

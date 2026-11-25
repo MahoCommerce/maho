@@ -149,8 +149,10 @@ describe('Order comments', function (): void {
 
         expect($response['status'])->toBe(400)
             ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toBe(['isCustomerNotified']);
-        $comments = array_column(apiGet("/api/rest/v2/orders/{$orderId}", adminToken())['json']['statusHistory'] ?? [], 'note');
-        expect($comments)->not->toContain($note);
+        $order = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+        expect($order['status'])->toBe(200)
+            ->and($order['json'])->toHaveKey('statusHistory')
+            ->and(array_column($order['json']['statusHistory'], 'note'))->not->toContain($note);
     });
 
     it('accepts the note field of statusHistory as the comment', function (): void {

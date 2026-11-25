@@ -42,7 +42,7 @@ describe('api.php protocol switches', function (): void {
     it('serves a protocol that is on, when legacy REST is off', function (): void {
         setLegacyProtocols(['legacy_rest' => '0', 'xmlrpc' => '1']);
         try {
-            expect(callXmlrpcThroughApiPhp())->not->toBe(404);
+            expect(callXmlrpcThroughApiPhp())->toBe(200);
         } finally {
             setLegacyProtocols(['legacy_rest' => '1', 'xmlrpc' => '1']);
         }
