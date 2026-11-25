@@ -153,7 +153,7 @@ v2 also has the order actions that the legacy REST API did not have: invoices, s
 | `PUT /blog/posts/:id` | `PUT /blog-posts/{id}` |
 | `DELETE /blog/posts/:id` | `DELETE /blog-posts/{id}` |
 
-The legacy list gives all the posts. The v2 list gives only the published posts: active, with no publish date or a publish date that is not in the future. To also get the disabled posts and the scheduled posts, send `GET /blog-posts?scope=all`. Only a token of an admin or an API user can send `scope=all`.
+The legacy REST routes of blog posts answer `404` for every user type, so only the SOAP `blog_post.list` gives the posts, and it gives all of them. The v2 list gives only the published posts: active, with no publish date or a publish date that is not in the future. To also get the disabled posts and the scheduled posts, send `GET /blog-posts?scope=all`. Only a token of an admin or an API user can send `scope=all`.
 
 ## Field differences
 
@@ -278,6 +278,7 @@ These legacy operations have no v2 counterpart in this version.
 | Legacy | What to do |
 |--------|------------|
 | Delete a customer: `DELETE /customers/:id`, SOAP `customer.delete` | Delete the customer in the admin. |
+| Set the password of a customer as an admin | The customer sets it with `POST /customers/forgot-password` and `POST /customers/reset-password`, or with `POST /customers/me/password`. `PUT /customers/{id}` answers `400` to a `password` field. |
 | The gift message of an order: `gift_message_from`, `gift_message_to`, `gift_message_body` | None |
 | A list of the stock settings of all products | Read `stockItem` with `GET /products/{id}` for each product. |
 | Copy the website values to the store views: `copy_to_stores` in `POST /products/:product_id/websites` | None |

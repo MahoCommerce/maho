@@ -85,7 +85,7 @@ STEP 6: REPORT
 - The table of step 1, with the v2 method and path of each call, and its status: "done" or "no counterpart".
 - The fields that have no counterpart, or that have a different meaning in v2.
 - The API resources that the role of the v2 API user needs.
-- The configuration values that the integration needs in each environment: the base URL, the client ID and the client secret.
+- The names of the configuration values that the integration needs in each environment: the base URL, the client ID and the client secret. Do not write the values.
 - The changes that I must make in the store: the role and the user.
 ```
 
