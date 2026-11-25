@@ -38,3 +38,5 @@ Without them, an enabled legacy protocol errors when it tries to instantiate the
 ## Web server routing
 
 `/api/rest` goes to `api.php`, and the four SOAP and RPC paths go to Maho's normal front controller (`index.php`). None of them go to the v2 API entry point (`rest.php`). The bundled `public/.htaccess` already routes them this way; if you use nginx, Caddy, or a custom Apache configuration, replicate the routing as shown in the [API routing map](../hosting/web-server.md#api-routing-map).
+
+A client can also call `api.php` directly, with the protocol in the `type` parameter: `/api.php?type=soap`, `v2_soap`, `xmlrpc`, `jsonrpc` or `rest`. `api.php` checks the switch of that protocol, so a disabled protocol returns `404` on this path too.
