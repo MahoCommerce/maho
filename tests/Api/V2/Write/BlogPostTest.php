@@ -69,7 +69,7 @@ describe('Blog Post CRUD Lifecycle (REST)', function (): void {
             'content' => '<p>Created by Pest test suite</p>',
             'shortContent' => 'Test short content',
             'isActive' => true,
-            'publishedAt' => '2026-01-15 10:00:00',
+            'publishDate' => '2026-01-15',
             'stores' => ['all'],
         ], $writeToken);
 
@@ -113,6 +113,36 @@ describe('Blog Post CRUD Lifecycle (REST)', function (): void {
         // 7. Confirm gone
         $gone = apiGet("/api/rest/v2/blog-posts/{$postId}");
         expect($gone['status'])->toBeNotFound();
+    });
+
+});
+
+describe('Blog Post write body (REST)', function (): void {
+
+    it('refuses the read-only status on update with a 400 that names it, and changes nothing', function (): void {
+        $token = serviceToken(['blog-posts/write']);
+        $create = apiPost('/api/rest/v2/blog-posts', [
+            'title' => 'Read-only Status Post',
+            'urlKey' => 'test-pest-readonly-status-post',
+            'content' => '<p>Read-only status</p>',
+            'isActive' => true,
+            'stores' => ['all'],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $postId = (int) $create['json']['id'];
+        trackCreated('blog_post', $postId);
+
+        $refused = apiPut("/api/rest/v2/blog-posts/{$postId}", ['title' => 'Changed', 'status' => 'disabled'], $token);
+        expect($refused['status'])->toBe(400)
+            ->and(array_column($refused['json']['details']['errors'] ?? [], 'field'))->toBe(['status']);
+
+        $read = apiGet("/api/rest/v2/blog-posts/{$postId}");
+        expect($read['json']['title'])->toBe('Read-only Status Post')
+            ->and($read['json']['status'])->toBe('enabled');
+
+        $disabled = apiPut("/api/rest/v2/blog-posts/{$postId}", ['isActive' => false], $token);
+        expect($disabled['status'])->toBe(200)
+            ->and($disabled['json']['status'])->toBe('disabled');
     });
 
 });

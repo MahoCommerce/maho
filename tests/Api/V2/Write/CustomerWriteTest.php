@@ -204,6 +204,20 @@ describe('PUT /api/rest/v2/customers/{id}', function (): void {
         expect($update['status'])->toBe(403);
     });
 
+    it('refuses a read-only field with a 400 that names it, and changes nothing', function (): void {
+        [$create] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        $update = apiPut("/api/rest/v2/customers/{$id}", [
+            'firstname' => 'Changed',
+            'createdAt' => '2020-01-01 00:00:00',
+        ], adminToken());
+
+        expect($update['status'])->toBe(400)
+            ->and(array_column($update['json']['details']['errors'] ?? [], 'field'))->toBe(['createdAt']);
+        expect(apiGet("/api/rest/v2/customers/{$id}", adminToken())['json']['firstname'])->toBe('Pest');
+    });
+
 });
 
 describe('PUT /api/rest/v2/customers/me (self-service gating)', function (): void {

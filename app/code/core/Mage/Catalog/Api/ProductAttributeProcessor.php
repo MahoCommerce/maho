@@ -21,7 +21,6 @@ use Mage_Eav_Service_Attribute;
 use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
 
 final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
@@ -276,17 +275,5 @@ final class ProductAttributeProcessor extends \Maho\ApiPlatform\Processor
             $errors->throwIfErrors();
         }
         return $change;
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     * @param list<string> $fields
-     */
-    private static function rejectUnknownFields(array $body, array $fields): void
-    {
-        $unknown = array_diff(array_keys($body), $fields);
-        if ($unknown !== []) {
-            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
-        }
     }
 }

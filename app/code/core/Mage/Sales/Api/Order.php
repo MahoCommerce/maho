@@ -131,8 +131,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             name: 'order_add_comment',
             extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/comment'],
             requirements: ['id' => '\d+'],
+            // The processor reads the body and rejects an unknown field, and the input class describes the body
+            deserialize: false,
+            input: OrderCommentInput::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
-            description: 'Add a status-history comment to an order. Optional status must be one assigned to the order\'s current state',
+            description: 'Add a status-history comment to an order. Body: comment (required), status (must be one assigned to the current state of the order), notifyCustomer, visibleOnFront',
         ),
         new Get(
             // Read an order by its human-readable increment id, authenticated

@@ -29,7 +29,7 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
  *
  * - read/delete of a single item → its URI variables
  * - list → pagination plus the filters the resource declares
- * - create/update → the resource body, with the URI variables merged in
+ * - create/update → the writable fields of the body, with the URI variables merged in
  *
  * Output schemas are left to the decorated factory.
  */
@@ -73,9 +73,19 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
             return $this->objectSchema($uriVariables, array_keys($uriVariables));
         }
 
+        // A write rejects or ignores a read-only field, so the tool does not offer one.
         // The body wins on collision: an `id` the resource exposes already carries its
         // own description and type.
-        $properties = ($body['properties'] ?? []) + $uriVariables;
+        $writable = array_filter($body['properties'] ?? [], static fn(mixed $property): bool => empty($property['readOnly']));
+        $properties = $writable + $uriVariables;
+        if (isset($body['required'])) {
+            $required = array_values(array_intersect($body['required'], array_keys($properties)));
+            if ($required === []) {
+                unset($body['required']);
+            } else {
+                $body['required'] = $required;
+            }
+        }
         if ($properties === []) {
             unset($body['properties']);
 

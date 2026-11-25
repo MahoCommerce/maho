@@ -50,12 +50,14 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
             processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Creates a new blog post',
+            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
             processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Updates a blog post',
+            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',

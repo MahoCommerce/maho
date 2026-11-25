@@ -61,6 +61,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             processor: ProductProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Creates a new product',
+            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new Put(
@@ -68,6 +69,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             processor: ProductProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Updates a product',
+            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new Delete(

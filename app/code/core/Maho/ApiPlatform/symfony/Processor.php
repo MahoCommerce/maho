@@ -22,6 +22,7 @@ use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 /**
  * Base class for all API state processors.
@@ -190,6 +191,22 @@ abstract class Processor implements ProcessorInterface
     protected function parseRequestBody(?Request $request): array
     {
         return RequestInput::decode($request);
+    }
+
+    /**
+     * Throw a 400 that names each key of $body that is not in $fields. Use it for a body that the serializer does not
+     * read, so that an unknown field is an error and not a value that the write ignores.
+     *
+     * @param array<array-key, mixed> $body
+     * @param list<string> $fields
+     * @throws ExtraAttributesException
+     */
+    protected static function rejectUnknownFields(array $body, array $fields): void
+    {
+        $unknown = array_diff(array_map(strval(...), array_keys($body)), $fields);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_values($unknown));
+        }
     }
 
     /**
