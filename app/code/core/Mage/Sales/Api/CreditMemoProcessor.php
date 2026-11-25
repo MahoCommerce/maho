@@ -21,6 +21,9 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
+    /** The fields of a comment body. */
+    private const array COMMENT_FIELDS = ['comment', 'notifyCustomer', 'visibleOnFront'];
+
     private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
@@ -34,7 +37,32 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     {
         $this->normalizeGraphQlInput($context);
 
-        return $this->createCreditMemo($uriVariables, $context);
+        return match ($operation->getName()) {
+            'creditmemo_add_comment' => $this->addComment($uriVariables, $context),
+            default => $this->createCreditMemo($uriVariables, $context),
+        };
+    }
+
+    /**
+     * Add a comment to an existing credit memo. Email the comment to the customer when notifyCustomer is true.
+     */
+    private function addComment(array $uriVariables, array $context): CreditMemo
+    {
+        $service = \Mage::getService('sales/order_document');
+        $creditmemo = $service->requireCreditmemo((int) ($uriVariables['id'] ?? 0));
+        $this->assertStoreAllowed($creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
+
+        $body = self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables);
+        self::rejectUnknownFields($body, self::COMMENT_FIELDS);
+        $input = RequestInput::of($body);
+        $creditmemo = $service->addComment(
+            $creditmemo,
+            $input->string('comment') ?? '',
+            $input->bool('notifyCustomer') ?? false,
+            $input->bool('visibleOnFront') ?? false,
+        );
+
+        return CreditMemo::fromModel(\Mage::getModel('sales/order_creditmemo')->load($creditmemo->getId()));
     }
 
     private function createCreditMemo(array $uriVariables, array $context): CreditMemo

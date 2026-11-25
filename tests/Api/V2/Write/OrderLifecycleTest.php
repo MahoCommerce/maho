@@ -135,6 +135,39 @@ describe('Order comments', function (): void {
         expect(Mage::getModel('sales/order')->load($orderId)->getStatus())->toBe($before);
     });
 
+    it('refuses a field of the comment read shape with a 400 that names it, and adds no comment', function (): void {
+        $orderId = findAnyOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No order in the test database');
+        }
+
+        $note = 'API refused comment ' . uniqid();
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/comments", [
+            'comment' => $note,
+            'isCustomerNotified' => true,
+        ], adminToken());
+
+        expect($response['status'])->toBe(400)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toBe(['isCustomerNotified']);
+        $order = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+        expect($order['status'])->toBe(200)
+            ->and($order['json'])->toHaveKey('statusHistory')
+            ->and(array_column($order['json']['statusHistory'], 'note'))->not->toContain($note);
+    });
+
+    it('accepts the note field of statusHistory as the comment', function (): void {
+        $orderId = findAnyOrderId();
+        if (!$orderId) {
+            $this->markTestSkipped('No order in the test database');
+        }
+
+        $note = 'API note comment ' . uniqid();
+        $response = apiPost("/api/rest/v2/orders/{$orderId}/comments", ['note' => $note], adminToken());
+
+        expect($response['status'])->toBeSuccessful();
+        expect(array_column($response['json']['statusHistory'] ?? [], 'note'))->toContain($note);
+    });
+
 });
 
 describe('Order cancel (REST)', function (): void {

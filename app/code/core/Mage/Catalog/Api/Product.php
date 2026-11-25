@@ -182,7 +182,7 @@ class Product extends CrudResource
     public string $type = 'simple';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product status: enabled or disabled', writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
+    #[ApiProperty(description: 'Product status: enabled or disabled', writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true, 'writeAs' => 'isActive'])]
     public string $status = 'enabled';
 
     #[Groups(['product:read'])]

@@ -5,7 +5,7 @@ description: GET parameters supported by Maho's legacy REST API - filter, page, 
 # GET Filters
 
 !!! warning "Legacy API"
-    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../v2/index.md) instead.
+    This is Maho's legacy REST API, inherited from Magento 1 and kept for backward compatibility. New integrations should use the modern [REST & GraphQL API (v2)](../v2/index.md) instead. To move an existing integration, see [Migrate from the legacy APIs](../v2/migrate-from-legacy-api.md).
 
 Some requests use GET parameters in the URL[^1]. These are as follows:
 

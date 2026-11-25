@@ -302,10 +302,10 @@ describe('Customer segment fields', function (): void {
             ->and(array_column($response['json']['details']['errors'], 'field'))->toBe(['unknown', 'matchedCustomersCount']);
     });
 
-    it('lists every value of a wrong type with a 422 that names each field', function (): void {
+    it('lists every value of a wrong type with a 400 that names each field', function (): void {
         $response = csegCreate(['name' => 5, 'priority' => 'x', 'websiteIds' => '1']);
 
-        expect($response['status'])->toBe(422)
+        expect($response['status'])->toBe(400)
             ->and(array_column($response['json']['details']['errors'], 'field'))
             ->toEqualCanonicalizing(['name', 'priority', 'websiteIds']);
     });

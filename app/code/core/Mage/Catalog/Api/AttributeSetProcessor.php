@@ -16,7 +16,6 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Http\RequestInput;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -70,7 +69,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function create(array $body): AttributeSet
     {
-        $this->rejectUnknownFields($body, ['name', 'skeletonId']);
+        self::rejectUnknownFields($body, ['name', 'skeletonId', ...self::IGNORED_FIELDS]);
         $input = RequestInput::of($body);
         $set = $this->setService()->newSet(\Mage_Catalog_Model_Product::ENTITY)
             ->setAttributeSetName($input->string('name'));
@@ -85,7 +84,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function rename(int $id, array $body): AttributeSet
     {
-        $this->rejectUnknownFields($body, ['name', 'skeletonId']);
+        self::rejectUnknownFields($body, ['name', 'skeletonId', ...self::IGNORED_FIELDS]);
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         $oldData = $set->getData();
         $this->setService()->save($set->setAttributeSetName(RequestInput::of($body)->string('name')));
@@ -99,7 +98,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createGroup(int $id, array $body): AttributeSet
     {
-        $this->rejectUnknownFields($body, ['name', 'sortOrder']);
+        self::rejectUnknownFields($body, ['name', 'sortOrder', ...self::IGNORED_FIELDS]);
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         /** @var \Mage_Eav_Model_Entity_Attribute_Group $group */
         $group = \Mage::getModel('eav/entity_attribute_group');
@@ -118,7 +117,7 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
      */
     private function assignAttribute(int $id, array $body): AttributeSet
     {
-        $this->rejectUnknownFields($body, ['attributeId', 'attributeCode', 'groupId', 'groupName', 'sortOrder']);
+        self::rejectUnknownFields($body, ['attributeId', 'attributeCode', 'groupId', 'groupName', 'sortOrder', ...self::IGNORED_FIELDS]);
         $input = RequestInput::of($body);
         $set = $this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY);
         $oldData = $set->getData();
@@ -136,18 +135,6 @@ final class AttributeSetProcessor extends \Maho\ApiPlatform\Processor
     private function toDto(int $id): AttributeSet
     {
         return $this->provider->setDto($this->setService()->getById($id, \Mage_Catalog_Model_Product::ENTITY));
-    }
-
-    /**
-     * @param array<string, mixed> $body
-     * @param list<string> $allowed
-     */
-    private function rejectUnknownFields(array $body, array $allowed): void
-    {
-        $unknown = array_diff(array_keys($body), $allowed, self::IGNORED_FIELDS);
-        if ($unknown !== []) {
-            throw new ExtraAttributesException(array_map(strval(...), array_values($unknown)));
-        }
     }
 
     private function setService(): \Mage_Eav_Service_Attribute_Set

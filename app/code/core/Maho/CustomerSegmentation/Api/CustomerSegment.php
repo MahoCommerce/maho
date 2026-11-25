@@ -35,7 +35,6 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
     description: 'Customer segments: groups of customers by behavior, such as the customers who spent the most, who did not order for a long time, or who left a cart',
     provider: CustomerSegmentProvider::class,
     processor: CustomerSegmentProcessor::class,
-    denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
     operations: [
         new GetCollection(
             uriTemplate: '/customer-segments',

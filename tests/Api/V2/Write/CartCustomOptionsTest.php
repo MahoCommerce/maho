@@ -70,9 +70,9 @@ function createTestProductWithOptions(): array
         ]],
         ['title' => 'Required Date', 'type' => 'date', 'required' => true, 'price' => 0, 'priceType' => 'fixed'],
         ['title' => 'Required File Upload', 'type' => 'file', 'required' => true, 'price' => 5.00, 'priceType' => 'fixed',
-            'fileExtension' => 'jpg,jpeg,png,gif', 'imageSizeX' => 2000, 'imageSizeY' => 2000],
+            'fileExtensions' => 'jpg,jpeg,png,gif', 'imageSizeX' => 2000, 'imageSizeY' => 2000],
         ['title' => 'Optional File Upload', 'type' => 'file', 'required' => false, 'price' => 0, 'priceType' => 'fixed',
-            'fileExtension' => 'jpg,jpeg,png,gif,pdf'],
+            'fileExtensions' => 'jpg,jpeg,png,gif,pdf'],
     ];
 
     $options = [];
@@ -85,7 +85,7 @@ function createTestProductWithOptions(): array
         $options[$spec['title']] = $optionData;
     }
 
-    // API Platform doesn't map fileExtension/imageSizeX/Y, set them via DB
+    // API Platform doesn't map fileExtensions/imageSizeX/Y, set them via DB
     try {
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
         foreach ($optionSpecs as $spec) {
@@ -95,8 +95,8 @@ function createTestProductWithOptions(): array
             }
             $optId = (int) $options[$optionTitle]['id'];
             $updates = [];
-            if (!empty($spec['fileExtension'])) {
-                $updates[] = 'file_extension = ' . $write->quote($spec['fileExtension']);
+            if (!empty($spec['fileExtensions'])) {
+                $updates[] = 'file_extension = ' . $write->quote($spec['fileExtensions']);
             }
             if (!empty($spec['imageSizeX'])) {
                 $updates[] = 'image_size_x = ' . (int) $spec['imageSizeX'];

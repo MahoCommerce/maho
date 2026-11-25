@@ -22,6 +22,7 @@ use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 
 /**
  * Base class for all API state processors.
@@ -190,6 +191,40 @@ abstract class Processor implements ProcessorInterface
     protected function parseRequestBody(?Request $request): array
     {
         return RequestInput::decode($request);
+    }
+
+    /**
+     * Throw a 400 that names each key of $body that is not in $fields. Use it for a body that the serializer does not
+     * read, so that an unknown field is an error and not a value that the write ignores.
+     *
+     * @param array<array-key, mixed> $body
+     * @param list<string> $fields
+     * @throws ExtraAttributesException
+     */
+    protected static function rejectUnknownFields(array $body, array $fields): void
+    {
+        $unknown = array_diff(array_map(strval(...), array_keys($body)), $fields);
+        if ($unknown !== []) {
+            throw new ExtraAttributesException(array_values($unknown));
+        }
+    }
+
+    /**
+     * Remove from $body each path parameter that has the same value as in the URI. An MCP tool call sends the path
+     * parameters in the body. A different value stays in the body, so that rejectUnknownFields() refuses it.
+     *
+     * @param array<array-key, mixed> $body
+     * @param array<string, mixed> $uriVariables
+     * @return array<array-key, mixed>
+     */
+    protected static function withoutUriVariables(array $body, array $uriVariables): array
+    {
+        foreach ($uriVariables as $name => $value) {
+            if (array_key_exists($name, $body) && is_scalar($body[$name]) && is_scalar($value) && (string) $body[$name] === (string) $value) {
+                unset($body[$name]);
+            }
+        }
+        return $body;
     }
 
     /**

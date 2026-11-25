@@ -34,6 +34,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         'gender' => 'customer_gender',
     ];
 
+    /** The fields of a comment body. note is the name of the comment in statusHistory, so a client can send it back. */
+    private const array COMMENT_FIELDS = ['comment', 'note', 'status', 'notifyCustomer', 'visibleOnFront'];
+
     private \Mage_Checkout_Service_Cart $cartService;
     private OrderProvider $orderProvider;
     private \Mage_Sales_Service_Order $orderService;
@@ -61,6 +64,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // fields. Parse the raw body so the placeOrder handler can read it.
         // GraphQL invocations already populate $context['args']['input'].
         $this->normalizeGraphQlInput($context);
+        if ($operationName === 'order_add_comment') {
+            // GraphQL checks its own arguments
+            self::rejectUnknownFields(self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables), self::COMMENT_FIELDS);
+        }
 
         return match ($operationName) {
             'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($uriVariables, $context),

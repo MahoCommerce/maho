@@ -25,7 +25,7 @@ beforeAll(function (): void {
         'urlKey' => 'test-pest-graphql-blog-post',
         'content' => '<p>Created by Pest test suite</p>',
         'isActive' => true,
-        'publishedAt' => '2026-01-15 10:00:00',
+        'publishDate' => '2026-01-15',
         'stores' => ['all'],
     ], serviceToken(['blog-posts/write']));
 

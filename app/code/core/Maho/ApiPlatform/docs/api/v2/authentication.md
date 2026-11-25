@@ -13,7 +13,7 @@ All authenticated endpoints require a Bearer token in the `Authorization` header
 The endpoint dispatches by `grant_type`. Supported grants: `customer` (default), `magic_link`, `client_credentials`, `api_user`.
 
 !!! note "Which grant should I use?"
-    Use `client_credentials` for new integrations. The `api_user` grant is a **transitional bridge**: it authenticates the API user accounts defined in the admin under **System > Web Services** (the accounts used by the SOAP-era APIs, part of the now-deprecated `Mage_Api` module) and issues a JWT carrying that user's ACL role permissions. It lets existing integrations move to the v2 API without re-provisioning credentials, but it will be retired together with the legacy API modules - plan to migrate those accounts to `client_credentials` service accounts.
+    Use `client_credentials` for new integrations. The `api_user` grant authenticates the API user accounts of the SOAP-era APIs (the deprecated `Mage_Api` module) with their user name and API key. The token has the resources of the role of the user. v2 checks the v2 resources, such as `products/read`, and a role that the SOAP role editor saved has only SOAP resources, such as `catalog/product/info`. So a v2 request with this token gives `403`, unless the role gives all the resources. The grant will be removed with the legacy API modules. To move a SOAP integration, see [Migrate from the legacy APIs](migrate-from-legacy-api.md#authentication).
 
 === "curl"
 

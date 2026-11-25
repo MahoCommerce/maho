@@ -159,7 +159,7 @@ class BlogPost extends CrudResource
     #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
-    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true, 'writeAs' => 'isActive'])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;

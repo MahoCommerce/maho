@@ -15,6 +15,8 @@ use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
@@ -58,6 +60,32 @@ use Maho\ApiPlatform\Metadata\ListFilter;
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
             extraProperties: [OperationAccessChecker::OPERATION_RESOURCE_KEY => 'sales/order/actions/creditmemo'],
             description: 'Create a credit memo / refund for an order',
+        ),
+        new Post(
+            uriTemplate: '/credit-memos/{id}/comments',
+            name: 'creditmemo_add_comment',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
+            description: 'Add a comment to an existing credit memo',
+            // The processor reads the body and rejects an unknown field
+            deserialize: false,
+            openapi: new OpenApiOperation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'comment' => ['type' => 'string', 'description' => 'Text of the comment'],
+                                    'notifyCustomer' => ['type' => 'boolean', 'default' => false, 'description' => 'Send the update email of the document, with the comment, to the customer'],
+                                    'visibleOnFront' => ['type' => 'boolean', 'default' => false, 'description' => 'Show the comment to the customer in the storefront account'],
+                                ],
+                                'required' => ['comment'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
     ],
     graphQlOperations: [

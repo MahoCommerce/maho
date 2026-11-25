@@ -183,10 +183,16 @@ public function getTailwindContent(): iterable {}
   `openapiContext: ['enum' => …]`: it reaches the OpenAPI document only.
 - Writes follow HTTP. PATCH (`application/merge-patch+json`) changes the fields in the body. PUT
   replaces the record, so a field that the body leaves out gets its default value. Declare `Patch`
-  before `Put`: the MCP update tool comes from the first one. Set
-  `denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true]`
-  so an unknown field is a 400 and every type error comes back at once. Many older resources still
-  use PUT as a partial update; they move one at a time.
+  before `Put`: the MCP update tool comes from the first one. Many older resources still use PUT as a
+  partial update; they move one at a time.
+- Every REST write refuses an unknown field, a read-only field and a value of the wrong type with one
+  400 that names each field (`StrictBodyResourceMetadataCollectionFactory`). Do not set
+  `allow_extra_attributes` in a core resource. A read-only property with a writable twin names it with
+  `extraProperties: ['writeAs' => 'isActive']`, so that the error tells the client what to write. A
+  body that is not the resource (an action such as `/orders/{id}/comments`) takes `deserialize: false`
+  and an inline `openapi:` request body, and the processor checks its keys with
+  `rejectUnknownFields()` and a constant list. Never add an input class for it. `OPEN_BODIES` lists the
+  older actions that still skip the check: it only shrinks
 - Pick the status code by what went wrong (RFC 9110). 400: the request cannot be read, such as
   invalid JSON, a value of the wrong type or shape, or a bad query string or header. 401: the client
   did not prove who it is. 403: the client is known and may not do the action. 404: the record in

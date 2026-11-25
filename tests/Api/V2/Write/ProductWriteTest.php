@@ -493,6 +493,37 @@ describe('Product Update (REST)', function (): void {
 
 });
 
+describe('Product write body (REST)', function (): void {
+
+    it('refuses the read-only status on update with a 400 that names it, and changes nothing', function (string $query): void {
+        $token = serviceToken(['products/write']);
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => 'PEST-READONLY-STATUS-' . substr(uniqid(), -8),
+            'name' => 'Pest Test Read-only Status',
+            'price' => 10.00,
+            'websiteIds' => [1],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $productId = (int) $create['json']['id'];
+        trackCreated('product', $productId);
+        expect($create['json']['status'])->toBe('enabled');
+
+        $refused = apiPut("/api/rest/v2/products/{$productId}{$query}", ['status' => 'disabled'], $token);
+        expect($refused['status'])->toBe(400)
+            ->and(array_column($refused['json']['details']['errors'] ?? [], 'field'))->toBe(['status']);
+        expect($refused['json']['details']['errors'][0]['message'])->toContain('isActive');
+        expect(apiGet("/api/rest/v2/products/{$productId}", $token)['json']['status'])->toBe('enabled');
+
+        $disabled = apiPut("/api/rest/v2/products/{$productId}{$query}", ['isActive' => false], $token);
+        expect($disabled['status'])->toBe(200)
+            ->and($disabled['json']['status'])->toBe('disabled');
+    })->with([
+        'model save' => [''],
+        'fast update' => ['?fast=true'],
+    ]);
+
+});
+
 describe('Product Extended Fields (REST)', function (): void {
 
     it('creates a product with extended price, date and msrp fields and reads them back', function (): void {

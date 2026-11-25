@@ -32,15 +32,27 @@ if (Mage::app()->isSchemaUpdatePending()) {
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
 
-// Legacy Magento 1 REST is opt-in via apiplatform/protocols/legacy_rest.
-// Disabled by default; operators must enable it consciously.
-if (!Mage::helper('apiplatform')->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_LEGACY_REST)) {
+// query parameter "type" is set by .htaccess rewrite rule
+$apiAlias = Mage::app()->getRequest()->getParam('type');
+$isRest = in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes());
+$apiHelper = Mage::helper('apiplatform');
+
+// Each legacy protocol is off by default. This file serves all of them, so check the switch of the requested one.
+if ($isRest) {
+    $protocol = Maho_ApiPlatform_Helper_Data::PROTOCOL_LEGACY_REST;
+} else {
+    /* @var $server Mage_Api_Model_Server */
+    $server = Mage::getSingleton('api/server');
+    // if no adapters found in aliases - find it by default, by code
+    $adapterCode = $apiAlias ? ($server->getAdapterCodeByAlias($apiAlias) ?? $apiAlias) : 'default';
+    $protocol = $apiHelper->getProtocolForAdapter($adapterCode === 'default'
+        ? (string) Mage::getSingleton('api/config')->getNode('adapters/default/use')
+        : (string) $adapterCode);
+}
+if ($protocol === null || !$apiHelper->isProtocolEnabled($protocol)) {
     http_response_code(404);
     exit;
 }
-
-// query parameter "type" is set by .htaccess rewrite rule
-$apiAlias = Mage::app()->getRequest()->getParam('type');
 
 // Several branches below exit, so the root span is closed at shutdown.
 // finishRequest() runs first, so a slow collector never holds the API client.
@@ -56,23 +68,12 @@ if ($tracer) {
 }
 
 // check request could be processed by API2
-if (in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes())) {
-    /** @var Mage_Api2_Model_Server $server */
-    $server = Mage::getSingleton('api2/server');
-    $server->run();
+if ($isRest) {
+    /** @var Mage_Api2_Model_Server $rest */
+    $rest = Mage::getSingleton('api2/server');
+    $rest->run();
     exit;
 }
-
-/* @var $server Mage_Api_Model_Server */
-$server = Mage::getSingleton('api/server');
-if (!$apiAlias) {
-    $adapterCode = 'default';
-} else {
-    $adapterCode = $server->getAdapterCodeByAlias($apiAlias);
-}
-
-// if no adapters found in aliases - find it by default, by code
-$adapterCode ??= $apiAlias;
 
 try {
     $server->initialize($adapterCode);

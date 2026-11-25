@@ -20,6 +20,9 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
+    /** The fields of a comment body. */
+    private const array COMMENT_FIELDS = ['comment', 'notifyCustomer', 'visibleOnFront'];
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invoice
     {
@@ -31,6 +34,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             'invoice_capture' => $this->executeLifecycleAction('captureInvoice', $uriVariables),
             'invoice_void' => $this->executeLifecycleAction('voidInvoice', $uriVariables),
             'invoice_cancel' => $this->executeLifecycleAction('cancelInvoice', $uriVariables),
+            'invoice_add_comment' => $this->addComment($uriVariables, $context),
             default => $this->createInvoice($uriVariables, $context),
         };
     }
@@ -57,6 +61,28 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return Invoice::fromModel($service->invoice($order, $qtys, $captureCase, $comment, $notifyCustomer));
+    }
+
+    /**
+     * Add a comment to an existing invoice. Email the comment to the customer when notifyCustomer is true.
+     */
+    private function addComment(array $uriVariables, array $context): Invoice
+    {
+        $service = \Mage::getService('sales/order_document');
+        $invoice = $service->requireInvoice((int) ($uriVariables['id'] ?? 0));
+        $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
+
+        $body = self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables);
+        self::rejectUnknownFields($body, self::COMMENT_FIELDS);
+        $input = RequestInput::of($body);
+        $invoice = $service->addComment(
+            $invoice,
+            $input->string('comment') ?? '',
+            $input->bool('notifyCustomer') ?? false,
+            $input->bool('visibleOnFront') ?? false,
+        );
+
+        return Invoice::fromModel(\Mage::getModel('sales/order_invoice')->load($invoice->getId()));
     }
 
     /**
