@@ -48,7 +48,7 @@ Pick the v2 grant from the user type of the legacy integration. See [Authenticat
 | Customer: an OAuth consumer with a customer token | The `customer` grant with the email and the password of the customer. Use the `/customers/me` routes. |
 | Guest | No token. A read of public data needs no `Authorization` header. |
 
-Do not move a SOAP integration with the `api_user` grant. The token of this grant has the SOAP resources of the role, such as `catalog/product/info`. v2 checks the v2 resources, such as `products/read`, so each request gives `403`. A role cannot have the two sets of resources: a save in the SOAP role editor or in the v2 role editor replaces all the resources of the role.
+Do not move a SOAP integration with the `api_user` grant. The token of this grant has the SOAP resources of the role, such as `catalog/product/info`. v2 checks the v2 resources, such as `products/read`, so each request gives `403`, unless the role gives all the resources. A role cannot have the two sets of resources: a save in the SOAP role editor or in the v2 role editor replaces all the resources of the role.
 
 ```bash
 curl -X POST https://your-domain.com/api/rest/v2/auth/token \
