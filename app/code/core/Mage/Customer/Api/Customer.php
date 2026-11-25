@@ -52,20 +52,17 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Post(
             uriTemplate: '/customers',
             description: 'Create a new customer (register)',
-            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
             security: 'true',
         ),
         new Put(
             uriTemplate: '/customers/me',
             name: 'update_profile',
             description: 'Update current customer profile',
-            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('customers/write')",
         ),
         new Put(
             uriTemplate: '/customers/{id}',
             description: 'Update a customer (admin / service token)',
-            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
             security: "is_granted('ROLE_ADMIN') or is_granted('customers/write')",
             // No read phase: the provider's item path demands customers/read,
             // which a write-only service token legitimately lacks; the

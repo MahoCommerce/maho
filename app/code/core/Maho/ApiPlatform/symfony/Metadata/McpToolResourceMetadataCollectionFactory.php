@@ -363,6 +363,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
             denormalizationContext: $operation->getDenormalizationContext(),
             security: $operation->getSecurity(),
             securityMessage: $operation->getSecurityMessage(),
+            openapi: $operation->getOpenapi(),
             input: $operation->getInput(),
             output: $operation->getOutput(),
             provider: $operation->getProvider(),

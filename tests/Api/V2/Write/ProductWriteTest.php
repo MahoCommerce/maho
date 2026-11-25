@@ -511,6 +511,7 @@ describe('Product write body (REST)', function (): void {
         $refused = apiPut("/api/rest/v2/products/{$productId}{$query}", ['status' => 'disabled'], $token);
         expect($refused['status'])->toBe(400)
             ->and(array_column($refused['json']['details']['errors'] ?? [], 'field'))->toBe(['status']);
+        expect($refused['json']['details']['errors'][0]['message'])->toContain('isActive');
         expect(apiGet("/api/rest/v2/products/{$productId}", $token)['json']['status'])->toBe('enabled');
 
         $disabled = apiPut("/api/rest/v2/products/{$productId}{$query}", ['isActive' => false], $token);

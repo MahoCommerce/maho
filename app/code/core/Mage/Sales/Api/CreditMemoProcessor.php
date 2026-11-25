@@ -21,6 +21,9 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
+    /** The fields of a comment body. */
+    private const array COMMENT_FIELDS = ['comment', 'notifyCustomer', 'visibleOnFront'];
+
     private \Mage_Sales_Service_Order $orderService;
 
     public function __construct(Security $security)
@@ -50,7 +53,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $this->assertStoreAllowed($creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
 
         $body = self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables);
-        self::rejectUnknownFields($body, DocumentCommentInput::FIELDS);
+        self::rejectUnknownFields($body, self::COMMENT_FIELDS);
         $input = RequestInput::of($body);
         $creditmemo = $service->addComment(
             $creditmemo,

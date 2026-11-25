@@ -20,6 +20,9 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 {
     use \Maho\ApiPlatform\Trait\OrderItemsTrait;
 
+    /** The fields of a comment body. */
+    private const array COMMENT_FIELDS = ['comment', 'notifyCustomer', 'visibleOnFront'];
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invoice
     {
@@ -70,7 +73,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $this->assertStoreAllowed($invoice->getStoreId(), $this->requireUser(), 'invoice');
 
         $body = self::withoutUriVariables($context['args']['input'] ?? [], $uriVariables);
-        self::rejectUnknownFields($body, DocumentCommentInput::FIELDS);
+        self::rejectUnknownFields($body, self::COMMENT_FIELDS);
         $input = RequestInput::of($body);
         $invoice = $service->addComment(
             $invoice,

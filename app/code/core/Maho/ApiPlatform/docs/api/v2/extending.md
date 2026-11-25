@@ -103,6 +103,28 @@ final class WidgetAttributes {}
 
 The attribute is repeatable, a single class can carry several declarations with different `uriTemplate` / `operations` sets that share one permission identity (the Cms `Media` DTO uses this pattern for `/media` and `/media/{path}`). Just give each attribute the same `mahoId` and the compiler unions their segments and GraphQL fields under one registry entry.
 
+### Request bodies
+
+Every REST `POST`, `PUT` and `PATCH` answers `400` when its body has an unknown field, a read-only field or a value of the wrong type. The answer names each field in `details.errors`. The serializer reads the body into the class of the resource, so the body of an operation must use the fields of that class.
+
+An action whose body is not the resource, such as a comment on an order, reads its body in the processor. Declare it with `deserialize: false` and an inline `openapi:` request body. In the processor, call `rejectUnknownFields()` with the list of the fields that the action reads.
+
+To keep the old behavior, which ignores a field that the class does not declare, set the context on the operation:
+
+```php
+new Post(
+    uriTemplate: '/my-resources/{id}/import',
+    denormalizationContext: ['allow_extra_attributes' => true],
+),
+```
+
+A read-only property that has a writable twin can name it. The error then tells the client which field to write:
+
+```php
+#[ApiProperty(writable: false, extraProperties: ['writeAs' => 'isActive'])]
+public string $status = 'enabled';
+```
+
 ## Extending the API (Third-Party Modules)
 
 All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field, an open array where modules can inject additional data without modifying core API files. The base class also provides a `toArray()` method for serializing DTOs (used by GraphQL handlers).

@@ -169,11 +169,9 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
         $id = (int) $create['json']['id'];
         trackAdminGiftCard($create['json']['code']);
 
+        // A PUT refuses a read-only field, so the client sends back only the writable fields that it read
         $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
-        $document = $read['json'];
-        $document['status'] = 'disabled';
-
-        $update = apiPut("/api/rest/v2/giftcards/{$id}", $document, adminToken());
+        $update = apiPut("/api/rest/v2/giftcards/{$id}", ['status' => 'disabled', 'websiteIds' => $read['json']['websiteIds']], adminToken());
         expect($update['status'])->toBe(200);
         expect($update['json']['status'])->toBe('disabled');
         expect($update['json']['websiteIds'])->toBe([1]);

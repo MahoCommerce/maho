@@ -50,14 +50,12 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
             processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Creates a new blog post',
-            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
             processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Updates a blog post',
-            denormalizationContext: ['allow_extra_attributes' => false, 'collect_denormalization_errors' => true],
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',
@@ -161,7 +159,7 @@ class BlogPost extends CrudResource
     #[ApiProperty(extraProperties: [EnumSource::KEY => ValueLists::META_ROBOTS])]
     public ?string $metaRobots = null;
 
-    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true, 'writeAs' => 'isActive'])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;

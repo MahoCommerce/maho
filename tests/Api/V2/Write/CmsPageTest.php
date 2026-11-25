@@ -421,3 +421,21 @@ describe('CMS Page via GraphQL (read)', function (): void {
     });
 
 });
+
+describe('CMS Page write body (REST)', function (): void {
+
+    it('refuses a read-only field and a value of a wrong type with a 400 that names each field', function (): void {
+        $response = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-pest-strict-body-page',
+            'title' => 'Strict Body Page',
+            'content' => '<p>Should fail</p>',
+            'stores' => ['all'],
+            'status' => 'disabled',
+            'sortOrder' => 'first',
+        ], serviceToken(['cms-pages/write']));
+
+        expect($response['status'])->toBe(400)
+            ->and(array_column($response['json']['details']['errors'] ?? [], 'field'))->toEqualCanonicalizing(['status', 'sortOrder']);
+    });
+
+});

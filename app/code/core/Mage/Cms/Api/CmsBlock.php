@@ -83,7 +83,7 @@ class CmsBlock extends CrudResource
     public string $title = '';
     public ?string $content = null;
 
-    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true])]
+    #[ApiProperty(writable: false, extraProperties: [EnumSource::KEY => ['enabled', 'disabled'], 'computed' => true, 'writeAs' => 'isActive'])]
     public string $status = 'enabled';
 
     public ?bool $isActive = null;

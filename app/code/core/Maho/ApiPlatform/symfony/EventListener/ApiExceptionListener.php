@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Exception\AccessDeniedException as MetadataAccessDeniedException;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Validator\Exception\ConstraintViolationListAwareExceptionInterface;
@@ -236,10 +237,10 @@ class ApiExceptionListener implements EventSubscriberInterface
         // type of the "email" attribute must be ..."), safe to pass through.
         // Processor::parseRequestBody() already maps its own JSON errors to 400;
         // this mirrors that for the DTO path, which otherwise surfaced as 500.
-        // ExtraAttributesException = a field that the DTO does not accept, when the operation sets allow_extra_attributes to false.
+        // ExtraAttributesException = a field that the DTO does not accept (see StrictBodyResourceMetadataCollectionFactory).
         if ($exception instanceof SerializerUnexpectedValueException || $exception instanceof ExtraAttributesException) {
             $statusCode = 400;
-            $errors = self::serializerErrors($exception);
+            $errors = self::serializerErrors($exception, $request?->attributes->get('_api_resource_class'));
             $data = [
                 'error' => 'bad_request',
                 'message' => match (true) {
@@ -401,7 +402,7 @@ class ApiExceptionListener implements EventSubscriberInterface
      *
      * @return list<array{field: string, message: string}>
      */
-    private static function serializerErrors(\Throwable $exception): array
+    private static function serializerErrors(\Throwable $exception, mixed $resourceClass = null): array
     {
         $typeErrors = match (true) {
             $exception instanceof PartialDenormalizationException => $exception->getNotNormalizableValueErrors(),
@@ -421,9 +422,29 @@ class ApiExceptionListener implements EventSubscriberInterface
             }
         }
         foreach ($extra?->getExtraAttributes() ?? [] as $field) {
-            $errors[] = ['field' => (string) $field, 'message' => sprintf('The field "%s" is unknown or read-only.', $field)];
+            $writeAs = is_string($resourceClass) ? self::writableField($resourceClass, (string) $field) : null;
+            $errors[] = ['field' => (string) $field, 'message' => $writeAs !== null
+                ? sprintf('The field "%s" is read-only. Write "%s" instead.', $field, $writeAs)
+                : sprintf('The field "%s" is unknown or read-only.', $field)];
         }
         return $errors;
+    }
+
+    /**
+     * Return the writable field that a read-only property names with `extraProperties: ['writeAs' => ...]`, or null.
+     */
+    private static function writableField(string $resourceClass, string $field): ?string
+    {
+        if (!property_exists($resourceClass, $field)) {
+            return null;
+        }
+        foreach (new \ReflectionProperty($resourceClass, $field)->getAttributes(ApiProperty::class) as $attribute) {
+            $writeAs = $attribute->newInstance()->getExtraProperties()['writeAs'] ?? null;
+            if (is_string($writeAs)) {
+                return $writeAs;
+            }
+        }
+        return null;
     }
 
     /**

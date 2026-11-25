@@ -34,7 +34,7 @@ The legacy REST API at `/api/rest` (module `Mage_Api2`) and the SOAP, XML-RPC an
 | Pagination | `page` and `limit` (default 10, maximum 100) | `page` and `itemsPerPage` (default 20, maximum 100) |
 | Filters | `filter[n][attribute]` with an operator | Named filters for each resource, see [Filters and sort](#filters-and-sort) |
 | Sort | `order` and `dir` | `sortBy` and `sortDir` (products only) |
-| A field that a write does not accept | Ignored | `400` with the name of the field, for products, customers, blog posts and comments |
+| A field that a write does not accept, or a value of the wrong type | Ignored, or a value that is cast | `400` with the name of each field |
 | Errors | `{"messages": {"error": [{"code": 404, "message": "..."}]}}` | `{"error": "not_found", "message": "...", "code": 404}`, see [Errors](errors.md) |
 
 ## Authentication

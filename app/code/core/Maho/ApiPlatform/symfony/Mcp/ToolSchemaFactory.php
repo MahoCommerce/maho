@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 
 /**
@@ -29,7 +30,8 @@ use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
  *
  * - read/delete of a single item → its URI variables
  * - list → pagination plus the filters the resource declares
- * - create/update → the writable fields of the body, with the URI variables merged in
+ * - create/update → the writable fields of the body, with the URI variables merged in; an operation that
+ *   declares its JSON request body in `openapi:` gets that body instead
  *
  * Output schemas are left to the decorated factory.
  */
@@ -68,6 +70,11 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
             return $this->objectSchema($uriVariables, array_keys($uriVariables));
         }
 
+        $declared = $this->declaredBody($operation);
+        if ($declared !== null) {
+            return $this->objectSchema(($declared['properties'] ?? []) + $uriVariables, array_values(array_unique([...($declared['required'] ?? []), ...array_keys($uriVariables)])));
+        }
+
         $body = $this->decorated->buildSchema($className, $format, $type, $operation, $schema, $serializerContext, $forceCollection);
         if (($body['type'] ?? null) !== 'object') {
             return $this->objectSchema($uriVariables, array_keys($uriVariables));
@@ -95,6 +102,25 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
         $body['properties'] = $properties;
 
         return $body;
+    }
+
+    /**
+     * Return the JSON object schema that the operation declares as its OpenAPI request body, or null. An operation that
+     * reads its own body with `deserialize: false` declares it there, because the resource does not describe it.
+     *
+     * @return array{properties?: array<string, array<string, mixed>>, required?: list<string>}|null
+     */
+    private function declaredBody(HttpOperation $operation): ?array
+    {
+        $openapi = $operation->getOpenapi();
+        $content = $openapi instanceof OpenApiOperation ? $openapi->getRequestBody()?->getContent() : null;
+        $schema = $content['application/json']['schema'] ?? null;
+        if (!is_array($schema) || ($schema['type'] ?? null) !== 'object') {
+            return null;
+        }
+
+        /** @var array{properties?: array<string, array<string, mixed>>, required?: list<string>} $schema */
+        return $schema;
     }
 
     /**
