@@ -34,6 +34,7 @@ The legacy REST API at `/api/rest` (module `Mage_Api2`) and the SOAP, XML-RPC an
 | Pagination | `page` and `limit` (default 10, maximum 100) | `page` and `itemsPerPage` (default 20, maximum 100) |
 | Filters | `filter[n][attribute]` with an operator | Named filters for each resource, see [Filters and sort](#filters-and-sort) |
 | Sort | `order` and `dir` | `sortBy` and `sortDir` (products only) |
+| A field that a write does not accept | Ignored | `400` with the name of the field, for products, customers, blog posts and comments |
 | Errors | `{"messages": {"error": [{"code": 404, "message": "..."}]}}` | `{"error": "not_found", "message": "...", "code": 404}`, see [Errors](errors.md) |
 
 ## Authentication
@@ -43,9 +44,11 @@ Pick the v2 grant from the user type of the legacy integration. See [Authenticat
 | Legacy user | v2 |
 |-------------|----|
 | Admin: an OAuth consumer with an admin token | An API user under **System > API > Users**, with a role that gives the resources of the integration. Get a token with the `client_credentials` grant. |
+| SOAP, XML-RPC or JSON-RPC API user | A new API user, the same as for an admin integration. |
 | Customer: an OAuth consumer with a customer token | The `customer` grant with the email and the password of the customer. Use the `/customers/me` routes. |
 | Guest | No token. A read of public data needs no `Authorization` header. |
-| SOAP, XML-RPC or JSON-RPC API user | The `api_user` grant, with the same user name and API key as `login()`. This grant is a bridge: move to `client_credentials` later. |
+
+Do not move a SOAP integration with the `api_user` grant. The token of this grant has the SOAP resources of the role, such as `catalog/product/info`. v2 checks the v2 resources, such as `products/read`, so each request gives `403`. A role cannot have the two sets of resources: a save in the SOAP role editor or in the v2 role editor replaces all the resources of the role.
 
 ```bash
 curl -X POST https://your-domain.com/api/rest/v2/auth/token \
@@ -150,6 +153,8 @@ v2 also has the order actions that the legacy REST API did not have: invoices, s
 | `PUT /blog/posts/:id` | `PUT /blog-posts/{id}` |
 | `DELETE /blog/posts/:id` | `DELETE /blog-posts/{id}` |
 
+The legacy list gives all the posts. The v2 list gives only the published posts: active, with no publish date or a publish date that is not in the future. To also get the disabled posts and the scheduled posts, send `GET /blog-posts?scope=all`. Only a token of an admin or an API user can send `scope=all`.
+
 ## Field differences
 
 The general rule is: change `snake_case` to `camelCase`, and change `entity_id` to `id`. The tables below list only the fields that do not follow this rule.
@@ -231,13 +236,13 @@ The legacy `filter[n][attribute]` parameter takes any attribute and an operator.
 | Products | `search`, `sku` (part of the SKU), `categoryId`, `priceMin`, `priceMax`, `status`, `type`, `attributeFilters` (a JSON object of attribute codes and option IDs), `createdFrom`, `createdTo`, `updatedSince`, `sortBy`, `sortDir` |
 | Customers | `search`, `email`, `telephone`, `groupId`, `websiteId`, `createdFrom`, `createdTo` |
 | Orders | `status`, `state`, `email`, `emailLike`, `incrementId`, `search`, `customerId`, `storeId`, `createdFrom`, `createdTo`, `updatedSince` |
-| Blog posts | `search`, `categoryId`, `urlKey` |
+| Blog posts | `search`, `categoryId`, `urlKey`, `scope=all` |
 
 A product search with many filters can use `QUERY /products` with the filters in a JSON body. See [Conventions](conventions.md#pagination) for the pagination of the answer.
 
 ## From SOAP, XML-RPC and JSON-RPC
 
-Replace `login()` with the `api_user` grant, see [Authentication](#authentication). Each call then becomes an HTTP request. The table gives the v2 path of each SOAP resource. The OpenAPI document of the store gives the operations of each path.
+Replace `login()` with a token of the `client_credentials` grant, see [Authentication](#authentication). Each call then becomes an HTTP request. The table gives the v2 path of each SOAP resource. The OpenAPI document of the store gives the operations of each path.
 
 | SOAP resource | v2 |
 |---------------|----|
@@ -249,6 +254,7 @@ Replace `login()` with the `api_user` grant, see [Authentication](#authenticatio
 | `catalog_product_link` | `/products/{productId}/links/related`, `/links/cross-sell`, `/links/up-sell`, `/products/{productId}/grouped` |
 | `catalog_product_custom_option`, `catalog_product_custom_option_value` | `/products/{productId}/custom-options` |
 | `catalog_product_downloadable_link` | `/products/{productId}/downloadable-links` |
+| `catalog_product_type` | No route. The enum of the `type` field of a product in the OpenAPI document lists the product types. |
 | `catalog_category` | `/categories`. `move` sets `parentId` with `PUT /categories/{id}`. `assignedProducts` is `GET /products?categoryId=<id>`. `assignProduct` and `removeProduct` change `categoryIds` of the product. |
 | `cataloginventory_stock_item` | `/inventory`, `/inventory/bulk`, and `stockItem` of the product |
 | `cart`, `cart_product`, `cart_customer`, `cart_shipping`, `cart_payment`, `cart_coupon` | `/carts` and `/carts/{id}/...`, see [Cart](endpoints.md#cart-authenticated) |
@@ -258,10 +264,11 @@ Replace `login()` with the `api_user` grant, see [Authentication](#authenticatio
 | `customer_group` | `/customer-groups` |
 | `directory_country`, `directory_region` | `/countries`, `/countries/{id}` (with the regions) |
 | `core_store` | `/stores` |
+| `core_maho` | `/build-info` |
 | `sales_order` | `/orders`, `/orders/{id}/comments`, `/orders/{id}/hold`, `/orders/{id}/unhold`, `/orders/{id}/cancel` |
-| `sales_order_invoice` | `/orders/{orderId}/invoices`, `/invoices/{id}`, `/invoices/{id}/capture`, `/invoices/{id}/void`, `/invoices/{id}/cancel` |
+| `sales_order_invoice` | `/orders/{orderId}/invoices`, `/invoices/{id}`, `/invoices/{id}/comments`, `/invoices/{id}/capture`, `/invoices/{id}/void`, `/invoices/{id}/cancel` |
 | `sales_order_shipment` | `/orders/{orderId}/shipments`, `/shipments/{id}`, `/shipments/{id}/comments`, `/shipments/{id}/tracks` |
-| `sales_order_creditmemo` | `/orders/{orderId}/credit-memos`, `/credit-memos/{id}` |
+| `sales_order_creditmemo` | `/orders/{orderId}/credit-memos`, `/credit-memos/{id}`, `/credit-memos/{id}/comments` |
 | `blog_post` | `/blog-posts` |
 
 ## No counterpart in v2
@@ -275,6 +282,7 @@ These legacy operations have no v2 counterpart in this version.
 | A list of the stock settings of all products | Read `stockItem` with `GET /products/{id}` for each product. |
 | Copy the website values to the store views: `copy_to_stores` in `POST /products/:product_id/websites` | None |
 | Product tags: SOAP `catalog_product_tag` | None |
+| The category attributes: SOAP `catalog_category_attribute` | `GET /custom-attributes?entityType=catalog_category` lists the attributes that an admin added. The system attributes have no route. |
 | Cancel a credit memo: SOAP `sales_order_creditmemo.cancel` | None |
 | Send the shipment email: SOAP `sales_order_shipment.sendInfo` | Send it from the admin. |
 
@@ -292,5 +300,5 @@ If your integration needs one of these operations, [open an issue](https://githu
 8. Make a list of the clients of each legacy protocol. Include the clients that run rarely, such as a monthly export.
 9. Turn off a legacy protocol only when these two conditions are true:
     - All the clients of the protocol use v2.
-    - The access log of the web server shows no request to the path of the protocol for a period longer than the longest interval between two runs of a client. The paths are `/api/rest` (outside `/api/rest/v2`), `/api/soap`, `/api/v2_soap`, `/api/xmlrpc` and `/api/jsonrpc`.
+    - The access log of the web server shows no request to the path of the protocol for a period longer than the longest interval between two runs of a client. The paths are `/api/rest` (outside `/api/rest/v2`), `/api/soap`, `/api/v2_soap`, `/api/xmlrpc`, `/api/jsonrpc` and `/api.php`. A request to `/api.php` uses the protocol in its `type` parameter, for example `/api.php?type=soap`.
 10. Delete the OAuth consumers, the REST roles and the SOAP API users of the integration.

@@ -38,7 +38,7 @@ If source 1 and source 2 do not agree, follow source 1 and tell me.
 STEP 1: FIND THE LEGACY CALLS
 Search the repository for:
 - URLs that contain /api/rest/ but not /api/rest/v2/
-- /api/soap, /api/v2_soap, /api/xmlrpc, /api/jsonrpc, ?wsdl, SoapClient
+- /api/soap, /api/v2_soap, /api/xmlrpc, /api/jsonrpc, /api.php, ?wsdl, SoapClient
 - OAuth 1.0a code: oauth_consumer_key, oauth_signature, /oauth/initiate, /oauth/token, oauth_authorize, the PHP OAuth class
 - Calls of SOAP or XML-RPC methods, such as login(, call(, multiCall(, catalog_product.info, sales_order.list
 - Code that parses XML with the root element magento_api
@@ -58,7 +58,7 @@ STEP 3: REPLACE THE AUTHENTICATION
 - Get a token with POST /auth/token and the client_credentials grant. Send it as "Authorization: Bearer <token>".
 - Keep the token until expires_in. If a request gives 401, get a new token one time and send the request again.
 - A flow that logs in a customer uses the customer grant and the /customers/me routes.
-- A SOAP or XML-RPC integration that must keep its API user for now uses the api_user grant, with the same user name and API key.
+- A SOAP, XML-RPC or JSON-RPC integration also uses the client_credentials grant. Do not use the api_user grant: its token has the SOAP resources of the role, and v2 answers 403.
 - When no call uses the OAuth 1.0a code or the SOAP session code, remove that code and its dependencies.
 
 STEP 4: CHANGE THE CALLS
@@ -66,7 +66,8 @@ Change one resource at a time, in this order: products, stock, customers, orders
 For each call:
 - Change the HTTP method, the path and the query parameters.
 - Change the field names: snake_case becomes camelCase, entity_id becomes id. Apply the exceptions of the guide.
-- Change the types: a number is a JSON number, not a string. A Yes/No value is true or false, not 1 or 0. Product status and visibility are words. A multiselect value is a list of option IDs.
+- Send only the fields that the request schema of the operation in the OpenAPI document lists. Never send a read-only field.
+- Change the types: a number is a JSON number, not a string. A Yes/No value is true or false, not 1 or 0. Product status and visibility are words. To enable or disable a product, write isActive, not status. A multiselect value is a list of option IDs.
 - A field with no value can be missing from the answer. Treat a missing field and null in the same way.
 - A list is a JSON array. The legacy lists of products, customers and orders were objects keyed by the record ID: change each loop that uses the key.
 - Read a list page by page, with page and itemsPerPage (maximum 100). Stop when a page has fewer items than itemsPerPage.
@@ -77,6 +78,7 @@ STEP 5: TEST
 - Change the tests and the mocks of the API client to the v2 requests and answers.
 - For each read, call the legacy API and the v2 API on the test store for the same records. Compare the values that the code uses. Report each difference.
 - Send writes only to the test store. Never send a request to a production store.
+- After each write, read the record again. Make sure that each field that the code sent has the new value.
 - Run the tests of the repository. Report the result.
 
 STEP 6: REPORT
