@@ -55,18 +55,17 @@ class Mage_CatalogRule_Block_Product_Widget_Onsale extends Mage_Catalog_Block_Pr
     protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
         $store = Mage::app()->getStore();
-        $websiteId = $store->getWebsiteId();
-        $customerGroupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
-        $date = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        $websiteId = (int) $store->getWebsiteId();
+        $customerGroupId = (int) Mage::getSingleton('customer/session')->getCustomerGroupId();
+        $now = Mage::app()->getLocale()->utcToStore($store);
+        $date = $now->format(Mage_Core_Model_Locale::DATE_FORMAT);
 
         /** @var Mage_CatalogRule_Model_Resource_Rule $resource */
         $resource = Mage::getResourceSingleton('catalogrule/rule');
-        $rulePrices = $resource->getActiveRuleProductPrices($date, $websiteId, $customerGroupId);
-
-        if ($this->getRuleId()) {
-            $ruleProductIds = array_flip($resource->getRuleProductIds($this->getRuleId()));
-            $rulePrices = array_intersect_key($rulePrices, $ruleProductIds);
-        }
+        $ruleId = $this->getRuleId();
+        $rulePrices = $ruleId === null
+            ? $resource->getActiveRuleProductPrices($date, $websiteId, $customerGroupId)
+            : $resource->getActiveRuleProductPricesForRule($ruleId, $websiteId, $customerGroupId, $now);
 
         $productIds = array_map(intval(...), array_keys($rulePrices));
 

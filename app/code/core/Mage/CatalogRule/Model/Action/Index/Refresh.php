@@ -350,18 +350,14 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
-     * Fill Index Data
-     *
-     * Rules chain: within one product/customer group, each rule applies to the price the previous
-     * one produced, until a rule with action_stop breaks the chain. That is a running calculation
-     * over ordered rows, which used to be done with MySQL user variables (SET @price := ...) and
-     * so only ever worked on MySQL. It is done here instead, once per row, in the same order.
+     * Keep the running price and rule stop separate for each indexed date.
      */
     protected function _fillIndexData(Mage_Core_Model_Website $website, int $time): void
     {
         $table = $this->_resource->getTable('catalogrule/rule_product_price');
         $websiteId = (int) $website->getId();
         $dates = $this->_getRuleDates($time);
+        [$civilStarts, $civilEnds] = $this->getCivilRuleBounds($dates, $website);
 
         $statement = $this->_connection->query(
             $this->_connection->select()
@@ -370,8 +366,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
         );
 
         $groupedId = null;
-        $price = 0.0;
-        $actionStop = 0;
+        $chains = [];
         $group = [];
         $pending = [];
 
@@ -384,19 +379,30 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     }
                     $group = [];
                     $groupedId = (string) $row['grouped_id'];
-                    $price = $this->_applyRuleAction((float) $row['price'], $row);
-                    $actionStop = (int) $row['action_stop'];
-                } else {
-                    if ($actionStop === 0) {
-                        $price = $this->_applyRuleAction($price, $row);
-                    }
-                    $actionStop += (int) $row['action_stop'];
+                    $chains = [];
+                }
+
+                $activeRow = $row;
+                $start = $civilStarts[(string) $row['from_date']][(int) $row['from_time']] ?? null;
+                if ($start !== null) {
+                    $activeRow['civil_from_time'] = $start;
+                }
+                $end = $civilEnds[(string) $row['to_date']][(int) $row['to_time']] ?? null;
+                if ($end !== null) {
+                    $activeRow['civil_to_time'] = $end;
                 }
 
                 foreach ($dates as $date => $timestamp) {
-                    if ($this->_isRuleActiveAt($row, $timestamp)) {
-                        $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
+                    if (!$this->_isRuleActiveAt($activeRow, $timestamp)) {
+                        continue;
                     }
+
+                    [$price, $actionStop] = $chains[$date] ?? [(float) $row['price'], 0];
+                    if ($actionStop === 0) {
+                        $price = $this->_applyRuleAction($price, $row);
+                    }
+                    $chains[$date] = [$price, $actionStop + (int) $row['action_stop']];
+                    $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
                 }
 
                 if (count($pending) >= self::INDEX_INSERT_BATCH) {
@@ -438,12 +444,56 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
+     * Match native association timestamps to their civil date on the UTC index calendar.
+     * Only dates within one day of a sample can cross its UTC date boundary.
+     *
+     * @param array<string, int> $dates
+     * @return array{array<string, array<int, int>>, array<string, array<int, int>>}
+     */
+    private function getCivilRuleBounds(array $dates, Mage_Core_Model_Website $website): array
+    {
+        $timezonePath = Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE;
+        $utc = Mage_Core_Model_Locale::DEFAULT_TIMEZONE;
+        // Also recognize rows written before the site timezone was used.
+        $timezones = array_unique([
+            $website->getConfig($timezonePath) ?: $utc,
+            $this->_app->getStore(Mage_Core_Model_App::ADMIN_STORE_ID)->getConfig($timezonePath) ?: $utc,
+        ]);
+        $days = [];
+        foreach ($dates as $timestamp) {
+            foreach ([-86400, 0, 86400] as $offset) {
+                $days[gmdate('Y-m-d', $timestamp + $offset)] = true;
+            }
+        }
+
+        $utcZone = new DateTimeZone($utc);
+        $zones = array_map(static fn(string $timezone): DateTimeZone => new DateTimeZone($timezone), $timezones);
+        $starts = $ends = [];
+        foreach (array_keys($days) as $date) {
+            $midnight = new DateTimeImmutable($date, $utcZone)->getTimestamp();
+            $endOfDay = $midnight + 86399;
+            foreach ($zones as $zone) {
+                $start = new DateTimeImmutable($date, $zone)->getTimestamp();
+                $end = new DateTimeImmutable($date . ' 23:59:59', $zone)->getTimestamp();
+                if ($start !== $midnight) {
+                    $starts[$date][$start] = $midnight;
+                }
+                if ($end !== 0 && $end !== $endOfDay) {
+                    $ends[$date][$end] = $endOfDay;
+                }
+            }
+        }
+
+        return [$starts, $ends];
+    }
+
+    /**
      * @param array<string, mixed> $row
      */
     protected function _isRuleActiveAt(array $row, int $timestamp): bool
     {
-        $toTime = (int) $row['to_time'];
-        return $timestamp >= (int) $row['from_time'] && ($toTime === 0 || $timestamp <= $toTime);
+        $toTime = (int) ($row['civil_to_time'] ?? $row['to_time']);
+        return $timestamp >= (int) ($row['civil_from_time'] ?? $row['from_time']) && ($toTime === 0 || $timestamp <= $toTime);
     }
 
     /**

@@ -11,13 +11,6 @@
 class Mage_CatalogRule_Model_Observer
 {
     /**
-     * Preload price rules for all items in quote
-     *
-     * @var array
-     */
-    protected $_preloadedPrices = [];
-
-    /**
      * Store calculated catalog rules prices for products
      * Prices collected per website, customer group, date and product
      *
@@ -128,20 +121,35 @@ class Mage_CatalogRule_Model_Observer
 
         $productIds = [];
         foreach ($quote->getAllItems() as $item) {
-            $productIds[] = $item->getProductId();
+            $productIds[] = (int) $item->getProductId();
         }
 
-        $cacheKey = spl_object_id($quote);
-
-        $this->_preloadedPrices[$cacheKey] ??= Mage::getResourceSingleton('catalogrule/rule')
-             ->getRulePrices($date, $wId, $gId, $productIds);
-
-        foreach ($this->_preloadedPrices[$cacheKey] as $pId => $price) {
-            $key = $this->_getRulePricesKey([$date, $wId, $gId, $pId]);
-            $this->_rulePrices[$key] = $price;
-        }
-
+        $this->preloadRulePrices($productIds, $date, $wId, $gId);
         return $this;
+    }
+
+    /** @param array<int, int|string|null> $productIds */
+    private function preloadRulePrices(
+        array $productIds,
+        string|int|DateTimeInterface|null $date,
+        int|string|null $websiteId,
+        int|string|null $groupId,
+    ): void {
+        $missing = [];
+        foreach ($productIds as $productId) {
+            $key = $this->_getRulePricesKey([$date, $websiteId, $groupId, $productId]);
+            if ($productId && !isset($this->_rulePrices[$key])) {
+                $missing[$key] = $productId;
+            }
+        }
+
+        if ($missing) {
+            $prices = Mage::getResourceSingleton('catalogrule/rule')
+                ->getRulePrices($date, $websiteId, $groupId, array_values($missing));
+            foreach ($missing as $key => $productId) {
+                $this->_rulePrices[$key] = $prices[$productId] ?? false;
+            }
+        }
     }
 
     /**
@@ -288,9 +296,11 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Clean out calculated catalog rule prices for products
      */
+    #[Maho\Config\Observer('catalogrule_after_apply', type: 'singleton')]
     public function flushPriceCache(): void
     {
         $this->_rulePrices = [];
+        Mage_CatalogRule_Model_Rule::clearProductPriceRuleCache();
     }
 
     /**
@@ -432,21 +442,10 @@ class Mage_CatalogRule_Model_Observer
         $productIds = [];
         /** @var Mage_Catalog_Model_Product $product */
         foreach ($collection as $product) {
-            $key = $this->_getRulePricesKey([$date, $websiteId, $groupId, $product->getId()]);
-            if (!isset($this->_rulePrices[$key])) {
-                $productIds[] = $product->getId();
-            }
+            $productIds[] = $product->getId();
         }
 
-        if ($productIds) {
-            $rulePrices = Mage::getResourceModel('catalogrule/rule')
-                ->getRulePrices($date, $websiteId, $groupId, $productIds);
-            foreach ($productIds as $productId) {
-                $key = $this->_getRulePricesKey([$date, $websiteId, $groupId, $productId]);
-                $this->_rulePrices[$key] = $rulePrices[$productId] ?? false;
-            }
-        }
-
+        $this->preloadRulePrices($productIds, $date, $websiteId, $groupId);
         return $this;
     }
 

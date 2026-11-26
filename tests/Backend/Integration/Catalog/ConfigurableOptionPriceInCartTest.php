@@ -108,3 +108,65 @@ test('each cart line of one configurable product keeps its own option price afte
         }
     }
 });
+
+it('keeps a configurable surcharge at zero when a later catalog rule applies', function (bool $listingFirst, float $surcharge): void {
+    $setup = configurableWithTwoChildren();
+    if ($setup === null) {
+        $this->markTestSkipped('No configurable product with two saleable children');
+    }
+
+    $resource = Mage::getSingleton('core/resource');
+    $connection = $resource->getConnection('core_write');
+    $connection->beginTransaction();
+    $app = Mage::app();
+    $previousStore = $app->getStore();
+    try {
+        $app->setCurrentStore(1);
+        $app->loadAreaPart(Mage_Core_Model_App_Area::AREA_FRONTEND, Mage_Core_Model_App_Area::PART_EVENTS);
+        $websiteId = (int) $app->getStore()->getWebsiteId();
+        $product = Mage::getModel('catalog/product')->setStoreId(1)->load($setup['product_id']);
+        $selection = $setup['buy_requests'][0];
+        $pricing = $resource->getTableName('catalog/product_super_attribute_pricing');
+        $connection->delete($pricing, ['product_super_attribute_id = ?' => $setup['super_attribute_id']]);
+        $connection->insert($pricing, [
+            'product_super_attribute_id' => $setup['super_attribute_id'],
+            'value_index' => $selection[$setup['attribute_id']], 'is_percent' => 0, 'pricing_value' => $surcharge, 'website_id' => 0,
+        ]);
+        foreach ([100, 50] as $priority => $percentage) {
+            $rule = Mage::getModel('catalogrule/rule')->setName('Configurable option discount')
+                ->setIsActive(true)->setWebsiteIds([$websiteId])->setCustomerGroupIds([0])
+                ->setSortOrder($priority)->setSimpleAction('by_fixed')->setDiscountAmount(1)
+                ->setSubIsEnable(true)->setSubSimpleAction('by_percent')->setSubDiscountAmount($percentage)->save();
+            $rule->getResource()->applyToProduct($rule, $product, [$websiteId]);
+        }
+
+        $swatchPrice = static function () use ($setup, $surcharge, $listingFirst): float {
+            $listing = Mage::getModel('catalog/product')->setStoreId(1)->load($setup['product_id']);
+            if (!$listingFirst) {
+                $listing->setParentId(42);
+            }
+            $listing->setListSwatchAttrId($setup['attribute_id']);
+            Mage::helper('configurableswatches/list_price')->attachConfigurableProductChildrenPricesMapping([$listing], 1);
+            expect($listing->hasData('parent_id'))->toBe(!$listingFirst)
+                ->and($listing->getParentId())->toBe($listingFirst ? null : 42)
+                ->and(Mage::getModel('catalogrule/rule')->calcProductPriceRule($listing, $surcharge))->toBe($listingFirst ? $surcharge - 2.0 : 0.0);
+            return (float) array_column($listing->getSwatchPrices(), 'price', 'oldPrice')[(int) $surcharge];
+        };
+        $listed = $listingFirst ? $swatchPrice() : null;
+        $quote = Mage::getModel('sales/quote')->setStoreId(1);
+        foreach ($setup['buy_requests'] as $request) {
+            $parent = Mage::getModel('catalog/product')->setStoreId(1)->load($setup['product_id']);
+            $quote->addProduct($parent, new Maho\DataObject(['qty' => 1, 'super_attribute' => $request]));
+        }
+        $quote->getShippingAddress()->setCountryId('US');
+        $quote->collectTotals()->save();
+        $savedQuote = Mage::getModel('sales/quote')->setStoreId(1)->load($quote->getId());
+        $items = array_values($savedQuote->getAllVisibleItems());
+        $listed ??= $swatchPrice();
+        expect($items)->toHaveCount(2)
+            ->and([$listed, (float) $items[0]->getPrice() - (float) $items[1]->getPrice()])->toBe([0.0, 0.0]);
+    } finally {
+        $app->setCurrentStore($previousStore);
+        $connection->rollBack();
+    }
+})->with(['catalog listing first' => [true, 20.0], 'cart first' => [false, 24.0]]);

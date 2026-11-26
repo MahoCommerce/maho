@@ -242,6 +242,17 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         $this->_now = $now;
     }
 
+    /** @return array<int|string> */
+    #[\Override]
+    public function getWebsiteIds()
+    {
+        $websiteIds = parent::getWebsiteIds();
+        if (is_array($websiteIds)) {
+            return $websiteIds;
+        }
+        return $websiteIds === null || $websiteIds === '' ? [] : explode(',', (string) $websiteIds);
+    }
+
     /**
      * Get array of product ids which are matched by rule
      *
@@ -253,9 +264,9 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             $this->_productIds = [];
             $this->setCollectedAttributes([]);
 
-            if ($this->getWebsiteIds()) {
+            if ($websiteIds = $this->getWebsiteIds()) {
                 $productCollection = Mage::getResourceModel('catalog/product_collection');
-                $productCollection->addWebsiteFilter($this->getWebsiteIds());
+                $productCollection->addWebsiteFilter($websiteIds);
                 if ($this->_productsFilter) {
                     $productCollection->addIdFilter($this->_productsFilter);
                 }
@@ -263,9 +274,13 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
                 if ($conditions instanceof Mage_Catalog_Model_Rule_Condition_Combine) {
                     $conditions->collectValidatedAttributes($productCollection);
                 }
+                $select = $productCollection->getSelect();
+                if (!$select->getPart(Maho\Db\Select::GROUP) && isset($select->getPart(Maho\Db\Select::FROM)['product_website'])) {
+                    $select->columns(['matched_website_id' => 'product_website.website_id']);
+                }
 
                 Mage::getSingleton('core/resource_iterator')->walk(
-                    $productCollection->getSelect(),
+                    $select,
                     [$this->callbackValidateProduct(...)],
                     [
                         'attributes' => $this->getCollectedAttributes(),
@@ -278,6 +293,11 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this->_productIds;
     }
 
+    public function resetMatchingProductIds(): void
+    {
+        $this->_productIds = null;
+    }
+
     /**
      * Callback function for product matching
      *
@@ -288,12 +308,15 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         $product = clone $args['product'];
         $product->setData($args['row']);
 
-        $results = [];
-        foreach ($this->_getWebsitesMap() as $websiteId => $defaultStoreId) {
+        $websiteIds = isset($args['row']['matched_website_id'])
+            ? [$args['row']['matched_website_id'] => true]
+            : array_flip($product->getWebsiteIds());
+        $websites = array_intersect_key($this->_getWebsitesMap(), $websiteIds);
+        $productId = $product->getId();
+        foreach ($websites as $websiteId => $defaultStoreId) {
             $product->setStoreId($defaultStoreId);
-            $results[$websiteId] = (int) $this->getConditions()->validate($product);
+            $this->_productIds[$productId][$websiteId] = (int) $this->getConditions()->validate($product);
         }
-        $this->_productIds[$product->getId()] = $results;
     }
 
     /**
@@ -324,8 +347,20 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             /** @var Mage_Catalog_Model_Product $product */
             $product = $this->_factory->getModel('catalog/product')->load($product);
         }
-        $websiteIds ??= $this->getWebsiteIds();
-        $this->getResource()->applyToProduct($this, $product, $websiteIds);
+        try {
+            if ($websiteIds === null) {
+                $this->getResource()->applyToProductOnAllWebsites(
+                    $this,
+                    $product,
+                    array_intersect($this->getWebsiteIds(), $product->getWebsiteIds()),
+                );
+            } else {
+                $product->unsetData('matched_rules');
+                $this->getResource()->applyToProduct($this, $product, $websiteIds);
+            }
+        } finally {
+            $product->unsetData('matched_rules');
+        }
         $this->getResource()->applyAllRules($product);
         $this->_cleanProductCache($product);
     }
@@ -398,9 +433,14 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         if ($rules->count() === 0) {
             return $this;
         }
-        foreach ($rules as $rule) {
-            $websiteIds = array_intersect($productWebsiteIds, $rule->getWebsiteIds());
-            $this->getResource()->applyToProduct($rule, $product, $websiteIds);
+        $this->loadProductRules($product);
+        try {
+            foreach ($rules as $rule) {
+                $websiteIds = array_intersect($productWebsiteIds, $rule->getWebsiteIds());
+                $this->getResource()->applyToProductOnAllWebsites($rule, $product, $websiteIds);
+            }
+        } finally {
+            $product->unsetData('matched_rules');
         }
 
         $this->getResource()->applyAllRules($product);
@@ -423,7 +463,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      */
     public function calcProductPriceRule(Mage_Catalog_Model_Product $product, $price)
     {
-        $priceRules = null;
         $productId  = $product->getId();
         $storeId    = $product->getStoreId();
         $websiteId  = Mage::app()->getStore($storeId)->getWebsiteId();
@@ -432,44 +471,44 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         } else {
             $customerGroupId = Mage::helper('customer')->getCurrentGroupId();
         }
-        $storeNow   = Mage::app()->getLocale()->utcToStore();
-        $cacheKey   = $storeNow->format(Mage_Core_Model_Locale::DATE_FORMAT) . "|$websiteId|$customerGroupId|$productId|$price";
+        $timestamp = Mage::app()->getLocale()->utcToStore($storeId)->getTimestamp();
+        $isConfigurableOption = (bool) $product->getParentId();
+        $cacheKey = "$websiteId|$customerGroupId|$productId|$price|" . (int) $isConfigurableOption;
 
-        if (!array_key_exists($cacheKey, self::$_priceRulesData)) {
-            $rulesData = $this->_getResource()->getRulesFromProduct($storeNow->getTimestamp(), $websiteId, $customerGroupId, $productId);
+        if ((self::$_priceRulesData[$cacheKey][0] ?? null) !== $timestamp) {
+            $priceRules = null;
+            $rulesData = $this->_getResource()->getRulesFromProduct($timestamp, $websiteId, $customerGroupId, $productId);
             if ($rulesData) {
+                $priceRules = $price;
                 foreach ($rulesData as $ruleData) {
-                    if ($product->getParentId()) {
+                    if ($isConfigurableOption) {
                         if (!empty($ruleData['sub_simple_action'])) {
                             $priceRules = Mage::helper('catalogrule')->calcPriceRule(
                                 $ruleData['sub_simple_action'],
                                 $ruleData['sub_discount_amount'],
-                                $priceRules ?: $price,
+                                $priceRules,
                             );
-                        } else {
-                            $priceRules = ($priceRules ?: $price);
-                        }
-                        if ($ruleData['action_stop']) {
-                            break;
                         }
                     } else {
                         $priceRules = Mage::helper('catalogrule')->calcPriceRule(
                             $ruleData['action_operator'],
                             $ruleData['action_amount'],
-                            $priceRules ?: $price,
+                            $priceRules,
                         );
-                        if ($ruleData['action_stop']) {
-                            break;
-                        }
+                    }
+                    if ($ruleData['action_stop']) {
+                        break;
                     }
                 }
-                return self::$_priceRulesData[$cacheKey] = $priceRules;
             }
-            self::$_priceRulesData[$cacheKey] = null;
-        } else {
-            return self::$_priceRulesData[$cacheKey];
+            self::$_priceRulesData[$cacheKey] = [$timestamp, $priceRules];
         }
-        return null;
+        return self::$_priceRulesData[$cacheKey][1];
+    }
+
+    public static function clearProductPriceRuleCache(): void
+    {
+        self::$_priceRulesData = [];
     }
 
     /**
