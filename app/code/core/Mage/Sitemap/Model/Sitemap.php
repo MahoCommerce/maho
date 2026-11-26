@@ -418,7 +418,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $includeProductImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
         $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
         $media = Mage::getStorage('media');
-        // Unsecure, as the page URLs of generateXml(), so the output does not depend on the request that starts the job.
+        // Use the unsecure URL, like the page URLs. The request that starts the job then does not change the result.
         $mediaUrlOptions = [StoreBaseUrlGenerator::OPTION_STORE => $storeId, StoreBaseUrlGenerator::OPTION_SECURE => false];
 
         foreach ($items as $item) {
