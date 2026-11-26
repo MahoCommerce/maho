@@ -85,13 +85,26 @@ $customerUrl = $this->getCustomerUrl();
         <h4 class="icon-head"><?= $helper->__('History') ?></h4>
     </div>
     <div class="fieldset">
-        <pre class="privacy-admin-note"><?= $this->escapeHtml((string) $request->getAdminNote()) ?></pre>
+        <?php $history = $this->getHistory() ?>
+        <?php if ($history): ?>
+        <ul class="flex flex-col">
+            <?php foreach ($history as $entry): ?>
+            <li class="relative border-l-2 border-base-300 pb-4 pl-5 last:pb-0">
+                <span class="absolute -left-[7px] top-1 size-3 rounded-full border-2 border-base-100 bg-primary"></span>
+                <p class="text-xs text-base-content/60"><?= $this->escapeHtml($entry['date']) ?></p>
+                <p class="whitespace-pre-line"><?= $this->escapeHtml($entry['text']) ?></p>
+            </li>
+            <?php endforeach ?>
+        </ul>
+        <?php else: ?>
+        <p class="text-base-content/60"><?= $helper->__('No history yet.') ?></p>
+        <?php endif ?>
         <?php if ($this->canProcess()): ?>
-        <form action="<?= $this->escapeUrl($this->getActionUrl('saveNote')) ?>" method="post">
+        <form action="<?= $this->escapeUrl($this->getActionUrl('saveNote')) ?>" method="post" class="mt-6 flex max-w-2xl flex-col gap-2 border-t border-base-300 pt-5">
             <?= $this->getBlockHtml('formkey') ?>
-            <label for="privacy_note"><?= $helper->__('Add a Note') ?></label>
-            <textarea id="privacy_note" name="note" class="textarea" rows="3"></textarea>
-            <button type="submit" class="scalable"><span><span><span><?= $helper->__('Save') ?></span></span></span></button>
+            <label for="privacy_note" class="font-semibold"><?= $helper->__('Add a Note') ?></label>
+            <textarea id="privacy_note" name="note" class="d-textarea w-full" rows="3" required></textarea>
+            <button type="submit" class="d-btn d-btn-sm self-start"><?= $helper->__('Save') ?></button>
         </form>
         <?php endif ?>
     </div>

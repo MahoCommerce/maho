@@ -45,7 +45,7 @@ $acceptances = $this->getAcceptances();
         <?php endif ?>
 
         <?php if ($this->canCreate()): ?>
-        <div class="privacy-create-request">
+        <div class="privacy-create-request mt-6 border-t border-base-300 pt-5">
             <p class="note"><?= $helper->__('Create a request that the customer sent by letter, by email or by phone. Check the identity of the customer first: the request starts confirmed.') ?></p>
             <form action="<?= $this->escapeUrl($this->getCreateUrl()) ?>" method="post">
                 <?= $this->getBlockHtml('formkey') ?>

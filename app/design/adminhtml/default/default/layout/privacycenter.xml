@@ -24,7 +24,7 @@ SPDX-License-Identifier: AFL-3.0
 
     <adminhtml_customer_edit>
         <reference name="customer_edit_tabs">
-            <action method="addTab"><name>privacy</name><block>privacycenter/adminhtml_customer_edit_tab_privacy</block></action>
+            <action method="addTabAfter"><name>privacy</name><block>privacycenter/adminhtml_customer_edit_tab_privacy</block><after>newsletter</after></action>
         </reference>
     </adminhtml_customer_edit>
 </layout>

@@ -119,6 +119,29 @@ class Maho_PrivacyCenter_Block_Adminhtml_Request_View extends Mage_Adminhtml_Blo
         return $utc ? Mage::helper('core')->formatDate($utc, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true) : '';
     }
 
+    /**
+     * The notes of the request, newest first. A line without a date continues the note above it.
+     *
+     * @return list<array{date: string, text: string}>
+     */
+    public function getHistory(): array
+    {
+        $entries = [];
+        foreach (explode("\n", (string) $this->getPrivacyRequest()?->getAdminNote()) as $line) {
+            if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\] (.*)$/s', $line, $match)) {
+                $entries[] = ['date' => $this->formatDateTime($match[1]), 'text' => $match[2]];
+            } elseif (trim($line) !== '') {
+                if ($entries === []) {
+                    $entries[] = ['date' => '', 'text' => $line];
+                } else {
+                    $last = array_key_last($entries);
+                    $entries[$last] = ['date' => $entries[$last]['date'], 'text' => $entries[$last]['text'] . "\n" . $line];
+                }
+            }
+        }
+        return array_reverse($entries);
+    }
+
     public function canProcess(): bool
     {
         return Mage::getSingleton('admin/session')->isAllowed('customer/privacy/process');
