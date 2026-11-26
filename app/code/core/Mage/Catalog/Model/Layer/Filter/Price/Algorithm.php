@@ -446,10 +446,11 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
         }
 
         $result = [];
-        $tenPower = 10 ** self::TEN_POWER_ROUNDING_FACTOR;
         $roundingFactorCoefficients = [10, 5, 2];
-        while ($tenPower >= Mage_Catalog_Model_Resource_Layer_Filter_Price::MIN_POSSIBLE_PRICE) {
-            if ($tenPower == Mage_Catalog_Model_Resource_Layer_Filter_Price::MIN_POSSIBLE_PRICE) {
+        $minPower = (int) round(log10(Mage_Catalog_Model_Resource_Layer_Filter_Price::MIN_POSSIBLE_PRICE));
+        for ($power = self::TEN_POWER_ROUNDING_FACTOR; $power >= $minPower; --$power) {
+            $tenPower = 10 ** $power;
+            if ($power === $minPower) {
                 $roundingFactorCoefficients[] = 1;
             }
             foreach ($roundingFactorCoefficients as $roundingFactorCoefficient) {
@@ -466,7 +467,6 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
                     $result[$index] = $roundPrices;
                 }
             }
-            $tenPower /= 10;
         }
 
         return empty($result) ? [1 => []] : $result;

@@ -19,12 +19,7 @@ declare(strict_types=1);
  */
 class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
 {
-    /**
-     * List of tax titles
-     *
-     * @var array|null
-     */
-    protected $_titles = null;
+    protected ?Mage_Tax_Model_Resource_Calculation_Rate_Title_Collection $_titles = null;
 
     /**
      * The Mage_Tax_Model_Calculation_Rate_Title
@@ -199,12 +194,7 @@ class Mage_Tax_Model_Calculation_Rate extends Mage_Core_Model_Abstract
         return $this->_titleModel;
     }
 
-    /**
-     * Returns the list of tax titles
-     *
-     * @return array
-     */
-    public function getTitles()
+    public function getTitles(): Mage_Tax_Model_Resource_Calculation_Rate_Title_Collection
     {
         $this->_titles ??= $this->getTitleModel()->getCollection()->loadByRateId($this->getId());
         return $this->_titles;

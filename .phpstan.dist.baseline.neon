@@ -2,7 +2,7 @@ parameters:
 	ignoreErrors:
 		-
 			rawMessage: '''
-				Access to constant on deprecated class Mage_Api_IndexController:
+				Fetching class constant class of deprecated class Mage_Api_IndexController:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: classConstant.deprecatedClass
@@ -11,7 +11,7 @@ parameters:
 
 		-
 			rawMessage: '''
-				Access to constant on deprecated class Mage_Api_JsonrpcController:
+				Fetching class constant class of deprecated class Mage_Api_JsonrpcController:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: classConstant.deprecatedClass
@@ -20,7 +20,7 @@ parameters:
 
 		-
 			rawMessage: '''
-				Access to constant on deprecated class Mage_Api_SoapController:
+				Fetching class constant class of deprecated class Mage_Api_SoapController:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: classConstant.deprecatedClass
@@ -29,7 +29,7 @@ parameters:
 
 		-
 			rawMessage: '''
-				Access to constant on deprecated class Mage_Api_V2_SoapController:
+				Fetching class constant class of deprecated class Mage_Api_V2_SoapController:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: classConstant.deprecatedClass
@@ -38,7 +38,7 @@ parameters:
 
 		-
 			rawMessage: '''
-				Access to constant on deprecated class Mage_Api_XmlrpcController:
+				Fetching class constant class of deprecated class Mage_Api_XmlrpcController:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: classConstant.deprecatedClass
