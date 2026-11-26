@@ -162,10 +162,13 @@ describe('blog posts', function (): void {
     it('refuses an unknown category and an image path outside media/blog on every write path', function (): void {
         $api = blogParityApi(BlogPost::class, ['title' => 'Blog Parity', 'urlKey' => 'blog-parity-refused', 'categoryIds' => [99999999]]);
         $post = Mage::getService('blog/post')->newPost()->addData(['title' => 'Blog Parity', 'url_key' => 'blog-parity-image', 'image' => '../../app/etc/local.xml']);
+        // The media mount refuses this name, so every later read of the post would fail.
+        $tab = Mage::getService('blog/post')->newPost()->addData(['title' => 'Blog Parity', 'url_key' => 'blog-parity-tab', 'image' => "cover\t.jpg"]);
 
         expect($api['status'])->toBe(422)
             ->and($api['errors'])->toBe(['Unknown blog category ID(s): 99999999'])
-            ->and(fn() => Mage::getService('blog/post')->save($post))->toThrow(Mage_Core_Exception_Input::class);
+            ->and(fn() => Mage::getService('blog/post')->save($post))->toThrow(Mage_Core_Exception_Input::class)
+            ->and(fn() => Mage::getService('blog/post')->save($tab))->toThrow(Mage_Core_Exception_Input::class, 'no control character');
     });
 
     it('saves the posts of the importer through the service', function (): void {
