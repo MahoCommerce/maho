@@ -87,12 +87,16 @@ $customerUrl = $this->getCustomerUrl();
     <div class="fieldset">
         <?php $history = $this->getHistory() ?>
         <?php if ($history): ?>
-        <ul class="flex flex-col">
-            <?php foreach ($history as $entry): ?>
-            <li class="relative border-l-2 border-base-300 pb-4 pl-5 last:pb-0">
-                <span class="absolute -left-[7px] top-1 size-3 rounded-full border-2 border-base-100 bg-primary"></span>
-                <p class="text-xs text-base-content/60"><?= $this->escapeHtml($entry['date']) ?></p>
-                <p class="whitespace-pre-line"><?= $this->escapeHtml($entry['text']) ?></p>
+        <ul class="d-timeline d-timeline-vertical d-timeline-compact d-timeline-snap-icon">
+            <?php foreach ($history as $index => $entry): ?>
+            <li>
+                <?php if ($index > 0): ?><hr><?php endif ?>
+                <div class="d-timeline-middle"><span class="block size-3 rounded-full bg-primary"></span></div>
+                <div class="d-timeline-end mb-4">
+                    <p class="text-xs text-base-content/60"><?= $this->escapeHtml($entry['date']) ?></p>
+                    <p class="whitespace-pre-line"><?= $this->escapeHtml($entry['text']) ?></p>
+                </div>
+                <?php if ($index < count($history) - 1): ?><hr><?php endif ?>
             </li>
             <?php endforeach ?>
         </ul>

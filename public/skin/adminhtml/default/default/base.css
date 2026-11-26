@@ -921,7 +921,7 @@ table.form-edit {
     padding: var(--maho-space-3) var(--maho-space-4)
 }
 
-.entry-edit fieldset li,.entry-edit .fieldset li {
+.entry-edit fieldset li:not(.d-timeline > li),.entry-edit .fieldset li:not(.d-timeline > li) {
     margin: var(--maho-space-2) 0
 }
 
