@@ -188,14 +188,14 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
                 ->order('v.version DESC'),
         );
         $helper = Mage::helper('checkout');
-        $html = '<table class="data-table"><thead><tr><th>' . $helper->__('Version') . '</th><th>'
+        $html = '<div class="grid np"><table cellspacing="0" class="data"><thead><tr><th>' . $helper->__('Version') . '</th><th>'
             . $helper->__('Created') . '</th><th>' . $helper->__('Acceptances') . '</th></tr></thead><tbody>';
         foreach ($rows as $row) {
             $html .= '<tr><td>' . (int) $row['version'] . '</td><td>'
                 . $this->escapeHtml(Mage::helper('core')->formatDate($row['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) . '</td><td>'
                 . (int) $row['acceptances'] . '</td></tr>';
         }
-        return $html . '</tbody></table>';
+        return $html . '</tbody></table></div>';
     }
 
     /** The save only sanitizes an HTML agreement. A plain text agreement gets no warning. */

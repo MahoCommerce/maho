@@ -56,7 +56,7 @@ $acceptances = $this->getAcceptances();
                     <tr>
                         <td class="font-medium"><span class="inline-flex items-center gap-2 [&>svg]:size-4 [&>svg]:text-success"><?= $this->getIconSvg('check') ?><?= $this->escapeHtml((string) $acceptance->getAgreementName()) ?></span></td>
                         <td><span class="badge badge-ghost"><?= $this->__('v%d', (int) $acceptance->getAgreementVersion()) ?></span></td>
-                        <td><?= $this->escapeHtml($this->getContextLabel((string) $acceptance->getContext())) ?></td>
+                        <td><?= $this->escapeHtml($acceptance->getContextLabel()) ?></td>
                         <td><?= $this->escapeHtml($this->formatUtcDate($acceptance->getCreatedAt(), true)) ?></td>
                     </tr>
                 <?php endforeach ?>

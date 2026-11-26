@@ -16,7 +16,8 @@ $acceptances = $this->getAcceptances();
     </div>
     <div class="fieldset">
         <?php if ($requests): ?>
-        <table class="data-table" cellspacing="0">
+        <div class="grid np">
+        <table cellspacing="0" class="data">
             <thead>
                 <tr>
                     <th><?= $helper->__('ID') ?></th>
@@ -38,6 +39,7 @@ $acceptances = $this->getAcceptances();
             <?php endforeach ?>
             </tbody>
         </table>
+        </div>
         <?php else: ?>
             <p><?= $helper->__('This customer has no privacy requests.') ?></p>
         <?php endif ?>
@@ -67,7 +69,8 @@ $acceptances = $this->getAcceptances();
     </div>
     <div class="fieldset">
         <?php if ($acceptances->getSize()): ?>
-        <table class="data-table" cellspacing="0">
+        <div class="grid np">
+        <table cellspacing="0" class="data">
             <thead>
                 <tr>
                     <th><?= $helper->__('Terms') ?></th>
@@ -83,7 +86,7 @@ $acceptances = $this->getAcceptances();
                 <tr>
                     <td><?= $this->escapeHtml((string) $acceptance->getAgreementName()) ?></td>
                     <td><?= (int) $acceptance->getAgreementVersion() ?></td>
-                    <td><?= $this->escapeHtml((string) $acceptance->getContext()) ?></td>
+                    <td><?= $this->escapeHtml($acceptance->getContextLabel()) ?></td>
                     <td>
                         <?php if ($acceptance->getOrderId()): ?>
                             <a href="<?= $this->escapeUrl($this->getUrl('*/sales_order/view', ['order_id' => $acceptance->getOrderId()])) ?>">#<?= (int) $acceptance->getOrderId() ?></a>
@@ -95,6 +98,7 @@ $acceptances = $this->getAcceptances();
             <?php endforeach ?>
             </tbody>
         </table>
+        </div>
         <?php else: ?>
             <p><?= $helper->__('This customer has not accepted any terms and conditions.') ?></p>
         <?php endif ?>

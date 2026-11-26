@@ -151,4 +151,18 @@ class Mage_Checkout_Model_Agreement_Acceptance extends Mage_Core_Model_Abstract
         $value = $this->getData('version');
         return $value === null ? null : (int) $value;
     }
+
+    /**
+     * The name of the place where the customer accepted the terms, for a person.
+     */
+    public function getContextLabel(): string
+    {
+        $helper = Mage::helper('checkout');
+        return match ($this->getContext()) {
+            self::CONTEXT_CHECKOUT => $helper->__('Checkout'),
+            self::CONTEXT_REGISTRATION => $helper->__('Registration'),
+            self::CONTEXT_ACCOUNT => $helper->__('Customer Account'),
+            default => (string) $this->getContext(),
+        };
+    }
 }

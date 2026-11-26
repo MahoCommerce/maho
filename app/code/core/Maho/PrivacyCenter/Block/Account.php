@@ -129,15 +129,4 @@ class Maho_PrivacyCenter_Block_Account extends Mage_Core_Block_Template
     {
         return $this->getUrl('privacy/account', ['_secure' => true]);
     }
-
-    public function getContextLabel(string $context): string
-    {
-        $helper = Mage::helper('privacycenter');
-        return match ($context) {
-            Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_CHECKOUT => $helper->__('Checkout'),
-            Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_REGISTRATION => $helper->__('Registration'),
-            Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_ACCOUNT => $helper->__('Account'),
-            default => $context,
-        };
-    }
 }
