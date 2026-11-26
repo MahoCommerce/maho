@@ -46,7 +46,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
             uriTemplate: '/customers/me/privacy-requests',
             name: 'submit_my_privacy_request',
             security: "is_granted('ROLE_CUSTOMER')",
-            description: 'Send a privacy request of the logged-in customer. An export starts at once, and the customer gets an email with the download link. An erasure waits for the link of its confirmation email. One open request of each type at a time: a second one answers 409',
+            description: 'Send a privacy request of the logged-in customer. The request waits for the link of its confirmation email. After the link, an export sends an email with the download link. One open request of each type at a time: a second one answers 409',
             deserialize: false,
             openapi: new OpenApiOperation(requestBody: new RequestBody(content: new \ArrayObject(['application/json' => ['schema' => [
                 'type' => 'object',

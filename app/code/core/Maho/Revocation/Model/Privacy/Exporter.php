@@ -26,27 +26,24 @@ class Maho_Revocation_Model_Privacy_Exporter extends Maho_PrivacyCenter_Model_Ex
     }
 
     /**
-     * A customer gets the requests of the orders of the account, because the session does not prove the email.
-     * A guest gets the requests of the email, which the confirmation link proved.
+     * The requests of the email, which the confirmation link of the privacy request proves, and the requests of the
+     * orders of the customer.
      */
     #[\Override]
     public function export(Subject $subject): array
     {
         $requests = Mage::getResourceModel('revocation/request_collection');
-        if ($subject->isGuest()) {
-            $requests->getSelect()->where(
-                (string) $requests->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
-                $subject->email,
-            );
-        } else {
+        $adapter = $requests->getConnection();
+        $condition = (string) $adapter->getCaseInsensitiveEqualsSql('main_table.email', '?');
+        if (!$subject->isGuest()) {
             $orderIds = Mage::getResourceModel('sales/order_collection')
                 ->addFieldToFilter('customer_id', $subject->customerId)
                 ->getAllIds();
-            if ($orderIds === []) {
-                return [];
+            if ($orderIds !== []) {
+                $condition .= ' OR ' . $adapter->quoteInto('main_table.order_id IN (?)', array_map(intval(...), $orderIds));
             }
-            $requests->addFieldToFilter('order_id', ['in' => $orderIds]);
         }
+        $requests->getSelect()->where($condition, $subject->email);
 
         $data = [];
         foreach ($requests as $request) {

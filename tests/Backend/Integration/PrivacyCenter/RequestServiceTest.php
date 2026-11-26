@@ -39,6 +39,16 @@ function privacyToken(Request $request): string
     return $token;
 }
 
+/**
+ * An export of $customer that the customer confirmed with the link of the email, so that it can run.
+ */
+function privacyConfirmedExport(Mage_Customer_Model_Customer $customer): Request
+{
+    $service = Mage::getService('privacycenter/request');
+    $request = $service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+    return $service->confirm(privacyToken($request));
+}
+
 function privacyOrder(Mage_Customer_Model_Customer $customer, string $state): Mage_Sales_Model_Order
 {
     return Mage::getModel('sales/order')
@@ -249,19 +259,20 @@ describe('the confirmation link', function () {
 });
 
 describe('an export', function () {
-    it('starts at once for a logged-in customer, and one export at a time', function () {
+    it('waits for the link of the email of a logged-in customer, and one export at a time', function () {
         $this->customers[] = $customer = privacyCustomer();
 
         $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
 
-        expect($request->getStatus())->toBe(Request::STATUS_PROCESSING)
+        expect($request->getStatus())->toBe(Request::STATUS_PENDING)
             ->and(fn() => $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1])))
-            ->toThrow(Mage_Core_Exception_Conflict::class);
+            ->toThrow(Mage_Core_Exception_Conflict::class)
+            ->and($this->service->confirm(privacyToken($request))->getStatus())->toBe(Request::STATUS_PROCESSING);
     });
 
     it('writes a ZIP with the data of the customer and without its secrets', function () {
         $this->customers[] = $customer = privacyCustomer();
-        $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+        $request = privacyConfirmedExport($customer);
 
         $this->service->export($request);
         $file = $this->service->openExportForCustomer((int) $request->getId(), (int) $customer->getId());
@@ -285,7 +296,7 @@ describe('an export', function () {
     it('gives the file only to its customer', function () {
         $this->customers[] = $owner = privacyCustomer();
         $this->customers[] = $other = privacyCustomer();
-        $request = $this->service->submitForCustomer($owner, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+        $request = privacyConfirmedExport($owner);
         $this->service->export($request);
 
         expect(fn() => $this->service->openExportForCustomer((int) $request->getId(), (int) $other->getId()))
@@ -294,7 +305,7 @@ describe('an export', function () {
 
     it('opens the file with the download link, and never lets that link confirm the request', function () {
         $this->customers[] = $customer = privacyCustomer();
-        $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+        $request = privacyConfirmedExport($customer);
         $this->service->export($request);
         $token = privacyToken($request);
 
@@ -329,43 +340,54 @@ describe('an export', function () {
         expect(array_column($data, 'increment_id'))->toBe([$order->getIncrementId()]);
     });
 
-    it('holds no guest order of the email of the account, because the session does not prove the email', function () {
+    it('holds the guest orders of the email of the account, which the confirmation link proves', function () {
         $this->customers[] = $customer = privacyCustomer();
-        $this->orders[] = privacyGuestOrder((string) $customer->getEmail(), Mage_Sales_Model_Order::STATE_COMPLETE);
+        $this->orders[] = $order = privacyGuestOrder((string) $customer->getEmail(), Mage_Sales_Model_Order::STATE_COMPLETE);
 
-        expect(Mage::getModel('privacycenter/export_orders')->export(privacySubject($customer)))->toBe([]);
+        $data = Mage::getModel('privacycenter/export_orders')->export(privacySubject($customer));
+
+        expect(array_column($data, 'increment_id'))->toBe([$order->getIncrementId()]);
     });
 
-    it('leaves out the subscription of a guest that has the email of the account', function () {
+    it('holds the guest subscription of the email of the account, and not the one of another customer', function () {
         $this->customers[] = $customer = privacyCustomer();
-        $row = privacySubscriberRow(0, (string) $customer->getEmail());
+        $this->customers[] = $other = privacyCustomer();
+        $guestRow = privacySubscriberRow(0, (string) $customer->getEmail());
+        $otherRow = privacySubscriberRow((int) $other->getId(), (string) $customer->getEmail());
 
         $data = Mage::getModel('privacycenter/export_newsletter')->export(privacySubject($customer));
-        $row->delete();
+        $guestRow->delete();
+        $otherRow->delete();
 
-        expect($data)->toBe([]);
+        expect($data)->toHaveCount(1);
     });
 
-    it('holds the revocation requests of the orders of the customer, and none found by the email alone', function () {
+    it('holds the revocation requests of the email and of the orders of the customer, and no other', function () {
         $this->customers[] = $customer = privacyCustomer();
         $this->orders[] = $order = privacyOrder($customer, Mage_Sales_Model_Order::STATE_COMPLETE);
-        $revocation = fn(?int $orderId, string $reference) => Mage::getModel('revocation/request')->setData([
+        $revocation = fn(?int $orderId, string $reference, string $email) => Mage::getModel('revocation/request')->setData([
             'store_id' => 1, 'order_id' => $orderId, 'order_reference' => $reference, 'customer_name' => 'Pri Vacy',
-            'email' => $customer->getEmail(), 'received_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+            'email' => $email, 'received_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ])->save();
-        $ofOrder = $revocation((int) $order->getId(), (string) $order->getIncrementId());
-        $byEmail = $revocation(null, 'not-an-order-of-the-customer');
+        $rows = [
+            $revocation((int) $order->getId(), 'of-the-order', 'other-' . uniqid() . '@example.com'),
+            $revocation(null, 'of-the-email', strtoupper((string) $customer->getEmail())),
+            $revocation(null, 'of-another-person', 'other-' . uniqid() . '@example.com'),
+        ];
 
         $data = Mage::getModel('revocation/privacy_exporter')->export(privacySubject($customer));
-        $ofOrder->delete();
-        $byEmail->delete();
+        foreach ($rows as $row) {
+            $row->delete();
+        }
+        $references = array_column($data, 'order_reference');
+        sort($references);
 
-        expect(array_column($data, 'order_reference'))->toBe([(string) $order->getIncrementId()]);
+        expect($references)->toBe(['of-the-email', 'of-the-order']);
     });
 
     it('deletes the file when the download link expires', function () {
         $this->customers[] = $customer = privacyCustomer();
-        $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+        $request = privacyConfirmedExport($customer);
         $this->service->export($request);
         $path = (string) $request->getExportFile();
         $request->setTokenExpiresAt(Mage::app()->getLocale()->formatDateForDb(time() - 60))->save();

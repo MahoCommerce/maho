@@ -22,7 +22,7 @@ $sections = $this->getExportLabels();
             <span class="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-5"><?= $this->getIconSvg('file-zip') ?></span>
             <div>
                 <h2 class="text-lg font-semibold"><?= $this->__('Get a copy of your data') ?></h2>
-                <p class="text-sm text-base-content/70"><?= $this->__('We put your data in a ZIP file with two files: data.html, to read, and data.json, to use in another service. We send you an email when the file is ready. The download link works for a limited time.') ?></p>
+                <p class="text-sm text-base-content/70"><?= $this->__('We put your data in a ZIP file with two files: data.html, to read, and data.json, to use in another service. We send you an email to confirm the request, and a second email when the file is ready. The download link works for a limited time.') ?></p>
             </div>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -30,7 +30,10 @@ $sections = $this->getExportLabels();
                 <span class="badge badge-ghost"><?= $this->escapeHtml($section) ?></span>
             <?php endforeach ?>
         </div>
-        <?php if (array_any($requests, fn($request) => $request->isOpen())): ?>
+        <?php $open = array_find($requests, fn($request) => $request->isOpen()) ?>
+        <?php if ($open?->getStatus() === Maho_PrivacyCenter_Model_Request::STATUS_PENDING): ?>
+            <div role="status" class="alert alert-warning alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('We sent you an email. Open the link in the email to confirm the request.') ?></span></div>
+        <?php elseif ($open): ?>
             <div role="status" class="alert alert-info alert-soft [&>svg]:size-5"><?= $this->getIconSvg('clock') ?><span><?= $this->__('We are preparing your data. We will send you an email when it is ready.') ?></span></div>
         <?php else: ?>
             <form action="<?= $this->escapeUrl($this->getActionUrl('export')) ?>" method="post" data-turbo="false">

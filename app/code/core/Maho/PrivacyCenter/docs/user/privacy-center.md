@@ -25,7 +25,7 @@ The customer account has a **Privacy Center** link, and the footer has a **Priva
 
 The **Privacy Center** of the customer account has three pages:
 
-- **My Personal Data**: the customer asks for a copy of the data. The export starts at once, because the login proves the owner of the account. The customer gets an email with a download link.
+- **My Personal Data**: the customer asks for a copy of the data, and confirms the request with the link of an email. The link proves the email, so the export also holds the guest orders of that email. The customer then gets an email with a download link.
 - **Terms and Conditions**: the terms that the customer accepted, with the version and the date. A customer accepts here the registration terms that wait for an acceptance.
 - **Delete My Account**: the customer asks for the erasure of the account. An erasure always waits for the link of its confirmation email. The customer can cancel it until it runs.
 
@@ -38,7 +38,7 @@ The export is a ZIP file with two files:
 - `data.html`, for a person to read.
 - `data.json`, for another service to read.
 
-It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms, the privacy requests, the revocation requests of the orders and the social login links. It never holds a password or a security token. For a guest, it holds the guest orders, the newsletter subscription, the accepted terms and the revocation requests of the email.
+It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms, the privacy requests, the revocation requests and the social login links. The orders, the newsletter subscriptions and the revocation requests include the ones of the email without an account. It never holds a password or a security token. For a guest, it holds the guest orders, the newsletter subscription, the accepted terms and the revocation requests of the email.
 
 The download link works for the time in **Download Link Lifetime (Hours)**. Then the cron deletes the file.
 

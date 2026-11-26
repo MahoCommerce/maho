@@ -113,8 +113,8 @@ class Maho_PrivacyCenter_Service_Request
     }
 
     /**
-     * Take the request of a logged-in customer. The session proves the owner of the account, so an export starts at
-     * once. An erasure deletes the account, so it waits for the link of its confirmation email.
+     * Take the request of a logged-in customer. The request waits for the link of its confirmation email: an erasure
+     * deletes the account, and an export holds the guest orders of the email, which the session does not prove.
      *
      * @throws Mage_Core_Exception_NoSuchEntity when the store has no privacy requests
      * @throws Mage_Core_Exception_Input when the type is not valid
@@ -129,11 +129,8 @@ class Maho_PrivacyCenter_Service_Request
 
         $request = $this->newRequest($type, (string) $customer->getEmail(), $storeId, $input)
             ->setCustomerId((int) $customer->getId());
-        if ($type === Request::TYPE_ERASURE) {
-            $this->sendConfirmation($request);
-            return $request;
-        }
-        return $this->startConfirmed($request);
+        $this->sendConfirmation($request);
+        return $request;
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The orders of the customer, or the guest orders of the email for a guest.
+ * The orders of the customer, and the guest orders of the email.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -38,14 +38,10 @@ class Maho_PrivacyCenter_Model_Export_Orders extends Maho_PrivacyCenter_Model_Ex
     public function export(Subject $subject): array
     {
         $orders = Mage::getResourceModel('sales/order_collection');
-        if ($subject->isGuest()) {
-            $orders->addFieldToFilter('customer_id', ['null' => true])->getSelect()->where(
-                (string) $orders->getConnection()->getCaseInsensitiveEqualsSql('main_table.customer_email', '?'),
-                $subject->email,
-            );
-        } else {
-            $orders->addFieldToFilter('customer_id', $subject->customerId);
-        }
+        $orders->getSelect()->where(
+            $subject->getRowsCondition($orders->getConnection(), 'main_table.customer_id', 'main_table.customer_email'),
+            $subject->email,
+        );
         $orders->setOrder('created_at', \Maho\Data\Collection::SORT_ORDER_ASC);
 
         $data = [];

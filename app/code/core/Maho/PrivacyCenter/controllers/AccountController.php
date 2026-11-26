@@ -61,7 +61,7 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
     #[Maho\Config\Route('/privacy/account/export', name: 'privacy.account.export', methods: ['POST'])]
     public function exportAction(): void
     {
-        $this->submit(Request::TYPE_EXPORT, $this->__('We are preparing your data. We will send you an email with the download link.'));
+        $this->submit(Request::TYPE_EXPORT, $this->__('We sent you an email. Open the link in the email to confirm the request.'));
         $this->_redirect('*/*/data');
     }
 
