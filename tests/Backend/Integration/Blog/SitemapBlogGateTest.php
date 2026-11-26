@@ -14,17 +14,20 @@ uses(Tests\MahoBackendTestCase::class);
  */
 
 /**
- * Run the sitemap observer of the blog for the store view $storeId. Return the number of blog files that it writes.
+ * Run the sitemap observer of the blog for the store view $storeId. Return the items of each blog file that it writes.
+ *
+ * @return list<array<\Maho\DataObject>>
  */
-function sitemapBlogGateFiles(int $storeId): int
+function sitemapBlogGateFiles(int $storeId): array
 {
     $sitemap = new class extends Mage_Sitemap_Model_Sitemap {
-        public int $files = 0;
+        /** @var list<array<\Maho\DataObject>> */
+        public array $files = [];
 
         #[\Override]
         public function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
         {
-            $this->files++;
+            $this->files[] = $items;
         }
     };
     $event = new \Maho\Event([
@@ -56,11 +59,35 @@ afterEach(function (): void {
 });
 
 it('lists the blog of a store view where the blog is on', function (): void {
-    expect(sitemapBlogGateFiles((int) $this->store->getId()))->toBe(1);
+    expect(sitemapBlogGateFiles((int) $this->store->getId()))->toHaveCount(1);
 });
 
 it('lists no blog URL of a store view where the blog output is off', function (): void {
     $this->store->setConfig('advanced/modules_disable_output/Maho_Blog', '1');
 
-    expect(sitemapBlogGateFiles((int) $this->store->getId()))->toBe(0);
+    expect(sitemapBlogGateFiles((int) $this->store->getId()))->toBeEmpty();
+});
+
+it('lists blog image URLs with the unsecure media URL of the sitemap store', function (): void {
+    $storeId = (int) $this->store->getId();
+    $this->post->setImage('cover.jpg')->save();
+    $this->store->setConfig('blog/sitemap/include_images', '1');
+    $this->store->setConfig('web/unsecure/base_media_url', 'https://images.example.test/shop/');
+    $this->store->setConfig('web/secure/base_media_url', 'https://secure-images.example.test/shop/');
+
+    // An admin page on HTTPS: the image URL must not follow the scheme of this request.
+    $https = $_SERVER['HTTPS'] ?? null;
+    $_SERVER['HTTPS'] = 'on';
+    try {
+        $files = Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => sitemapBlogGateFiles($storeId));
+    } finally {
+        if ($https === null) {
+            unset($_SERVER['HTTPS']);
+        } else {
+            $_SERVER['HTTPS'] = $https;
+        }
+    }
+
+    expect(array_map(fn(\Maho\DataObject $item) => $item->getImageUrl(), $files[0]))
+        ->toContain('https://images.example.test/shop/blog/cover.jpg');
 });

@@ -150,3 +150,21 @@ describe('One resolver for every output engine', function () {
         expect(trim($template))->toStartWith('80.00');
     });
 });
+
+test('builds the image URLs from the media URL of the feed store', function () {
+    $storeId = (int) Mage::app()->getDefaultStoreView()->getId();
+    Mage::app()->getStore($storeId)->setConfig('web/unsecure/base_media_url', 'https://images.example.test/shop/');
+    $mapper = new Maho_FeedManager_Model_Mapper(Mage::getModel('feedmanager/feed')->setPlatform('google')->setStoreId($storeId));
+    $product = Mage::getModel('catalog/product')->setData([
+        'image' => '/g/gear.jpg',
+        'media_gallery' => ['images' => [['file' => '/g/gear.jpg', 'disabled' => 0]]],
+    ]);
+
+    [$image, $gallery] = Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => [
+        new ReflectionMethod($mapper, '_getImageUrl')->invoke($mapper, $product, 'image'),
+        new ReflectionMethod($mapper, '_getGalleryImages')->invoke($mapper, $product),
+    ]);
+
+    expect($image)->toBe('https://images.example.test/shop/catalog/product/g/gear.jpg')
+        ->and($gallery)->toBe(['https://images.example.test/shop/catalog/product/g/gear.jpg']);
+});

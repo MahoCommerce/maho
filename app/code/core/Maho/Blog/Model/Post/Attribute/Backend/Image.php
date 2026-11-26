@@ -20,7 +20,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     }
 
     /**
-     * The image is a path under media/blog, so a path that leaves that folder or names a scheme is refused.
+     * The image is a path under media/blog, so a path that leaves that folder, names a scheme or holds a control character is refused.
      *
      * @throws Mage_Core_Exception_Input
      */
@@ -31,9 +31,10 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         if (is_string($value) && $value !== '' && (
             preg_match('#^(/|[a-z][a-z0-9+.-]*:)#i', str_replace('\\', '/', $value))
             || in_array('..', explode('/', str_replace('\\', '/', $value)), true)
+            || preg_match('#\p{C}#u', $value) !== 0
         )) {
             throw new Mage_Core_Exception_Input()->addError('image', Mage::helper('blog')->__(
-                'The image must be a path relative to media/blog, with no leading "/", no ".." segment and no scheme.',
+                'The image must be a path relative to media/blog, with no leading "/", no ".." segment, no scheme and no control character.',
             ));
         }
         return parent::beforeSave($object);
