@@ -710,11 +710,12 @@ trait Maho_FeedManager_Model_Generator_ProductWriterTrait
             return $value;
         }
 
+        $mediaUrl = Mage::app()->getStore($this->_feed->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
         if (str_starts_with($value, '/')) {
-            return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . ltrim($value, '/');
+            return $mediaUrl . ltrim($value, '/');
         }
 
-        return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $value;
+        return $mediaUrl . 'catalog/product' . $value;
     }
 
     // ──────────────────────────────────────────────────────────────────────

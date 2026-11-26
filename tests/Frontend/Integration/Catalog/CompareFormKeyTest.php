@@ -55,6 +55,12 @@ beforeEach(function () {
     Mage::getSingleton('core/session')->getMessages(true);
 });
 
+// The messages stay in the session singletons, and a later test renders them in its page.
+afterEach(function () {
+    Mage::getSingleton('catalog/session')->getMessages(true);
+    Mage::getSingleton('core/session')->getMessages(true);
+});
+
 it('refuses to clear the comparison list without a form key', function () {
     $controller = cmpfkController('clear', []);
 

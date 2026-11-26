@@ -45,6 +45,12 @@ function firstEnabledProduct(): Mage_Catalog_Model_Product
         ->getFirstItem();
 }
 
+// The messages stay in the session singletons, and a later test renders them in its page.
+afterEach(function () {
+    Mage::getSingleton('catalog/session')->getMessages(true);
+    Mage::getSingleton('core/session')->getMessages(true);
+});
+
 it('populates the shared log/visitor singleton on controller_action_predispatch', function () {
     startGuestSession();
 
