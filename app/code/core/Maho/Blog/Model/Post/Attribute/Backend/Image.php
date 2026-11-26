@@ -20,7 +20,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     }
 
     /**
-     * The image is a path under media/blog, so a path that leaves that folder or names a scheme is refused.
+     * The image is a path under media/blog, so a path that leaves that folder, names a scheme or holds a control character is refused.
      *
      * @throws Mage_Core_Exception_Input
      */
