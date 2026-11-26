@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The orders of the customer, and the guest orders with the email of the subject.
+ * The orders of the customer, or the guest orders of the email for a guest.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0

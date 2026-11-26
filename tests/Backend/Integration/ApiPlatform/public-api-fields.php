@@ -34,6 +34,9 @@ return [
         'email', 'extensions', 'firstname', 'id', 'isActive', 'lastname', 'logdate', 'roleId',
         'roleName', 'username',
     ],
+    'AgreementAcceptance' => [
+        'agreementId', 'agreementName', 'agreementVersion', 'context', 'createdAt', 'extensions', 'id', 'orderId',
+    ],
     'AttributeSet' => [
         'attributeCodes', 'attributeSetName', 'extensions', 'groups', 'id',
     ],
@@ -105,6 +108,9 @@ return [
         'extensions', 'filterPriceRange', 'id', 'image', 'includeInMenu', 'isActive', 'isAnchor',
         'landingPageId', 'level', 'metaDescription', 'metaKeywords', 'metaRobots', 'metaTitle', 'name',
         'pageLayout', 'parentId', 'path', 'position', 'productCount', 'updatedAt', 'urlKey', 'urlPath',
+    ],
+    'CheckoutAgreement' => [
+        'checkboxText', 'content', 'contentHeight', 'extensions', 'id', 'isHtml', 'name', 'position', 'version',
     ],
     'CmsBlock' => [
         'content', 'createdAt', 'extensions', 'id', 'identifier', 'isActive', 'status', 'stores',
@@ -251,6 +257,10 @@ return [
         'paymentMethodTitle', 'prices', 'quoteId', 'shipments', 'shippingAddress',
         'shippingDescription', 'shippingMethod', 'state', 'status', 'statusHistory', 'storeId',
         'storeName', 'totalItemCount', 'totalQtyOrdered', 'updatedAt', 'weight',
+    ],
+    'PrivacyRequest' => [
+        'approvedAt', 'confirmedAt', 'createdAt', 'email', 'extensions', 'id', 'processedAt', 'scheduledAt', 'status',
+        'storeId', 'type',
     ],
     'Product' => [
         'additionalAttributes', 'attributeSetId', 'averageRating', 'barcode', 'bundleOptions',

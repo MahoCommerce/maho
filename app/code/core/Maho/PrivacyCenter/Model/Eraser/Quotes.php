@@ -24,10 +24,12 @@ class Maho_PrivacyCenter_Model_Eraser_Quotes extends Maho_PrivacyCenter_Model_Er
     public function erase(Subject $subject): string
     {
         $adapter = $this->getConnection();
+        // A guest cart holds customer_id NULL or 0, as Mage_Sales_Model_Quote::loadByCustomer() says
+        $guestCart = '(customer_id IS NULL OR customer_id = 0) AND '
+            . $adapter->quoteInto((string) $adapter->getCaseInsensitiveEqualsSql('customer_email', '?'), $subject->email);
         $where = $subject->isGuest()
-            ? ['customer_email = ?' => $subject->email, 'customer_id IS NULL']
-            : [$adapter->quoteInto('customer_id = ?', $subject->customerId)
-                . ' OR (customer_id IS NULL AND ' . $adapter->quoteInto('customer_email = ?', $subject->email) . ')'];
+            ? [$guestCart]
+            : [$adapter->quoteInto('customer_id = ?', $subject->customerId) . " OR ({$guestCart})"];
         $count = $adapter->delete($this->getTable('sales/quote'), $where);
         return Mage::helper('privacycenter')->__('%d carts deleted', $count);
     }

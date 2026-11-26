@@ -89,6 +89,17 @@ function privacySubject(Mage_Customer_Model_Customer $customer): Maho_PrivacyCen
     return new Maho_PrivacyCenter_Model_Subject((int) $customer->getId(), (string) $customer->getEmail(), 1);
 }
 
+function privacySubscriberRow(int $customerId, string $email): Mage_Newsletter_Model_Subscriber
+{
+    return Mage::getModel('newsletter/subscriber')
+        ->setStoreId(1)
+        ->setCustomerId($customerId)
+        ->setSubscriberEmail($email)
+        ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+        ->setSubscriberConfirmCode(substr(md5(uniqid('', true)), 0, 32))
+        ->save();
+}
+
 beforeEach(function () {
     $this->config = [
         Maho_PrivacyCenter_Helper_Data::XML_PATH_ENABLED => '1',
@@ -158,6 +169,21 @@ describe('a request of a guest', function () {
         ]));
 
         expect($request)->toBeNull();
+    });
+
+    it('refuses a second request from the same client when the limit is 1', function () {
+        Mage::app()->getStore(1)->setConfig(Maho_PrivacyCenter_Helper_Data::XML_PATH_IP_RATE_LIMIT, '1');
+        Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
+        try {
+            $this->guestEmails[] = $first = 'privacy-guest-' . uniqid() . '@example.com';
+            $this->service->submit(new \Maho\DataObject(['email' => $first, 'type' => Request::TYPE_EXPORT, 'store_id' => 1]));
+            $second = 'privacy-guest-' . uniqid() . '@example.com';
+
+            expect(fn() => $this->service->submit(new \Maho\DataObject(['email' => $second, 'type' => Request::TYPE_EXPORT, 'store_id' => 1])))
+                ->toThrow(Mage_Core_Exception_TooManyRequests::class);
+        } finally {
+            Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
+        }
     });
 
     it('refuses a guest when the store takes requests of customers only', function () {
@@ -290,6 +316,16 @@ describe('an export', function () {
         expect(Mage::getModel('privacycenter/export_orders')->export(privacySubject($customer)))->toBe([]);
     });
 
+    it('leaves out the subscription of a guest that has the email of the account', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $row = privacySubscriberRow(0, (string) $customer->getEmail());
+
+        $data = Mage::getModel('privacycenter/export_newsletter')->export(privacySubject($customer));
+        $row->delete();
+
+        expect($data)->toBe([]);
+    });
+
     it('deletes the file when the download link expires', function () {
         $this->customers[] = $customer = privacyCustomer();
         $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
@@ -412,6 +448,35 @@ describe('an erasure', function () {
         $quote->delete();
 
         expect($keptQuoteId)->not->toBeNull();
+    });
+
+    it('deletes a guest cart of the email in any letter case, also when its customer_id is 0', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $quote = Mage::getModel('sales/quote')->setStoreId(1)
+            ->setData('customer_email', strtoupper((string) $customer->getEmail()))
+            ->save();
+
+        Mage::getModel('privacycenter/eraser_quotes')->erase(privacySubject($customer));
+        $keptQuoteId = Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId())->getId();
+        if ($keptQuoteId) {
+            $quote->delete();
+        }
+
+        expect($keptQuoteId)->toBeNull();
+    });
+
+    it('keeps the subscription of another customer that has the same email', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->customers[] = $other = privacyCustomer();
+        $row = privacySubscriberRow((int) $other->getId(), (string) $customer->getEmail());
+
+        Mage::getModel('privacycenter/eraser_newsletter')->erase(privacySubject($customer));
+        $kept = (bool) Mage::getModel('newsletter/subscriber')->load($row->getId())->getId();
+        if ($kept) {
+            $row->delete();
+        }
+
+        expect($kept)->toBeTrue();
     });
 
     it('deletes the logged emails that name the customer, and keeps the others', function () {

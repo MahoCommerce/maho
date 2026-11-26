@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The newsletter subscription of the email.
+ * The newsletter subscriptions of the customer, or of the email for a guest.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
