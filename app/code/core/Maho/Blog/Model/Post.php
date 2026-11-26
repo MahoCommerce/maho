@@ -74,16 +74,16 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param ?bool $secure null follows the current request
+     * @param array<string, mixed> $urlOptions the options of Mount::publicUrl(), such as StoreBaseUrlGenerator::OPTION_STORE
      */
-    public function getImageUrl(?int $storeId = null, ?bool $secure = null): ?string
+    public function getImageUrl(array $urlOptions = []): ?string
     {
         $image = $this->getImage();
         if (!$image) {
             return null;
         }
 
-        return Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA, $secure) . 'blog/' . $image;
+        return Mage::getStorage('media')->publicUrl('blog/' . $image, $urlOptions);
     }
 
     /**

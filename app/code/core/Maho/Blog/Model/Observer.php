@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Maho\Storage\Url\StoreBaseUrlGenerator;
+
 class Maho_Blog_Model_Observer
 {
     #[Maho\Config\Observer('controller_action_predispatch_blog', id: 'blog_set_entity_key')]
@@ -116,7 +118,7 @@ class Maho_Blog_Model_Observer
 
             // Only set image data if the post has an image AND images are enabled in configuration
             if ($includeBlogImages && $post->hasImage()) {
-                $blogPost->setImageUrl($post->getImageUrl($storeId, secure: false));
+                $blogPost->setImageUrl($post->getImageUrl([StoreBaseUrlGenerator::OPTION_STORE => $storeId, StoreBaseUrlGenerator::OPTION_SECURE => false]));
                 $blogPost->setImageTitle($post->getTitle()); // Use post title as image title (same as frontend alt text)
             }
             $blogItems[] = $blogPost;
