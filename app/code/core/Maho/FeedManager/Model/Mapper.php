@@ -1053,13 +1053,21 @@ class Maho_FeedManager_Model_Mapper
         try {
             $image = $product->getData($imageType);
             if ($image && $image !== 'no_selection') {
-                return Mage::getBaseUrl('media') . 'catalog/product' . $image;
+                return $this->_getProductMediaUrl() . $image;
             }
         } catch (Exception) {
             // Silent fail
         }
 
         return '';
+    }
+
+    /**
+     * The URL of the product image folder in the media of the feed store.
+     */
+    protected function _getProductMediaUrl(): string
+    {
+        return Mage::app()->getStore($this->_storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product';
     }
 
     /**
@@ -1070,6 +1078,7 @@ class Maho_FeedManager_Model_Mapper
     protected function _getGalleryImages(Mage_Catalog_Model_Product $product): array
     {
         $images = [];
+        $baseUrl = $this->_getProductMediaUrl();
 
         // Force-load the media_gallery backend (collections don't trigger it).
         if ($product->getData('media_gallery') === null) {
@@ -1083,9 +1092,9 @@ class Maho_FeedManager_Model_Mapper
             $gallery = $product->getMediaGalleryImages();
             if ($gallery && $gallery->getSize() > 0) {
                 foreach ($gallery as $image) {
-                    $url = $image->getUrl();
-                    if (is_string($url) && !empty($url)) {
-                        $images[] = $url;
+                    $file = $image->getFile();
+                    if (is_string($file) && $file !== '') {
+                        $images[] = $baseUrl . $file;
                     }
                 }
             }
@@ -1097,7 +1106,6 @@ class Maho_FeedManager_Model_Mapper
         if (empty($images)) {
             $mediaGallery = $product->getData('media_gallery');
             if (is_array($mediaGallery) && isset($mediaGallery['images'])) {
-                $baseUrl = Mage::getBaseUrl('media') . 'catalog/product';
                 foreach ($mediaGallery['images'] as $img) {
                     if (isset($img['file']) && empty($img['disabled'])) {
                         $images[] = $baseUrl . $img['file'];
