@@ -1,0 +1,369 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_SalesRule
+ */
+
+declare(strict_types=1);
+
+use Mage_SalesRule_Model_Rule as Rule;
+
+uses(Tests\MahoBackendTestCase::class);
+
+it('uses the fixed cart budget within the remaining capacity of every eligible line', function (
+    array $lines,
+    array $rules,
+    float $expectedBaseTotal,
+    float $expectedTotal,
+    string $currency = 'USD',
+    ?float $shippingPrice = null,
+    ?array $expectedLineDiscounts = null,
+    ?array $expectedPersisted = null,
+    int $pricePrecision = 2,
+): void {
+    $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $connection->beginTransaction();
+    $previousShippingConfig = [];
+    $eventProperty = null;
+    $originalEvents = null;
+    $storeProperty = null;
+    $originalStores = null;
+    $observerAlias = 'cart_fixed_allocation_test/observer';
+    try {
+        Mage::getModel('directory/currency')->saveRates(['USD' => ['EUR' => $expectedPersisted['rate'] ?? 2.0]]);
+        if ($pricePrecision !== 2) {
+            $app = Mage::app();
+            $originalStore = $app->getStore(1);
+            $roundingStore = new class ($pricePrecision) extends Mage_Core_Model_Store {
+                public function __construct(private readonly int $pricePrecision)
+                {
+                    parent::__construct();
+                }
+
+                #[\Override]
+                public function roundPrice($price): float
+                {
+                    return round((float) $price, $this->pricePrecision);
+                }
+            };
+            $roundingStore->addData($originalStore->getData());
+            $roundingStore->setWebsite($originalStore->getWebsite());
+            $roundingStore->setGroup($originalStore->getGroup());
+            $storeProperty = new ReflectionProperty($app, '_stores');
+            $originalStores = $storeProperty->getValue($app);
+            $stores = $originalStores;
+            $stores[$originalStore->getId()] = $roundingStore;
+            $stores[$originalStore->getCode()] = $roundingStore;
+            $storeProperty->setValue($app, $stores);
+        }
+        $store = setStoreDisplayCurrency($currency, 'USD,EUR');
+        $storeId = (int) $store->getId();
+        $websiteId = (int) $store->getWebsiteId();
+        $group = Mage::getModel('customer/group')
+            ->setCode('Fixed allocation ' . uniqid())
+            ->setTaxClassId((int) Mage::getModel('customer/group')->getTaxClassId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID))
+            ->save();
+        foreach ($rules as $priority => $rule) {
+            [$action, $discount, $maxQty] = $rule;
+            Mage::getModel('salesrule/rule')
+                ->setName('Fixed allocation ' . uniqid())
+                ->setIsActive(true)
+                ->setWebsiteIds([$websiteId])
+                ->setCustomerGroupIds([(int) $group->getId()])
+                ->setCouponType(Rule::COUPON_TYPE_NO_COUPON)
+                ->setSimpleAction($action)
+                ->setDiscountAmount($discount)
+                ->setDiscountQty($maxQty)
+                ->setDiscountStep($rule[3] ?? null)
+                ->setSortOrder($priority)
+                ->setApplyToShipping($shippingPrice !== null && $action === Rule::CART_FIXED_ACTION)
+                ->setStopRulesProcessing(false)
+                ->save();
+        }
+
+        $cart = Mage::getService('checkout/cart');
+        $quote = $cart->create(null, $storeId)->setCustomerGroupId((int) $group->getId());
+        if ($shippingPrice !== null) {
+            foreach (['active' => '1', 'price' => (string) $shippingPrice, 'type' => 'O'] as $field => $value) {
+                $path = 'carriers/flatrate/' . $field;
+                $previousShippingConfig[$path] = $store->getConfig($path);
+                $store->setConfig($path, $value);
+            }
+            $quote->getShippingAddress()->setCountryId('US')->setPostcode('10001')->setShippingMethod('flatrate_flatrate');
+        }
+        foreach ($lines as [$price, $qty]) {
+            $product = Mage::getModel('catalog/product')->setStoreId(0);
+            $product->setAttributeSetId($product->getDefaultAttributeSetId())
+                ->setTypeId($shippingPrice === null ? Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL : Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+                ->setSku('fixed-allocation-' . uniqid())
+                ->setName('Fixed allocation item')
+                ->setPrice($price)
+                ->setWeight(1.0)
+                ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+                ->setTaxClassId(0)
+                ->setWebsiteIds([$websiteId])
+                ->setStockData([
+                    'use_config_manage_stock' => 0,
+                    'manage_stock' => 0,
+                    'is_in_stock' => 1,
+                    'qty' => 100,
+                    'is_qty_decimal' => $qty != floor($qty),
+                    'use_config_min_sale_qty' => 0,
+                    'min_sale_qty' => 0.01,
+                ])
+                ->save();
+            $product = Mage::getModel('catalog/product')->setStoreId($storeId)->load($product->getId());
+            $cart->addProduct($quote, $product, new Maho\DataObject(['qty' => $qty]), save: false);
+        }
+
+        if (isset($expectedPersisted['callback']) || isset($expectedPersisted['item_callback'])) {
+            $observer = new readonly class (
+                $expectedPersisted['callback_action'] ?? Rule::CART_FIXED_ACTION,
+                $expectedPersisted['callback'] ?? null,
+                $expectedPersisted['item_callback'] ?? null,
+            ) {
+                public function __construct(private string $action, private ?array $resultAmounts, private ?array $itemAmounts) {}
+
+                public function record(Maho\Event\Observer $observer): void
+                {
+                    if ($observer->getRule()->getSimpleAction() === $this->action) {
+                        if ($this->resultAmounts !== null) {
+                            $observer->getResult()->setBaseDiscountAmount($this->resultAmounts[0])->setDiscountAmount($this->resultAmounts[1]);
+                        }
+                        if ($this->itemAmounts !== null) {
+                            $item = $observer->getItem();
+                            $item->setBaseDiscountAmount($item->getBaseDiscountAmount() + $this->itemAmounts[0])
+                                ->setDiscountAmount($item->getDiscountAmount() + $this->itemAmounts[1]);
+                        }
+                    }
+                }
+            };
+            $app = Mage::app();
+            $eventProperty = new ReflectionProperty($app, '_events');
+            $originalEvents = $eventProperty->getValue($app);
+            $events = $originalEvents;
+            $events['global']['salesrule_validator_process'] = ['observers' => [
+                'fixed_test' => ['type' => 'singleton', 'model' => $observerAlias, 'method' => 'record'],
+            ]];
+            Mage::register('_singleton/' . $observerAlias, $observer);
+            $eventProperty->setValue($app, $events);
+        }
+
+        for ($pass = 0; $pass < 2; $pass++) {
+            if ($shippingPrice !== null) {
+                $quote->getShippingAddress()->setCollectShippingRates(true);
+            }
+            $cart->collectAndSave($quote);
+            if ($shippingPrice !== null) {
+                expect($quote->getShippingAddress()->getBaseShippingAmount())->toEqualWithDelta($shippingPrice, 0.0001);
+            }
+            expect($quote->getBaseGrandTotal())->toEqualWithDelta($expectedBaseTotal, 0.0001)
+                ->and($quote->getGrandTotal())->toEqualWithDelta($expectedTotal, 0.0001);
+            if ($expectedLineDiscounts !== null && $expectedPersisted === null) {
+                $baseDiscounts = array_map(
+                    static fn(Mage_Sales_Model_Quote_Item $item): float => (float) $item->getBaseDiscountAmount(),
+                    $quote->getAllVisibleItems(),
+                );
+                expect($baseDiscounts)->toHaveCount(count($expectedLineDiscounts));
+                foreach ($expectedLineDiscounts as $index => $amount) {
+                    expect($baseDiscounts[$index])->toEqualWithDelta($amount, 0.0000001);
+                }
+            }
+            if ($expectedPersisted !== null) {
+                $address = $quote->getBillingAddress();
+                expect(array_sum($address->getCartFixedRules()))->toEqualWithDelta($expectedPersisted['remaining'][0], 0.000000001)
+                    ->and(array_sum($address->getData('cart_fixed_display_rules')))->toEqualWithDelta($expectedPersisted['remaining'][1], 0.000000001);
+
+                $reloaded = $cart->getById((int) $quote->getId());
+                foreach ([$quote, $reloaded] as $currentQuote) {
+                    $items = $currentQuote->getAllVisibleItems();
+                    expect($items)->toHaveCount(count($lines));
+                    foreach ($items as $index => $item) {
+                        expect($item->getBaseDiscountAmount())->toEqualWithDelta($expectedLineDiscounts[$index], 0.000000001)
+                            ->and($item->getDiscountAmount())->toEqualWithDelta($expectedPersisted['lines'][$index], 0.000000001);
+                    }
+                    $currentAddress = $currentQuote->getBillingAddress();
+                    expect($currentAddress->getBaseDiscountAmount())->toEqualWithDelta(-array_sum($expectedLineDiscounts), 0.000000001)
+                        ->and($currentAddress->getDiscountAmount())->toEqualWithDelta(-array_sum($expectedPersisted['lines']), 0.000000001)
+                        ->and($currentAddress->getBaseGrandTotal())->toEqualWithDelta($expectedBaseTotal, 0.000000001)
+                        ->and($currentAddress->getGrandTotal())->toEqualWithDelta($expectedTotal, 0.000000001);
+                }
+                $quote = $reloaded;
+            }
+        }
+    } finally {
+        if ($eventProperty !== null) {
+            $eventProperty->setValue(Mage::app(), $originalEvents);
+            Mage::unregister('_singleton/' . $observerAlias);
+        }
+        $connection->rollBack();
+        foreach ($previousShippingConfig as $path => $value) {
+            $store->setConfig($path, $value);
+        }
+        resetCurrencyState();
+        $storeProperty?->setValue(Mage::app(), $originalStores);
+    }
+})->with([
+    'fully discounted first line' => [
+        [[0.01, 1], [0.03, 1]], [[Rule::BY_PERCENT_ACTION, 50.0, null], [Rule::CART_FIXED_ACTION, 0.02, null]], 0.0, 0.0,
+    ],
+    'fully discounted second line' => [
+        [[0.03, 1], [0.01, 1]], [[Rule::BY_PERCENT_ACTION, 50.0, null], [Rule::CART_FIXED_ACTION, 0.02, null]], 0.0, 0.0,
+    ],
+    'different available capacities in the base and display currencies' => [
+        [[0.01, 1], [0.03, 1]], [[Rule::BY_PERCENT_ACTION, 50.0, null], [Rule::CART_FIXED_ACTION, 0.02, null]], 0.0, 0.0, 'EUR',
+    ],
+    'later line has no capacity after the limited percentage promotion' => [
+        [[0.10, 2], [0.10, 1]], [[Rule::BY_PERCENT_ACTION, 100.0, 1.0], [Rule::CART_FIXED_ACTION, 0.10, null]], 0.0, 0.0,
+    ],
+    'earlier line has no capacity after the limited percentage promotion' => [
+        [[0.10, 1], [0.10, 2]], [[Rule::BY_PERCENT_ACTION, 100.0, 1.0], [Rule::CART_FIXED_ACTION, 0.10, null]], 0.0, 0.0,
+    ],
+    'fixed rule uses one unit and preserves the preceding discount on both' => [
+        [[0.20, 2]], [[Rule::BY_PERCENT_ACTION, 50.0, null], [Rule::CART_FIXED_ACTION, 0.10, 1.0]], 0.10, 0.10,
+    ],
+    'two fixed credits each use the remaining capacity after the previous rule' => [
+        [[0.01, 1], [0.03, 1]], [
+            [Rule::BY_PERCENT_ACTION, 50.0, null],
+            [Rule::CART_FIXED_ACTION, 0.01, null],
+            [Rule::CART_FIXED_ACTION, 0.01, null],
+        ], 0.0, 0.0,
+    ],
+    'following percentage uses the final allocation of the fixed credit' => [
+        [[0.10, 2], [0.10, 1]], [
+            [Rule::BY_PERCENT_ACTION, 100.0, 1.0],
+            [Rule::CART_FIXED_ACTION, 0.06, null],
+            [Rule::BY_PERCENT_ACTION, 50.0, null],
+        ], 0.02, 0.02,
+    ],
+    'no fixed discount is allocated on entirely free lines' => [
+        [[0.0, 1], [0.0, 1]], [[Rule::CART_FIXED_ACTION, 0.10, null]], 0.0, 0.0,
+    ],
+    'shipping uses the remaining credit in each currency' => [
+        [[0.01, 1]], [[Rule::BY_PERCENT_ACTION, 50.0, null], [Rule::CART_FIXED_ACTION, 0.02, null]], 0.01, 0.03, 'EUR', 0.03,
+    ],
+    'last eligible line receives the rounding remainder' => [
+        [[1.0, 1], [1.0, 1], [1.0, 1]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 2.99, 2.99, 'USD', null, [0.0, 0.0, 0.01],
+    ],
+    'remaining lines share the unused credit proportionally' => [
+        [[10.0, 1], [5.0, 2], [5.0, 2]], [[Rule::BY_PERCENT_ACTION, 100.0, 1.0], [Rule::CART_FIXED_ACTION, 6.0, null]], 4.0, 4.0, 'USD', null, [10.0, 8.0, 8.0],
+    ],
+    'a percentage on one unit preserves the fixed discount shared by both units' => [
+        [[10.0, 2]], [[Rule::CART_FIXED_ACTION, 15.0, null], [Rule::BY_PERCENT_ACTION, 50.0, 1.0]], 3.75, 7.5, 'EUR', null, [16.25],
+    ],
+    'fractional capacity is floored independently in each currency' => [
+        [[10.0, 3]], [[Rule::BY_FIXED_ACTION, 1.0, 1.0], [Rule::CART_FIXED_ACTION, 10.0, 1.0]],
+        19.34, 14.12, 'EUR', null, [10.66],
+        ['rate' => 0.73, 'remaining' => [0.34, 0.25], 'lines' => [7.78]],
+    ],
+    'another line absorbs the credit left by a fractional cap' => [
+        [[10.0, 3], [40.0, 1]], [[Rule::BY_FIXED_ACTION, 1.0, 1.0], [Rule::CART_FIXED_ACTION, 48.57, 1.0]],
+        19.43, 14.18, 'EUR', null, [10.66, 39.91],
+        ['rate' => 0.73, 'remaining' => [0.0, 0.0], 'lines' => [7.78, 29.14]],
+    ],
+    'the credit stays available when each line has less than one cent of capacity' => [
+        [[0.03, 3], [0.03, 3]], [[Rule::BY_PERCENT_ACTION, 80.0, null], [Rule::CART_FIXED_ACTION, 0.01, 1.0]],
+        0.04, 0.04, 'USD', null, [0.07, 0.07],
+        ['rate' => 0.73, 'remaining' => [0.01, 0.01], 'lines' => [0.07, 0.07]],
+    ],
+    'fixed budget deducts only the share left after an observer discounts the item' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [10.0],
+        ['remaining' => [4.0, 4.0], 'lines' => [10.0], 'item_callback' => [8.0, 8.0]],
+    ],
+    'an observer discount preserves the rounded billable fractional row cap' => [
+        [[11.99, 1.5]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [17.99],
+        ['remaining' => [3.01, 3.01], 'lines' => [17.99], 'item_callback' => [15.0, 15.0]],
+    ],
+    'an observer discount leaves separate fixed budgets in each currency' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'EUR', null, [10.0],
+        ['rate' => 0.73, 'remaining' => [4.0, 3.08], 'lines' => [7.30], 'item_callback' => [8.0, 6.0]],
+    ],
+    'fixed budget is untouched when an observer discounts more than the whole item' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 6.0, null]],
+        0.0, 0.0, 'USD', null, [10.0],
+        ['remaining' => [6.0, 6.0], 'lines' => [10.0], 'item_callback' => [12.0, 12.0]],
+    ],
+    'fractional amounts returned by a fixed discount observer are rounded once' => [
+        [[10.0, 1]], [[Rule::CART_FIXED_ACTION, 2.0, null]],
+        8.77, 6.40, 'EUR', null, [1.23],
+        ['rate' => 0.73, 'remaining' => [0.77, 0.56], 'lines' => [0.90], 'callback' => [1.234, 0.904]],
+    ],
+    'whole cent capacity for three units at 119.99' => [
+        [[119.99, 3]], [[Rule::CART_FIXED_ACTION, 359.97, null]], 0.0, 0.0, 'USD', null, [359.97],
+    ],
+    'whole cent capacity for seven units at 19.99' => [
+        [[19.99, 7]], [[Rule::CART_FIXED_ACTION, 139.93, null]], 0.0, 0.0, 'USD', null, [139.93],
+    ],
+    'whole cent capacity after a preceding fixed discount' => [
+        [[119.99, 1]], [[Rule::BY_FIXED_ACTION, 119.98, null], [Rule::CART_FIXED_ACTION, 0.01, null]],
+        0.0, 0.0, 'USD', null, [119.99],
+    ],
+    'whole cent capacity after a large preceding fixed discount' => [
+        [[89999999.99, 1]], [[Rule::BY_FIXED_ACTION, 89999999.98, null], [Rule::CART_FIXED_ACTION, 0.01, null]],
+        0.0, 0.0, 'USD', null, [89999999.99],
+    ],
+    'whole cent credit on units priced to four decimals' => [
+        [[39.995, 2]], [[Rule::CART_FIXED_ACTION, 79.99, null]], 0.01, 0.01, 'USD', null, [79.99],
+    ],
+    'the credit covers a fractional quantity that bills at one cent' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'USD', null, [0.01],
+    ],
+    'an item discount does not apply below its quantity step' => [
+        [[0.03, 0.3]], [[Rule::BY_FIXED_ACTION, 0.10, null, 1]], 1.01, 1.01, 'USD', 1.00, [0.0],
+    ],
+    'an item discount preserves cart credit below its quantity step' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
+        1.00, 1.00, 'USD', 1.00, [0.01],
+    ],
+    'a buy one get one rule preserves cart credit below its minimum quantity' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.01],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.02]],
+    ],
+    'a buy one get one rule stays within the amount left by the cart credit' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.06],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.12]],
+    ],
+    'a buy one get one observer cannot increase the item discount beyond the line' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.0, 0.0, 'EUR', null, [0.06],
+        ['remaining' => [0.0, 0.0], 'lines' => [0.12], 'callback_action' => Rule::BUY_X_GET_Y_ACTION, 'item_callback' => [0.03, 0.06]],
+    ],
+    'a buy one get one observer can replace the rule result without changing the cart credit' => [
+        [[0.03, 2]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BUY_X_GET_Y_ACTION, 1.0, null, 1]],
+        0.01, 0.02, 'EUR', null, [0.05],
+        ['remaining' => [0.0, 0.0], 'lines' => [0.10], 'callback_action' => Rule::BUY_X_GET_Y_ACTION, 'callback' => [0.0, 0.0]],
+    ],
+    'a percentage preserves cart credit on fully discounted fractional lines' => [
+        [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
+        1.00, 1.00, 'USD', 1.00, [0.01, 0.01],
+    ],
+    'a percentage preserves cart credit when only the base fractions round up' => [
+        [[0.03, 0.2], [0.03, 0.2]], [[Rule::CART_FIXED_ACTION, 0.02, null], [Rule::BY_PERCENT_ACTION, 90.0, null]],
+        1.00, 1.98, 'EUR', 1.00, [0.01, 0.01],
+    ],
+    'a stepped item discount only covers eligible units' => [
+        [[0.04, 1.3]], [[Rule::BY_FIXED_ACTION, 0.10, null, 1]], 1.01, 1.01, 'USD', 1.00, [0.04],
+    ],
+    'a stepped item discount preserves cart credit applied to the whole line' => [
+        [[0.04, 1.3]], [[Rule::CART_FIXED_ACTION, 0.05, null], [Rule::BY_FIXED_ACTION, 0.10, null, 1]],
+        1.00, 1.00, 'USD', 1.00, [0.05],
+    ],
+    'the credit covers the billed fractional quantity in each currency' => [
+        [[0.03, 0.3]], [[Rule::CART_FIXED_ACTION, 0.01, null]], 0.0, 0.0, 'EUR', null, [0.01],
+        ['rate' => 2.0, 'remaining' => [0.0, 0.0], 'lines' => [0.02]],
+    ],
+    'whole mill capacity from a three decimal store' => [
+        [[19.999, 1]], [[Rule::CART_FIXED_ACTION, 19.999, null]], 0.0, 0.0, 'USD', null, [19.999], null, 3,
+    ],
+    'the credit covers a rounded fractional quantity in a three decimal store' => [
+        [[0.03, 0.66]], [[Rule::CART_FIXED_ACTION, 0.02, null]], 0.0, 0.0, 'USD', null, [0.02], null, 3,
+    ],
+]);

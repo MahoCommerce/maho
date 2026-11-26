@@ -421,6 +421,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         return $price;
     }
 
+    public function clearItemsCollection(): void
+    {
+        $this->_items = null;
+    }
+
     /**
      * Get invoice items collection
      *
@@ -523,6 +528,13 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     {
         if ($this->getId()) {
             Mage::throwException(Mage::helper('sales')->__('Cannot register existing invoice'));
+        }
+
+        // Check the finalized totals before registering items or attempting capture.
+        if ($this->getData('has_remaining_base_shipping_discount')
+            && $this->getStore()->roundPrice((float) $this->getBaseGrandTotal()) < 0.0
+        ) {
+            Mage::throwException(Mage::helper('sales')->__('The remaining shipping discount exceeds the amount of this invoice.'));
         }
 
         foreach ($this->getAllItems() as $item) {
@@ -852,7 +864,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     {
         $this->unsetData();
         $this->_origData = null;
-        $this->_items = null;
+        $this->clearItemsCollection();
         $this->_comments = null;
         $this->_order = null;
         $this->_saveBeforeDestruct = false;

@@ -19,6 +19,11 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
     public function collect(Mage_Sales_Model_Order_Invoice $invoice)
     {
         $store = $invoice->getStore();
+        $order = $invoice->getOrder();
+        $helper = Mage::helper('weee');
+        $allocation = new Mage_Weee_Model_DocumentAllocation();
+        $previous = $source = null;
+        $itemShares = [];
 
         $totalTax = 0;
         $baseTotalTax = 0;
@@ -29,65 +34,38 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $orderItem = $item->getOrderItem();
             $orderItemQty = $orderItem->getQtyOrdered();
 
-            if (!$orderItemQty || $orderItem->isDummy()) {
+            if (!$orderItemQty || !$item->getQty() || $orderItem->isDummy()
+                || !$allocation->hasFee($orderItem)
+            ) {
                 continue;
             }
 
-            $weeeRowDiscountAmount = $orderItem->getDiscountAppliedForWeeeTax();
-            $weeeDiscountAmount = $invoice->roundPrice(
-                $weeeRowDiscountAmount / $orderItemQty * $item->getQty(),
-                'regular',
-                true,
+            $previous ??= $allocation->invoiceAmounts($order, except: $invoice->getId() ? (int) $invoice->getId() : null);
+            $source ??= $allocation->orderAmounts($order);
+            $share = $allocation->share(
+                $source[(int) $orderItem->getId()],
+                $previous[$orderItem->getId()] ?? null,
+                (float) $item->getQty(),
+                $store,
             );
-            $baseWeeeRowDiscountAmount = $orderItem->getBaseDiscountAppliedForWeeeTax();
-            $baseWeeeDiscountAmount = $invoice->roundPrice(
-                $baseWeeeRowDiscountAmount / $orderItemQty * $item->getQty(),
-                'base',
-                true,
-            );
-            $weeeTaxAmount = $item->getWeeeTaxAppliedAmount() * $item->getQty();
-            $baseWeeeTaxAmount = $item->getBaseWeeeTaxAppliedAmount() * $item->getQty();
-
-            $weeeTaxAmountInclTax = Mage::helper('weee')->getWeeeTaxInclTax($item) * $item->getQty();
-            $baseWeeeTaxAmountInclTax = Mage::helper('weee')->getBaseWeeeTaxInclTax($item) * $item->getQty();
-
-            $item->setWeeeTaxAppliedRowAmount($weeeTaxAmount);
-            $item->setBaseWeeeTaxAppliedRowAmount($baseWeeeTaxAmount);
-            $newApplied = [];
-            $applied = Mage::helper('weee')->getApplied($item);
-            foreach ($applied as $one) {
-                $one['base_row_amount'] = $one['base_amount'] * $item->getQty();
-                $one['row_amount'] = $one['amount'] * $item->getQty();
-                $one['base_row_amount_incl_tax'] = $one['base_amount_incl_tax'] * $item->getQty();
-                $one['row_amount_incl_tax'] = $one['amount_incl_tax'] * $item->getQty();
-
-                $one['weee_discount'] = $weeeDiscountAmount;
-                $one['base_weee_discount'] = $baseWeeeDiscountAmount;
-
-                $newApplied[] = $one;
-            }
-            Mage::helper('weee')->setApplied($item, $newApplied);
-
-            $item->setWeeeTaxRowDisposition($item->getWeeeTaxDisposition() * $item->getQty());
-            $item->setBaseWeeeTaxRowDisposition($item->getBaseWeeeTaxDisposition() * $item->getQty());
-
-            $totalTax += $weeeTaxAmount - $weeeDiscountAmount;
-            $baseTotalTax += $baseWeeeTaxAmount - $baseWeeeDiscountAmount;
-
-            $weeeInclTax += $weeeTaxAmountInclTax;
-            $baseWeeeInclTax += $baseWeeeTaxAmountInclTax;
+            $itemShares[] = [$item, $share];
+            $totalTax += $share['gross'] - $share['discount'];
+            $baseTotalTax += $share['base_gross'] - $share['base_discount'];
         }
 
-        /*
-         * Add FPT to totals
-         * Notice that we check restriction on allowed tax, because
-         * a) for last invoice we don't need to collect FPT - it is automatically collected by subtotal/tax collector,
-         * that adds whole remaining (not invoiced) subtotal/tax value, so fpt is automatically included into it
-         * b) FPT tax is included into order subtotal/tax value, so after multiple invoices with partial item quantities
-         * it can happen that other collector will take some FPT value from shared subtotal/tax order value
-         */
-        $order = $invoice->getOrder();
-        if (Mage::helper('weee')->includeInSubtotal($store)) {
+        if ($itemShares === []) {
+            return $this;
+        }
+
+        $last = $invoice->isLast();
+        $requestedTax = $totalTax;
+        $requestedBaseTax = $baseTotalTax;
+        $included = $allocation->feeWasIncludedInSubtotal($order);
+        if ($last) {
+            // The subtotal and tax collectors have already booked the signed remainder.
+            $totalTax = 0.0;
+            $baseTotalTax = 0.0;
+        } elseif ($included ?? $helper->includeInSubtotal($store)) {
             $allowedSubtotal = $order->getSubtotal() - $order->getSubtotalInvoiced() - $invoice->getSubtotal();
             $allowedBaseSubtotal = $order->getBaseSubtotal() - $order->getBaseSubtotalInvoiced()
                 - $invoice->getBaseSubtotal();
@@ -106,10 +84,22 @@ class Mage_Weee_Model_Total_Invoice_Weee extends Mage_Sales_Model_Order_Invoice_
             $invoice->setBaseTaxAmount($invoice->getBaseTaxAmount() + $baseTotalTax);
         }
 
-        if (!$invoice->isLast()) {
-            $invoice->setSubtotalInclTax($invoice->getSubtotalInclTax() + $weeeInclTax);
-            $invoice->setBaseSubtotalInclTax($invoice->getBaseSubtotalInclTax() + $baseWeeeInclTax);
+        $excess = $last ? 0.0 : $store->roundPrice($requestedTax - $store->roundPrice($totalTax));
+        $baseExcess = $last ? 0.0 : $store->roundPrice($requestedBaseTax - $store->roundPrice($baseTotalTax));
+        foreach ($itemShares as [$item, $share]) {
+            $reduction = min(max(0.0, $share['gross'] - $share['discount']), max(0.0, $excess));
+            $baseReduction = min(max(0.0, $share['base_gross'] - $share['base_discount']), max(0.0, $baseExcess));
+            $share['gross'] = $store->roundPrice($share['gross'] - $reduction);
+            $share['base_gross'] = $store->roundPrice($share['base_gross'] - $baseReduction);
+            $excess = $store->roundPrice($excess - $reduction);
+            $baseExcess = $store->roundPrice($baseExcess - $baseReduction);
+            $allocation->apply($item, $share, $store);
+            [$inclTax, $baseInclTax] = $allocation->getTaxInclusiveAmounts($item);
+            $weeeInclTax += $inclTax;
+            $baseWeeeInclTax += $baseInclTax;
         }
+        $invoice->setSubtotalInclTax($invoice->getSubtotalInclTax() + $weeeInclTax);
+        $invoice->setBaseSubtotalInclTax($invoice->getBaseSubtotalInclTax() + $baseWeeeInclTax);
 
         $invoice->setGrandTotal($invoice->getGrandTotal() + $totalTax);
         $invoice->setBaseGrandTotal($invoice->getBaseGrandTotal() + $baseTotalTax);

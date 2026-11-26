@@ -250,15 +250,20 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        /**
-         * if order item data is old enough then weee_tax_applied cab be
-         * not valid serialized data
-         */
+        return $this->getAppliedToItem($item);
+    }
+
+    /**
+     * @return array<array-key, array<string, mixed>>
+     */
+    public function getAppliedToItem(\Maho\DataObject $item): array
+    {
         $data = $item->getWeeeTaxApplied();
         if (empty($data)) {
             return [];
         }
-        return Mage::helper('core/string')->unserialize($data);
+        $applied = Mage::helper('core/string')->unserialize($data);
+        return is_array($applied) ? $applied : [];
     }
 
     /**
@@ -268,6 +273,124 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($value));
         return $this;
+    }
+
+    /**
+     * @param array<array-key, array<string, mixed>> $applied
+     * @return array<array-key, array<string, mixed>>
+     */
+    public function allocateTaxDiscounts(
+        array $applied,
+        float $discount,
+        float $baseDiscount,
+        ?Mage_Core_Model_Store $store = null,
+    ): array {
+        $store ??= Mage::app()->getStore();
+        foreach ([
+            ['weee_discount', 'row_amount', 'total_weee_discount', $discount],
+            ['base_weee_discount', 'base_row_amount', 'total_base_weee_discount', $baseDiscount],
+        ] as [$discountKey, $amountKey, $totalKey, $total]) {
+            $weights = array_map(static fn(array $tax): float => max(0.0, (float) ($tax[$discountKey] ?? 0)), $applied);
+            if (!array_sum($weights)) {
+                $weights = array_map(static fn(array $tax): float => max(0.0, (float) ($tax[$amountKey] ?? 0)), $applied);
+            }
+            $weightTotal = array_sum($weights);
+            $total = $store->roundPrice($total);
+            $lastKey = array_key_last($applied);
+            $weightSoFar = 0.0;
+            $allocated = 0.0;
+            foreach ($applied as $key => &$tax) {
+                $weightSoFar += $weights[$key];
+                $share = $key === $lastKey
+                    ? $total
+                    : ($weightTotal ? $store->roundPrice($total * $weightSoFar / $weightTotal) : 0.0);
+                $tax[$discountKey] = $store->roundPrice($share - $allocated);
+                $tax[$totalKey] = $total;
+                $tax['weee_discount_allocated'] = true;
+                $allocated = $share;
+            }
+            unset($tax);
+        }
+        return $applied;
+    }
+
+    /**
+     * @param iterable<\Maho\DataObject> $items
+     * @return array<array-key, float>
+     */
+    public function getDiscountedAmountsByTitle(iterable $items, Mage_Core_Model_Store $store): array
+    {
+        if ($this->includeInSubtotal($store)) {
+            return [];
+        }
+        $amountKey = $this->isTaxIncluded($store) ? 'row_amount_incl_tax' : 'row_amount';
+        $totals = [];
+        foreach ($items as $item) {
+            if ($item instanceof Mage_Sales_Model_Quote_Item_Abstract && $item->getHasChildren() && $item->isChildrenCalculated()) {
+                continue;
+            }
+            foreach ($this->getAppliedForDisplay($this->getApplied($item), $item, $store) as $tax) {
+                $title = (string) ($tax['title'] ?? '');
+                if ($title === '') {
+                    $title = $this->__('Fixed Product Tax');
+                }
+                $amount = $tax[$amountKey] ?? $tax['row_amount'] ?? 0.0;
+                $totals[$title] = ($totals[$title] ?? 0.0) + $amount - ($tax['weee_discount'] ?? 0.0);
+            }
+        }
+
+        $rawTotal = 0.0;
+        $roundedTotal = 0.0;
+        foreach ($totals as $title => $amount) {
+            $rawTotal += $amount;
+            $nextTotal = $store->roundPrice($rawTotal);
+            $totals[$title] = $store->roundPrice($nextTotal - $roundedTotal);
+            $roundedTotal = $nextTotal;
+        }
+        return $totals;
+    }
+
+    /**
+     * @param array<array-key, array<string, mixed>> $applied
+     * @return array<array-key, array<string, mixed>>
+     */
+    private function getAppliedForDisplay(
+        array $applied,
+        \Maho\DataObject $item,
+        Mage_Core_Model_Store $store,
+    ): array {
+        $first = reset($applied);
+        if ($first === false || !empty($first['weee_discount_allocated'])) {
+            return $applied;
+        }
+
+        if ($item instanceof Mage_Sales_Model_Order_Invoice_Item || $item instanceof Mage_Sales_Model_Order_Creditmemo_Item) {
+            // Older documents repeat the row discount under each tax title.
+            $discounts = array_column($applied, 'weee_discount');
+            $baseDiscounts = array_column($applied, 'base_weee_discount');
+            if (count($applied) < 2
+                || count(array_unique($discounts, SORT_NUMERIC)) > 1
+                || count(array_unique($baseDiscounts, SORT_NUMERIC)) > 1
+            ) {
+                return $applied;
+            }
+
+            foreach ($applied as &$tax) {
+                unset($tax['weee_discount'], $tax['base_weee_discount']);
+            }
+            unset($tax);
+            return $this->allocateTaxDiscounts($applied, (float) reset($discounts), (float) reset($baseDiscounts), $store);
+        }
+
+        if (isset($first['total_weee_discount'], $first['total_base_weee_discount'])) {
+            return $this->allocateTaxDiscounts(
+                $applied,
+                (float) $first['total_weee_discount'],
+                (float) $first['total_base_weee_discount'],
+                $store,
+            );
+        }
+        return $applied;
     }
 
     /**
@@ -643,15 +766,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRowWeeeAmountAfterDiscount($item)
     {
-        $weeeTaxAppliedAmounts = $this->getApplied($item);
-        $weeeAmountInclDiscount = 0;
-        foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
-            $weeeAmountInclDiscount += $weeeTaxAppliedAmount['row_amount'];
-            if (!$this->includeInSubtotal()) {
-                $weeeAmountInclDiscount -= $weeeTaxAppliedAmount['weee_discount'] ?? 0;
-            }
-        }
-        return $weeeAmountInclDiscount;
+        return $this->getDiscountedRowAmount($item, 'row_amount', 'weee_discount');
     }
 
     /**
@@ -664,14 +779,35 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getBaseRowWeeeAmountAfterDiscount($item)
     {
-        $weeeTaxAppliedAmounts = $this->getApplied($item);
-        $baseWeeeAmountInclDiscount = 0;
-        foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
-            $baseWeeeAmountInclDiscount += $weeeTaxAppliedAmount['base_row_amount'];
-            if (!$this->includeInSubtotal()) {
-                $baseWeeeAmountInclDiscount -= $weeeTaxAppliedAmount['base_weee_discount'] ?? 0;
-            }
+        return $this->getDiscountedRowAmount($item, 'base_row_amount', 'base_weee_discount');
+    }
+
+    private function getDiscountedRowAmount(\Maho\DataObject $item, string $amountKey, string $discountKey): float
+    {
+        if ($item instanceof Mage_Sales_Model_Quote_Item_Abstract && $item->getHasChildren() && $item->isChildrenCalculated()) {
+            return array_sum(array_map(
+                fn(\Maho\DataObject $child): float => $this->getDiscountedRowAmount($child, $amountKey, $discountKey),
+                $item->getChildren(),
+            ));
         }
-        return $baseWeeeAmountInclDiscount;
+        $applied = $this->getApplied($item);
+        if (!$applied) {
+            return 0.0;
+        }
+
+        $storeId = match (true) {
+            $item instanceof Mage_Sales_Model_Quote_Item_Abstract => $item->getQuote()?->getStoreId() ?? $item->getStoreId(),
+            $item instanceof Mage_Sales_Model_Order_Item => $item->getStoreId() ?? $item->getOrder()?->getStoreId(),
+            $item instanceof Mage_Sales_Model_Order_Invoice_Item => $item->getInvoice()?->getStoreId() ?? $item->getStoreId(),
+            $item instanceof Mage_Sales_Model_Order_Creditmemo_Item => $item->getCreditmemo()?->getStoreId() ?? $item->getStoreId(),
+            default => null,
+        };
+        $store = Mage::app()->getStore($storeId);
+        $includeInSubtotal = $this->includeInSubtotal($store);
+        $total = 0.0;
+        foreach ($this->getAppliedForDisplay($applied, $item, $store) as $tax) {
+            $total += ($tax[$amountKey] ?? 0.0) - ($includeInSubtotal ? 0.0 : ($tax[$discountKey] ?? 0.0));
+        }
+        return $total;
     }
 }

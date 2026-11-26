@@ -22,6 +22,8 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
         $baseTotalTax   = 0;
         $totalHiddenTax      = 0;
         $baseTotalHiddenTax  = 0;
+        $remainingNegativeTax = 0.0;
+        $baseRemainingNegativeTax = 0.0;
 
         $order = $invoice->getOrder();
 
@@ -29,7 +31,9 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
             $orderItem = $item->getOrderItem();
             $orderItemQty = $orderItem->getQtyOrdered();
 
-            if (($orderItem->getTaxAmount() || $orderItem->getHiddenTaxAmount()) && $orderItemQty) {
+            if ($orderItemQty && ($orderItem->getTaxAmount() || $orderItem->getBaseTaxAmount()
+                || $orderItem->getHiddenTaxAmount() || $orderItem->getBaseHiddenTaxAmount())
+            ) {
                 if ($item->getOrderItem()->isDummy()) {
                     continue;
                 }
@@ -42,11 +46,15 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
                 $hiddenTax      = $orderItem->getHiddenTaxAmount() - $orderItem->getHiddenTaxInvoiced();
                 $baseHiddenTax  = $orderItem->getBaseHiddenTaxAmount() - $orderItem->getBaseHiddenTaxInvoiced();
                 if (!$item->isLast()) {
+                    $uninvoicedTax = $tax;
+                    $uninvoicedBaseTax = $baseTax;
                     $availableQty  = $orderItemQty - $orderItem->getQtyInvoiced();
                     $tax           = $invoice->roundPrice($tax / $availableQty * $item->getQty());
                     $baseTax       = $invoice->roundPrice($baseTax / $availableQty * $item->getQty(), 'base');
                     $hiddenTax     = $invoice->roundPrice($hiddenTax / $availableQty * $item->getQty());
                     $baseHiddenTax = $invoice->roundPrice($baseHiddenTax / $availableQty * $item->getQty(), 'base');
+                    $remainingNegativeTax += min(0.0, $uninvoicedTax - $tax);
+                    $baseRemainingNegativeTax += min(0.0, $uninvoicedBaseTax - $baseTax);
                 }
 
                 $item->setTaxAmount($tax);
@@ -84,8 +92,9 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
             $totalHiddenTax     = $allowedHiddenTax;
             $baseTotalHiddenTax = $allowedBaseHiddenTax;
         } else {
-            $totalTax           = min($allowedTax, $totalTax);
-            $baseTotalTax       = min($allowedBaseTax, $baseTotalTax);
+            // Leave negative tax on quantities that a later invoice will bill.
+            $totalTax           = min($allowedTax - $remainingNegativeTax, $totalTax);
+            $baseTotalTax       = min($allowedBaseTax - $baseRemainingNegativeTax, $baseTotalTax);
             $totalHiddenTax     = min($allowedHiddenTax, $totalHiddenTax);
             $baseTotalHiddenTax = min($allowedBaseHiddenTax, $baseTotalHiddenTax);
         }
@@ -112,8 +121,8 @@ class Mage_Sales_Model_Order_Invoice_Total_Tax extends Mage_Sales_Model_Order_In
         /**
          * Check shipping amount in previous invoices
          */
-        foreach ($invoice->getOrder()->getInvoiceCollection() as $previusInvoice) {
-            if ($previusInvoice->getShippingAmount() && !$previusInvoice->isCanceled()) {
+        foreach ($invoice->getOrder()->getInvoiceCollection() as $previousInvoice) {
+            if (!$previousInvoice->isCanceled() && ($previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount())) {
                 $includeShippingTax = false;
             }
         }

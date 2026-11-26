@@ -549,6 +549,7 @@ class Mage_Sales_Service_Order_Document
             }
         }
         $creditmemo = $this->withOrderLock((int) $order->getId(), function () use ($order, $data, $comment, $offlineRefund, $backToStockItemIds, $notifyCustomer, $visibleOnFront, $sendEmail, $invoice, $beforeRegister): Creditmemo {
+            $order->clearRefundDocumentCollections();
             // Re-read under the lock so canCreditmemo() sees the live
             // total_refunded, not a value another request changed while we waited.
             $order->load((int) $order->getId());
@@ -556,6 +557,7 @@ class Mage_Sales_Service_Order_Document
                 if (!$invoice->getId() || (int) $invoice->getOrderId() !== (int) $order->getId()) {
                     throw new Mage_Core_Exception_Input()->addError('invoice_id', Mage::helper('sales')->__('The invoice does not belong to this order'));
                 }
+                $invoice->clearItemsCollection();
                 $invoice->load((int) $invoice->getId())->setOrder($order);
             }
             $creditmemo = $this->prepareCreditmemo($order, $data, $backToStockItemIds, $invoice);

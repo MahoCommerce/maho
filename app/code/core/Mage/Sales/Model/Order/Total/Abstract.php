@@ -37,4 +37,17 @@ abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
     {
         return $this->setData('total_config_node', $value);
     }
+
+    protected function getBaseDiscountOutsideItems(Mage_Sales_Model_Order_Invoice|Mage_Sales_Model_Order_Creditmemo $document): ?float
+    {
+        $items = $document->getAllItems();
+        if ($items === [] && ($document instanceof Mage_Sales_Model_Order_Invoice || $document->getTotalQty() > 0)) {
+            return null;
+        }
+        $itemDiscount = array_sum(array_map(
+            static fn(Mage_Sales_Model_Order_Invoice_Item|Mage_Sales_Model_Order_Creditmemo_Item $item): float => (float) $item->getBaseDiscountAmount(),
+            $items,
+        ));
+        return round(-(float) $document->getBaseDiscountAmount() - $itemDiscount, 4);
+    }
 }

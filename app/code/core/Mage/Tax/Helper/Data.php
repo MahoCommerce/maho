@@ -1089,9 +1089,6 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getAllWeee($source = null)
     {
-        $allWeee = [];
-        $store = $this->_app->getStore();
-
         if (Mage::registry('current_invoice')) {
             $source = Mage::registry('current_invoice');
         } elseif (Mage::registry('current_creditmemo')) {
@@ -1100,30 +1097,14 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
             $source = Mage::registry('current_order');
         }
         if ($source === null) {
-            return $allWeee;
+            return [];
         }
 
-        $helper = Mage::helper('weee');
-        if (!$helper->includeInSubtotal($store)) {
-            foreach ($source->getAllItems() as $item) {
-                foreach ($helper->getApplied($item) as $tax) {
-                    $weeeDiscount = $tax['weee_discount'] ?? 0;
-                    $title = $tax['title'];
-
-                    $rowAmount = $tax['row_amount'] ?? 0;
-                    $rowAmountInclTax = $tax['row_amount_incl_tax'] ?? 0;
-                    $amountDisplayed = ($helper->isTaxIncluded()) ? $rowAmountInclTax : $rowAmount;
-
-                    if (array_key_exists((string) $title, $allWeee)) {
-                        $allWeee[$title] = $allWeee[$title] + $amountDisplayed - $weeeDiscount;
-                    } else {
-                        $allWeee[$title] = $amountDisplayed - $weeeDiscount;
-                    }
-                }
-            }
-        }
-
-        return $allWeee;
+        $store = is_callable([$source, 'getStore']) ? $source->getStore() : null;
+        return Mage::helper('weee')->getDiscountedAmountsByTitle(
+            $source->getAllItems(),
+            $store instanceof Mage_Core_Model_Store ? $store : $this->_app->getStore(),
+        );
     }
 
     /**

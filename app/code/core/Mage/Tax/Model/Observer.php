@@ -217,7 +217,7 @@ class Mage_Tax_Model_Observer
     }
 
     /**
-     * Reset extra tax amounts on quote addresses before recollecting totals
+     * Reset extra tax amounts and fixed product tax discounts before recollecting totals
      *
      * @return $this
      */
@@ -229,6 +229,8 @@ class Mage_Tax_Model_Observer
         foreach ($quote->getAllAddresses() as $address) {
             $address->setExtraTaxAmount(0);
             $address->setBaseExtraTaxAmount(0);
+            $address->setWeeeDiscount(0);
+            $address->setBaseWeeeDiscount(0);
         }
         return $this;
     }

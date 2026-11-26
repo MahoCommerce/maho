@@ -19,25 +19,37 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
         $invoice->setDiscountAmount(0);
         $invoice->setBaseDiscountAmount(0);
 
-        $totalDiscountAmount     = 0;
-        $baseTotalDiscountAmount = 0;
-
-        /**
-         * Checking if shipping discount was added in previous invoices.
-         * So basically if we have invoice with positive discount and it
-         * was not canceled we don't add shipping discount to this one.
-         */
-        $addShippingDicount = true;
-        foreach ($invoice->getOrder()->getInvoiceCollection() as $previusInvoice) {
-            if ($previusInvoice->getDiscountAmount() && !$previusInvoice->isCanceled()) {
-                $addShippingDicount = false;
+        $order = $invoice->getOrder();
+        $shippingDiscount = (float) $order->getShippingDiscountAmount();
+        $baseShippingDiscount = (float) $order->getBaseShippingDiscountAmount();
+        $checkBaseShippingDiscount = !$order->getShippingAmount() && (float) $order->getBaseShippingAmount() > 0.0;
+        $baseShippingInvoicedWithoutDiscount = false;
+        foreach ($order->getInvoiceCollection() as $previousInvoice) {
+            if ($previousInvoice->isCanceled()) {
+                continue;
+            }
+            $hasShipping = $previousInvoice->getShippingAmount() || $previousInvoice->getBaseShippingAmount();
+            // Base-only shipping and its discount can be on different invoices after an upgrade.
+            $discountOutsideItems = $checkBaseShippingDiscount && $baseShippingDiscount > 0.0
+                ? $this->getBaseDiscountOutsideItems($previousInvoice)
+                : null;
+            if ($hasShipping) {
+                $shippingDiscount = 0.0;
+                if ($discountOutsideItems !== 0.0) {
+                    $baseShippingDiscount = 0.0;
+                    break;
+                }
+                $baseShippingInvoicedWithoutDiscount = true;
+            } elseif ($discountOutsideItems > 0.0
+                && $discountOutsideItems === round($baseShippingDiscount, 4)
+            ) {
+                $baseShippingDiscount = 0.0;
             }
         }
 
-        if ($addShippingDicount) {
-            $totalDiscountAmount     = $totalDiscountAmount + $invoice->getOrder()->getShippingDiscountAmount();
-            $baseTotalDiscountAmount = $baseTotalDiscountAmount + $invoice->getOrder()->getBaseShippingDiscountAmount();
-        }
+        $invoice->setData('has_remaining_base_shipping_discount', $baseShippingInvoicedWithoutDiscount && $baseShippingDiscount > 0.0);
+        $totalDiscountAmount = $shippingDiscount;
+        $baseTotalDiscountAmount = $baseShippingDiscount;
 
         foreach ($invoice->getAllItems() as $item) {
             $orderItem = $item->getOrderItem();
@@ -49,7 +61,7 @@ class Mage_Sales_Model_Order_Invoice_Total_Discount extends Mage_Sales_Model_Ord
             $baseOrderItemDiscount  = (float) $orderItem->getBaseDiscountAmount();
             $orderItemQty       = $orderItem->getQtyOrdered();
 
-            if ($orderItemDiscount && $orderItemQty) {
+            if ($orderItemQty && ($orderItemDiscount || $baseOrderItemDiscount)) {
                 /**
                  * Resolve rounding problems
                  *
