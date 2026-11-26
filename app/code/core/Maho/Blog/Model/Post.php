@@ -83,7 +83,13 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
             return null;
         }
 
-        return Mage::getStorage('media')->publicUrl('blog/' . $image, $urlOptions);
+        try {
+            return Mage::getStorage('media')->publicUrl('blog/' . $image, $urlOptions);
+        } catch (\League\Flysystem\FilesystemException $e) {
+            // A name that an older save accepted, such as one with a control character, has no URL.
+            Mage::logException($e);
+            return null;
+        }
     }
 
     /**
