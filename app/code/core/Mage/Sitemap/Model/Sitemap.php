@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+use Maho\Storage\Url\StoreBaseUrlGenerator;
+
 /**
  * @method Mage_Sitemap_Model_Resource_Sitemap _getResource()
  * @method Mage_Sitemap_Model_Resource_Sitemap getResource()
@@ -412,24 +414,24 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         ];
 
         $urlHelper = Mage::helper('core/url');
+        $storeId = $this->getStoreId();
+        $includeProductImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
+        $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
+        $media = Mage::getStorage('media');
+        // Unsecure, as the page URLs of generateXml(), so the output does not depend on the request that starts the job.
+        $mediaUrlOptions = [StoreBaseUrlGenerator::OPTION_STORE => $storeId, StoreBaseUrlGenerator::OPTION_SECURE => false];
+
         foreach ($items as $item) {
-            // Write URL to sitemap
             $imageUrl = $item->getImageUrl();
             $imageTitle = $item->getImageTitle();
 
-            // Handle product images for sitemap (only if enabled in configuration)
-            $storeId = $this->getStoreId();
-            $includeProductImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
-            $includeCategoryImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
-
             if ($type === 'products' && $includeProductImages && $item->getImage() && $item->getImage() !== 'no_selection') {
-                $imageUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $item->getImage();
+                $imageUrl = $media->publicUrl('catalog/product' . $item->getImage(), $mediaUrlOptions);
                 $imageTitle = $item->getName();
             }
 
-            // Handle category images for sitemap (only if enabled in configuration)
             if ($type === 'categories' && $includeCategoryImages && $item->getImage()) {
-                $imageUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/category/' . $item->getImage();
+                $imageUrl = $media->publicUrl('catalog/category/' . $item->getImage(), $mediaUrlOptions);
                 $imageTitle = $item->getName();
             }
 

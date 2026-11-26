@@ -180,25 +180,35 @@ describe('Mage_Sitemap_Model_Sitemap on the sitemaps mount', function () {
         'saved, not generated' => [null, true, false],
     ]);
 
-    it('writes catalog image URLs using the media base URL of the sitemap store', function (string $type, string $configPath, string $image, string $expectedPath): void {
+    it('writes catalog image URLs with the unsecure media base URL of the sitemap store', function (string $type, string $configPath, string $image, string $expectedPath): void {
         $store = Mage::app()->getStore($this->storeId);
         $store->setConfig($configPath, '1');
-        foreach (['secure', 'unsecure'] as $scheme) {
-            $store->setConfig("web/$scheme/base_media_url", 'https://images.example.test/shop/');
-        }
+        $store->setConfig('web/unsecure/base_media_url', 'https://images.example.test/shop/');
+        $store->setConfig('web/secure/base_media_url', 'https://secure-images.example.test/shop/');
         $item = new \Maho\DataObject(['url' => 'gear.html', 'image' => $image, 'name' => 'Gear']);
 
-        Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => $this->sitemap->writeSingleSitemapFile(
-            $type,
-            [$item],
-            'https://shop.example.test/',
-            '',
-            '',
-            0.0,
-            1,
-            1,
-            100,
-        ));
+        // An admin page on HTTPS: the image URL must not follow the scheme of this request.
+        $https = $_SERVER['HTTPS'] ?? null;
+        $_SERVER['HTTPS'] = 'on';
+        try {
+            Mage::app()->withStore(Mage_Core_Model_App::ADMIN_STORE_ID, fn() => $this->sitemap->writeSingleSitemapFile(
+                $type,
+                [$item],
+                'https://shop.example.test/',
+                '',
+                '',
+                0.0,
+                1,
+                1,
+                100,
+            ));
+        } finally {
+            if ($https === null) {
+                unset($_SERVER['HTTPS']);
+            } else {
+                $_SERVER['HTTPS'] = $https;
+            }
+        }
 
         expect($this->mount->read("sitemaps/sitemap-$type.xml"))
             ->toContain("<image:loc>https://images.example.test/shop/$expectedPath</image:loc>");

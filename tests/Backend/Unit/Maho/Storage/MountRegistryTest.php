@@ -12,6 +12,7 @@ use Maho\Storage\Mount;
 use Maho\Storage\MountRegistry;
 use Maho\Storage\StorageException;
 use Maho\Storage\UnknownMountException;
+use Maho\Storage\Url\StoreBaseUrlGenerator;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -86,6 +87,23 @@ describe(\Maho\Storage\MountRegistry::class, function () {
     it('builds sitemap urls from the store web base url', function (): void {
         expect(Mage::getStorage('sitemaps')->publicUrl('/sitemap.xml'))
             ->toBe(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . 'sitemap.xml');
+    });
+
+    it('builds a media url for the store that the caller names, not the current store', function (): void {
+        $store = Mage::app()->getDefaultStoreView();
+        $store->setConfig('web/unsecure/base_media_url', 'http://images.example.test/shop/');
+        $store->setConfig('web/secure/base_media_url', 'https://images.example.test/shop/');
+        Mage::app()->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+        $media = Mage::getStorage('media');
+
+        expect($media->publicUrl('catalog/a.jpg', [StoreBaseUrlGenerator::OPTION_STORE => (int) $store->getId()]))
+            ->toBeIn(['http://images.example.test/shop/catalog/a.jpg', 'https://images.example.test/shop/catalog/a.jpg'])
+            ->and($media->publicUrl('catalog/a.jpg', [StoreBaseUrlGenerator::OPTION_STORE => $store, StoreBaseUrlGenerator::OPTION_SECURE => false]))
+            ->toBe('http://images.example.test/shop/catalog/a.jpg')
+            ->and($media->publicUrl('catalog/a.jpg', [StoreBaseUrlGenerator::OPTION_STORE => $store->getCode(), StoreBaseUrlGenerator::OPTION_SECURE => true]))
+            ->toBe('https://images.example.test/shop/catalog/a.jpg')
+            ->and($media->publicUrl('catalog/a.jpg'))
+            ->toBe(Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/a.jpg');
     });
 
     it('rejects an unknown mount and lists the known ones', function (): void {
