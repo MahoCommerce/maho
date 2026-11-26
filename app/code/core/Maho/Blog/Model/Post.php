@@ -73,14 +73,17 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId, $isActive);
     }
 
-    public function getImageUrl(): ?string
+    /**
+     * @param ?bool $secure null follows the current request
+     */
+    public function getImageUrl(?int $storeId = null, ?bool $secure = null): ?string
     {
         $image = $this->getImage();
         if (!$image) {
             return null;
         }
 
-        return Mage::getBaseUrl('media') . 'blog/' . $image;
+        return Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA, $secure) . 'blog/' . $image;
     }
 
     /**

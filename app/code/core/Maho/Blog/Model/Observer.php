@@ -116,7 +116,7 @@ class Maho_Blog_Model_Observer
 
             // Only set image data if the post has an image AND images are enabled in configuration
             if ($includeBlogImages && $post->hasImage()) {
-                $blogPost->setImageUrl($post->getImageUrl());
+                $blogPost->setImageUrl($post->getImageUrl($storeId, secure: false));
                 $blogPost->setImageTitle($post->getTitle()); // Use post title as image title (same as frontend alt text)
             }
             $blogItems[] = $blogPost;
