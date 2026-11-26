@@ -23,14 +23,8 @@ class Maho_PrivacyCenter_Model_Export_Requests extends Maho_PrivacyCenter_Model_
     #[\Override]
     public function export(Subject $subject): array
     {
-        $requests = Mage::getResourceModel('privacycenter/request_collection');
-        if ($subject->isGuest()) {
-            $requests->addFieldToFilter('email', $subject->email);
-        } else {
-            $requests->addFieldToFilter('customer_id', $subject->customerId);
-        }
         $data = [];
-        foreach ($requests as $request) {
+        foreach (Mage::getService('privacycenter/request')->getSubjectRequests($subject) as $request) {
             $data[] = $this->clean(array_intersect_key(
                 $request->getData(),
                 array_flip(['type', 'status', 'email', 'created_at', 'confirmed_at', 'processed_at', 'remote_ip', 'user_agent']),

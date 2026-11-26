@@ -45,7 +45,7 @@ $kept = [$this->__('Orders and invoices'), $this->__('Shipments and refunds'), $
                 <p class="text-sm text-base-content/70"><?= $this->__('We send you an email to confirm the request. After the confirmation, you have %d days to change your mind.', $this->getCoolingOffDays()) ?></p>
             </div>
         </div>
-        <?php if ($this->hasOpenRequest(Maho_PrivacyCenter_Model_Request::TYPE_ERASURE)): ?>
+        <?php if (array_any($requests, fn($request) => $request->isOpen())): ?>
             <div role="status" class="alert alert-warning alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('You already asked us to delete your account. See the request below.') ?></span></div>
         <?php else: ?>
             <form action="<?= $this->escapeUrl($this->getActionUrl('erase')) ?>" method="post" data-turbo="false" class="flex flex-col gap-4">

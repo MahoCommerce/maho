@@ -104,19 +104,6 @@ class Maho_PrivacyCenter_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Count one request of the client against the limit of each hour.
-     *
-     * @return bool true when the client is over the limit
-     */
-    public function isIpRateLimited(mixed $store = null): bool
-    {
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $store);
-        return !Mage::helper('core')
-            ->rateLimiter('privacy_request', $limit, 3600, \Maho\Security\RateLimitScope::Ip)
-            ->attempt();
-    }
-
-    /**
      * Count one email to $email against the limit of each day, so that a request cannot fill the inbox of another
      * person.
      *

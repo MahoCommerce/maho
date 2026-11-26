@@ -383,7 +383,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $http = Mage::helper('core/http');
         return Mage::getModel('checkout/agreement_acceptance')
             ->setRemoteIp($http->getRemoteAddr() ?: null)
-            ->setUserAgent(mb_substr((string) $http->getHttpUserAgent(), 0, 512) ?: null);
+            ->setUserAgent($http->getHttpUserAgent() ?: null);
     }
 
     /**

@@ -70,7 +70,7 @@ Keep the data that a law requires, such as an invoice, and tell it in the user d
 | `privacy_collect_erasers` | `container` (`erasers` key) | Before an erasure. Add, replace or remove an eraser. |
 | `privacy_before_erase` | `request`, `subject` | Before the first eraser runs. |
 | `privacy_after_erase` | `request`, `customer_id` | After the last eraser ran. |
-| `checkout_agreement_accepted` | `acceptance` | After the save of each accepted terms and conditions text. |
+| `checkout_agreement_acceptance_save_commit_after` | `acceptance` | After the save of each accepted terms and conditions text. |
 
 ## The service
 

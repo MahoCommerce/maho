@@ -68,7 +68,6 @@ class Mage_Checkout_Service_Agreement
     /**
      * Save one acceptance of the current version of each agreement in $agreementIds. Each row takes the customer,
      * the email, the order, the store, the context and the client of $template. An ID with no agreement is skipped.
-     * A row fires checkout_agreement_accepted.
      *
      * @param list<int> $agreementIds
      * @return list<Acceptance>
@@ -85,7 +84,6 @@ class Mage_Checkout_Service_Agreement
                 ->setAgreementId($agreementId)
                 ->setVersionId($versionId);
             $acceptance->save();
-            Mage::dispatchEvent('checkout_agreement_accepted', ['acceptance' => $acceptance]);
             $acceptances[] = $acceptance;
         }
         return $acceptances;

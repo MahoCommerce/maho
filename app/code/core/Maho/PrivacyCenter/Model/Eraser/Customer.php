@@ -31,18 +31,7 @@ class Maho_PrivacyCenter_Model_Eraser_Customer extends Maho_PrivacyCenter_Model_
         if (!$customer->getId()) {
             return $helper->__('No customer account');
         }
-
-        $wasSecure = Mage::registry('isSecureArea');
-        if (!$wasSecure) {
-            Mage::register('isSecureArea', true);
-        }
-        try {
-            Mage::getService('customer/customer')->delete($customer);
-        } finally {
-            if (!$wasSecure) {
-                Mage::unregister('isSecureArea');
-            }
-        }
+        Mage::getService('customer/customer')->delete($customer);
         return $helper->__('Customer account deleted');
     }
 }

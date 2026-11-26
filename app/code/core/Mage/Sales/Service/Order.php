@@ -164,7 +164,7 @@ class Mage_Sales_Service_Order
                 ->setStoreId((int) $order->getStoreId())
                 ->setContext(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_CHECKOUT)
                 ->setRemoteIp($order->getRemoteIp() ?: $quote->getRemoteIp())
-                ->setUserAgent($quote->getRemoteUserAgent() === null ? null : mb_substr($quote->getRemoteUserAgent(), 0, 512));
+                ->setUserAgent($quote->getRemoteUserAgent());
             Mage::getService('checkout/agreement')->recordAcceptances(array_map(intval(...), $agreementIds), $template);
         } catch (Throwable $e) {
             Mage::logException($e);

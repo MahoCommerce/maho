@@ -181,16 +181,8 @@ class Mage_Checkout_Model_Cart_Api extends Mage_Checkout_Model_Api_Resource
         $storeId = $quote->getStoreId();
 
         $agreements = [];
-        if (Mage::getStoreConfigFlag('checkout/options/enable_agreements')) {
-            $agreementsCollection = Mage::getModel('checkout/agreement')->getCollection()
-                    ->addStoreFilter($storeId)
-                    ->addFieldToFilter('is_active', 1)
-                    ->addLocationFilter(Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT);
-
-            foreach ($agreementsCollection as $_a) {
-                /** @var Mage_Checkout_Model_Agreement $_a */
-                $agreements[] = $this->_getAttributes($_a, 'quote_agreement');
-            }
+        foreach (Mage::getService('checkout/agreement')->getActive((int) $storeId, Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT) as $_a) {
+            $agreements[] = $this->_getAttributes($_a, 'quote_agreement');
         }
 
         return $agreements;

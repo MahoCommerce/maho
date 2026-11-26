@@ -131,7 +131,7 @@ class Mage_Checkout_Model_Agreement_Acceptance extends Mage_Core_Model_Abstract
 
     public function setUserAgent(?string $value): static
     {
-        return $this->setData('user_agent', $value);
+        return $this->setData('user_agent', $value === null ? null : mb_substr($value, 0, 512));
     }
 
     /**

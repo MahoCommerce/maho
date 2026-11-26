@@ -15,7 +15,9 @@ $acceptances = $this->getAcceptances();
 <?= $this->getMessagesBlock()->getGroupedHtml() ?>
 
 <div class="privacy-center flex flex-col gap-6">
+    <?php if (Mage::helper('privacycenter')->isEnabled()): ?>
     <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
+    <?php endif ?>
 
     <?php if ($pending): ?>
     <div class="flex flex-col gap-4 rounded-box border border-warning/40 bg-warning/5 p-5">

@@ -36,7 +36,39 @@ class Maho_PrivacyCenter_Model_Eraser_Logs extends Maho_PrivacyCenter_Model_Eras
             $count += $adapter->delete($this->getTable('reports/event'), ['subject_id = ?' => $subject->customerId, 'subtype = 0']);
         }
         $count += $adapter->delete($this->getTable('customer/flowpassword'), ['email = ?' => $subject->email]);
-        $count += $adapter->delete($this->getTable('core/email_log'), ['email_to = ?' => $subject->email]);
+        $count += $this->deleteEmailLogs($subject->email);
         return Mage::helper('privacycenter')->__('%d log entries deleted', $count);
+    }
+
+    /**
+     * Delete the logged emails that have $email in the To, Cc or Bcc field. The log writes each field as a list of
+     * "address" or "Name <address>", with a comma between two recipients.
+     */
+    protected function deleteEmailLogs(#[\SensitiveParameter]
+        string $email): int
+    {
+        $adapter = $this->getConnection();
+        $table = $this->getTable('core/email_log');
+        $email = mb_strtolower($email);
+        $like = Mage::getResourceHelper('core')->addLikeEscape($email, ['position' => 'any']);
+        $columns = ['email_to', 'email_cc', 'email_bcc'];
+        $select = $adapter->select()->from($table, ['log_id', ...$columns]);
+        foreach ($columns as $column) {
+            $select->orWhere("LOWER({$column}) LIKE ?", $like);
+        }
+
+        $logIds = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            foreach ($columns as $column) {
+                foreach (explode(',', (string) $row[$column]) as $recipient) {
+                    $address = preg_match('/<([^>]*)>\s*$/', $recipient, $match) ? $match[1] : $recipient;
+                    if (mb_strtolower(trim($address)) === $email) {
+                        $logIds[] = (int) $row['log_id'];
+                        continue 3;
+                    }
+                }
+            }
+        }
+        return $logIds === [] ? 0 : $adapter->delete($table, ['log_id IN (?)' => $logIds]);
     }
 }

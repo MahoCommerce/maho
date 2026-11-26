@@ -15,6 +15,7 @@ declare(strict_types=1);
  */
 
 const PRIVACY_TEST_GUEST_EMAIL = 'privacy-api-guest@example.com';
+const PRIVACY_TEST_OTHER_EMAIL = 'privacy-api-other@example.com';
 
 /**
  * Save $value for $path at the default scope, and keep the earlier value for restorePrivacyConfig().
@@ -82,12 +83,41 @@ function createPrivacyRequest(string $type, string $status): int
     return (int) $request->getId();
 }
 
+/**
+ * A second customer with a confirmed erasure, so that a test proves what the first customer cannot see or change.
+ *
+ * @return array{customerId: int, requestId: int}
+ */
+function createOtherPrivacyCustomer(): array
+{
+    \Mage::app();
+    $customer = \Mage::getModel('customer/customer')->setWebsiteId(1)->loadByEmail(PRIVACY_TEST_OTHER_EMAIL);
+    if (!$customer->getId()) {
+        $customer->setStoreId(1)->setGroupId(1)->setFirstname('Other')->setLastname('Customer')
+            ->setEmail(PRIVACY_TEST_OTHER_EMAIL)->save();
+    }
+    $request = \Mage::getModel('privacycenter/request')
+        ->setStoreId(1)
+        ->setCustomerId((int) $customer->getId())
+        ->setEmail(PRIVACY_TEST_OTHER_EMAIL)
+        ->setType('erasure')
+        ->setStatus('confirmed')
+        ->save();
+    return ['customerId' => (int) $customer->getId(), 'requestId' => (int) $request->getId()];
+}
+
 afterAll(function (): void {
     try {
         \Mage::app();
         $adapter = \Mage::getSingleton('core/resource')->getConnection('core_write');
         $customer = \Mage::getModel('customer/customer')->load((int) fixtures('customer_id'));
-        $adapter->delete('privacy_request', ['email IN (?)' => [PRIVACY_TEST_GUEST_EMAIL, (string) $customer->getEmail()]]);
+        $adapter->delete('privacy_request', ['email IN (?)' => [PRIVACY_TEST_GUEST_EMAIL, PRIVACY_TEST_OTHER_EMAIL, (string) $customer->getEmail()]]);
+        \Mage::register('isSecureArea', true, true);
+        $other = \Mage::getModel('customer/customer')->setWebsiteId(1)->loadByEmail(PRIVACY_TEST_OTHER_EMAIL);
+        if ($other->getId()) {
+            $other->delete();
+        }
+        \Mage::unregister('isSecureArea');
     } catch (\Throwable) {
         // DB not available; nothing to clean.
     }
@@ -140,6 +170,7 @@ describe('/api/rest/v2/customers/me/privacy-requests', function (): void {
 
     it('takes one open erasure, which the customer can cancel', function (): void {
         enablePrivacyCenter();
+        $other = createOtherPrivacyCustomer();
 
         $created = apiPost('/api/rest/v2/customers/me/privacy-requests', ['type' => 'erasure'], customerToken());
         $second = apiPost('/api/rest/v2/customers/me/privacy-requests', ['type' => 'erasure'], customerToken());
@@ -151,7 +182,8 @@ describe('/api/rest/v2/customers/me/privacy-requests', function (): void {
         expect($created['json']['status'])->toBe('pending');
         expect($created['json']['adminNote'] ?? null)->toBeNull();
         expect($second['status'])->toBe(409);
-        expect(array_column($list['json']['member'] ?? $list['json'], 'id'))->toContain($created['json']['id']);
+        expect(array_column($list['json']['member'] ?? $list['json'], 'id'))->toContain($created['json']['id'])
+            ->not->toContain($other['requestId']);
         expect($canceled['status'])->toBe(200);
         expect($canceled['json']['status'])->toBe('canceled');
     });
@@ -159,15 +191,9 @@ describe('/api/rest/v2/customers/me/privacy-requests', function (): void {
     it('cannot cancel the request of another customer', function (): void {
         enablePrivacyCenter();
         $id = createPrivacyRequest('erasure', 'confirmed');
-        $other = \Mage::getResourceModel('customer/customer_collection')
-            ->addFieldToFilter('entity_id', ['neq' => (int) fixtures('customer_id')])
-            ->setPageSize(1)
-            ->getFirstItem();
-        if (!$other->getId()) {
-            $this->markTestSkipped('No second customer in the database');
-        }
+        $other = createOtherPrivacyCustomer();
 
-        $response = apiPost("/api/rest/v2/customers/me/privacy-requests/{$id}/cancel", [], customerToken((int) $other->getId()));
+        $response = apiPost("/api/rest/v2/customers/me/privacy-requests/{$id}/cancel", [], customerToken($other['customerId']));
 
         expect($response['status'])->toBe(404);
     });
@@ -188,6 +214,12 @@ describe('/api/rest/v2/privacy-requests (staff)', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($ids)->toContain($id);
+    });
+
+    it('refuses a customer ID that is not a number', function (): void {
+        $response = apiGet('/api/rest/v2/privacy-requests?customerId=abc', adminToken());
+
+        expect($response['status'])->toBe(400);
     });
 
     it('approves a confirmed erasure, and refuses to approve it twice', function (): void {

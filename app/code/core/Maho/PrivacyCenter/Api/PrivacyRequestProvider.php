@@ -47,11 +47,15 @@ final class PrivacyRequestProvider extends \Maho\ApiPlatform\Provider
             $collection->addFieldToFilter('store_id', ['in' => $allowedStoreIds ?: [-1]]);
         }
         $filters = $context['filters'] ?? [];
-        foreach (['status' => 'status', 'type' => 'type', 'email' => 'email', 'customerId' => 'customer_id'] as $filter => $field) {
-            $value = $this->stringFilter($filters, $filter);
+        foreach (['status', 'type', 'email'] as $field) {
+            $value = $this->stringFilter($filters, $field);
             if ($value !== null) {
-                $collection->addFieldToFilter($field, $field === 'customer_id' ? (int) $value : $value);
+                $collection->addFieldToFilter($field, $value);
             }
+        }
+        $customerId = $this->intFilter($filters, 'customerId');
+        if ($customerId !== null) {
+            $collection->addFieldToFilter('customer_id', $customerId);
         }
         return $this->paginateRequests($collection, $context);
     }

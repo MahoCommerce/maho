@@ -23,20 +23,28 @@ class Maho_PrivacyCenter_Model_Export_Newsletter extends Maho_PrivacyCenter_Mode
     #[\Override]
     public function export(Subject $subject): array
     {
-        $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail($subject->email);
-        if (!$subscriber->getId()) {
-            return [];
-        }
         $statuses = [
             Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED => 'subscribed',
             Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE => 'not_active',
             Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED => 'unsubscribed',
             Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED => 'unconfirmed',
         ];
-        return $this->clean([
-            'email' => $subscriber->getSubscriberEmail(),
-            'status' => $statuses[(int) $subscriber->getSubscriberStatus()] ?? (string) $subscriber->getSubscriberStatus(),
-            'changed_at' => $subscriber->getChangeStatusAt(),
-        ]);
+        $data = [];
+        $subscribers = Mage::getResourceModel('newsletter/subscriber_collection');
+        if ($subject->isGuest()) {
+            $adapter = $subscribers->getConnection();
+            $subscribers->addFieldToFilter('main_table.customer_id', 0)->getSelect()
+                ->where((string) $adapter->getCaseInsensitiveEqualsSql('main_table.subscriber_email', '?'), $subject->email);
+        } else {
+            $subscribers->addFieldToFilter('main_table.customer_id', $subject->customerId);
+        }
+        foreach ($subscribers as $subscriber) {
+            $data[] = $this->clean([
+                'email' => $subscriber->getSubscriberEmail(),
+                'status' => $statuses[(int) $subscriber->getSubscriberStatus()] ?? (string) $subscriber->getSubscriberStatus(),
+                'changed_at' => $subscriber->getChangeStatusAt(),
+            ]);
+        }
+        return $data;
     }
 }

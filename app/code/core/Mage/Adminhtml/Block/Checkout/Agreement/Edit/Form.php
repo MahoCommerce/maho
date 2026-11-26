@@ -173,20 +173,7 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
      */
     protected function getVersionsHtml(int $agreementId): string
     {
-        $resource = Mage::getSingleton('core/resource');
-        $adapter = $resource->getConnection('core_read');
-        $rows = $adapter->fetchAll(
-            $adapter->select()
-                ->from(['v' => $resource->getTableName('checkout/agreement_version')], ['version', 'created_at'])
-                ->joinLeft(
-                    ['a' => $resource->getTableName('checkout/agreement_acceptance')],
-                    'a.version_id = v.version_id',
-                    ['acceptances' => new \Maho\Db\Expr('COUNT(a.acceptance_id)')],
-                )
-                ->where('v.agreement_id = ?', $agreementId)
-                ->group(['v.version_id', 'v.version', 'v.created_at'])
-                ->order('v.version DESC'),
-        );
+        $rows = Mage::getResourceSingleton('checkout/agreement')->getVersionsWithAcceptanceCount($agreementId);
         $helper = Mage::helper('checkout');
         $html = '<div class="grid np"><table cellspacing="0" class="data"><thead><tr><th>' . $helper->__('Version') . '</th><th>'
             . $helper->__('Created') . '</th><th>' . $helper->__('Acceptances') . '</th></tr></thead><tbody>';

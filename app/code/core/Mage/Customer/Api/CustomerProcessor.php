@@ -124,7 +124,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
                 agreementIds: $data->agreementIds ?? [],
                 client: \Mage::getModel('checkout/agreement_acceptance')
                     ->setRemoteIp($http->getRemoteAddr() ?: null)
-                    ->setUserAgent(mb_substr((string) $http->getHttpUserAgent(), 0, 512) ?: null),
+                    ->setUserAgent($http->getHttpUserAgent() ?: null),
             );
         }
 

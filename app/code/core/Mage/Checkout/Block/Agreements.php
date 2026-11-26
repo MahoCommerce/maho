@@ -26,16 +26,10 @@ class Mage_Checkout_Block_Agreements extends Mage_Core_Block_Template
     public function getAgreements()
     {
         if (!$this->hasAgreements()) {
-            if (!Mage::getStoreConfigFlag('checkout/options/enable_agreements')) {
-                $agreements = [];
-            } else {
-                $agreements = Mage::getModel('checkout/agreement')->getCollection()
-                    ->addStoreFilter(Mage::app()->getStore()->getId())
-                    ->addFieldToFilter('is_active', 1)
-                    ->addLocationFilter($this->getLocation())
-                    ->setOrder('position', \Maho\Data\Collection::SORT_ORDER_ASC);
-            }
-            $this->setAgreements($agreements);
+            $this->setAgreements(Mage::getService('checkout/agreement')->getActive(
+                (int) Mage::app()->getStore()->getId(),
+                $this->getLocation(),
+            ));
         }
         return $this->getData('agreements');
     }

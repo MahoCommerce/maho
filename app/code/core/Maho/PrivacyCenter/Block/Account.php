@@ -39,11 +39,6 @@ class Maho_PrivacyCenter_Block_Account extends Mage_Core_Block_Template
         return $this->getPrivacyRequests($type)[0] ?? null;
     }
 
-    public function hasOpenRequest(string $type): bool
-    {
-        return array_any($this->getPrivacyRequests($type), fn($request) => $request->isOpen());
-    }
-
     /**
      * @return list<Mage_Checkout_Model_Agreement>
      */

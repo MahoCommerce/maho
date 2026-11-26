@@ -222,6 +222,69 @@ describe('registration', function () {
     });
 });
 
+/**
+ * Register one customer on the storefront and one on the API, each with $agreementIds.
+ *
+ * @param list<int> $agreementIds
+ * @return array{0: array{success: list<string>, errors: list<string>}, 1: string, 2: array<string, mixed>, 3: string}
+ */
+function customerParityRegisterWithTerms(array $agreementIds): array
+{
+    $webEmail = customerParityEmail();
+    $web = customerParityWeb(Mage_Customer_AccountController::class, 'account', 'createPost', [
+        'firstname' => 'Parity', 'lastname' => 'Customer', 'email' => $webEmail,
+        'password' => CUSTOMER_PARITY_PASSWORD, 'confirmation' => CUSTOMER_PARITY_PASSWORD,
+        'agreement' => array_fill_keys($agreementIds, '1'),
+    ]);
+    $dto = new CustomerDto();
+    $dto->email = customerParityEmail();
+    $dto->firstname = 'Parity';
+    $dto->lastname = 'Customer';
+    $dto->password = CUSTOMER_PARITY_PASSWORD;
+    $dto->agreementIds = $agreementIds;
+    $api = TransportParity::api(fn() => new CustomerProcessor()->process($dto, new Post()));
+    return [$web, $webEmail, $api, $dto->email];
+}
+
+describe('registration terms', function () {
+    beforeEach(function () {
+        $this->agreement = Mage::getModel('checkout/agreement')->setData([
+            'name' => 'Pest terms', 'content' => 'Terms', 'checkbox_text' => 'I agree',
+            'is_active' => 1, 'is_html' => 0, 'stores' => [0],
+            'show_on_checkout' => 0, 'show_on_registration' => 1,
+        ])->save();
+        Mage::app()->getStore()->setConfig('checkout/options/enable_agreements', '1');
+    });
+
+    afterEach(function () {
+        Mage::app()->getStore()->setConfig('checkout/options/enable_agreements', '0');
+        $this->agreement->delete();
+    });
+
+    it('refuses a registration without them on the storefront and the API', function () {
+        [$web, $webEmail, $api, $apiEmail] = customerParityRegisterWithTerms([]);
+
+        expect($web['errors'])->not->toBe([])
+            ->and(Mage::getService('customer/customer')->getByEmail($webEmail))->toBeNull()
+            ->and($api['status'])->toBe(422)
+            ->and(Mage::getService('customer/customer')->getByEmail($apiEmail))->toBeNull();
+    });
+
+    it('keeps the proof of the acceptance on the storefront and the API', function () {
+        $agreementId = (int) $this->agreement->getId();
+        [$web, $webEmail, , $apiEmail] = customerParityRegisterWithTerms([$agreementId]);
+
+        expect($web['errors'])->toBe([]);
+        foreach ([$webEmail, $apiEmail] as $email) {
+            $customer = Mage::getService('customer/customer')->getByEmail($email);
+            expect($customer)->not->toBeNull();
+            $acceptance = Mage::getService('checkout/agreement')->getAcceptances((int) $customer->getId())->getFirstItem();
+            expect($acceptance->getAgreementId())->toBe($agreementId)
+                ->and($acceptance->getContext())->toBe(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_REGISTRATION);
+        }
+    });
+});
+
 describe('registration with an address', function () {
     it('requires an address field that a condition on a customer field of the same form shows', function () {
         /** @var Mage_Eav_Service_Attribute $service */

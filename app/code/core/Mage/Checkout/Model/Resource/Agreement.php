@@ -116,6 +116,28 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
     }
 
     /**
+     * The versions of the agreement with $agreementId, newest first, with the number of acceptances of each.
+     *
+     * @return list<array<string, mixed>> the columns version, created_at and acceptances
+     */
+    public function getVersionsWithAcceptanceCount(int $agreementId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        return $adapter->fetchAll(
+            $adapter->select()
+                ->from(['v' => $this->getTable('checkout/agreement_version')], ['version', 'created_at'])
+                ->joinLeft(
+                    ['a' => $this->getTable('checkout/agreement_acceptance')],
+                    'a.version_id = v.version_id',
+                    ['acceptances' => new \Maho\Db\Expr('COUNT(a.acceptance_id)')],
+                )
+                ->where('v.agreement_id = ?', $agreementId)
+                ->group(['v.version_id', 'v.version', 'v.created_at'])
+                ->order('v.version DESC'),
+        );
+    }
+
+    /**
      * The ID of the current version of each agreement in $agreementIds.
      *
      * @param list<int> $agreementIds

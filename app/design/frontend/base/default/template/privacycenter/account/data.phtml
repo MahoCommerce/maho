@@ -30,7 +30,7 @@ $sections = $this->getExportLabels();
                 <span class="badge badge-ghost"><?= $this->escapeHtml($section) ?></span>
             <?php endforeach ?>
         </div>
-        <?php if ($this->hasOpenRequest(Maho_PrivacyCenter_Model_Request::TYPE_EXPORT)): ?>
+        <?php if (array_any($requests, fn($request) => $request->isOpen())): ?>
             <div role="status" class="alert alert-info alert-soft [&>svg]:size-5"><?= $this->getIconSvg('clock') ?><span><?= $this->__('We are preparing your data. We will send you an email when it is ready.') ?></span></div>
         <?php else: ?>
             <form action="<?= $this->escapeUrl($this->getActionUrl('export')) ?>" method="post" data-turbo="false">

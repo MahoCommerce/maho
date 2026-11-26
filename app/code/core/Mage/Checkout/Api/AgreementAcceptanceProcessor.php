@@ -32,7 +32,7 @@ final class AgreementAcceptanceProcessor extends \Maho\ApiPlatform\Processor
         $http = \Mage::helper('core/http');
         $client = \Mage::getModel('checkout/agreement_acceptance')
             ->setRemoteIp($http->getRemoteAddr() ?: null)
-            ->setUserAgent(mb_substr((string) (($context['request'] ?? null)?->headers->get('User-Agent')), 0, 512) ?: null);
+            ->setUserAgent(($context['request'] ?? null)?->headers->get('User-Agent') ?: null);
         $customer = \Mage::getService('customer/customer')->getById($this->requireCustomerId());
         $acceptances = \Mage::getService('checkout/agreement')->acceptForCustomer($customer, (int) StoreContext::getStoreId(), [$agreementId], $client);
 

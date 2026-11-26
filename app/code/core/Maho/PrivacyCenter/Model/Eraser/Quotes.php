@@ -26,7 +26,8 @@ class Maho_PrivacyCenter_Model_Eraser_Quotes extends Maho_PrivacyCenter_Model_Er
         $adapter = $this->getConnection();
         $where = $subject->isGuest()
             ? ['customer_email = ?' => $subject->email, 'customer_id IS NULL']
-            : [$adapter->quoteInto('customer_id = ?', $subject->customerId) . ' OR ' . $adapter->quoteInto('customer_email = ?', $subject->email)];
+            : [$adapter->quoteInto('customer_id = ?', $subject->customerId)
+                . ' OR (customer_id IS NULL AND ' . $adapter->quoteInto('customer_email = ?', $subject->email) . ')'];
         $count = $adapter->delete($this->getTable('sales/quote'), $where);
         return Mage::helper('privacycenter')->__('%d carts deleted', $count);
     }

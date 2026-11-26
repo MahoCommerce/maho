@@ -15,7 +15,7 @@ class Maho_PrivacyCenter_Block_Agreements_Notice extends Mage_Core_Block_Templat
     public function getPendingCount(): int
     {
         $session = Mage::getSingleton('customer/session');
-        if (!$session->isLoggedIn() || !Mage::helper('privacycenter')->isEnabled()) {
+        if (!$session->isLoggedIn()) {
             return 0;
         }
         return count(Mage::getService('checkout/agreement')->getPendingForCustomer(

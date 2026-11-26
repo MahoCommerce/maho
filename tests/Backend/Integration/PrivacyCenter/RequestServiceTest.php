@@ -54,6 +54,41 @@ function privacyOrder(Mage_Customer_Model_Customer $customer, string $state): Ma
         ->save();
 }
 
+function privacyGuestOrder(string $email, string $state): Mage_Sales_Model_Order
+{
+    return Mage::getModel('sales/order')
+        ->setIncrementId((string) random_int(800000000, 899999999))
+        ->setStoreId(1)
+        ->setData('state', $state)
+        ->setStatus($state)
+        ->setCustomerId(null)
+        ->setCustomerEmail($email)
+        ->setCustomerIsGuest(true)
+        ->setGrandTotal(10.0)
+        ->setBaseGrandTotal(10.0)
+        ->save();
+}
+
+function privacyReview(Mage_Customer_Model_Customer $customer): Mage_Review_Model_Review
+{
+    $review = Mage::getModel('review/review');
+    return $review->setEntityId($review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+        ->setEntityPkValue(1)
+        ->setStatusId(Mage_Review_Model_Review::STATUS_APPROVED)
+        ->setTitle('Nice')
+        ->setDetail('A nice product')
+        ->setNickname('Pri')
+        ->setCustomerId((int) $customer->getId())
+        ->setStoreId(1)
+        ->setStores([1])
+        ->save();
+}
+
+function privacySubject(Mage_Customer_Model_Customer $customer): Maho_PrivacyCenter_Model_Subject
+{
+    return new Maho_PrivacyCenter_Model_Subject((int) $customer->getId(), (string) $customer->getEmail(), 1);
+}
+
 beforeEach(function () {
     $this->config = [
         Maho_PrivacyCenter_Helper_Data::XML_PATH_ENABLED => '1',
@@ -72,6 +107,7 @@ beforeEach(function () {
     $this->service = Mage::getService('privacycenter/request');
     $this->customers = [];
     $this->orders = [];
+    $this->guestEmails = [];
 });
 
 afterEach(function () {
@@ -79,7 +115,7 @@ afterEach(function () {
     foreach ($this->orders as $order) {
         $order->delete();
     }
-    $emails = [];
+    $emails = $this->guestEmails;
     foreach ($this->customers as $customer) {
         $emails[] = (string) $customer->getEmail();
         if (Mage::getModel('customer/customer')->load($customer->getId())->getId()) {
@@ -164,6 +200,16 @@ describe('the confirmation link', function () {
             ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
     });
 
+    it('lets only one confirmation use the token, also when two run at the same time', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $hash = Mage::helper('privacycenter')->hashToken(privacyToken($request));
+        $resource = $request->getResource();
+
+        expect($resource->consumeToken((int) $request->getId(), $hash))->toBeTrue()
+            ->and($resource->consumeToken((int) $request->getId(), $hash))->toBeFalse();
+    });
+
     it('does not work after it expires, and the cron expires the request', function () {
         $this->customers[] = $customer = privacyCustomer();
         $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
@@ -220,6 +266,30 @@ describe('an export', function () {
             ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
     });
 
+    it('opens the file with the download link, and never lets that link confirm the request', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
+        $this->service->export($request);
+        $token = privacyToken($request);
+
+        $file = $this->service->openExportByToken($token);
+        fclose($file['stream']);
+
+        expect((int) $file['request']->getId())->toBe((int) $request->getId())
+            ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+
+        $request->setTokenExpiresAt(Mage::app()->getLocale()->formatDateForDb(time() - 60))->save();
+
+        expect(fn() => $this->service->openExportByToken($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+    });
+
+    it('holds no guest order of the email of the account, because the session does not prove the email', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->orders[] = privacyGuestOrder((string) $customer->getEmail(), Mage_Sales_Model_Order::STATE_COMPLETE);
+
+        expect(Mage::getModel('privacycenter/export_orders')->export(privacySubject($customer)))->toBe([]);
+    });
+
     it('deletes the file when the download link expires', function () {
         $this->customers[] = $customer = privacyCustomer();
         $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
@@ -272,17 +342,7 @@ describe('an erasure', function () {
     it('deletes the account, keeps the orders, and removes the name from the reviews', function () {
         $this->customers[] = $customer = privacyCustomer();
         $this->orders[] = $order = privacyOrder($customer, Mage_Sales_Model_Order::STATE_COMPLETE);
-        $review = Mage::getModel('review/review');
-        $review->setEntityId($review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
-            ->setEntityPkValue(1)
-            ->setStatusId(Mage_Review_Model_Review::STATUS_APPROVED)
-            ->setTitle('Nice')
-            ->setDetail('A nice product')
-            ->setNickname('Pri')
-            ->setCustomerId((int) $customer->getId())
-            ->setStoreId(1)
-            ->setStores([1])
-            ->save();
+        $review = privacyReview($customer);
         $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
         $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
 
@@ -300,6 +360,76 @@ describe('an erasure', function () {
             ->and($keptReview->getCustomerId())->toBeNull();
 
         $keptReview->delete();
+    });
+
+    it('waits while a guest has an open order, and runs when the order is complete', function () {
+        $this->guestEmails[] = $email = 'privacy-guest-' . uniqid() . '@example.com';
+        $this->orders[] = $order = privacyGuestOrder($email, Mage_Sales_Model_Order::STATE_PROCESSING);
+        $request = $this->service->submit(new \Maho\DataObject(['email' => $email, 'type' => Request::TYPE_ERASURE, 'store_id' => 1]));
+        $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
+
+        expect(fn() => $this->service->erase($request))->toThrow(Mage_Core_Exception_Conflict::class);
+
+        $order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE)->setStatus(Mage_Sales_Model_Order::STATE_COMPLETE)->save();
+        $this->service->erase($request);
+
+        expect($request->getStatus())->toBe(Request::STATUS_COMPLETED);
+    });
+
+    it('deletes the reviews also outside the admin area, as the API does', function () {
+        Mage::app()->getStore(1)->setConfig(Maho_PrivacyCenter_Helper_Data::XML_PATH_REVIEW_ACTION, Maho_PrivacyCenter_Helper_Data::REVIEW_ACTION_DELETE);
+        $this->customers[] = $customer = privacyCustomer();
+        $review = privacyReview($customer);
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
+        $previousStoreId = (int) Mage::app()->getStore()->getId();
+        Mage::app()->setCurrentStore(1);
+        // The backend test case opens the secure area for every test, and the API has none
+        Mage::unregister('isSecureArea');
+
+        try {
+            $this->service->erase($request);
+        } finally {
+            Mage::register('isSecureArea', true, true);
+            Mage::app()->setCurrentStore($previousStoreId);
+            Mage::app()->getStore(1)->setConfig(Maho_PrivacyCenter_Helper_Data::XML_PATH_REVIEW_ACTION, Maho_PrivacyCenter_Helper_Data::REVIEW_ACTION_ANONYMIZE);
+        }
+
+        expect($request->getStatus())->toBe(Request::STATUS_COMPLETED)
+            ->and(Mage::getModel('review/review')->load($review->getId())->getId())->toBeNull();
+    });
+
+    it('keeps the cart of another account that has the same email', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->customers[] = $other = privacyCustomer();
+        $quote = Mage::getModel('sales/quote')->setStoreId(1)
+            ->setData('customer_id', (int) $other->getId())
+            ->setData('customer_email', $customer->getEmail())
+            ->save();
+
+        Mage::getModel('privacycenter/eraser_quotes')->erase(privacySubject($customer));
+        $keptQuoteId = Mage::getModel('sales/quote')->loadByIdWithoutStore($quote->getId())->getId();
+        $quote->delete();
+
+        expect($keptQuoteId)->not->toBeNull();
+    });
+
+    it('deletes the logged emails that name the customer, and keeps the others', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $email = (string) $customer->getEmail();
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $table = $resource->getTableName('core/email_log');
+        $adapter->insert($table, ['subject' => 'Welcome', 'email_to' => 'Other <other@example.com>, Pri Vacy <' . strtoupper($email) . '>', 'email_body' => 'Hi']);
+        $namedLogId = (int) $adapter->lastInsertId($table);
+        $adapter->insert($table, ['subject' => 'Welcome', 'email_to' => 'x' . $email, 'email_body' => 'Hi']);
+        $otherLogId = (int) $adapter->lastInsertId($table);
+
+        Mage::getModel('privacycenter/eraser_logs')->erase(privacySubject($customer));
+        $remaining = $adapter->fetchCol($adapter->select()->from($table, ['log_id'])->where('log_id IN (?)', [$namedLogId, $otherLogId]));
+        $adapter->delete($table, ['log_id IN (?)' => [$namedLogId, $otherLogId]]);
+
+        expect(array_map(intval(...), $remaining))->toBe([$otherLogId]);
     });
 
     it('can be canceled by its customer before it runs', function () {

@@ -95,12 +95,12 @@ class Maho_PrivacyCenter_Service_Request
         $email = trim((string) $input->getData('email'));
         $type = (string) $input->getData('type');
         $this->assertTypeAndEmail($type, $email);
-        if ($helper->isIpRateLimited($storeId)) {
-            throw new Mage_Core_Exception_TooManyRequests(
-                $helper->__('Too many requests. Please try again later.'),
-                self::RATE_LIMIT_WINDOW,
-            );
-        }
+        Mage::helper('core')->rateLimiter(
+            'privacy_request',
+            (int) Mage::getStoreConfig(Maho_PrivacyCenter_Helper_Data::XML_PATH_IP_RATE_LIMIT, $storeId),
+            self::RATE_LIMIT_WINDOW,
+            \Maho\Security\RateLimitScope::Ip,
+        )->attemptOrThrow($helper->__('Too many requests. Please try again later.'));
 
         $customer = Mage::getModel('customer/customer')
             ->setWebsiteId((int) Mage::app()->getStore($storeId)->getWebsiteId())
@@ -342,8 +342,19 @@ class Maho_PrivacyCenter_Service_Request
                 $this->save($other->setTokenHash(null)->setTokenExpiresAt(null));
             }
         }
-        foreach ($this->getErasers() as $code => $eraser) {
-            $request->appendAdminNote($code . ': ' . $eraser->erase($subject));
+        // The API and the storefront run outside the admin area, and the review and customer models refuse a delete there
+        $wasSecure = Mage::registry('isSecureArea');
+        if (!$wasSecure) {
+            Mage::register('isSecureArea', true);
+        }
+        try {
+            foreach ($this->getErasers() as $code => $eraser) {
+                $request->appendAdminNote($code . ': ' . $eraser->erase($subject));
+            }
+        } finally {
+            if (!$wasSecure) {
+                Mage::unregister('isSecureArea');
+            }
         }
 
         // The customer is gone, so the request keeps only the email, as the proof of the erasure
@@ -730,7 +741,7 @@ class Maho_PrivacyCenter_Service_Request
      *
      * @return list<Request>
      */
-    protected function getSubjectRequests(Subject $subject): array
+    public function getSubjectRequests(Subject $subject): array
     {
         $requests = Mage::getResourceModel('privacycenter/request_collection');
         if ($subject->isGuest()) {

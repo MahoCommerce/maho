@@ -42,20 +42,13 @@ class Maho_PrivacyCenter_Model_Export_Orders extends Maho_PrivacyCenter_Model_Ex
             $orders->addFieldToFilter('customer_id', ['null' => true])
                 ->addFieldToFilter('customer_email', $subject->email);
         } else {
-            $orders->addFieldToFilter(
-                ['customer_id', 'customer_email'],
-                [$subject->customerId, $subject->email],
-            );
+            $orders->addFieldToFilter('customer_id', $subject->customerId);
         }
         $orders->setOrder('created_at', \Maho\Data\Collection::SORT_ORDER_ASC);
 
         $data = [];
         foreach ($orders as $order) {
             /** @var Mage_Sales_Model_Order $order */
-            // An order of another customer with the same email is not data of the subject
-            if (!$subject->isGuest() && $order->getCustomerId() && $order->getCustomerId() !== $subject->customerId) {
-                continue;
-            }
             $row = array_intersect_key($order->getData(), array_flip(self::ORDER_FIELDS));
             $row['payment_method'] = $order->getPayment()?->getMethod();
             foreach (['billing_address' => $order->getBillingAddress(), 'shipping_address' => $order->getShippingAddress()] as $key => $address) {

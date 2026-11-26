@@ -21,7 +21,9 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         if (!$this->getRequest()->isDispatched()) {
             return $this;
         }
-        if (!Mage::helper('privacycenter')->isEnabled()) {
+        // The terms and conditions of Mage_Checkout ask for an acceptance also when the store takes no privacy requests
+        $isAgreementPage = in_array($this->getRequest()->getActionName(), ['agreements', 'acceptAgreements'], true);
+        if (!$isAgreementPage && !Mage::helper('privacycenter')->isEnabled()) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             $this->_forward('noRoute');
             return $this;
@@ -121,7 +123,7 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
                 array_map(intval(...), array_keys((array) $this->getRequest()->getPost('agreement', []))),
                 Mage::getModel('checkout/agreement_acceptance')
                     ->setRemoteIp($http->getRemoteAddr() ?: null)
-                    ->setUserAgent(mb_substr((string) $http->getHttpUserAgent(), 0, 512) ?: null),
+                    ->setUserAgent($http->getHttpUserAgent() ?: null),
             );
             $session->addSuccess($this->__('Thank you. Your acceptance has been saved.'));
         } catch (Mage_Core_Exception_Input $e) {
