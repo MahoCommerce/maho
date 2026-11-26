@@ -20,6 +20,8 @@ declare(strict_types=1);
  *
  * Each protocol is gated behind the apiplatform/protocols/* config flag and
  * defaults to disabled, operators must opt in explicitly.
+ *
+ * @deprecated since 26.7 It serves only the legacy API. Remove it with the legacy API.
  */
 class Maho_ApiPlatform_IndexController extends Mage_Core_Controller_Front_Action
 {

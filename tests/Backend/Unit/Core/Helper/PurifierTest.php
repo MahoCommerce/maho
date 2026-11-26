@@ -407,12 +407,34 @@ describe('Mage_Core_Helper_Purifier allowlist for the editor', function () {
     it('keeps each listed attribute on a save', function () {
         // The editor keeps every attribute of the list. A save that removed one would remove what
         // the author saw in the editor.
+        $editor = Mage_Core_Helper_Purifier::forEditor();
         $removed = [];
-        foreach (Mage_Core_Helper_Purifier::forEditor()['attributes'] as $attribute) {
+        foreach ($editor['attributes'] as $attribute) {
             if (!str_contains($this->purifier->purify("<section {$attribute}=\"x\">t</section>"), "{$attribute}=")) {
                 $removed[] = $attribute;
             }
         }
-        expect($removed)->toBe([]);
+        foreach ($editor['elementAttributes'] as $element => $attributes) {
+            foreach ($attributes as $attribute) {
+                if (!str_contains($this->purifier->purify("<{$element} {$attribute}=\"x\">t</{$element}>"), "{$attribute}=")) {
+                    $removed[] = "{$element} {$attribute}";
+                }
+            }
+        }
+        expect($removed)->toBe([])
+            ->and($editor['elementAttributes']['a'] ?? [])->toContain('name');
+    });
+});
+
+describe('Mage_Core_Helper_Purifier attributes that act on the page', function () {
+    // buildConfig() allows button again, so it must not take the attributes that send a form.
+    it('removes the form attributes of a button', function () {
+        expect($this->purifier->purify('<button type="submit" form="f" formaction="https://evil.test/">Play</button>'))
+            ->toBe('<button type="submit">Play</button>');
+    });
+
+    // name is allowed only where it clobbers no document property.
+    it('removes the name of an image', function () {
+        expect($this->purifier->purify('<img src="/a.jpg" name="cookie" alt="a" />'))->not->toContain('name=');
     });
 });

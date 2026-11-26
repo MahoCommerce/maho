@@ -19,11 +19,9 @@ declare(strict_types=1);
 class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
 {
     /**
-     * Catalog Product collection
-     *
-     * @var Mage_CatalogSearch_Model_Resource_Fulltext_Collection|Mage_Eav_Model_Entity_Collection_Abstract|null
+     * @var \Maho\Data\Collection<Mage_Catalog_Model_Product>|null
      */
-    protected $_productCollection;
+    protected ?\Maho\Data\Collection $_productCollection = null;
 
     /**
      * Retrieve query model object
@@ -145,11 +143,9 @@ class Mage_CatalogSearch_Block_Result extends Mage_Core_Block_Template
     }
 
     /**
-     * Retrieve loaded category collection
-     *
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext_Collection|Mage_Eav_Model_Entity_Collection_Abstract
+     * @return \Maho\Data\Collection<Mage_Catalog_Model_Product>
      */
-    protected function _getProductCollection()
+    protected function _getProductCollection(): \Maho\Data\Collection
     {
         $this->_productCollection ??= $this->getListBlock()->getLoadedProductCollection();
 

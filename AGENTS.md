@@ -141,7 +141,7 @@ public function setIsActive(?bool $value = true): static
 - `has` and `uns` stay on `__call`. A session getter keeps `bool $clear = false` and forwards it
   to `getData()`.
 - Read every call site: a `getFoo(true)` that `__call` forwarded becomes an `arguments.count`
-  error. Fix the method; CI fails a pull request whose PHPStan baseline grows.
+  error. Fix the method: Maho has no PHPStan baseline, so CI fails on every new error.
 - A parent and its subclasses convert in one commit when a subclass overrides the accessor.
 
 ### Configuration via PHP attributes
