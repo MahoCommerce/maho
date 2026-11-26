@@ -1,5 +1,4 @@
 includes:
-    - .phpstan.dist.baseline.neon
     - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
     - vendor/phpstan/phpstan/conf/bleedingEdge.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
@@ -37,6 +36,14 @@ parameters:
         - public
 
     ignoreErrors:
+        # These files run the legacy API, so they use its deprecated classes. Remove this entry with the legacy API.
+        -
+            message: '#deprecated class Mage_\w+:\s+since 26\.7 Use Maho_ApiPlatform instead\.$#'
+            paths:
+                - app/design/adminhtml/default/default/template/api/user_roles_grid_js.phtml
+                - app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
+                - lib/MahoCLI/Commands/HealthCheck.php
+                - public/api.php
         -
             identifier: missingType.iterableValue
             paths:
