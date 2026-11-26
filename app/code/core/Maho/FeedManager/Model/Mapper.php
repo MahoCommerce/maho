@@ -1053,7 +1053,7 @@ class Maho_FeedManager_Model_Mapper
         try {
             $image = $product->getData($imageType);
             if ($image && $image !== 'no_selection') {
-                return $this->_getProductMediaUrl() . $image;
+                return $this->_getProductImageUrl($image);
             }
         } catch (Exception) {
             // Silent fail
@@ -1063,11 +1063,11 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * The URL of the product image folder in the media of the feed store.
+     * The URL of a product image file in the media of the feed store.
      */
-    protected function _getProductMediaUrl(): string
+    protected function _getProductImageUrl(string $file): string
     {
-        return Mage::app()->getStore($this->_storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product';
+        return Mage::app()->getStore($this->_storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product/' . ltrim($file, '/');
     }
 
     /**
@@ -1078,7 +1078,6 @@ class Maho_FeedManager_Model_Mapper
     protected function _getGalleryImages(Mage_Catalog_Model_Product $product): array
     {
         $images = [];
-        $baseUrl = $this->_getProductMediaUrl();
 
         // Force-load the media_gallery backend (collections don't trigger it).
         if ($product->getData('media_gallery') === null) {
@@ -1094,7 +1093,7 @@ class Maho_FeedManager_Model_Mapper
                 foreach ($gallery as $image) {
                     $file = $image->getFile();
                     if (is_string($file) && $file !== '') {
-                        $images[] = $baseUrl . $file;
+                        $images[] = $this->_getProductImageUrl($file);
                     }
                 }
             }
@@ -1108,7 +1107,7 @@ class Maho_FeedManager_Model_Mapper
             if (is_array($mediaGallery) && isset($mediaGallery['images'])) {
                 foreach ($mediaGallery['images'] as $img) {
                     if (isset($img['file']) && empty($img['disabled'])) {
-                        $images[] = $baseUrl . $img['file'];
+                        $images[] = $this->_getProductImageUrl($img['file']);
                     }
                 }
             }
