@@ -296,6 +296,11 @@ on the local disk.
 - Get the URL of a file with `$mount->publicUrl($path)`. It gives the correct URL for every mount,
   also for a mount that you declare. On `media`, it gives the same URL as
   `Mage::getBaseUrl('media')` and the path.
+- On `media` and `sitemaps`, the URL comes from the current store. If your code writes for
+  another store, such as a cron job or a queue handler, name that store:
+  `$mount->publicUrl($path, [StoreBaseUrlGenerator::OPTION_STORE => $storeId])`.
+  `StoreBaseUrlGenerator::OPTION_SECURE` selects the secure or the unsecure base URL. Without
+  it, the URL follows the current request. The class is `Maho\Storage\Url\StoreBaseUrlGenerator`.
 - Store an upload with `$uploader->saveToStorage(Mage::getStorage('media'), 'my_module')`. The
   upload goes from the PHP temporary file to the mount, with no local copy.
 - Before you read or delete a file whose name comes from a request or from the database, check

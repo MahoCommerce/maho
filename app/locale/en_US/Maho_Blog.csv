@@ -80,7 +80,7 @@
 "The blog categories are not enabled for this store view.","The blog categories are not enabled for this store view."
 "The blog is not enabled for this store view.","The blog is not enabled for this store view."
 "The form shows the fields of the set that you select.","The form shows the fields of the set that you select."
-"The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment and no scheme.","The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment and no scheme."
+"The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment, no scheme and no control character.","The image must be a path relative to media/blog, with no leading ""/"", no "".."" segment, no scheme and no control character."
 "The latest published blog posts, optionally from one category","The latest published blog posts, optionally from one category"
 "The post title is required.","The post title is required."
 "There are no blog posts in this category.","There are no blog posts in this category."

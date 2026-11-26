@@ -73,14 +73,23 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $this->_getResource()->getPostIdByUrlKey($urlKey, $storeId, $isActive);
     }
 
-    public function getImageUrl(): ?string
+    /**
+     * @param array<string, mixed> $urlOptions the options of Mount::publicUrl(), such as StoreBaseUrlGenerator::OPTION_STORE
+     */
+    public function getImageUrl(array $urlOptions = []): ?string
     {
         $image = $this->getImage();
         if (!$image) {
             return null;
         }
 
-        return Mage::getBaseUrl('media') . 'blog/' . $image;
+        try {
+            return Mage::getStorage('media')->publicUrl('blog/' . $image, $urlOptions);
+        } catch (\League\Flysystem\FilesystemException $e) {
+            // A name that an older save accepted, such as one with a control character, has no URL.
+            Mage::logException($e);
+            return null;
+        }
     }
 
     /**
