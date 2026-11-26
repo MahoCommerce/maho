@@ -309,6 +309,26 @@ describe('an export', function () {
         expect(fn() => $this->service->openExportByToken($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
     });
 
+    it('finds the earlier requests of a guest email in any letter case', function () {
+        $this->guestEmails[] = $email = 'privacy-guest-' . uniqid() . '@example.com';
+        $this->guestEmails[] = strtoupper($email);
+        $earlier = Mage::getModel('privacycenter/request')->setStoreId(1)->setEmail(strtoupper($email))
+            ->setType(Request::TYPE_EXPORT)->setStatus(Request::STATUS_COMPLETED)->save();
+
+        $found = $this->service->getSubjectRequests(new Maho_PrivacyCenter_Model_Subject(null, $email, 1));
+
+        expect(array_map(fn(Request $request): int => (int) $request->getId(), $found))->toContain((int) $earlier->getId());
+    });
+
+    it('holds the guest orders of the email in any letter case', function () {
+        $email = 'privacy-guest-' . uniqid() . '@example.com';
+        $this->orders[] = $order = privacyGuestOrder(strtoupper($email), Mage_Sales_Model_Order::STATE_COMPLETE);
+
+        $data = Mage::getModel('privacycenter/export_orders')->export(new Maho_PrivacyCenter_Model_Subject(null, $email, 1));
+
+        expect(array_column($data, 'increment_id'))->toBe([$order->getIncrementId()]);
+    });
+
     it('holds no guest order of the email of the account, because the session does not prove the email', function () {
         $this->customers[] = $customer = privacyCustomer();
         $this->orders[] = privacyGuestOrder((string) $customer->getEmail(), Mage_Sales_Model_Order::STATE_COMPLETE);

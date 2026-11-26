@@ -745,7 +745,10 @@ class Maho_PrivacyCenter_Service_Request
     {
         $requests = Mage::getResourceModel('privacycenter/request_collection');
         if ($subject->isGuest()) {
-            $requests->addFieldToFilter('email', $subject->email);
+            $requests->getSelect()->where(
+                (string) $requests->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
+                $subject->email,
+            );
         } else {
             $requests->addFieldToFilter('customer_id', $subject->customerId);
         }

@@ -164,7 +164,10 @@ class Mage_Checkout_Service_Agreement
         if ($customerId !== null) {
             $collection->addFieldToFilter('main_table.customer_id', $customerId);
         } else {
-            $collection->addFieldToFilter('main_table.email', (string) $email);
+            $collection->getSelect()->where(
+                (string) $collection->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
+                (string) $email,
+            );
         }
         return $collection->setOrder('main_table.created_at', \Maho\Data\Collection::SORT_ORDER_DESC);
     }

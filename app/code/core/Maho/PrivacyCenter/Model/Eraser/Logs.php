@@ -35,7 +35,10 @@ class Maho_PrivacyCenter_Model_Eraser_Logs extends Maho_PrivacyCenter_Model_Eras
             // Subtype 0 is an event of a customer, subtype 1 an event of a visitor
             $count += $adapter->delete($this->getTable('reports/event'), ['subject_id = ?' => $subject->customerId, 'subtype = 0']);
         }
-        $count += $adapter->delete($this->getTable('customer/flowpassword'), ['email = ?' => $subject->email]);
+        $count += $adapter->delete(
+            $this->getTable('customer/flowpassword'),
+            [(string) $adapter->getCaseInsensitiveEqualsSql('email', '?') => $subject->email],
+        );
         $count += $this->deleteEmailLogs($subject->email);
         return Mage::helper('privacycenter')->__('%d log entries deleted', $count);
     }
