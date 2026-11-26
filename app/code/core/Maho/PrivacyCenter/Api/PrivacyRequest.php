@@ -28,7 +28,7 @@ use Symfony\Component\ObjectMapper\Condition\TargetClass;
 #[ApiResource(
     security: "is_granted('ROLE_ADMIN') or is_granted('privacy-requests/read')",
     mahoLabel: 'Privacy Requests',
-    mahoSection: 'Customers',
+    mahoSection: 'Privacy',
     mahoOperations: ['read' => 'View', 'write' => 'Process'],
     mahoCustomerScoped: true,
     shortName: 'PrivacyRequest',

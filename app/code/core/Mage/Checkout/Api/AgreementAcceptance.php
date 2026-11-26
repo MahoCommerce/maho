@@ -23,7 +23,8 @@ use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\ObjectMapper\Condition\TargetClass;
 
 #[ApiResource(
-    security: "is_granted('ROLE_CUSTOMER')",
+    // API Platform still adds a nested GraphQL item query, which takes this expression and has no owner check.
+    security: 'false',
     mahoLabel: 'Accepted Terms and Conditions',
     mahoSection: 'Customers',
     mahoOperations: ['read' => 'View', 'write' => 'Accept'],
