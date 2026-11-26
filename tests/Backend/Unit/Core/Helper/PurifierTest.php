@@ -407,13 +407,22 @@ describe('Mage_Core_Helper_Purifier allowlist for the editor', function () {
     it('keeps each listed attribute on a save', function () {
         // The editor keeps every attribute of the list. A save that removed one would remove what
         // the author saw in the editor.
+        $editor = Mage_Core_Helper_Purifier::forEditor();
         $removed = [];
-        foreach (Mage_Core_Helper_Purifier::forEditor()['attributes'] as $attribute) {
+        foreach ($editor['attributes'] as $attribute) {
             if (!str_contains($this->purifier->purify("<section {$attribute}=\"x\">t</section>"), "{$attribute}=")) {
                 $removed[] = $attribute;
             }
         }
-        expect($removed)->toBe([]);
+        foreach ($editor['elementAttributes'] as $element => $attributes) {
+            foreach ($attributes as $attribute) {
+                if (!str_contains($this->purifier->purify("<{$element} {$attribute}=\"x\">t</{$element}>"), "{$attribute}=")) {
+                    $removed[] = "{$element} {$attribute}";
+                }
+            }
+        }
+        expect($removed)->toBe([])
+            ->and($editor['elementAttributes']['a'] ?? [])->toContain('name');
     });
 });
 

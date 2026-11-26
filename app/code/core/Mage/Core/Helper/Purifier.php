@@ -195,8 +195,8 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * The HTML allowlist for the content editor: each element that a save keeps, and the
-     * attributes that a save keeps on all of them.
+     * The HTML allowlist for the content editor: each element that a save keeps, the attributes
+     * that a save keeps on all of them, and the attributes that a save keeps on one element only.
      *
      * TipTap then keeps the same markup that a save keeps. If the editor removed more, the check in
      * setup.js would warn about a loss that the save does not cause. If it kept more, a save would
@@ -206,7 +206,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * the SVG elements with their own attributes. A `data-*` name cannot be listed, so the editor
      * tests that prefix, as getSanitizer() does.
      *
-     * @return array{elements: list<string>, attributes: list<string>}
+     * @return array{elements: list<string>, attributes: list<string>, elementAttributes: array<string, list<string>>}
      */
     public static function forEditor(): array
     {
@@ -214,14 +214,24 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
         $excluded = [...array_keys(array_change_key_case(SvgAllowlist::ELEMENTS)), ...self::DOCUMENT_ELEMENTS];
         $elements = array_diff_key($allowed, array_flip($excluded));
 
-        // An attribute that only some elements allow stays out. The editor gives one list to every
-        // element, and it must not keep what a save removes.
         $attributes = array_keys(array_intersect_key(...array_values($elements)));
         sort($attributes);
         $names = array_keys($elements);
         sort($names);
 
-        return ['elements' => $names, 'attributes' => $attributes];
+        // An attribute that only some elements allow, such as the name of an anchor, goes in the
+        // list of each of those elements. The editor must not keep it on the others.
+        $elementAttributes = [];
+        foreach ($elements as $element => $allowedAttributes) {
+            $own = array_values(array_diff(array_keys($allowedAttributes), $attributes));
+            if ($own !== []) {
+                sort($own);
+                $elementAttributes[$element] = $own;
+            }
+        }
+        ksort($elementAttributes);
+
+        return ['elements' => $names, 'attributes' => $attributes, 'elementAttributes' => $elementAttributes];
     }
 
     /**

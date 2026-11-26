@@ -5,7 +5,7 @@ import { Extension, Mark, Node, Plugin } from '../../../../../tiptap.js';
 import { DATA_ATTRIBUTE, groupingTags, hasOwnDivNode, inlineTags, isInlineContext, isTextContainer, rawTags } from './html-context.js';
 import { buildSvgElement, parseSvgTree, renderSvgTree } from './svg.js';
 
-const EMPTY_ALLOWLIST = { elements: [], attributes: [] };
+const EMPTY_ALLOWLIST = { elements: [], attributes: [], elementAttributes: {} };
 
 /**
  * Below the default priority, so a node or a mark of the schema that reads the same tag goes
@@ -104,9 +104,10 @@ const removeDuplicateIds = (state) => {
 /** Copy the attributes of `element` that `allowlist` keeps and `skip` does not name, or null. */
 const readAttributes = (element, allowlist, skip = []) => {
     const skipped = FORM_NAMED_TAGS.includes(element.localName) ? [...skip, 'name'] : skip;
+    const own = allowlist.elementAttributes?.[element.localName] ?? [];
     const attributes = {};
     for (const { name, value } of element.attributes) {
-        if (!skipped.includes(name) && (DATA_ATTRIBUTE.test(name) || allowlist.attributes.includes(name))) {
+        if (!skipped.includes(name) && (DATA_ATTRIBUTE.test(name) || allowlist.attributes.includes(name) || own.includes(name))) {
             attributes[name] = value;
         }
     }
