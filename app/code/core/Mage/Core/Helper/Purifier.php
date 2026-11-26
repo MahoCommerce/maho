@@ -104,7 +104,7 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      * Built on the W3C Sanitizer API baseline, which is HTML5-native, so `video`, `figure`,
      * `details` and `section` survive a save. Anything absent from that baseline falls to the
      * default Drop action, which covers `script`, `iframe`, `object` and `embed`, and form controls
-     * along with them. Forms are left dropped as the W3C baseline has them: the supported way to
+     * along with them, except `button`. Forms are left dropped as the W3C baseline has them: the supported way to
      * put one on a page is a block or widget, not markup pasted into a content field.
      *
      * The baseline contains no SVG element. \Maho\Security\SvgAllowlist adds them, in lower case,
@@ -118,6 +118,9 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             ->allowSafeElements()
             // The W3C baseline has no fetchpriority, and the slideshow puts it on its first image
             ->allowAttribute('fetchpriority', 'img')
+            // The W3C baseline drops name because it clobbers document properties on img, form and
+            // embed. On these two it does not: an anchor target, and the group of an accordion.
+            ->allowAttribute('name', ['a', 'details'])
             // Relative URLs default to being dropped, which would strip the href from every
             // internal link and the src from every locally hosted image.
             ->allowRelativeLinks()
@@ -128,6 +131,14 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             // Symfony allows these by default. Naming them keeps the rule in one place.
             ->allowLinkSchemes(Mage_Core_Model_Input_Filter_SvgLink::SCHEMES)
             ->withMaxInputLength(self::MAX_INPUT_LENGTH);
+
+        // The W3C baseline drops these because they can act on a form of the page. Only an admin
+        // writes this content, and the editor keeps them inert in the admin, so a save keeps them.
+        // A button gets the safe attributes of the baseline, which leave out form and formaction.
+        // `for` goes on every element, because forEditor() gives the editor one list for all of them.
+        $config = $config
+            ->allowElement('button', array_keys($config->getAllowedElements()['p']))
+            ->allowAttribute('for', '*');
 
         // Not elementNames(). allowElement() replaces the attributes that the baseline gives a
         // name, and elementNames() also holds the names that only a file may use.

