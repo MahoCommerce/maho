@@ -92,9 +92,10 @@ function createOtherPrivacyCustomer(): array
 {
     \Mage::app();
     $customer = \Mage::getModel('customer/customer')->setWebsiteId(1)->loadByEmail(PRIVACY_TEST_OTHER_EMAIL);
-    // The API refuses the token of a customer that is not active
     $customer->setStoreId(1)->setGroupId(1)->setFirstname('Other')->setLastname('Customer')
         ->setEmail(PRIVACY_TEST_OTHER_EMAIL)->setIsActive(true)->save();
+    // A store that asks new accounts to confirm their email gives them a confirmation key, and the API refuses those
+    $customer->setConfirmation(null)->save();
     $request = \Mage::getModel('privacycenter/request')
         ->setStoreId(1)
         ->setCustomerId((int) $customer->getId())
