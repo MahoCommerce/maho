@@ -48,7 +48,7 @@ class Maho_PrivacyCenter_Model_Export_Orders extends Maho_PrivacyCenter_Model_Ex
         foreach ($orders as $order) {
             /** @var Mage_Sales_Model_Order $order */
             $row = array_intersect_key($order->getData(), array_flip(self::ORDER_FIELDS));
-            $row['payment_method'] = $order->getPayment()?->getMethod();
+            $row['payment_method'] = ($order->getPayment() ?: null)?->getMethod();
             foreach (['billing_address' => $order->getBillingAddress(), 'shipping_address' => $order->getShippingAddress()] as $key => $address) {
                 $row[$key] = $address ? array_intersect_key($address->getData(), array_flip(self::ADDRESS_FIELDS)) : null;
             }
