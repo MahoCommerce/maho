@@ -32,11 +32,25 @@ class Mage_Checkout_Block_Agreements extends Mage_Core_Block_Template
                 $agreements = Mage::getModel('checkout/agreement')->getCollection()
                     ->addStoreFilter(Mage::app()->getStore()->getId())
                     ->addFieldToFilter('is_active', 1)
+                    ->addLocationFilter($this->getLocation())
                     ->setOrder('position', \Maho\Data\Collection::SORT_ORDER_ASC);
             }
             $this->setAgreements($agreements);
         }
         return $this->getData('agreements');
+    }
+
+    /**
+     * The place where the block shows, a Mage_Checkout_Model_Agreement::LOCATION_* value. A layout sets it.
+     */
+    public function getLocation(): string
+    {
+        return (string) ($this->getData('location') ?: Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT);
+    }
+
+    public function setLocation(string $value): static
+    {
+        return $this->setData('location', $value);
     }
 
     public function setAgreements(array|Mage_Checkout_Model_Resource_Agreement_Collection|null $value): static

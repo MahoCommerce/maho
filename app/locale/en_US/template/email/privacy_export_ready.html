@@ -1,0 +1,25 @@
+<!--@subject Your personal data is ready @-->
+<!--@vars
+{"var email":"Email",
+"var link_url":"Download Link",
+"var link_hours":"Link Lifetime in Hours",
+"var request_id":"Request Number",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>Your personal data is ready</h1>
+            <p>We prepared a copy of the personal data that we keep about {{var email}}.</p>
+            <p>The ZIP file holds two files: data.html, to read, and data.json, to use in another service.</p>
+            <p><a href="{{var link_url}}">Download my data</a></p>
+            <p>The link works for {{var link_hours}} hours. Then we delete the file. Do not send this link to other persons.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

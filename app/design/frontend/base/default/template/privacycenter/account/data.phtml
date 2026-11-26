@@ -1,0 +1,69 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Account $this */
+$requests = $this->getPrivacyRequests(Maho_PrivacyCenter_Model_Request::TYPE_EXPORT);
+$sections = $this->getExportLabels();
+?>
+<div class="page-title">
+    <h1><?= $this->__('My Personal Data') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<div class="privacy-center flex flex-col gap-6">
+    <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
+
+    <div class="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5">
+        <div class="flex items-start gap-4">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-5"><?= $this->getIconSvg('file-zip') ?></span>
+            <div>
+                <h2 class="text-lg font-semibold"><?= $this->__('Get a copy of your data') ?></h2>
+                <p class="text-sm text-base-content/70"><?= $this->__('We put your data in a ZIP file with two files: data.html, to read, and data.json, to use in another service. We send you an email when the file is ready. The download link works for a limited time.') ?></p>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <?php foreach ($sections as $section): ?>
+                <span class="badge badge-ghost"><?= $this->escapeHtml($section) ?></span>
+            <?php endforeach ?>
+        </div>
+        <?php if ($this->hasOpenRequest(Maho_PrivacyCenter_Model_Request::TYPE_EXPORT)): ?>
+            <div role="status" class="alert alert-info alert-soft [&>svg]:size-5"><?= $this->getIconSvg('clock') ?><span><?= $this->__('We are preparing your data. We will send you an email when it is ready.') ?></span></div>
+        <?php else: ?>
+            <form action="<?= $this->escapeUrl($this->getActionUrl('export')) ?>" method="post" data-turbo="false">
+                <?= $this->getBlockHtml('formkey') ?>
+                <button type="submit" class="btn btn-primary"><?= $this->__('Request My Data') ?></button>
+            </form>
+        <?php endif ?>
+    </div>
+
+    <?php if ($requests): ?>
+    <div class="overflow-x-auto rounded-box border border-base-300">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><?= $this->__('Requested') ?></th>
+                    <th><?= $this->__('Status') ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($requests as $request): ?>
+                <tr>
+                    <td><?= $this->escapeHtml($this->formatUtcDate($request->getCreatedAt(), true)) ?></td>
+                    <td><?= $this->getStatusBadgeHtml($request) ?></td>
+                    <td class="text-right">
+                        <?php if ($request->isExportAvailable()): ?>
+                            <a class="btn btn-sm btn-primary btn-soft [&>svg]:size-4" href="<?= $this->escapeUrl($this->getActionUrl('download', ['id' => (int) $request->getId()])) ?>"><?= $this->getIconSvg('download') ?><?= $this->__('Download') ?></a>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif ?>
+</div>

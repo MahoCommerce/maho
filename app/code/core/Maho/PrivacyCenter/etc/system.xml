@@ -1,0 +1,209 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <privacy translate="label" module="privacycenter">
+            <label>Privacy Center</label>
+            <tab>customer</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>145</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label" module="privacycenter">
+                    <label>General</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enabled</label>
+                            <comment>Adds the Privacy Center to the customer account, and the Privacy Request form at /privacy/request.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <allow_guests translate="label comment">
+                            <label>Allow Requests of Guests</label>
+                            <comment>A guest confirms the request with a link in an email. A request for the email of an account is a request for that account.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_guests>
+                    </fields>
+                </general>
+                <requests translate="label" module="privacycenter">
+                    <label>Requests</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <confirm_hours translate="label">
+                            <label>Confirmation Link Lifetime (Hours)</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </confirm_hours>
+                        <export_hours translate="label comment">
+                            <label>Download Link Lifetime (Hours)</label>
+                            <comment>The export file is deleted after this time.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </export_hours>
+                        <cooling_off_days translate="label comment">
+                            <label>Erasure Cooling-Off Period (Days)</label>
+                            <comment>The time in which the customer can cancel an erasure. 0 runs the erasure at the next hourly run of the cron.</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </cooling_off_days>
+                        <erasure_approval translate="label comment">
+                            <label>Erasures Need Approval</label>
+                            <comment>With Yes, an erasure runs only after a user approves it in Customers &gt; Privacy Requests.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </erasure_approval>
+                        <review_action translate="label">
+                            <label>Reviews of an Erased Customer</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>privacycenter/source_reviewAction</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </review_action>
+                    </fields>
+                </requests>
+                <email translate="label" module="privacycenter">
+                    <label>Emails</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>30</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <identity translate="label">
+                            <label>Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </identity>
+                        <confirm_template translate="label">
+                            <label>Confirmation Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </confirm_template>
+                        <export_template translate="label">
+                            <label>Export Ready Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </export_template>
+                        <erasure_scheduled_template translate="label">
+                            <label>Erasure Scheduled Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </erasure_scheduled_template>
+                        <erasure_completed_template translate="label">
+                            <label>Erasure Completed Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </erasure_completed_template>
+                    </fields>
+                </email>
+                <abuse translate="label" module="privacycenter">
+                    <label>Abuse Protection</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>40</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <honeypot_enabled translate="label comment">
+                            <label>Honeypot</label>
+                            <comment>A hidden field in the request form for guests. A bot that fills it gets the normal answer, and the store records nothing.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </honeypot_enabled>
+                    </fields>
+                </abuse>
+            </groups>
+        </privacy>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <privacy_request translate="label comment" module="privacycenter">
+                            <label>Privacy request form</label>
+                            <comment>Per IP address. Default 5 per hour. 0 to disable.</comment>
+                            <sort_order>230</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </privacy_request>
+                        <privacy_request_recipient translate="label comment" module="privacycenter">
+                            <label>Privacy confirmation email</label>
+                            <comment>Per recipient address. A request over the limit is still recorded, but its confirmation email is not sent. Default 3 per day. 0 to disable.</comment>
+                            <sort_order>231</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </privacy_request_recipient>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
+    </sections>
+</config>

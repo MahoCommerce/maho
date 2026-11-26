@@ -149,6 +149,29 @@ class Mage_Sales_Service_Order
     }
 
     /**
+     * Keep the proof that the customer of $order accepted $agreementIds. A failure is logged and does not stop the
+     * order, which is already saved.
+     *
+     * @param list<int|string> $agreementIds
+     */
+    protected function recordAgreementAcceptances(Order $order, \Mage_Sales_Model_Quote $quote, array $agreementIds): void
+    {
+        try {
+            $template = Mage::getModel('checkout/agreement_acceptance')
+                ->setCustomerId($order->getCustomerId() ?: null)
+                ->setEmail($order->getCustomerEmail())
+                ->setOrderId((int) $order->getId())
+                ->setStoreId((int) $order->getStoreId())
+                ->setContext(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_CHECKOUT)
+                ->setRemoteIp($order->getRemoteIp() ?: $quote->getRemoteIp())
+                ->setUserAgent($quote->getRemoteUserAgent() === null ? null : mb_substr($quote->getRemoteUserAgent(), 0, 512));
+            Mage::getService('checkout/agreement')->recordAcceptances(array_map(intval(...), $agreementIds), $template);
+        } catch (Throwable $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
      * Check that $quote can become an order. A Customer must reach the minimum order amount, and must accept each
      * required agreement in $agreementIds. A Customer order of a cart with no customer needs a store that allows
      * guest checkout, a valid email and the fields of the Checkout Registration form. Staff places a guest order in
@@ -315,8 +338,11 @@ class Mage_Sales_Service_Order
         $this->prepareCustomerData($quote);
         $this->validateQuote($quote, $actor, $agreementIds);
 
-        return $this->withQuoteLock($quote, function () use ($quote, $actor, $orderData, $sendConfirmation, $convertor, $afterSave): Order {
+        return $this->withQuoteLock($quote, function () use ($quote, $actor, $agreementIds, $orderData, $sendConfirmation, $convertor, $afterSave): Order {
             $order = $this->saveOrderOf($quote, $actor, $orderData, $convertor);
+            if ($actor === Actor::Customer && $agreementIds) {
+                $this->recordAgreementAcceptances($order, $quote, $agreementIds);
+            }
             if ($afterSave) {
                 $afterSave($order);
             }

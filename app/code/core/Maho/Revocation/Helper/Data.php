@@ -75,31 +75,11 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
         return new DateTimeImmutable('now', new DateTimeZone('UTC')) <= $deadline;
     }
 
-    /**
-     * Collapse aliases that deliver to the same inbox so the per-recipient rate limit
-     * cannot be bypassed with subaddressing (local+tag@) or gmail dot-variants.
-     */
+    #[\Deprecated('Use Mage_Core_Helper_Data::normalizeEmail()')]
     public function normalizeEmail(#[\SensitiveParameter]
         string $email): string
     {
-        $email = strtolower(trim($email));
-        $atPos = strrpos($email, '@');
-        if ($atPos === false) {
-            return $email;
-        }
-
-        $local = substr($email, 0, $atPos);
-        $domain = substr($email, $atPos + 1);
-
-        $plusPos = strpos($local, '+');
-        if ($plusPos !== false) {
-            $local = substr($local, 0, $plusPos);
-        }
-        if (in_array($domain, ['gmail.com', 'googlemail.com'], true)) {
-            $local = str_replace('.', '', $local);
-        }
-
-        return $local . '@' . $domain;
+        return Mage::helper('core')->normalizeEmail($email);
     }
 
     public function isIpRateLimited(mixed $store = null): bool
@@ -115,7 +95,7 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_RECIPIENT_RATE_LIMIT, $store);
         return !Mage::helper('core')
-            ->rateLimiterBy('revocation_recipient', $this->normalizeEmail($email), $limit, 86400)
+            ->rateLimiterBy('revocation_recipient', Mage::helper('core')->normalizeEmail($email), $limit, 86400)
             ->attempt();
     }
 

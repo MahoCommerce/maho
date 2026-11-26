@@ -374,6 +374,26 @@ describe('the terms and conditions', function () {
         expect($web['success'] ?? null)->toBeTrue()
             ->and($api['status'])->toBe(200);
     });
+
+    it('keeps the proof of the acceptance with the order on both transports', function () {
+        [$webCart, $apiCart] = $this->carts;
+        $agreementId = (int) $this->agreement->getId();
+
+        placeOrderViaWeb($webCart, ['agreement' => [$agreementId => '1']]);
+        placeOrderViaApi($apiCart, ['agreementIds' => [$agreementId]]);
+
+        foreach ([$webCart, $apiCart] as $cart) {
+            $order = placeOrderOf($cart);
+            $acceptances = Mage::getResourceModel('checkout/agreement_acceptance_collection')
+                ->addFieldToFilter('order_id', (int) $order->getId());
+            expect($acceptances->getSize())->toBe(1);
+            $acceptance = $acceptances->getFirstItem();
+            expect($acceptance->getAgreementId())->toBe($agreementId)
+                ->and($acceptance->getContext())->toBe(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_CHECKOUT)
+                ->and($acceptance->getEmail())->toBe($order->getCustomerEmail())
+                ->and($acceptance->getVersionId())->toBeGreaterThan(0);
+        }
+    });
 });
 
 it('refuses a placement while another connection places the same cart, on both transports', function () {

@@ -1,0 +1,59 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Account $this */
+$export = $this->getLatestRequest(Maho_PrivacyCenter_Model_Request::TYPE_EXPORT);
+$erasure = $this->getLatestRequest(Maho_PrivacyCenter_Model_Request::TYPE_ERASURE);
+$pending = count($this->getPendingAgreements());
+$accepted = $this->getAcceptances()->getSize();
+?>
+<div class="page-title">
+    <h1><?= $this->__('Privacy Center') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<div class="privacy-center flex flex-col gap-6">
+    <p class="text-base-content/70"><?= $this->__('See the personal data that we keep about you and the terms that you accepted, or delete your account.') ?></p>
+
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div class="flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-5">
+            <span class="grid size-10 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-5"><?= $this->getIconSvg('download') ?></span>
+            <h2 class="text-lg font-semibold"><?= $this->__('My Personal Data') ?></h2>
+            <p class="flex-1 text-sm text-base-content/70"><?= $this->__('Download a copy of the personal data that we keep about you.') ?></p>
+            <?php if ($export?->isExportAvailable()): ?>
+                <span class="badge badge-success badge-soft"><?= $this->__('Your data is ready') ?></span>
+            <?php elseif ($export?->isOpen()): ?>
+                <span class="badge badge-info badge-soft"><?= $this->__('We are preparing your data') ?></span>
+            <?php endif ?>
+            <a class="btn btn-primary btn-sm self-start" href="<?= $this->escapeUrl($this->getActionUrl('data')) ?>"><?= $this->__('Download My Data') ?></a>
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-box border border-base-300 bg-base-100 p-5">
+            <span class="grid size-10 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-5"><?= $this->getIconSvg('file-certificate') ?></span>
+            <h2 class="text-lg font-semibold"><?= $this->__('Terms and Conditions') ?></h2>
+            <p class="flex-1 text-sm text-base-content/70"><?= $this->__('See the terms and conditions that you accepted, with the version and the date.') ?></p>
+            <?php if ($pending): ?>
+                <span class="badge badge-warning badge-soft"><?= $this->__('%d waiting for your acceptance', $pending) ?></span>
+            <?php elseif ($accepted): ?>
+                <span class="badge badge-success badge-soft"><?= $this->__('%d accepted', $accepted) ?></span>
+            <?php endif ?>
+            <a class="btn btn-primary btn-sm self-start" href="<?= $this->escapeUrl($this->getActionUrl('agreements')) ?>"><?= $this->__('View Terms and Conditions') ?></a>
+        </div>
+
+        <div class="flex flex-col gap-3 rounded-box border border-error/30 bg-base-100 p-5">
+            <span class="grid size-10 place-items-center rounded-full bg-error/10 text-error [&>svg]:size-5"><?= $this->getIconSvg('user-x') ?></span>
+            <h2 class="text-lg font-semibold"><?= $this->__('Delete My Account') ?></h2>
+            <p class="flex-1 text-sm text-base-content/70"><?= $this->__('Ask us to delete your account and your personal data. We keep your orders and invoices for the period that the law requires.') ?></p>
+            <?php if ($erasure?->getStatus() === Maho_PrivacyCenter_Model_Request::STATUS_CONFIRMED && $erasure->getScheduledAt()): ?>
+                <span class="badge badge-error badge-soft"><?= $this->__('Deletion scheduled for %s', $this->escapeHtml($this->formatUtcDate($erasure->getScheduledAt()))) ?></span>
+            <?php elseif ($erasure?->getStatus() === Maho_PrivacyCenter_Model_Request::STATUS_PENDING): ?>
+                <span class="badge badge-warning badge-soft"><?= $this->__('Check your email to confirm') ?></span>
+            <?php endif ?>
+            <a class="btn btn-outline btn-error btn-sm self-start" href="<?= $this->escapeUrl($this->getActionUrl('requests')) ?>"><?= $this->__('Delete My Account') ?></a>
+        </div>
+    </div>
+</div>

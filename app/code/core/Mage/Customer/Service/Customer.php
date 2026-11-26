@@ -244,14 +244,17 @@ class Mage_Customer_Service_Customer
      * it.
      * The registration counts in the registration limit when its input is valid, before the save.
      * The event customer_register_success gets the customer and the entries of $eventData.
+     * $agreementIds must hold each registration agreement of the store. The account keeps the proof of each one,
+     * with the client of $client (its remote_ip and user_agent).
      *
      * @param array<array-key, mixed> $captchaFields
      * @param array<string, mixed> $eventData
+     * @param list<int> $agreementIds
      * @throws Mage_Core_Exception_Forbidden when the store has the customer accounts turned off, or when an observer
      *                                        of customer_registration_is_allowed refuses the registration
      * @throws Mage_Core_Exception_TooManyRequests when the client is over the registration limit
      * @throws Mage_Core_Exception_Input with one error for each problem of the customer and of its new addresses,
-     *                                    or when the CAPTCHA refuses the token
+     *                                    when the CAPTCHA refuses the token, or when an agreement is not accepted
      * @throws Mage_Core_Exception_Conflict when another customer has the email
      */
     public function register(
@@ -260,11 +263,25 @@ class Mage_Customer_Service_Customer
         array $captchaFields,
         string $backUrl = '',
         array $eventData = [],
+        array $agreementIds = [],
+        ?Mage_Checkout_Model_Agreement_Acceptance $client = null,
     ): Customer {
         $this->assertRegistrationAllowed($storeId);
         Mage::helper('core')->assertCaptcha($captchaFields);
+        $agreements = Mage::getService('checkout/agreement');
+        $agreements->assertAccepted($agreementIds, $storeId, Mage_Checkout_Model_Agreement::LOCATION_REGISTRATION);
 
-        return $this->saveRegistration($customer, $storeId, $backUrl, null, $eventData);
+        $this->saveRegistration($customer, $storeId, $backUrl, null, $eventData);
+
+        if ($agreementIds !== []) {
+            $template = ($client ?? Mage::getModel('checkout/agreement_acceptance'))
+                ->setCustomerId((int) $customer->getId())
+                ->setEmail($customer->getEmail())
+                ->setStoreId($storeId)
+                ->setContext(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_REGISTRATION);
+            $agreements->recordAcceptances($agreementIds, $template);
+        }
+        return $customer;
     }
 
     /**

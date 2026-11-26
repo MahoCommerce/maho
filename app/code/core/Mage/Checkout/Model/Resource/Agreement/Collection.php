@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @extends Mage_Core_Model_Resource_Db_Collection_Abstract<Mage_Checkout_Model_Agreement>
+ */
 class Mage_Checkout_Model_Resource_Agreement_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]
@@ -74,6 +77,22 @@ class Mage_Checkout_Model_Resource_Agreement_Collection extends Mage_Core_Model_
          */
         $this->_useAnalyticFunction = true;
 
+        return $this;
+    }
+
+    /**
+     * Keep the agreements that show at $location, a Mage_Checkout_Model_Agreement::LOCATION_* value.
+     *
+     * @return $this
+     */
+    public function addLocationFilter(string $location): static
+    {
+        $column = match ($location) {
+            Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT => 'show_on_checkout',
+            Mage_Checkout_Model_Agreement::LOCATION_REGISTRATION => 'show_on_registration',
+            default => throw new InvalidArgumentException("Unknown agreement location: {$location}"),
+        };
+        $this->addFieldToFilter("main_table.{$column}", 1);
         return $this;
     }
 

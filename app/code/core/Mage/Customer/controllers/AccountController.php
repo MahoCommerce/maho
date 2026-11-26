@@ -348,6 +348,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     $this->getRequest()->getPost(),
                     $session->getBeforeAuthUrl(),
                     eventData: ['account_controller' => $this],
+                    agreementIds: array_map(intval(...), array_keys((array) $this->getRequest()->getPost('agreement', []))),
+                    client: $this->getAgreementClient(),
                 );
                 $this->_successProcessRegistration($customer);
                 return;
@@ -371,6 +373,17 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->_redirectError($errUrl);
+    }
+
+    /**
+     * The client of this request, for the log of the accepted agreements.
+     */
+    protected function getAgreementClient(): Mage_Checkout_Model_Agreement_Acceptance
+    {
+        $http = Mage::helper('core/http');
+        return Mage::getModel('checkout/agreement_acceptance')
+            ->setRemoteIp($http->getRemoteAddr() ?: null)
+            ->setUserAgent(mb_substr((string) $http->getHttpUserAgent(), 0, 512) ?: null);
     }
 
     /**

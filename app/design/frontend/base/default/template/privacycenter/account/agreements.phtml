@@ -1,0 +1,70 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Account $this */
+$pending = $this->getPendingAgreements();
+$acceptances = $this->getAcceptances();
+?>
+<div class="page-title">
+    <h1><?= $this->__('Terms and Conditions') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<div class="privacy-center flex flex-col gap-6">
+    <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
+
+    <?php if ($pending): ?>
+    <div class="flex flex-col gap-4 rounded-box border border-warning/40 bg-warning/5 p-5">
+        <div class="flex items-start gap-4">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-warning/15 text-warning [&>svg]:size-5"><?= $this->getIconSvg('alert-triangle') ?></span>
+            <div>
+                <h2 class="text-lg font-semibold"><?= $this->__('Waiting for Your Acceptance') ?></h2>
+                <p class="text-sm text-base-content/70"><?= $this->__('Our terms and conditions changed. Read them and accept them.') ?></p>
+            </div>
+        </div>
+        <form action="<?= $this->escapeUrl($this->getActionUrl('acceptAgreements')) ?>" method="post" data-turbo="false">
+            <?= $this->getBlockHtml('formkey') ?>
+            <?= $this->getLayout()->createBlock('checkout/agreements')
+                ->setTemplate('checkout/agreements/form.phtml')
+                ->setLocation('account')
+                ->setAgreements($pending)
+                ->toHtml() ?>
+            <button type="submit" class="btn btn-primary mt-4"><?= $this->__('Accept') ?></button>
+        </form>
+    </div>
+    <?php endif ?>
+
+    <div class="flex flex-col gap-4">
+        <h2 class="text-lg font-semibold"><?= $this->__('Accepted Terms and Conditions') ?></h2>
+        <?php if ($acceptances->getSize()): ?>
+        <div class="overflow-x-auto rounded-box border border-base-300">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><?= $this->__('Terms') ?></th>
+                        <th><?= $this->__('Version') ?></th>
+                        <th><?= $this->__('Accepted In') ?></th>
+                        <th><?= $this->__('Date') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($acceptances as $acceptance): ?>
+                    <tr>
+                        <td class="font-medium"><span class="inline-flex items-center gap-2 [&>svg]:size-4 [&>svg]:text-success"><?= $this->getIconSvg('check') ?><?= $this->escapeHtml((string) $acceptance->getAgreementName()) ?></span></td>
+                        <td><span class="badge badge-ghost"><?= $this->__('v%d', (int) $acceptance->getAgreementVersion()) ?></span></td>
+                        <td><?= $this->escapeHtml($this->getContextLabel((string) $acceptance->getContext())) ?></td>
+                        <td><?= $this->escapeHtml($this->formatUtcDate($acceptance->getCreatedAt(), true)) ?></td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+        <?php else: ?>
+            <p class="rounded-box bg-base-200 p-5 text-sm text-base-content/70"><?= $this->__('You have not accepted any terms and conditions yet.') ?></p>
+        <?php endif ?>
+    </div>
+</div>

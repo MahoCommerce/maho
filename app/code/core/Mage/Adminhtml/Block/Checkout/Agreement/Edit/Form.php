@@ -129,11 +129,73 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Edit_Form extends Mage_Adminhtml_B
             'class'    => 'validate-digits',
         ]);
 
+        $placement = $form->addFieldset('placement_fieldset', [
+            'legend'    => Mage::helper('checkout')->__('Placement and Consent'),
+            'class'     => 'fieldset-wide',
+        ]);
+        $yesNo = Mage::getSingleton('adminhtml/system_config_source_yesno')->toArray();
+        $placement->addField('show_on_checkout', 'select', [
+            'label'     => Mage::helper('checkout')->__('Show in the Checkout'),
+            'name'      => 'show_on_checkout',
+            'options'   => $yesNo,
+        ]);
+        $placement->addField('show_on_registration', 'select', [
+            'label'     => Mage::helper('checkout')->__('Show in the Registration Form'),
+            'name'      => 'show_on_registration',
+            'options'   => $yesNo,
+            'note'      => Mage::helper('checkout')->__('An existing customer who did not accept these terms sees a request in the customer account.'),
+        ]);
+        $placement->addField('requires_reconsent', 'select', [
+            'label'     => Mage::helper('checkout')->__('Ask Again When the Text Changes'),
+            'name'      => 'requires_reconsent',
+            'options'   => $yesNo,
+            'note'      => Mage::helper('checkout')->__('A change of the name, the checkbox text or the content makes a new version. With Yes, customers who accepted an older version must accept the new one.'),
+        ]);
+        if ($model->getId()) {
+            $placement->addField('versions', 'note', [
+                'label'     => Mage::helper('checkout')->__('Versions'),
+                'text'      => $this->getVersionsHtml((int) $model->getId()),
+            ]);
+        }
+
+        if (!$model->getId()) {
+            $model->setShowOnCheckout($model->getShowOnCheckout() ?? true);
+        }
         $form->setValues($model->getData());
         $form->setUseContainer(true);
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+
+    /**
+     * A table of the versions of the agreement with $agreementId, with the number of acceptances of each.
+     */
+    protected function getVersionsHtml(int $agreementId): string
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from(['v' => $resource->getTableName('checkout/agreement_version')], ['version', 'created_at'])
+                ->joinLeft(
+                    ['a' => $resource->getTableName('checkout/agreement_acceptance')],
+                    'a.version_id = v.version_id',
+                    ['acceptances' => new \Maho\Db\Expr('COUNT(a.acceptance_id)')],
+                )
+                ->where('v.agreement_id = ?', $agreementId)
+                ->group(['v.version_id', 'v.version', 'v.created_at'])
+                ->order('v.version DESC'),
+        );
+        $helper = Mage::helper('checkout');
+        $html = '<table class="data-table"><thead><tr><th>' . $helper->__('Version') . '</th><th>'
+            . $helper->__('Created') . '</th><th>' . $helper->__('Acceptances') . '</th></tr></thead><tbody>';
+        foreach ($rows as $row) {
+            $html .= '<tr><td>' . (int) $row['version'] . '</td><td>'
+                . $this->escapeHtml(Mage::helper('core')->formatDate($row['created_at'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true)) . '</td><td>'
+                . (int) $row['acceptances'] . '</td></tr>';
+        }
+        return $html . '</tbody></table>';
     }
 
     /** The save only sanitizes an HTML agreement. A plain text agreement gets no warning. */

@@ -1,0 +1,169 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_PrivacyCenter>
+            <version>1.0.0</version>
+        </Maho_PrivacyCenter>
+    </modules>
+    <global>
+        <docs>
+            <user>docs/user</user>
+            <developer>docs/developer</developer>
+        </docs>
+        <models>
+            <privacycenter>
+                <class>Maho_PrivacyCenter_Model</class>
+                <resourceModel>privacycenter_resource</resourceModel>
+            </privacycenter>
+            <privacycenter_resource>
+                <class>Maho_PrivacyCenter_Model_Resource</class>
+                <entities>
+                    <request>
+                        <table>privacy_request</table>
+                    </request>
+                </entities>
+            </privacycenter_resource>
+        </models>
+        <blocks>
+            <privacycenter>
+                <class>Maho_PrivacyCenter_Block</class>
+            </privacycenter>
+        </blocks>
+        <helpers>
+            <privacycenter>
+                <class>Maho_PrivacyCenter_Helper</class>
+            </privacycenter>
+        </helpers>
+        <services>
+            <privacycenter>
+                <class>Maho_PrivacyCenter_Service</class>
+            </privacycenter>
+        </services>
+        <storage>
+            <mounts>
+                <!-- Private: an export holds all the personal data of one customer -->
+                <privacy_exports>
+                    <dir>var</dir>
+                    <path>privacy/exports</path>
+                </privacy_exports>
+            </mounts>
+        </storage>
+        <privacycenter>
+            <!-- Each exporter adds one section to an export. An extension adds its own here or with the privacy_collect_exporters event -->
+            <exporters>
+                <profile>privacycenter/export_profile</profile>
+                <addresses>privacycenter/export_addresses</addresses>
+                <orders>privacycenter/export_orders</orders>
+                <reviews>privacycenter/export_reviews</reviews>
+                <wishlist>privacycenter/export_wishlist</wishlist>
+                <newsletter>privacycenter/export_newsletter</newsletter>
+                <product_alerts>privacycenter/export_productAlerts</product_alerts>
+                <agreements>privacycenter/export_agreements</agreements>
+                <privacy_requests>privacycenter/export_requests</privacy_requests>
+            </exporters>
+            <!-- Each eraser removes one kind of data. The customer eraser runs last. An extension adds its own here or with the privacy_collect_erasers event -->
+            <erasers>
+                <quotes>privacycenter/eraser_quotes</quotes>
+                <reviews>privacycenter/eraser_reviews</reviews>
+                <newsletter>privacycenter/eraser_newsletter</newsletter>
+                <logs>privacycenter/eraser_logs</logs>
+                <customer>privacycenter/eraser_customer</customer>
+            </erasers>
+        </privacycenter>
+        <template>
+            <email>
+                <privacy_email_confirm_template translate="label" module="privacycenter">
+                    <label>Privacy Request Confirmation</label>
+                    <file>privacy_confirm.html</file>
+                    <type>html</type>
+                </privacy_email_confirm_template>
+                <privacy_email_export_template translate="label" module="privacycenter">
+                    <label>Privacy Data Export Ready</label>
+                    <file>privacy_export_ready.html</file>
+                    <type>html</type>
+                </privacy_email_export_template>
+                <privacy_email_erasure_scheduled_template translate="label" module="privacycenter">
+                    <label>Privacy Erasure Scheduled</label>
+                    <file>privacy_erasure_scheduled.html</file>
+                    <type>html</type>
+                </privacy_email_erasure_scheduled_template>
+                <privacy_email_erasure_completed_template translate="label" module="privacycenter">
+                    <label>Privacy Erasure Completed</label>
+                    <file>privacy_erasure_completed.html</file>
+                    <type>html</type>
+                </privacy_email_erasure_completed_template>
+            </email>
+        </template>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <privacycenter>
+                    <file>privacycenter.xml</file>
+                </privacycenter>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Maho_PrivacyCenter>
+                    <files>
+                        <default>Maho_PrivacyCenter.csv</default>
+                    </files>
+                </Maho_PrivacyCenter>
+            </modules>
+        </translate>
+    </frontend>
+    <adminhtml>
+        <layout>
+            <updates>
+                <privacycenter>
+                    <file>privacycenter.xml</file>
+                </privacycenter>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Maho_PrivacyCenter>
+                    <files>
+                        <default>Maho_PrivacyCenter.csv</default>
+                    </files>
+                </Maho_PrivacyCenter>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <privacy>
+            <general>
+                <enabled>1</enabled>
+                <allow_guests>1</allow_guests>
+            </general>
+            <requests>
+                <confirm_hours>24</confirm_hours>
+                <export_hours>48</export_hours>
+                <cooling_off_days>14</cooling_off_days>
+                <erasure_approval>1</erasure_approval>
+                <review_action>anonymize</review_action>
+            </requests>
+            <email>
+                <identity>general</identity>
+                <confirm_template>privacy_email_confirm_template</confirm_template>
+                <export_template>privacy_email_export_template</export_template>
+                <erasure_scheduled_template>privacy_email_erasure_scheduled_template</erasure_scheduled_template>
+                <erasure_completed_template>privacy_email_erasure_completed_template</erasure_completed_template>
+            </email>
+            <abuse>
+                <honeypot_enabled>1</honeypot_enabled>
+            </abuse>
+        </privacy>
+        <system>
+            <rate_limit>
+                <privacy_request>5</privacy_request>
+                <privacy_request_recipient>3</privacy_request_recipient>
+            </rate_limit>
+        </system>
+    </default>
+</config>

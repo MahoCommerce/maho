@@ -18,6 +18,9 @@ declare(strict_types=1);
 
 class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
 {
+    public const string LOCATION_CHECKOUT = 'checkout';
+    public const string LOCATION_REGISTRATION = 'registration';
+
     #[\Override]
     protected function _construct()
     {
@@ -88,5 +91,66 @@ class Mage_Checkout_Model_Agreement extends Mage_Core_Model_Abstract
     public function setIsHtml(?bool $value = true): static
     {
         return $this->setData('is_html', $value);
+    }
+
+    public function getPosition(): ?int
+    {
+        $value = $this->getData('position');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPosition(?int $value): static
+    {
+        return $this->setData('position', $value);
+    }
+
+    /**
+     * The number of the current text. The resource model increments it when the text changes.
+     */
+    public function getVersion(): ?int
+    {
+        $value = $this->getData('version');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setVersion(?int $value): static
+    {
+        return $this->setData('version', $value);
+    }
+
+    public function getShowOnCheckout(): ?bool
+    {
+        $value = $this->getData('show_on_checkout');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setShowOnCheckout(?bool $value = true): static
+    {
+        return $this->setData('show_on_checkout', $value);
+    }
+
+    public function getShowOnRegistration(): ?bool
+    {
+        $value = $this->getData('show_on_registration');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setShowOnRegistration(?bool $value = true): static
+    {
+        return $this->setData('show_on_registration', $value);
+    }
+
+    /**
+     * True when a customer who accepted an older version must accept the current version again.
+     */
+    public function getRequiresReconsent(): ?bool
+    {
+        $value = $this->getData('requires_reconsent');
+        return $value === null ? null : (bool) $value;
+    }
+
+    public function setRequiresReconsent(?bool $value = true): static
+    {
+        return $this->setData('requires_reconsent', $value);
     }
 }

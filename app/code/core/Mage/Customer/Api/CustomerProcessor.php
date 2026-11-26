@@ -116,7 +116,16 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if ($isPrivileged) {
             $this->getService()->create($customer, $storeId, $storeId);
         } else {
-            $this->getService()->register($customer, $storeId, captchaFields: ['captchaToken' => $data->captchaToken]);
+            $http = \Mage::helper('core/http');
+            $this->getService()->register(
+                $customer,
+                $storeId,
+                captchaFields: ['captchaToken' => $data->captchaToken],
+                agreementIds: $data->agreementIds ?? [],
+                client: \Mage::getModel('checkout/agreement_acceptance')
+                    ->setRemoteIp($http->getRemoteAddr() ?: null)
+                    ->setUserAgent(mb_substr((string) $http->getHttpUserAgent(), 0, 512) ?: null),
+            );
         }
 
         return Customer::fromModel($customer);

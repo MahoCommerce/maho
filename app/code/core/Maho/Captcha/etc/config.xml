@@ -79,7 +79,8 @@ SPDX-License-Identifier: AFL-3.0
 .catalog-product-view #review-form
 .review-product-list #review-form
 .wishlist-index-share #form-validate
-.revocation-index-index #revocation-form</selectors>
+.revocation-index-index #revocation-form
+.privacy-request-index #privacy-request-form</selectors>
             </captcha>
         </admin>
     </default>

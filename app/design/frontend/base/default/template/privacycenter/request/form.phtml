@@ -1,0 +1,51 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Request_Form $this */
+?>
+<div class="page-title">
+    <h1><?= $this->__('Privacy Request') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="privacy-center mx-auto flex max-w-xl flex-col gap-6">
+    <div class="flex items-start gap-4 rounded-box bg-base-200 p-5">
+        <span class="grid size-12 shrink-0 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-6"><?= $this->getIconSvg('shield-lock') ?></span>
+        <div class="text-sm">
+            <p class="font-semibold"><?= $this->__('Do you have an account?') ?></p>
+            <p class="text-base-content/70"><?= $this->__('Log in to manage your data in the Privacy Center of your account.') ?></p>
+            <a class="link link-primary" href="<?= $this->escapeUrl($this->getLoginUrl()) ?>"><?= $this->__('Log in') ?></a>
+        </div>
+    </div>
+    <?php if ($this->isGuestRequestAllowed()): ?>
+    <form action="<?= $this->escapeUrl($this->getPostUrl()) ?>" method="post" id="privacy-request-form" data-turbo="false" class="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5">
+        <?= $this->getBlockHtml('formkey') ?>
+        <?php if ($this->isHoneypotEnabled()): ?>
+            <?= Mage::helper('core')->getHoneypotFieldHtml() ?>
+        <?php endif ?>
+        <p class="text-sm text-base-content/70"><?= $this->__('Ask for a copy of the personal data that we keep about your email address, or ask us to delete it. We send you an email to confirm the request.') ?></p>
+        <ul class="form-list">
+            <li>
+                <label for="privacy_email" class="required"><?= $this->__('Email Address') ?></label>
+                <div class="input-box">
+                    <input type="email" name="email" id="privacy_email" value="<?= $this->escapeHtml($this->getFormValue('email')) ?>" class="input-text required-entry validate-email" autocomplete="email" required>
+                </div>
+            </li>
+        </ul>
+        <fieldset class="flex flex-col gap-2">
+            <legend class="mb-2 text-sm font-semibold"><?= $this->__('Request') ?></legend>
+            <?php foreach ($this->getTypes() as $value => $label): ?>
+                <label class="flex cursor-pointer items-center gap-3 rounded-box border border-base-300 p-3 has-checked:border-primary has-checked:bg-primary/5">
+                    <input type="radio" name="type" value="<?= $this->escapeHtml($value) ?>" class="radio radio-primary radio-sm" required<?= $this->getFormValue('type') === $value || ($this->getFormValue('type') === '' && $value === Maho_PrivacyCenter_Model_Request::TYPE_EXPORT) ? ' checked' : '' ?>>
+                    <span class="text-sm font-medium"><?= $this->escapeHtml($label) ?></span>
+                </label>
+            <?php endforeach ?>
+        </fieldset>
+        <?= $this->getChildHtml('form.additional.info') ?>
+        <button type="submit" class="btn btn-primary self-start"><?= $this->__('Submit') ?></button>
+    </form>
+    <?php endif ?>
+</div>

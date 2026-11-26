@@ -1,0 +1,98 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_PrivacyCenter
+ */
+
+/** @var Maho_PrivacyCenter_Block_Adminhtml_Request_View $this */
+$helper = Mage::helper('privacycenter');
+$request = $this->getPrivacyRequest();
+if (!$request) {
+    return;
+}
+$customerUrl = $this->getCustomerUrl();
+?>
+<div class="content-header">
+    <h3 class="icon-head head-customer"><?= $this->escapeHtml($this->getHeaderText()) ?></h3>
+    <p class="content-buttons form-buttons"><?= $this->getButtonsHtml() ?></p>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Request') ?></h4>
+    </div>
+    <div class="fieldset">
+        <table class="form-list" cellspacing="0">
+            <tr>
+                <td class="label"><?= $helper->__('Type') ?></td>
+                <td class="value"><strong><?= $this->escapeHtml($this->getTypeLabel()) ?></strong></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Status') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->getStatusLabel()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Email') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getEmail()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Customer') ?></td>
+                <td class="value">
+                    <?php if ($customerUrl): ?>
+                        <a href="<?= $this->escapeUrl($customerUrl) ?>">#<?= (int) $request->getCustomerId() ?></a>
+                    <?php else: ?>
+                        <?= $helper->__('Guest, or a deleted account') ?>
+                    <?php endif ?>
+                </td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Created') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->formatDateTime($request->getCreatedAt())) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Confirmed') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->formatDateTime($request->getConfirmedAt())) ?></td>
+            </tr>
+            <?php if ($request->isErasure()): ?>
+            <tr>
+                <td class="label"><?= $helper->__('Erasure Date') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->formatDateTime($request->getScheduledAt())) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Approved') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->formatDateTime($request->getApprovedAt())) ?></td>
+            </tr>
+            <?php endif ?>
+            <tr>
+                <td class="label"><?= $helper->__('Processed') ?></td>
+                <td class="value"><?= $this->escapeHtml($this->formatDateTime($request->getProcessedAt())) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('IP Address') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getRemoteIp()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('User Agent') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getUserAgent()) ?></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('History') ?></h4>
+    </div>
+    <div class="fieldset">
+        <pre class="privacy-admin-note"><?= $this->escapeHtml((string) $request->getAdminNote()) ?></pre>
+        <?php if ($this->canProcess()): ?>
+        <form action="<?= $this->escapeUrl($this->getActionUrl('saveNote')) ?>" method="post">
+            <?= $this->getBlockHtml('formkey') ?>
+            <label for="privacy_note"><?= $helper->__('Add a Note') ?></label>
+            <textarea id="privacy_note" name="note" class="textarea" rows="3"></textarea>
+            <button type="submit" class="scalable"><span><span><span><?= $helper->__('Save') ?></span></span></span></button>
+        </form>
+        <?php endif ?>
+    </div>
+</div>

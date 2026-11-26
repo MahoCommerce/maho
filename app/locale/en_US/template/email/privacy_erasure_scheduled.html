@@ -1,0 +1,30 @@
+<!--@subject Your erasure request is confirmed @-->
+<!--@vars
+{"var email":"Email",
+"var scheduled_date":"Erasure Date",
+"var needs_approval":"The Staff Must Approve",
+"var account_url":"Privacy Center URL",
+"var request_id":"Request Number",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>Your erasure request is confirmed</h1>
+            <p>We will delete the personal data of {{var email}} on {{var scheduled_date}}.</p>
+            {{depend needs_approval}}
+            <p>Our staff checks each erasure request first. We will contact you if we cannot delete the data.</p>
+            {{/depend}}
+            <p>We keep your orders and invoices, because the law requires it.</p>
+            {{depend account_url}}
+            <p>Did you change your mind? <a href="{{var account_url}}">Cancel the request</a> before that date.</p>
+            {{/depend}}
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

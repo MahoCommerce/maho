@@ -1,0 +1,102 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_PrivacyCenter
+ */
+
+/** @var Maho_PrivacyCenter_Block_Adminhtml_Customer_Edit_Tab_Privacy $this */
+$helper = Mage::helper('privacycenter');
+$requests = $this->getPrivacyRequests();
+$acceptances = $this->getAcceptances();
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Privacy Requests') ?></h4>
+    </div>
+    <div class="fieldset">
+        <?php if ($requests): ?>
+        <table class="data-table" cellspacing="0">
+            <thead>
+                <tr>
+                    <th><?= $helper->__('ID') ?></th>
+                    <th><?= $helper->__('Type') ?></th>
+                    <th><?= $helper->__('Status') ?></th>
+                    <th><?= $helper->__('Created') ?></th>
+                    <th><?= $helper->__('Processed') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($requests as $request): ?>
+                <tr>
+                    <td><a href="<?= $this->escapeUrl($this->getRequestUrl($request)) ?>">#<?= (int) $request->getId() ?></a></td>
+                    <td><?= $this->escapeHtml($this->getTypeLabel((string) $request->getType())) ?></td>
+                    <td><?= $this->escapeHtml($this->getStatusLabel((string) $request->getStatus())) ?></td>
+                    <td><?= $this->escapeHtml($this->formatDateTime($request->getCreatedAt())) ?></td>
+                    <td><?= $this->escapeHtml($this->formatDateTime($request->getProcessedAt())) ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p><?= $helper->__('This customer has no privacy requests.') ?></p>
+        <?php endif ?>
+
+        <?php if ($this->canCreate()): ?>
+        <div class="privacy-create-request">
+            <p class="note"><?= $helper->__('Create a request that the customer sent by letter, by email or by phone. Check the identity of the customer first: the request starts confirmed.') ?></p>
+            <form action="<?= $this->escapeUrl($this->getCreateUrl()) ?>" method="post">
+                <?= $this->getBlockHtml('formkey') ?>
+                <input type="hidden" name="customer_id" value="<?= $this->getCustomerId() ?>">
+                <label for="privacy_request_type" class="d-label"><?= $helper->__('Request') ?></label>
+                <select id="privacy_request_type" name="type" class="d-select d-select-sm">
+                    <?php foreach (Mage::getModel('privacycenter/source_type')->toOptionHash() as $value => $label): ?>
+                        <option value="<?= $this->escapeHtml($value) ?>"><?= $this->escapeHtml($label) ?></option>
+                    <?php endforeach ?>
+                </select>
+                <button type="submit" class="d-btn d-btn-sm"><?= $helper->__('Create') ?></button>
+            </form>
+        </div>
+        <?php endif ?>
+    </div>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Accepted Terms and Conditions') ?></h4>
+    </div>
+    <div class="fieldset">
+        <?php if ($acceptances->getSize()): ?>
+        <table class="data-table" cellspacing="0">
+            <thead>
+                <tr>
+                    <th><?= $helper->__('Terms') ?></th>
+                    <th><?= $helper->__('Version') ?></th>
+                    <th><?= $helper->__('Accepted In') ?></th>
+                    <th><?= $helper->__('Order') ?></th>
+                    <th><?= $helper->__('IP Address') ?></th>
+                    <th><?= $helper->__('Date') ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($acceptances as $acceptance): ?>
+                <tr>
+                    <td><?= $this->escapeHtml((string) $acceptance->getAgreementName()) ?></td>
+                    <td><?= (int) $acceptance->getAgreementVersion() ?></td>
+                    <td><?= $this->escapeHtml((string) $acceptance->getContext()) ?></td>
+                    <td>
+                        <?php if ($acceptance->getOrderId()): ?>
+                            <a href="<?= $this->escapeUrl($this->getUrl('*/sales_order/view', ['order_id' => $acceptance->getOrderId()])) ?>">#<?= (int) $acceptance->getOrderId() ?></a>
+                        <?php endif ?>
+                    </td>
+                    <td><?= $this->escapeHtml((string) $acceptance->getRemoteIp()) ?></td>
+                    <td><?= $this->escapeHtml($this->formatDateTime($acceptance->getCreatedAt())) ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <p><?= $helper->__('This customer has not accepted any terms and conditions.') ?></p>
+        <?php endif ?>
+    </div>
+</div>

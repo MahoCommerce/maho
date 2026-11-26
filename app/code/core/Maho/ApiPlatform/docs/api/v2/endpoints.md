@@ -259,7 +259,7 @@ A guest order needs a valid email, and each field that the **Checkout Registrati
 
 **Order placement** <span class="version-badge">v27.1+</span>: the place-order endpoints, the storefront checkout and the admin order create place an order with the same rules.
 
-- A guest token or a customer token places the order as the customer. The subtotal must reach the minimum order amount of the store (**Sales > Minimum Order Amount**). When the store asks the customer to accept its terms and conditions, the body sends `agreementIds`, with the ID of each required one. A problem gives a 422 with `subtotal` or `agreementIds` in `details.errors`.
+- A guest token or a customer token places the order as the customer. The subtotal must reach the minimum order amount of the store (**Sales > Minimum Order Amount**). When the store asks the customer to accept its terms and conditions, the body sends `agreementIds`, with the ID of each required one. `GET /checkout-agreements` lists them. The order keeps the proof of each accepted version <span class="version-badge">v27.1+</span>. A problem gives a 422 with `subtotal` or `agreementIds` in `details.errors`.
 - An admin token or an API token with the `orders/create` grant places the order as staff, as the admin order create does: the minimum order amount and the terms and conditions do not apply.
 - A line with an error, an address that is not valid, a shipping method without a rate of the address and a missing payment method give a 422, with `items`, `billingAddress`, `shippingAddress`, `shippingMethod` or `paymentMethod` in `details.errors`. A `guestEmail` that is not a valid email address gives a 422 with `guestEmail` in `details.errors`.
 - An address of a customer order goes to the address book of the customer only when the checkout or the admin order form asks for it (**Save in Address Book**). On the API, an address asks for it with `"saveInAddressBook": true` <span class="version-badge">v27.1+</span>, on `shipping-address`, `billing-address` and the addresses of a place-order body, and on the `setShippingAddressOnCart` and `setBillingAddressOnCart` mutations. Without the field, or with `false`, the address does not go to the address book. Each address write sets the field again. A guest cart ignores it. When the customer has no default billing or shipping address, the new address becomes it. A `billing-address` with `sameAsShipping` adds the address once, when its own `saveInAddressBook` is true. A shipping address that the client sends is no longer marked as the same as the billing address.
@@ -679,6 +679,38 @@ blog is off. The same rule applies to the GraphQL queries `blogPost`, `blogPosts
 The body of `POST /products/{productId}/reviews` and the input of `submitReview` take `title`, `detail`, `nickname` and an optional `rating`: the stars from 1 to 5, which become the vote for the first rating of the store. A `rating` outside 1 to 5 gives a 422 with an entry for `rating` in `details.errors`. Without a `rating`, the review has no vote, as on the storefront form. On a read, `rating` is the average of the votes, rounded to whole stars, or `null` when the review has no vote.
 
 `POST /products/{productId}/reviews` and the `submitReview` mutation use the same CAPTCHA as the review form of the storefront. When the CAPTCHA of the store is on, send the solved token in `captchaToken`. A missing or refused token gives a 422 with an entry for `captchaToken` in `details.errors`. `GET /contact/config` gives the provider and the challenge URL for the widget (see [Contact](#contact)).
+
+---
+
+### Privacy requests (GDPR) <span class="version-badge">v27.1+</span>
+
+A customer or a guest asks for a copy of the personal data (`export`) or for its erasure (`erasure`). A guest, and the erasure of a customer, wait for the link of a confirmation email. An erasure then waits for its cooling-off period, for the approval of the staff when the store asks for it, and for the end of the open orders of the customer. The endpoints answer 404 when the store has the Privacy Center turned off.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/privacy-requests` | None | Send the request of a guest. Body: `email`, `type`, `captchaToken`. The answer is a 202 with no ID, for any email |
+| POST | `/privacy-requests/confirm` | None | Confirm a request with the `token` of the link in its email. A token works once |
+| POST | `/customers/me/privacy-requests` | Customer | Send a request of the customer. Body: `type`. An export starts at once. A second open request of the same type gives a 409 |
+| GET | `/customers/me/privacy-requests` | Customer | List the requests of the customer |
+| POST | `/customers/me/privacy-requests/{id}/cancel` | Customer | Cancel an erasure before it runs |
+| GET | `/privacy-requests` | Admin/API | List the requests. Filters: `status`, `type`, `email`, `customerId` |
+| GET | `/privacy-requests/{id}` | Admin/API | Get a request, with its `adminNote` |
+| POST | `/privacy-requests/{id}/approve` | Admin/API | Approve a confirmed erasure |
+| POST | `/privacy-requests/{id}/reject` | Admin/API | Reject an open request. Body: `reason` |
+| POST | `/privacy-requests/{id}/process` | Admin/API | Write the export or run the erasure now. Body: `force`, to skip the cooling-off period, the approval and the open order check |
+
+The export reaches the customer as a download link in an email. The API does not return the file.
+
+### Terms and conditions <span class="version-badge">v27.1+</span>
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/checkout-agreements` | None | List the active terms of the store. Filter: `location`, `checkout` (default) or `registration` |
+| GET | `/customers/me/checkout-agreements/pending` | Customer | List the registration terms that the customer did not accept, or must accept again after a change of the text |
+| GET | `/customers/me/agreement-acceptances` | Customer | List the terms that the customer accepted, with the version and the date |
+| POST | `/customers/me/agreement-acceptances` | Customer | Accept a pending registration term. Body: `agreementId` |
+
+A registration (`POST /customers`) sends `agreementIds`, with the ID of each registration term. A missing one gives a 422 with `agreementIds` in `details.errors`.
 
 ---
 

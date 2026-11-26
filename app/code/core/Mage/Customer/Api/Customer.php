@@ -347,6 +347,10 @@ class Customer extends CrudResource
     #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA. For a registration, a password reset email and a confirmation email', writable: true, readable: false, extraProperties: ['computed' => true])]
     public ?string $captchaToken = null;
 
+    /** @var list<int>|null */
+    #[ApiProperty(description: 'For a registration: the IDs of the terms and conditions that the customer accepted. Each agreement that GET /checkout-agreements?location=registration lists must be in it', writable: true, readable: false, extraProperties: ['computed' => true])]
+    public ?array $agreementIds = null;
+
     #[ApiProperty(description: 'true turns two-factor authentication on, false turns it off (POST /customers/me/two-factor)', writable: true, readable: false, extraProperties: ['computed' => true])]
     public ?bool $twofaEnabled = null;
 

@@ -176,6 +176,7 @@ class MahoPaypalStandardCheckout {
             body: JSON.stringify({
                 paypal_order_id: orderId,
                 method: this.methodCode,
+                ...(this.reviewMode ? { agreement_ids: this._checkedAgreementIds() } : {}),
             }),
             loaderArea: this.formDiv,
         });
@@ -185,6 +186,12 @@ class MahoPaypalStandardCheckout {
         } else {
             this.handleError(new MahoPaypalCheckoutError(response.message || 'Payment approval failed'));
         }
+    }
+
+    _checkedAgreementIds() {
+        return [...document.querySelectorAll('.checkout-agreements input[type="checkbox"]:checked')]
+            .map((box) => parseInt(box.name.match(/^agreement\[(\d+)\]$/)?.[1], 10))
+            .filter((id) => !Number.isNaN(id));
     }
 
     _validateAgreements() {

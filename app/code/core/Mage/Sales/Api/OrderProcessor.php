@@ -192,6 +192,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             throw CartRequest::withAddressFieldNames($e, ['shipping_address' => 'shippingAddress', 'billing_address' => 'billingAddress']);
         }
 
+        // The log of the accepted agreements keeps the client that accepted them
+        if ($agreementIds !== null) {
+            $http = \Mage::helper('core/http');
+            $quote->setRemoteIp($quote->getRemoteIp() ?: ($http->getRemoteAddr() ?: null));
+            $quote->setRemoteUserAgent($http->getHttpUserAgent() ?: null);
+        }
+
         $placeOrder = fn(): array => $this->orderService->place(
             $quote,
             $guestEmail,
