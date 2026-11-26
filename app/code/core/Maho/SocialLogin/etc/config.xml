@@ -50,6 +50,11 @@ SPDX-License-Identifier: AFL-3.0
                 </setup>
             </sociallogin_setup>
         </resources>
+        <privacycenter>
+            <exporters>
+                <social_login>sociallogin/privacy_exporter</social_login>
+            </exporters>
+        </privacycenter>
     </global>
     <frontend>
         <layout>

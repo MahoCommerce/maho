@@ -64,6 +64,11 @@ SPDX-License-Identifier: OSL-3.0
                 </revocation_email_merchant_template>
             </email>
         </template>
+        <privacycenter>
+            <exporters>
+                <revocation_requests>revocation/privacy_exporter</revocation_requests>
+            </exporters>
+        </privacycenter>
     </global>
     <frontend>
         <layout>

@@ -38,7 +38,7 @@ The export is a ZIP file with two files:
 - `data.html`, for a person to read.
 - `data.json`, for another service to read.
 
-It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms and the privacy requests. It never holds a password or a security token. For a guest, it holds the guest orders, the newsletter subscription and the accepted terms of the email.
+It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms, the privacy requests, the revocation requests of the orders and the social login links. It never holds a password or a security token. For a guest, it holds the guest orders, the newsletter subscription, the accepted terms and the revocation requests of the email.
 
 The download link works for the time in **Download Link Lifetime (Hours)**. Then the cron deletes the file.
 
@@ -57,6 +57,7 @@ The erasure keeps these records, because the law requires them:
 
 - The orders, the invoices, the shipments and the credit memos.
 - The proof of each accepted terms and conditions text.
+- The revocation requests, as the receipt of each withdrawal.
 - The privacy request itself, as the proof of the erasure.
 
 The customer gets an email when the erasure is complete.

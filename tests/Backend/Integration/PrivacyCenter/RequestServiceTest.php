@@ -346,6 +346,23 @@ describe('an export', function () {
         expect($data)->toBe([]);
     });
 
+    it('holds the revocation requests of the orders of the customer, and none found by the email alone', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->orders[] = $order = privacyOrder($customer, Mage_Sales_Model_Order::STATE_COMPLETE);
+        $revocation = fn(?int $orderId, string $reference) => Mage::getModel('revocation/request')->setData([
+            'store_id' => 1, 'order_id' => $orderId, 'order_reference' => $reference, 'customer_name' => 'Pri Vacy',
+            'email' => $customer->getEmail(), 'received_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+        ])->save();
+        $ofOrder = $revocation((int) $order->getId(), (string) $order->getIncrementId());
+        $byEmail = $revocation(null, 'not-an-order-of-the-customer');
+
+        $data = Mage::getModel('revocation/privacy_exporter')->export(privacySubject($customer));
+        $ofOrder->delete();
+        $byEmail->delete();
+
+        expect(array_column($data, 'order_reference'))->toBe([(string) $order->getIncrementId()]);
+    });
+
     it('deletes the file when the download link expires', function () {
         $this->customers[] = $customer = privacyCustomer();
         $request = $this->service->submitForCustomer($customer, Request::TYPE_EXPORT, new \Maho\DataObject(['store_id' => 1]));
