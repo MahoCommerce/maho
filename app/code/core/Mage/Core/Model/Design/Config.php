@@ -58,6 +58,22 @@ class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
     }
 
     /**
+     * The package and the skin theme in the store config of the store view. A design change, a user
+     * agent exception or the custom design of a category or a product does not change them.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function getStoreSkinTheme(int $storeId): array
+    {
+        return [
+            (string) Mage::getStoreConfig('design/package/name', $storeId) ?: Mage_Core_Model_Design_Package::DEFAULT_PACKAGE,
+            (string) Mage::getStoreConfig('design/theme/skin', $storeId)
+                ?: (string) Mage::getStoreConfig('design/theme/default', $storeId)
+                ?: Mage_Core_Model_Design_Package::DEFAULT_THEME,
+        ];
+    }
+
+    /**
      * Load cache
      *
      * @return bool
