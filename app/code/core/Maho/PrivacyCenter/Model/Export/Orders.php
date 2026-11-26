@@ -39,8 +39,10 @@ class Maho_PrivacyCenter_Model_Export_Orders extends Maho_PrivacyCenter_Model_Ex
     {
         $orders = Mage::getResourceModel('sales/order_collection');
         if ($subject->isGuest()) {
-            $orders->addFieldToFilter('customer_id', ['null' => true])
-                ->addFieldToFilter('customer_email', $subject->email);
+            $orders->addFieldToFilter('customer_id', ['null' => true])->getSelect()->where(
+                (string) $orders->getConnection()->getCaseInsensitiveEqualsSql('main_table.customer_email', '?'),
+                $subject->email,
+            );
         } else {
             $orders->addFieldToFilter('customer_id', $subject->customerId);
         }

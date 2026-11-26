@@ -757,7 +757,10 @@ class Maho_PrivacyCenter_Service_Request
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('state', ['nin' => self::FINAL_ORDER_STATES]);
         if ($subject->isGuest()) {
-            $orders->addFieldToFilter('customer_email', $subject->email);
+            $orders->getSelect()->where(
+                (string) $orders->getConnection()->getCaseInsensitiveEqualsSql('main_table.customer_email', '?'),
+                $subject->email,
+            );
         } else {
             $orders->addFieldToFilter('customer_id', $subject->customerId);
         }

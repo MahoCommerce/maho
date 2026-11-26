@@ -398,9 +398,9 @@ describe('an erasure', function () {
         $keptReview->delete();
     });
 
-    it('waits while a guest has an open order, and runs when the order is complete', function () {
+    it('waits while a guest has an open order in any letter case, and runs when the order is complete', function () {
         $this->guestEmails[] = $email = 'privacy-guest-' . uniqid() . '@example.com';
-        $this->orders[] = $order = privacyGuestOrder($email, Mage_Sales_Model_Order::STATE_PROCESSING);
+        $this->orders[] = $order = privacyGuestOrder(strtoupper($email), Mage_Sales_Model_Order::STATE_PROCESSING);
         $request = $this->service->submit(new \Maho\DataObject(['email' => $email, 'type' => Request::TYPE_ERASURE, 'store_id' => 1]));
         $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
 
