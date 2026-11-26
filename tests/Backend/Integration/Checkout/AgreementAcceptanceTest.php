@@ -189,7 +189,7 @@ describe('the acceptance of a customer', function () {
         ))->toThrow(Mage_Core_Exception_Input::class);
     });
 
-    it('keeps the acceptance when the customer is deleted', function () {
+    it('keeps the acceptance when the customer is deleted, and finds it by the email in any letter case', function () {
         $this->agreements[] = $agreement = acceptanceAgreement();
         $customer = acceptanceCustomer();
         Mage::getService('checkout/agreement')->acceptForCustomer($customer, 1, [(int) $agreement->getId()], Mage::getModel('checkout/agreement_acceptance'));
@@ -197,7 +197,7 @@ describe('the acceptance of a customer', function () {
         Mage::register('isSecureArea', true, true);
         $customer->delete();
         Mage::unregister('isSecureArea');
-        $kept = Mage::getService('checkout/agreement')->getAcceptances(null, $customer->getEmail());
+        $kept = Mage::getService('checkout/agreement')->getAcceptances(null, strtoupper((string) $customer->getEmail()));
 
         expect($kept->getSize())->toBe(1)
             ->and($kept->getFirstItem()->getCustomerId())->toBeNull()
