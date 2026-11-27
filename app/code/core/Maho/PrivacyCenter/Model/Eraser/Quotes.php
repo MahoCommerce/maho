@@ -57,10 +57,6 @@ class Maho_PrivacyCenter_Model_Eraser_Quotes extends Maho_PrivacyCenter_Model_Er
             $adapter->select()->from(['t' => $this->getTable('sales/quote')], ['gift_message_id'])->where('t.entity_id IN (?)', $quoteIds),
             $adapter->select()->from(['t' => $this->getTable('sales/quote_item')], ['gift_message_id'])->where('t.quote_id IN (?)', $quoteIds),
             $adapter->select()->from(['t' => $this->getTable('sales/quote_address')], ['gift_message_id'])->where('t.quote_id IN (?)', $quoteIds),
-            $adapter->select()
-                ->from(['t' => $this->getTable('sales_flat_quote_address_item')], ['gift_message_id'])
-                ->join(['address' => $this->getTable('sales/quote_address')], 'address.address_id = t.quote_address_id', [])
-                ->where('address.quote_id IN (?)', $quoteIds),
         ];
         $ids = [];
         foreach ($selects as $select) {
