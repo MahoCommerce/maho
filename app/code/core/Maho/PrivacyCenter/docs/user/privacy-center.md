@@ -62,6 +62,16 @@ The erasure keeps these records, because the law requires them:
 
 The customer gets an email when the erasure is complete.
 
+## The other rights of the GDPR
+
+The Privacy Center handles the right of access, the right to data portability (the `data.json` file of the export) and the right to erasure. The store answers the other rights with the pages that it already has:
+
+- **Rectification**: the customer corrects the name, the email and the addresses in the customer account. A user corrects the other data, such as the address of an order, in the admin.
+- **Objection to direct marketing**: the customer unsubscribes from the newsletter in the customer account, or with the link in each newsletter.
+- **Withdrawal of a consent**: a terms and conditions text is the contract of an order or of an account, not a consent. The customer ends the contract of the account with an erasure. Do not use a terms and conditions text to ask for a consent that the customer can withdraw, such as for marketing. Use the newsletter subscription for marketing.
+
+A customer who has another request, such as an objection to other processing, writes to the store. Answer it within one month, as for the other requests.
+
 ## Customers > Privacy Requests
 
 This grid lists every request. The counters above the grid show the requests that wait for a confirmation, the erasures that wait for an approval, the requests that are open for more than 23 days, and the requests completed in the last 30 days. The GDPR gives the store one month to answer a request.
