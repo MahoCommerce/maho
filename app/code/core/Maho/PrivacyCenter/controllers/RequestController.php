@@ -61,17 +61,17 @@ class Maho_PrivacyCenter_RequestController extends Mage_Core_Controller_Front_Ac
             return;
         }
         $session->addSuccess($this->__('Thank you. If the email address is correct, you will receive an email with a link to confirm your request.'));
-        $this->_redirect('privacy/request/sent');
+        $this->_redirect('privacy/request/result');
     }
 
-    #[Maho\Config\Route('/privacy/request/sent', name: 'privacy.request.sent', methods: ['GET'])]
-    public function sentAction(): void
+    #[Maho\Config\Route('/privacy/request/result', name: 'privacy.request.result', methods: ['GET'])]
+    public function resultAction(): void
     {
         $this->renderPage($this->__('Privacy Request'));
     }
 
-    #[Maho\Config\Route('/privacy/request/confirm', name: 'privacy.request.confirm', methods: ['GET'])]
-    public function confirmAction(): void
+    #[Maho\Config\Route('/privacy/request/confirmation', name: 'privacy.request.confirmation', methods: ['GET'])]
+    public function confirmationAction(): void
     {
         $token = (string) $this->getRequest()->getParam('token');
         try {
@@ -79,14 +79,14 @@ class Maho_PrivacyCenter_RequestController extends Mage_Core_Controller_Front_Ac
             Mage::register('privacy_request_token', $token);
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('core/session')->addError($e->getMessage());
-            $this->_redirect('privacy/request/sent');
+            $this->_redirect('privacy/request/result');
             return;
         }
         $this->renderPage($this->__('Confirm Your Privacy Request'));
     }
 
-    #[Maho\Config\Route('/privacy/request/confirmPost', name: 'privacy.request.confirmPost', methods: ['POST'])]
-    public function confirmPostAction(): void
+    #[Maho\Config\Route('/privacy/request/confirm', name: 'privacy.request.confirm', methods: ['POST'])]
+    public function confirmAction(): void
     {
         $session = Mage::getSingleton('core/session');
         try {
@@ -97,7 +97,7 @@ class Maho_PrivacyCenter_RequestController extends Mage_Core_Controller_Front_Ac
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         }
-        $this->_redirect('privacy/request/sent');
+        $this->_redirect('privacy/request/result');
     }
 
     #[Maho\Config\Route('/privacy/request/download', name: 'privacy.request.download', methods: ['GET'])]
@@ -107,7 +107,7 @@ class Maho_PrivacyCenter_RequestController extends Mage_Core_Controller_Front_Ac
             $file = Mage::getService('privacycenter/request')->openExportByToken((string) $this->getRequest()->getParam('token'));
         } catch (Mage_Core_Exception $e) {
             Mage::getSingleton('core/session')->addError($e->getMessage());
-            $this->_redirect('privacy/request/sent');
+            $this->_redirect('privacy/request/result');
             return;
         }
         $this->_prepareDownloadResponse($file['filename'], [

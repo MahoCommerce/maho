@@ -48,7 +48,7 @@ $kept = [$this->__('Orders and invoices'), $this->__('Shipments and refunds'), $
         <?php if (array_any($requests, fn($request) => $request->isOpen())): ?>
             <div role="status" class="alert alert-warning alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('You already asked us to delete your account. See the request below.') ?></span></div>
         <?php else: ?>
-            <form action="<?= $this->escapeUrl($this->getActionUrl('erase')) ?>" method="post" data-turbo="false" class="flex flex-col gap-4">
+            <form action="<?= $this->escapeUrl($this->getActionUrl('delete')) ?>" method="post" data-turbo="false" class="flex flex-col gap-4">
                 <?= $this->getBlockHtml('formkey') ?>
                 <label class="flex cursor-pointer items-start gap-3 text-sm">
                     <input type="checkbox" name="confirm_erasure" value="1" class="checkbox checkbox-error checkbox-sm mt-0.5" required>

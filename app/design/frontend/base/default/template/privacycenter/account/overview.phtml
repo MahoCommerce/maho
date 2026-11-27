@@ -55,7 +55,7 @@ $accepted = $this->getAcceptances()->getSize();
             <?php elseif ($erasure?->getStatus() === Maho_PrivacyCenter_Model_Request::STATUS_PENDING): ?>
                 <span class="badge badge-warning badge-soft"><?= $this->__('Check your email to confirm') ?></span>
             <?php endif ?>
-            <a class="btn btn-outline btn-error btn-sm self-start" href="<?= $this->escapeUrl($this->getActionUrl('requests')) ?>"><?= $this->__('Delete My Account') ?></a>
+            <a class="btn btn-outline btn-error btn-sm self-start" href="<?= $this->escapeUrl($this->getActionUrl('deletion')) ?>"><?= $this->__('Delete My Account') ?></a>
         </div>
     </div>
 </div>

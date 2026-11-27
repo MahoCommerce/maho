@@ -50,7 +50,7 @@ describe('Privacy Center account controller when the module is off', function ()
     });
 
     it('sends the other pages to the no-route page', function () {
-        expect(privacyCenterActionAfterPreDispatch('requests'))->toBe('noRoute');
+        expect(privacyCenterActionAfterPreDispatch('deletion'))->toBe('noRoute');
     });
 
     it('still serves the terms and conditions page', function () {
@@ -58,6 +58,6 @@ describe('Privacy Center account controller when the module is off', function ()
     });
 
     it('still serves the acceptance of the terms and conditions', function () {
-        expect(privacyCenterActionAfterPreDispatch('acceptAgreements'))->toBe('acceptAgreements');
+        expect(privacyCenterActionAfterPreDispatch('accept'))->toBe('accept');
     });
 });

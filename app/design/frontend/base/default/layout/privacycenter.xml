@@ -44,13 +44,13 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </privacy_account_agreements>
 
-    <privacy_account_requests translate="label">
+    <privacy_account_deletion translate="label">
         <label>Customer Privacy Center Account Deletion</label>
         <update handle="customer_account"/>
         <reference name="my.account.wrapper">
-            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/requests.phtml"/>
+            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/deletion.phtml"/>
         </reference>
-    </privacy_account_requests>
+    </privacy_account_deletion>
 
     <privacy_request_index translate="label">
         <label>Privacy Request Form</label>
@@ -62,23 +62,23 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </privacy_request_index>
 
-    <privacy_request_sent translate="label">
+    <privacy_request_result translate="label">
         <label>Privacy Request Result</label>
         <reference name="root">
             <action method="setTemplate"><template>page/1column.phtml</template></action>
         </reference>
         <reference name="content">
-            <block type="core/template" name="privacycenter.request.sent" template="privacycenter/request/sent.phtml"/>
+            <block type="core/template" name="privacycenter.request.result" template="privacycenter/request/result.phtml"/>
         </reference>
-    </privacy_request_sent>
+    </privacy_request_result>
 
-    <privacy_request_confirm translate="label">
+    <privacy_request_confirmation translate="label">
         <label>Privacy Request Confirmation</label>
         <reference name="root">
             <action method="setTemplate"><template>page/1column.phtml</template></action>
         </reference>
         <reference name="content">
-            <block type="privacycenter/request_confirm" name="privacycenter.request.confirm" template="privacycenter/request/confirm.phtml"/>
+            <block type="privacycenter/request_confirm" name="privacycenter.request.confirmation" template="privacycenter/request/confirmation.phtml"/>
         </reference>
-    </privacy_request_confirm>
+    </privacy_request_confirmation>
 </layout>

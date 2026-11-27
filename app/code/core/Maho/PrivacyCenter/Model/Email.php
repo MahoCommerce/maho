@@ -22,7 +22,7 @@ class Maho_PrivacyCenter_Model_Email
         string $token): bool
     {
         return $this->send($request, Helper::XML_PATH_CONFIRM_TEMPLATE, [
-            'link_url' => $this->getUrl($request, 'privacy/request/confirm', $token),
+            'link_url' => $this->getUrl($request, 'privacy/request/confirmation', $token),
             'link_hours' => Mage::helper('privacycenter')->getConfirmHours($request->getStoreId()),
         ]);
     }
@@ -44,7 +44,7 @@ class Maho_PrivacyCenter_Model_Email
         return $this->send($request, Helper::XML_PATH_ERASURE_SCHEDULED_TEMPLATE, [
             'scheduled_date' => $this->formatDate($request, (string) $request->getScheduledAt()),
             'needs_approval' => Mage::helper('privacycenter')->isErasureApprovalRequired($request->getStoreId()),
-            'account_url' => $request->getCustomerId() ? $this->getUrl($request, 'privacy/account/requests') : '',
+            'account_url' => $request->getCustomerId() ? $this->getUrl($request, 'privacy/account/deletion') : '',
         ]);
     }
 

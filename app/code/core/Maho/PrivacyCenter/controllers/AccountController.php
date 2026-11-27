@@ -22,7 +22,7 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
             return $this;
         }
         // The terms and conditions of Mage_Checkout ask for an acceptance also when the store takes no privacy requests
-        $isAgreementPage = in_array($this->getRequest()->getActionName(), ['agreements', 'acceptAgreements'], true);
+        $isAgreementPage = in_array($this->getRequest()->getActionName(), ['agreements', 'accept'], true);
         if (!$isAgreementPage && !Mage::helper('privacycenter')->isEnabled()) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             $this->_forward('noRoute');
@@ -52,8 +52,8 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         $this->renderPage($this->__('Terms and Conditions'));
     }
 
-    #[Maho\Config\Route('/privacy/account/requests', name: 'privacy.account.requests', methods: ['GET'])]
-    public function requestsAction(): void
+    #[Maho\Config\Route('/privacy/account/deletion', name: 'privacy.account.deletion', methods: ['GET'])]
+    public function deletionAction(): void
     {
         $this->renderPage($this->__('Delete My Account'));
     }
@@ -65,15 +65,15 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         $this->_redirect('*/*/data');
     }
 
-    #[Maho\Config\Route('/privacy/account/erase', name: 'privacy.account.erase', methods: ['POST'])]
-    public function eraseAction(): void
+    #[Maho\Config\Route('/privacy/account/delete', name: 'privacy.account.delete', methods: ['POST'])]
+    public function deleteAction(): void
     {
         if (!$this->getRequest()->getPost('confirm_erasure')) {
             $this->getSession()->addError($this->__('Please confirm that you want to delete your account.'));
         } else {
             $this->submit(Request::TYPE_ERASURE, $this->__('We sent you an email. Open the link in the email to confirm the deletion of your account.'));
         }
-        $this->_redirect('*/*/requests');
+        $this->_redirect('*/*/deletion');
     }
 
     #[Maho\Config\Route('/privacy/account/cancel', name: 'privacy.account.cancel', methods: ['POST'])]
@@ -89,7 +89,7 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         }
-        $this->_redirect('*/*/requests');
+        $this->_redirect('*/*/deletion');
     }
 
     #[Maho\Config\Route('/privacy/account/download', name: 'privacy.account.download', methods: ['GET'])]
@@ -111,8 +111,8 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         ], 'application/zip', $file['size']);
     }
 
-    #[Maho\Config\Route('/privacy/account/acceptAgreements', name: 'privacy.account.acceptAgreements', methods: ['POST'])]
-    public function acceptAgreementsAction(): void
+    #[Maho\Config\Route('/privacy/account/accept', name: 'privacy.account.accept', methods: ['POST'])]
+    public function acceptAction(): void
     {
         $session = $this->getSession();
         $http = Mage::helper('core/http');

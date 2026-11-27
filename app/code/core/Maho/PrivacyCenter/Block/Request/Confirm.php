@@ -25,7 +25,7 @@ class Maho_PrivacyCenter_Block_Request_Confirm extends Mage_Core_Block_Template
 
     public function getPostUrl(): string
     {
-        return $this->getUrl('privacy/request/confirmPost', ['_secure' => true]);
+        return $this->getUrl('privacy/request/confirm', ['_secure' => true]);
     }
 
     public function getCoolingOffDays(): int
