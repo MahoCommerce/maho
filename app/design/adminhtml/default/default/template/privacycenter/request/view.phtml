@@ -91,8 +91,8 @@ $customerUrl = $this->getCustomerUrl();
             <?php foreach ($history as $index => $entry): ?>
             <li>
                 <?php if ($index > 0): ?><hr><?php endif ?>
-                <div class="d-timeline-middle"><span class="block size-3 rounded-full bg-primary"></span></div>
-                <div class="d-timeline-end mb-4">
+                <div class="d-timeline-middle"><span class="block size-3 rounded-full <?= $index === 0 ? 'bg-primary' : 'bg-base-content/30' ?>"></span></div>
+                <div class="d-timeline-end ms-4 mt-1.5 <?= $index < count($history) - 1 ? 'mb-5' : 'mb-0' ?>">
                     <p class="text-xs text-base-content/60"><?= $this->escapeHtml($entry['date']) ?></p>
                     <p class="whitespace-pre-line"><?= $this->escapeHtml($entry['text']) ?></p>
                 </div>
