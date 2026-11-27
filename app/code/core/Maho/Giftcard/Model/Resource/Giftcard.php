@@ -198,4 +198,28 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
             ->order('website_id ASC');
         return array_map(intval(...), $adapter->fetchCol($select));
     }
+
+    /**
+     * The gift cards that $email sent or bought with one of $orderIds, and the gift cards that $email received.
+     *
+     * @param list<int> $orderIds
+     * @return array{sent: list<int>, received: list<int>}
+     */
+    public function getIdsOfPerson(#[\SensitiveParameter] string $email, array $orderIds): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $sent = $adapter->select()
+            ->from($this->getMainTable(), ['giftcard_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('sender_email', '?'), $email);
+        if ($orderIds !== []) {
+            $sent->orWhere('purchase_order_id IN (?)', $orderIds);
+        }
+        $received = $adapter->select()
+            ->from($this->getMainTable(), ['giftcard_id'])
+            ->where((string) $adapter->getCaseInsensitiveEqualsSql('recipient_email', '?'), $email);
+        return [
+            'sent' => array_map(intval(...), $adapter->fetchCol($sent)),
+            'received' => array_map(intval(...), $adapter->fetchCol($received)),
+        ];
+    }
 }

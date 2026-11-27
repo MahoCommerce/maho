@@ -1,0 +1,30 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Checkout_Block_Agreements $this */
+?>
+<?php if (!$this->getAgreements()) {
+return;
+} ?>
+<ol class="checkout-agreements">
+<?php foreach ($this->getAgreements() as $_a): ?>
+    <li>
+        <?php if ($_a->getContent()): ?>
+            <div class="agreement-content"<?= ($_a->getContentHeight() ? ' style="height:' . $_a->getContentHeight() . '"' : '') ?>>
+                <?php if ($_a->getIsHtml()): ?>
+                    <?= $_a->getContent() ?>
+                <?php else: ?>
+                    <?= nl2br($this->escapeHtml($_a->getContent())) ?>
+                <?php endif ?>
+            </div>
+        <?php endif ?>
+        <p class="agree">
+            <input type="checkbox" id="agreement-<?= $this->getLocation() ?>-<?= $_a->getId() ?>" name="agreement[<?= $_a->getId() ?>]" value="1" title="<?= $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox required-entry" required aria-required="true"><label for="agreement-<?= $this->getLocation() ?>-<?= $_a->getId() ?>"><?= $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
+        </p>
+    </li>
+<?php endforeach ?>
+</ol>

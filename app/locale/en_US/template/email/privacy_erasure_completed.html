@@ -1,0 +1,23 @@
+<!--@subject Your personal data has been deleted @-->
+<!--@vars
+{"var email":"Email",
+"var processed_date":"Erasure Date",
+"var request_id":"Request Number",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>Your personal data has been deleted</h1>
+            <p>On {{var processed_date}}, we deleted the personal data of {{var email}}.</p>
+            <p>We keep your orders, invoices and the terms that you accepted, for the period that the law requires.</p>
+            <p>Reference number: #{{var request_id}}</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

@@ -179,6 +179,7 @@ class Mage_Checkout_Model_Session extends Mage_Core_Model_Session_Abstract
             $xForwardIp = Mage::app()->getRequest()->getServer('HTTP_X_FORWARDED_FOR');
             $this->_quote->setXForwardedFor($xForwardIp);
         }
+        $this->_quote->setRemoteUserAgent(Mage::helper('core/http')->getHttpUserAgent() ?: null);
         return $this->_quote;
     }
 

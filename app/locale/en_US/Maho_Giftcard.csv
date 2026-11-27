@@ -1,3 +1,5 @@
+"%d gift cards changed","%d gift cards changed"
+"%d gift cards changed, %d kept until their email is sent","%d gift cards changed, %d kept until their email is sent"
 "* Required Fields","* Required Fields"
 "-- Please Select --","-- Please Select --"
 "0 = never expires. Can be overridden per product.","0 = never expires. Can be overridden per product."
@@ -116,6 +118,7 @@
 "Message:","Message:"
 "Minimum Amount","Minimum Amount"
 "New Gift Card","New Gift Card"
+"No gift cards","No gift cards"
 "No recipient email address set.","No recipient email address set."
 "Not redeemable for cash","Not redeemable for cash"
 "Optional","Optional"
@@ -169,3 +172,4 @@
 "When refunding to an expired gift card, extend expiration by this many days. 0 = no extension (card stays expired but balance is restored).","When refunding to an expired gift card, extend expiration by this many days. 0 = no extension (card stays expired but balance is restored)."
 "Your Email","Your Email"
 "Your Name","Your Name"
+"Your name, email and message on gift cards","Your name, email and message on gift cards"

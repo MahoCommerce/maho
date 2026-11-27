@@ -234,6 +234,9 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $methodCode = $this->_validateMethodCode(
                 $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
             );
+            // The review step of the checkout sends the accepted agreements. The buttons of the cart have no such step.
+            $agreementIds = $this->getRequest()->getParam('agreement_ids');
+            $agreementIds = is_array($agreementIds) ? array_values(array_map(intval(...), array_filter($agreementIds, is_numeric(...)))) : null;
 
             // Acquire lock to prevent concurrent order placement with webhook handlers
             /** @var Maho_Paypal_Helper_Data $paypalHelper */
@@ -302,7 +305,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
                     // Prepare and validate the quote BEFORE capturing. A missing or
                     // invalid shipping method must fail here, not after the money moves.
-                    $paypalHelper->prepareQuoteForPaypalOrder($quote, $paypalResult, $methodCode);
+                    $quote->setRemoteUserAgent(Mage::helper('core/http')->getHttpUserAgent() ?: null);
+                    $paypalHelper->prepareQuoteForPaypalOrder($quote, $paypalResult, $methodCode, $agreementIds);
 
                     $status = $paypalResult['status'] ?? '';
 
@@ -321,7 +325,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                         Mage::throwException(Mage::helper('paypal')->__('PayPal order could not be approved. Status: %s', $status));
                     }
 
-                    Mage::helper('paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
+                    Mage::helper('paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent, $agreementIds);
 
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);

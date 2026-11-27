@@ -1,0 +1,36 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Request_Confirm $this */
+$request = $this->getPrivacyRequest();
+if (!$request) {
+    return;
+}
+$isErasure = $request->isErasure();
+?>
+<div class="page-title">
+    <h1><?= $this->__('Confirm Your Privacy Request') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+<div class="privacy-center mx-auto flex max-w-xl flex-col gap-4 rounded-box border <?= $isErasure ? 'border-error/30 bg-error/5' : 'border-base-300 bg-base-100' ?> p-5">
+    <div class="flex items-start gap-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-full <?= $isErasure ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary' ?> [&>svg]:size-5"><?= $this->getIconSvg($isErasure ? 'user-x' : 'download') ?></span>
+        <div class="text-sm">
+            <?php if ($isErasure): ?>
+                <p class="font-semibold"><?= $this->__('Confirm that you want us to delete the personal data that we keep about %s.', $this->escapeHtml((string) $request->getEmail())) ?></p>
+                <p class="text-base-content/70"><?= $this->__('After the confirmation, you have %d days to change your mind. We keep your orders and invoices, because the law requires it.', $this->getCoolingOffDays()) ?></p>
+            <?php else: ?>
+                <p class="font-semibold"><?= $this->__('Confirm that you want a copy of the personal data that we keep about %s.', $this->escapeHtml((string) $request->getEmail())) ?></p>
+            <?php endif ?>
+        </div>
+    </div>
+    <form action="<?= $this->escapeUrl($this->getPostUrl()) ?>" method="post" data-turbo="false">
+        <?= $this->getBlockHtml('formkey') ?>
+        <input type="hidden" name="token" value="<?= $this->escapeHtml($this->getToken()) ?>">
+        <button type="submit" class="btn <?= $isErasure ? 'btn-error' : 'btn-primary' ?>"><?= $this->__('Confirm') ?></button>
+    </form>
+</div>

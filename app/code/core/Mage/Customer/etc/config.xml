@@ -378,6 +378,9 @@ SPDX-License-Identifier: AFL-3.0
                     <flowpassword>
                         <table>customer_flowpassword</table>
                     </flowpassword>
+                    <email_change>
+                        <table>customer_email_change</table>
+                    </email_change>
                 </entities>
             </customer_resource>
         </models>
@@ -421,6 +424,11 @@ SPDX-License-Identifier: AFL-3.0
                     <file>password_or_email_changed.html</file>
                     <type>html</type>
                 </customer_changed_account_password_or_email_template>
+                <customer_changed_account_email_change_template translate="label" module="customer">
+                    <label>Confirm New Email</label>
+                    <file>account_email_change_confirmation.html</file>
+                    <type>html</type>
+                </customer_changed_account_email_change_template>
                 <customer_password_link_account_new_email_template translate="label" module="customer">
                     <label>Email Link to Set Password on New Account</label>
                     <file>account_new_password_link.html</file>
@@ -595,6 +603,7 @@ SPDX-License-Identifier: AFL-3.0
             <changed_account>
                 <password_or_email_identity>general</password_or_email_identity>
                 <password_or_email_template>customer_changed_account_password_or_email_template</password_or_email_template>
+                <email_change_template>customer_changed_account_email_change_template</email_change_template>
             </changed_account>
             <default>
                 <group>1</group>

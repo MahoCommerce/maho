@@ -1,0 +1,19 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_PrivacyCenter
+ */
+
+/** @var Mage_Adminhtml_Block_Template $this */
+/** @var array<string, array{label: string, value: int}> $counters */
+$counters = $this->getData('counters') ?: [];
+?>
+<div class="d-stats d-stats-vertical lg:d-stats-horizontal w-full mb-4 border border-base-300 bg-base-100">
+    <?php foreach ($counters as $code => $counter): ?>
+        <div class="d-stat privacy-counter-<?= $this->escapeHtml($code) ?>">
+            <div class="d-stat-title"><?= $this->escapeHtml($counter['label']) ?></div>
+            <div class="d-stat-value"><?= (int) $counter['value'] ?></div>
+        </div>
+    <?php endforeach ?>
+</div>

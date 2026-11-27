@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Checkout>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </Mage_Checkout>
     </modules>
     <global>
@@ -124,6 +124,12 @@ SPDX-License-Identifier: AFL-3.0
                     <agreement_store>
                         <table>checkout_agreement_store</table>
                     </agreement_store>
+                    <agreement_version>
+                        <table>checkout_agreement_version</table>
+                    </agreement_version>
+                    <agreement_acceptance>
+                        <table>checkout_agreement_acceptance</table>
+                    </agreement_acceptance>
                 </entities>
             </checkout_resource>
         </models>

@@ -348,6 +348,8 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     $this->getRequest()->getPost(),
                     $session->getBeforeAuthUrl(),
                     eventData: ['account_controller' => $this],
+                    agreementIds: array_map(intval(...), array_keys((array) $this->getRequest()->getPost('agreement', []))),
+                    client: Mage::helper('checkout')->getAcceptanceClient(),
                 );
                 $this->_successProcessRegistration($customer);
                 return;
@@ -937,8 +939,11 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         try {
             if ($errors === []) {
+                $newEmail = (string) $customer->getEmail();
                 $this->getService()->updateAccount($customer, (string) $this->getRequest()->getPost('current_password'), requirePassword: true);
-                $session->setCustomer($customer)->addSuccess($this->__('The account information has been saved.'));
+                $session->setCustomer($customer)->addSuccess($newEmail === $customer->getEmail()
+                    ? $this->__('The account information has been saved.')
+                    : $this->__('We sent a link to %s. Your email changes when you open the link.', $newEmail));
                 $this->_redirect('customer/account');
                 return;
             }
@@ -957,6 +962,52 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
         $session->setCustomerFormData($this->getRequest()->getPost());
         $this->_redirect('*/*/edit');
+    }
+
+    /**
+     * Show the new email of the link in the confirmation email, with a button that confirms it. A GET request
+     * changes nothing, so that a mail scanner that opens the link does not confirm the change.
+     */
+    #[Maho\Config\Route('/customer/account/confirmEmail', name: 'customer.account.confirmEmail', methods: ['GET'])]
+    public function confirmEmailAction(): void
+    {
+        $token = (string) $this->getRequest()->getParam('token');
+        try {
+            $email = $this->getService()->getEmailByChangeToken($token);
+        } catch (Mage_Core_Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/login');
+            return;
+        }
+        $this->loadLayout();
+        $block = $this->getLayout()->getBlock('customerConfirmEmail');
+        if ($block) {
+            $block->setData('new_email', $email)->setData('token', $token);
+        }
+        $this->_initLayoutMessages('customer/session');
+        $this->renderLayout();
+    }
+
+    /**
+     * Change the email to the new email of the link. A visitor who is not logged in can do it too.
+     */
+    #[Maho\Config\Route('/customer/account/confirmEmailPost', name: 'customer.account.confirmEmailPost', methods: ['POST'])]
+    public function confirmEmailPostAction(): void
+    {
+        $session = $this->_getSession();
+        try {
+            $customer = $this->getService()->confirmEmailChange((string) $this->getRequest()->getPost('token'));
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+            $this->_redirect('*/*/login');
+            return;
+        }
+        // The change ends the sessions of the customer, so the customer logs in again with the new email
+        if ($session->isLoggedIn() && (int) $session->getCustomerId() === (int) $customer->getId()) {
+            $session->logout()->regenerateSessionId();
+        }
+        $session->addSuccess($this->__('We changed the email of your account. Log in with the new email.'));
+        $this->_redirect('*/*/login');
     }
 
     /**

@@ -933,6 +933,33 @@ XML;
     }
 
     /**
+     * Collapse the aliases of one inbox, so that a limit for each recipient does not miss subaddresses
+     * (local+tag@) or the dot variants of Gmail. Use the result as the value of rateLimiterBy().
+     */
+    public function normalizeEmail(#[\SensitiveParameter]
+        string $email): string
+    {
+        $email = strtolower(trim($email));
+        $atPos = strrpos($email, '@');
+        if ($atPos === false) {
+            return $email;
+        }
+
+        $local = substr($email, 0, $atPos);
+        $domain = substr($email, $atPos + 1);
+
+        $plusPos = strpos($local, '+');
+        if ($plusPos !== false) {
+            $local = substr($local, 0, $plusPos);
+        }
+        if (in_array($domain, ['gmail.com', 'googlemail.com'], true)) {
+            $local = str_replace('.', '', $local);
+        }
+
+        return $local . '@' . $domain;
+    }
+
+    /**
      * Rate limiter keyed by a caller-owned domain value (email, store id, order reference) rather
      * than by request identity. The caller passes a value it already holds; nothing is read from
      * the request. A non-positive $maxAttempts disables it.

@@ -29,6 +29,7 @@ nav:
 - Customer accounts:
   - Customer and address attributes: customer-attributes.md
   - Magic link authentication: magic-link-authentication.md
+  - Privacy Center (GDPR): privacy-center.md
   - Social login: social-login.md
   - Two-factor authentication: two-factor-authentication.md
 - Search engines & AI:

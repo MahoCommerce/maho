@@ -17,7 +17,8 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     #[\Override]
     protected $_moduleName = 'Mage_Checkout';
 
-    protected ?array $_agreements = null;
+    /** @var array<string, list<int>> */
+    protected array $_agreements = [];
 
     /**
      * Retrieve checkout session model
@@ -59,22 +60,29 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @return array|null
+     * The IDs of the active agreements that a customer must accept at $location in the current store.
+     *
+     * @param string $location a Mage_Checkout_Model_Agreement::LOCATION_* value
+     * @return list<int>
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getRequiredAgreementIds()
+    public function getRequiredAgreementIds(string $location = Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT): array
     {
-        if (is_null($this->_agreements)) {
-            if (!Mage::getStoreConfigFlag('checkout/options/enable_agreements')) {
-                $this->_agreements = [];
-            } else {
-                $this->_agreements = Mage::getModel('checkout/agreement')->getCollection()
-                    ->addStoreFilter(Mage::app()->getStore()->getId())
-                    ->addFieldToFilter('is_active', 1)
-                    ->getAllIds();
-            }
-        }
-        return $this->_agreements;
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $key = "{$location}_{$storeId}";
+        $this->_agreements[$key] ??= Mage::getService('checkout/agreement')->getActiveIds($storeId, $location);
+        return $this->_agreements[$key];
+    }
+
+    /**
+     * The client of the current request, for the log of the accepted agreements.
+     */
+    public function getAcceptanceClient(): Mage_Checkout_Model_Agreement_Acceptance
+    {
+        $http = Mage::helper('core/http');
+        return Mage::getModel('checkout/agreement_acceptance')
+            ->setRemoteIp($http->getRemoteAddr() ?: null)
+            ->setUserAgent($http->getHttpUserAgent() ?: null);
     }
 
     /**

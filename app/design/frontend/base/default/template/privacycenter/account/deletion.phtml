@@ -1,0 +1,92 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Maho_PrivacyCenter_Block_Account $this */
+$requests = $this->getPrivacyRequests(Maho_PrivacyCenter_Model_Request::TYPE_ERASURE);
+$deleted = $this->getErasureLabels();
+$kept = [$this->__('Orders and invoices'), $this->__('Shipments and refunds'), $this->__('The terms that you accepted')];
+?>
+<div class="page-title">
+    <h1><?= $this->__('Delete My Account') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->getGroupedHtml() ?>
+
+<div class="privacy-center flex flex-col gap-6">
+    <div class="grid gap-4 md:grid-cols-2">
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+            <h2 class="mb-3 font-semibold"><?= $this->__('What we delete') ?></h2>
+            <ul class="flex flex-col gap-2 text-sm">
+                <?php foreach ($deleted as $item): ?>
+                    <li class="flex items-center gap-2 [&>svg]:size-4 [&>svg]:text-error"><?= $this->getIconSvg('trash') ?><?= $this->escapeHtml($item) ?></li>
+                <?php endforeach ?>
+            </ul>
+        </div>
+        <div class="rounded-box border border-base-300 bg-base-100 p-5">
+            <h2 class="mb-3 font-semibold"><?= $this->__('What the law makes us keep') ?></h2>
+            <ul class="flex flex-col gap-2 text-sm">
+                <?php foreach ($kept as $item): ?>
+                    <li class="flex items-center gap-2 [&>svg]:size-4 [&>svg]:text-base-content/50"><?= $this->getIconSvg('shield-check') ?><?= $this->escapeHtml($item) ?></li>
+                <?php endforeach ?>
+            </ul>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-4 rounded-box border border-error/30 bg-error/5 p-5">
+        <div class="flex items-start gap-4">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-error/10 text-error [&>svg]:size-5"><?= $this->getIconSvg('user-x') ?></span>
+            <div>
+                <h2 class="text-lg font-semibold"><?= $this->__('Delete My Account') ?></h2>
+                <p class="text-sm text-base-content/70"><?= $this->__('We send you an email to confirm the request. After the confirmation, you have %d days to change your mind.', $this->getCoolingOffDays()) ?></p>
+            </div>
+        </div>
+        <?php if (array_any($requests, fn($request) => $request->isOpen())): ?>
+            <div role="status" class="alert alert-warning alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('You already asked us to delete your account. See the request below.') ?></span></div>
+        <?php else: ?>
+            <form action="<?= $this->escapeUrl($this->getActionUrl('delete')) ?>" method="post" data-turbo="false" class="flex flex-col gap-4">
+                <?= $this->getBlockHtml('formkey') ?>
+                <label class="flex cursor-pointer items-start gap-3 text-sm">
+                    <input type="checkbox" name="confirm_erasure" value="1" class="checkbox checkbox-error checkbox-sm mt-0.5" required>
+                    <span><?= $this->__('I understand that this deletes my account and my personal data.') ?></span>
+                </label>
+                <button type="submit" class="btn btn-error self-start"><?= $this->__('Delete My Account') ?></button>
+            </form>
+        <?php endif ?>
+    </div>
+
+    <?php if ($requests): ?>
+    <div class="overflow-x-auto rounded-box border border-base-300">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><?= $this->__('Requested') ?></th>
+                    <th><?= $this->__('Status') ?></th>
+                    <th><?= $this->__('Scheduled For') ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($requests as $request): ?>
+                <tr>
+                    <td><?= $this->escapeHtml($this->formatUtcDate($request->getCreatedAt(), true)) ?></td>
+                    <td><?= $this->getStatusBadgeHtml($request) ?></td>
+                    <td><?= $this->escapeHtml($this->formatUtcDate($request->getScheduledAt())) ?></td>
+                    <td class="text-right">
+                        <?php if ($request->canCancel()): ?>
+                        <form action="<?= $this->escapeUrl($this->getActionUrl('cancel')) ?>" method="post" data-turbo="false">
+                            <?= $this->getBlockHtml('formkey') ?>
+                            <input type="hidden" name="request_id" value="<?= (int) $request->getId() ?>">
+                            <button type="submit" class="btn btn-sm btn-ghost"><?= $this->__('Cancel') ?></button>
+                        </form>
+                        <?php endif ?>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+    <?php endif ?>
+</div>

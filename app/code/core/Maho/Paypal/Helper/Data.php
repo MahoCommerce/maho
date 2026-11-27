@@ -187,12 +187,15 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * @param PaypalOrder $paypalResult
+     * @param list<int>|null $agreementIds the agreements that the buyer accepted in the review step of the checkout,
+     *                                     or null when the flow has no such step, such as a webhook
      */
     public function placeOrderFromPaypalResult(
         Mage_Sales_Model_Quote $quote,
         array $paypalResult,
         string $methodCode,
         string $intent,
+        ?array $agreementIds = null,
     ): void {
         $payment = $quote->getPayment();
         $payment->setMethod($methodCode);
@@ -241,7 +244,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             /** @var Mage_Checkout_Model_Type_Onepage $onepage */
             $onepage = Mage::getSingleton('checkout/type_onepage');
             $onepage->setQuote($quote);
-            $onepage->saveOrder();
+            $onepage->saveOrder($agreementIds);
         } catch (\Throwable $e) {
             Mage::log(
                 sprintf(
@@ -305,11 +308,13 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
      * that cannot be created.
      *
      * @param PaypalOrder $paypalResult
+     * @param list<int>|null $agreementIds see placeOrderFromPaypalResult()
      */
     public function prepareQuoteForPaypalOrder(
         Mage_Sales_Model_Quote $quote,
         array $paypalResult,
         string $methodCode,
+        ?array $agreementIds = null,
     ): void {
         if (!$quote->getBillingAddress()->getFirstname()) {
             $this->importPaypalAddress($paypalResult, $quote);
@@ -328,7 +333,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             Mage::getService('checkout/cart')->selectPaymentMethod($quote, ['method' => $methodCode]);
         }
 
-        Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer);
+        Mage::getService('sales/order')->validateQuote($quote, Mage_Checkout_Model_Actor::Customer, $agreementIds);
     }
 
     /**

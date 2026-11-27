@@ -22,6 +22,9 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\RequestBody;
+use ApiPlatform\OpenApi\Model\Response as OpenApiResponse;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
@@ -110,6 +113,24 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             name: 'confirmation_link_rest',
             description: 'Send the account confirmation email again. Body: email, captchaToken',
             security: 'true',
+        ),
+        new Post(
+            uriTemplate: '/customers/email-change/confirm',
+            name: 'confirm_email_change',
+            description: 'Change the email of a customer with the token of the link in the email that confirms a new email. A token works once. The customer logs in again with the new email',
+            security: 'true',
+            status: 204,
+            output: false,
+            deserialize: false,
+            openapi: new OpenApiOperation(
+                responses: ['204' => new OpenApiResponse(description: 'The email is changed')],
+                summary: 'Confirms the new email of a customer.',
+                requestBody: new RequestBody(content: new \ArrayObject(['application/json' => ['schema' => [
+                    'type' => 'object',
+                    'properties' => ['token' => ['type' => 'string', 'description' => 'The token of the link in the confirmation email']],
+                    'required' => ['token'],
+                ]]])),
+            ),
         ),
         new Post(
             uriTemplate: '/customers/me/two-factor',
@@ -232,6 +253,14 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Send the account confirmation email again',
         ),
         new Mutation(
+            security: 'true',
+            name: 'confirmEmailChange',
+            args: [
+                'token' => ['type' => 'String!', 'description' => 'Token of the link in the email that confirms the new email'],
+            ],
+            description: 'Change the email of a customer with the token of the email that confirms the new email',
+        ),
+        new Mutation(
             name: 'setTwoFactor',
             args: [
                 'currentPassword' => ['type' => 'String!'],
@@ -303,6 +332,9 @@ class Customer extends CrudResource
     #[ApiProperty(description: 'Exclude from automatic (VAT) group changes; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?bool $disableAutoGroupChange = null;
 
+    #[ApiProperty(description: 'The new email that waits for the link of its confirmation email, when the store requires the confirmation of emails. Only GET and PUT /customers/me return it', writable: false, security: "is_granted('ROLE_CUSTOMER')", extraProperties: ['computed' => true])]
+    public ?string $pendingEmail = null;
+
     /** True when the account needs no (or has completed) email confirmation */
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isConfirmed = false;
@@ -346,6 +378,10 @@ class Customer extends CrudResource
 
     #[ApiProperty(description: 'CAPTCHA token from the client-side widget, when the store uses a CAPTCHA. For a registration, a password reset email and a confirmation email', writable: true, readable: false, extraProperties: ['computed' => true])]
     public ?string $captchaToken = null;
+
+    /** @var list<int>|null */
+    #[ApiProperty(description: 'For a registration: the IDs of the terms and conditions that the customer accepted. Each agreement that GET /checkout-agreements?location=registration lists must be in it', writable: true, readable: false, extraProperties: ['computed' => true])]
+    public ?array $agreementIds = null;
 
     #[ApiProperty(description: 'true turns two-factor authentication on, false turns it off (POST /customers/me/two-factor)', writable: true, readable: false, extraProperties: ['computed' => true])]
     public ?bool $twofaEnabled = null;

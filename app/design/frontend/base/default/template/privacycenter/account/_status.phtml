@@ -1,0 +1,25 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/**
+ * The status badge of one privacy request. The parent passes the request as privacy_request.
+ *
+ * @var Mage_Core_Block_Template $this
+ */
+$request = $this->getData('privacy_request');
+if (!$request instanceof Maho_PrivacyCenter_Model_Request) {
+    return;
+}
+$class = match ($request->getStatus()) {
+    Maho_PrivacyCenter_Model_Request::STATUS_PENDING => 'badge-warning',
+    Maho_PrivacyCenter_Model_Request::STATUS_CONFIRMED, Maho_PrivacyCenter_Model_Request::STATUS_PROCESSING => 'badge-info',
+    Maho_PrivacyCenter_Model_Request::STATUS_COMPLETED => 'badge-success',
+    default => 'badge-neutral',
+};
+$label = $request->getStatusLabel();
+?>
+<span class="badge badge-soft <?= $class ?>"><?= $this->escapeHtml($label) ?></span>

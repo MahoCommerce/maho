@@ -1478,4 +1478,9 @@
     .config-use-default .config-scope {
         color: var(--maho-ink-faint);
     }
+
+    /* The admin loads no Tailwind preflight, so an hr keeps the margin of the browser and cuts the line */
+    .d-timeline > li > hr {
+        margin: 0;
+    }
 }

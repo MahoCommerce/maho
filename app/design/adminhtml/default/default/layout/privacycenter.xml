@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout>
+    <adminhtml_customer_privacy_index>
+        <reference name="content">
+            <block type="privacycenter/adminhtml_request" name="privacycenter_request"/>
+        </reference>
+    </adminhtml_customer_privacy_index>
+
+    <adminhtml_customer_privacy_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="privacycenter/adminhtml_request_grid" name="privacycenter.request.grid"/>
+        </block>
+    </adminhtml_customer_privacy_grid>
+
+    <adminhtml_customer_privacy_view>
+        <reference name="content">
+            <block type="privacycenter/adminhtml_request_view" name="privacycenter_request_view"/>
+        </reference>
+    </adminhtml_customer_privacy_view>
+
+    <adminhtml_customer_edit>
+        <reference name="customer_edit_tabs">
+            <action method="addTabAfter"><name>privacy</name><block>privacycenter/adminhtml_customer_edit_tab_privacy</block><after>newsletter</after></action>
+        </reference>
+    </adminhtml_customer_edit>
+</layout>

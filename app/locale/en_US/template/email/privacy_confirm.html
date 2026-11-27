@@ -1,0 +1,26 @@
+<!--@subject Confirm your privacy request @-->
+<!--@vars
+{"var request_type":"Request Type",
+"var email":"Email",
+"var link_url":"Confirmation Link",
+"var link_hours":"Link Lifetime in Hours",
+"var request_id":"Request Number",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>Confirm your privacy request</h1>
+            <p>We received a request for the personal data of {{var email}}: <strong>{{var request_type}}</strong>.</p>
+            <p>To confirm the request, open this link. The link works for {{var link_hours}} hours.</p>
+            <p><a href="{{var link_url}}">Confirm my request</a></p>
+            <p>If you did not send this request, do nothing. We do not process a request that nobody confirms.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

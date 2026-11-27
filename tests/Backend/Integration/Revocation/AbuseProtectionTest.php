@@ -52,14 +52,14 @@ describe('Revocation email normalization', function () {
     });
 
     it('treats gmail plus-addresses and dotted local parts as the same recipient', function () {
-        expect($this->helper->normalizeEmail('Victim+1@Gmail.com'))->toBe('victim@gmail.com');
-        expect($this->helper->normalizeEmail('vic.tim@gmail.com'))->toBe('victim@gmail.com');
-        expect($this->helper->normalizeEmail('v.i.c.t.i.m+abc@googlemail.com'))->toBe('victim@googlemail.com');
+        expect(Mage::helper('core')->normalizeEmail('Victim+1@Gmail.com'))->toBe('victim@gmail.com');
+        expect(Mage::helper('core')->normalizeEmail('vic.tim@gmail.com'))->toBe('victim@gmail.com');
+        expect(Mage::helper('core')->normalizeEmail('v.i.c.t.i.m+abc@googlemail.com'))->toBe('victim@googlemail.com');
     });
 
     it('treats subaddressing on non-gmail domains as the same recipient but keeps dots', function () {
-        expect($this->helper->normalizeEmail('user+tag@example.com'))->toBe('user@example.com');
-        expect($this->helper->normalizeEmail('first.last@example.com'))->toBe('first.last@example.com');
+        expect(Mage::helper('core')->normalizeEmail('user+tag@example.com'))->toBe('user@example.com');
+        expect(Mage::helper('core')->normalizeEmail('first.last@example.com'))->toBe('first.last@example.com');
     });
 
     it('rate-limits normalized aliases of the same inbox together', function () {

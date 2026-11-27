@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout version="0.1.0">
+    <default>
+        <reference name="footer_links2">
+            <action method="addLink" translate="label title" module="privacycenter" ifconfig="privacy/general/enabled"><label>Privacy Request</label><url helper="privacycenter/getRequestUrl"/><title>Privacy Request</title></action>
+        </reference>
+    </default>
+
+    <customer_account>
+        <reference name="customer_account_navigation">
+            <action method="addLink" translate="label" module="privacycenter" ifconfig="privacy/general/enabled"><name>privacy_center</name><path>privacy/account</path><label>Privacy Center</label></action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="privacycenter/agreements_notice" name="privacycenter.agreements.notice" before="-" template="privacycenter/account/notice.phtml"/>
+        </reference>
+    </customer_account>
+
+    <privacy_account_index translate="label">
+        <label>Customer Privacy Center</label>
+        <update handle="customer_account"/>
+        <reference name="my.account.wrapper">
+            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/overview.phtml"/>
+        </reference>
+    </privacy_account_index>
+
+    <privacy_account_data translate="label">
+        <label>Customer Privacy Center Data Export</label>
+        <update handle="customer_account"/>
+        <reference name="my.account.wrapper">
+            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/data.phtml"/>
+        </reference>
+    </privacy_account_data>
+
+    <privacy_account_agreements translate="label">
+        <label>Customer Privacy Center Terms and Conditions</label>
+        <update handle="customer_account"/>
+        <remove name="privacycenter.agreements.notice"/>
+        <reference name="my.account.wrapper">
+            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/agreements.phtml"/>
+        </reference>
+    </privacy_account_agreements>
+
+    <privacy_account_deletion translate="label">
+        <label>Customer Privacy Center Account Deletion</label>
+        <update handle="customer_account"/>
+        <reference name="my.account.wrapper">
+            <block type="privacycenter/account" name="privacycenter.account" template="privacycenter/account/deletion.phtml"/>
+        </reference>
+    </privacy_account_deletion>
+
+    <privacy_request_index translate="label">
+        <label>Privacy Request Form</label>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block type="privacycenter/request_form" name="privacycenter.request.form" template="privacycenter/request/form.phtml"/>
+        </reference>
+    </privacy_request_index>
+
+    <privacy_request_result translate="label">
+        <label>Privacy Request Result</label>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block type="core/template" name="privacycenter.request.result" template="privacycenter/request/result.phtml"/>
+        </reference>
+    </privacy_request_result>
+
+    <privacy_request_confirmation translate="label">
+        <label>Privacy Request Confirmation</label>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block type="privacycenter/request_confirm" name="privacycenter.request.confirmation" template="privacycenter/request/confirmation.phtml"/>
+        </reference>
+    </privacy_request_confirmation>
+</layout>

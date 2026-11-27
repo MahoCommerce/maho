@@ -590,6 +590,7 @@ final class Assistant
         'blog' => 'content',
         'widget' => 'content',
         'sales' => 'sales',
+        'customer_privacy' => 'privacy',
         'customer' => 'customers',
         'customersegmentation' => 'customers',
         'promo' => 'promotions',

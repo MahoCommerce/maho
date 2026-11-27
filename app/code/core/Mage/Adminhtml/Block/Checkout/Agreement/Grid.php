@@ -87,6 +87,14 @@ class Mage_Adminhtml_Block_Checkout_Agreement_Grid extends Mage_Adminhtml_Block_
             ]);
         }
 
+        $this->addColumn('version', [
+            'header'    => Mage::helper('checkout')->__('Version'),
+            'align'     => 'right',
+            'width'     => '50px',
+            'index'     => 'version',
+            'type'      => 'number',
+        ]);
+
         $this->addColumn('is_active', [
             'header'    => Mage::helper('adminhtml')->__('Status'),
             'index'     => 'is_active',

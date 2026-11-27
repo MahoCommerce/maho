@@ -6,7 +6,7 @@ SPDX-License-Identifier: AFL-3.0
 <layout>
     <adminhtml_customer_edit>
         <reference name="customer_edit_tabs">
-            <action method="addTab"><name>social_login</name><block>sociallogin/adminhtml_customer_edit_tab_identities</block></action>
+            <action method="addTabAfter"><name>social_login</name><block>sociallogin/adminhtml_customer_edit_tab_identities</block><after>account</after></action>
         </reference>
     </adminhtml_customer_edit>
 </layout>

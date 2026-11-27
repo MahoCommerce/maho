@@ -2280,6 +2280,21 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         return $this->setData('quote_currency_code', $value);
     }
 
+    /**
+     * The user agent of the client that places the order. The quote does not save it: the order service copies it
+     * to the log of the accepted agreements.
+     */
+    public function getRemoteUserAgent(): ?string
+    {
+        $value = $this->getData('remote_user_agent');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setRemoteUserAgent(?string $value): static
+    {
+        return $this->setData('remote_user_agent', $value);
+    }
+
     public function getRemoteIp(): ?string
     {
         $value = $this->getData('remote_ip');

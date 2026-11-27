@@ -52,7 +52,15 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // read phase runs for the PUT; it has no {id} uri variable.
         if ($operationName === 'current' || $operationName === 'me_rest' || $operationName === 'update_profile') {
             $customerId = $this->getAuthenticatedCustomerId();
-            return $customerId ? $this->getItem($customerId) : null;
+            $customer = $customerId ? $this->customerService->findById($customerId) : null;
+            if ($customer === null) {
+                return null;
+            }
+            $dto = $this->mapToDto($customer);
+            if ($operationName !== 'update_profile') {
+                $dto->pendingEmail = $this->customerService->getPendingEmail($customer);
+            }
+            return $dto;
         }
 
 
@@ -105,15 +113,6 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         $value = $this->stringFilter($filters, $key);
 
         return $value === null ? null : $this->normalizeBoundary($value, $isUpperBound);
-    }
-
-    /**
-     * Get a single customer by ID
-     */
-    private function getItem(int $id): ?Customer
-    {
-        $mahoCustomer = $this->customerService->findById($id);
-        return $mahoCustomer ? $this->mapToDto($mahoCustomer) : null;
     }
 
     /**

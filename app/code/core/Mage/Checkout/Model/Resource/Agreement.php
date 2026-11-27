@@ -57,6 +57,8 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
     #[\Override]
     protected function _afterSave(Mage_Core_Model_Abstract $object)
     {
+        $this->saveVersion($object);
+
         $condition = ['agreement_id = ?' => $object->getId()];
         $this->_getWriteAdapter()->delete($this->getTable('checkout/agreement_store'), $condition);
 
@@ -68,6 +70,100 @@ class Mage_Checkout_Model_Resource_Agreement extends Mage_Core_Model_Resource_Db
         }
 
         return parent::_afterSave($object);
+    }
+
+    /**
+     * Add a version row when $agreement is new or when its text differs from the text of its last version.
+     * A caller that saves without a load (such as the admin form) sends no version, so the last version comes
+     * from the database, not from the data of $agreement.
+     */
+    protected function saveVersion(Mage_Core_Model_Abstract $agreement): void
+    {
+        $adapter = $this->_getWriteAdapter();
+        $versionTable = $this->getTable('checkout/agreement_version');
+        $last = $adapter->fetchRow(
+            $adapter->select()
+                ->from($versionTable, ['version', 'name', 'content', 'checkbox_text', 'is_html'])
+                ->where('agreement_id = ?', $agreement->getId())
+                ->order('version DESC')
+                ->limit(1),
+        );
+        $text = [
+            'name' => $agreement->getData('name'),
+            'content' => $agreement->getData('content'),
+            'checkbox_text' => $agreement->getData('checkbox_text'),
+            'is_html' => (int) (bool) $agreement->getData('is_html'),
+        ];
+        if ($last) {
+            $changed = (string) $last['name'] !== (string) $text['name']
+                || (string) $last['content'] !== (string) $text['content']
+                || (string) $last['checkbox_text'] !== (string) $text['checkbox_text']
+                || (int) $last['is_html'] !== $text['is_html'];
+            if (!$changed) {
+                $agreement->setData('version', (int) $last['version']);
+                return;
+            }
+        }
+
+        $version = $last ? (int) $last['version'] + 1 : 1;
+        $adapter->insert($versionTable, $text + [
+            'agreement_id' => (int) $agreement->getId(),
+            'version' => $version,
+            'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+        ]);
+        $adapter->update($this->getMainTable(), ['version' => $version], ['agreement_id = ?' => $agreement->getId()]);
+        $agreement->setData('version', $version);
+    }
+
+    /**
+     * The versions of the agreement with $agreementId, newest first, with the number of acceptances of each.
+     *
+     * @return list<array<string, mixed>> the columns version, created_at and acceptances
+     */
+    public function getVersionsWithAcceptanceCount(int $agreementId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        return $adapter->fetchAll(
+            $adapter->select()
+                ->from(['v' => $this->getTable('checkout/agreement_version')], ['version', 'created_at'])
+                ->joinLeft(
+                    ['a' => $this->getTable('checkout/agreement_acceptance')],
+                    'a.version_id = v.version_id',
+                    ['acceptances' => new \Maho\Db\Expr('COUNT(a.acceptance_id)')],
+                )
+                ->where('v.agreement_id = ?', $agreementId)
+                ->group(['v.version_id', 'v.version', 'v.created_at'])
+                ->order('v.version DESC'),
+        );
+    }
+
+    /**
+     * The ID of the current version of each agreement in $agreementIds.
+     *
+     * @param list<int> $agreementIds
+     * @return array<int, int> agreement ID => version ID
+     */
+    public function getCurrentVersionIds(array $agreementIds): array
+    {
+        if ($agreementIds === []) {
+            return [];
+        }
+        $adapter = $this->_getReadAdapter();
+        $rows = $adapter->fetchPairs(
+            $adapter->select()
+                ->from(['a' => $this->getMainTable()], ['agreement_id'])
+                ->join(
+                    ['v' => $this->getTable('checkout/agreement_version')],
+                    'v.agreement_id = a.agreement_id AND v.version = a.version',
+                    ['version_id'],
+                )
+                ->where('a.agreement_id IN (?)', $agreementIds),
+        );
+        $ids = [];
+        foreach ($rows as $agreementId => $versionId) {
+            $ids[(int) $agreementId] = (int) $versionId;
+        }
+        return $ids;
     }
 
     /**
