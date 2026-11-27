@@ -171,7 +171,7 @@ describe('POST /api/rest/v2/privacy-requests (guest)', function (): void {
 
         $response = apiPost('/api/rest/v2/privacy-requests/confirm', ['token' => str_repeat('a', 64)]);
 
-        expect($response['status'])->toBe(404);
+        expect($response['status'])->toBe(422);
     });
 });
 

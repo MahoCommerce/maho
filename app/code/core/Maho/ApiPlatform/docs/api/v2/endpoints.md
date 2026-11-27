@@ -692,7 +692,7 @@ A customer or a guest asks for a copy of the personal data (`export`) or for its
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | POST | `/privacy-requests` | None | Send the request of a guest. Body: `email`, `type`, `captchaToken`. The answer is a 202 with no ID, for any email |
-| POST | `/privacy-requests/confirm` | None | Confirm a request with the `token` of the link in its email. A token works once |
+| POST | `/privacy-requests/confirm` | None | Confirm a request with the `token` of the link in its email. A token works once. A token that is not valid, that a request already used or that expired gives a 422 |
 | POST | `/customers/me/privacy-requests` | Customer | Send a request of the customer. Body: `type`. The request waits for the link of its confirmation email. A second open request of the same type gives a 409 |
 | GET | `/customers/me/privacy-requests` | Customer | List the requests of the customer |
 | POST | `/customers/me/privacy-requests/{id}/cancel` | Customer | Cancel an erasure before it runs |

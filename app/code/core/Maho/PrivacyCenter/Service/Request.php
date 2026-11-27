@@ -156,7 +156,7 @@ class Maho_PrivacyCenter_Service_Request
     /**
      * The request that waits for the confirmation link with $token.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity when no pending request has the token, or the link expired
+     * @throws Mage_Core_Exception when no pending request has the token, or the link expired
      */
     public function getByConfirmationToken(#[\SensitiveParameter]
         string $token): Request
@@ -172,7 +172,7 @@ class Maho_PrivacyCenter_Service_Request
      * Confirm the request of the link with $token. An export goes to the queue. An erasure waits for its cooling-off
      * period, and for the approval of the staff when the store asks for it.
      *
-     * @throws Mage_Core_Exception_NoSuchEntity when no pending request has the token, or the link expired
+     * @throws Mage_Core_Exception when no pending request has the token, or the link expired
      */
     public function confirm(#[\SensitiveParameter]
         string $token): Request
@@ -398,7 +398,7 @@ class Maho_PrivacyCenter_Service_Request
      * The export file of the download link with $token.
      *
      * @return array{request: Request, stream: resource, size: int, filename: string}
-     * @throws Mage_Core_Exception_NoSuchEntity when no export has the token, or the link expired
+     * @throws Mage_Core_Exception when no export has the token, or the link expired
      */
     public function openExportByToken(#[\SensitiveParameter]
         string $token): array
@@ -661,14 +661,11 @@ class Maho_PrivacyCenter_Service_Request
     }
 
     /**
-     * @throws Mage_Core_Exception_NoSuchEntity
+     * @throws Mage_Core_Exception
      */
     protected function findByToken(#[\SensitiveParameter]
         string $token): Request
     {
-        if (!preg_match('/^[a-f0-9]{64}$/', $token)) {
-            throw $this->invalidLink();
-        }
         $hash = Mage::helper('privacycenter')->hashToken($token);
         $request = Mage::getModel('privacycenter/request')->load($hash, 'token_hash');
         if (!$request->getId()
@@ -680,9 +677,9 @@ class Maho_PrivacyCenter_Service_Request
         return $request;
     }
 
-    protected function invalidLink(): Mage_Core_Exception_NoSuchEntity
+    protected function invalidLink(): Mage_Core_Exception
     {
-        return new Mage_Core_Exception_NoSuchEntity(Mage::helper('privacycenter')->__('This link is not valid or has expired.'));
+        return new Mage_Core_Exception(Mage::helper('privacycenter')->__('This link is not valid or has expired.'));
     }
 
     /**

@@ -267,7 +267,7 @@ describe('the confirmation link', function () {
         expect($confirmed->getStatus())->toBe(Request::STATUS_CONFIRMED)
             ->and($confirmed->getTokenHash())->toBeNull()
             ->and($confirmed->getScheduledAt())->not->toBeNull()
-            ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+            ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.');
     });
 
     it('lets only one confirmation use the token, also when two run at the same time', function () {
@@ -286,7 +286,7 @@ describe('the confirmation link', function () {
         $token = privacyToken($request);
         $request->setTokenExpiresAt(Mage::app()->getLocale()->formatDateForDb(time() - 60))->save();
 
-        expect(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class)
+        expect(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.')
             ->and($this->service->expirePending())->toBeGreaterThanOrEqual(1)
             ->and($this->service->getById((int) $request->getId())->getStatus())->toBe(Request::STATUS_EXPIRED);
     });
@@ -346,7 +346,7 @@ describe('an export', function () {
 
         $this->service->resendEmail($request);
 
-        expect(fn() => $this->service->openExportByToken($oldToken))->toThrow(Mage_Core_Exception_NoSuchEntity::class)
+        expect(fn() => $this->service->openExportByToken($oldToken))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.')
             ->and($this->service->getById((int) $request->getId())->isExportAvailable())->toBeTrue();
     });
 
@@ -381,11 +381,11 @@ describe('an export', function () {
         fclose($file['stream']);
 
         expect((int) $file['request']->getId())->toBe((int) $request->getId())
-            ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+            ->and(fn() => $this->service->confirm($token))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.');
 
         $request->setTokenExpiresAt(Mage::app()->getLocale()->formatDateForDb(time() - 60))->save();
 
-        expect(fn() => $this->service->openExportByToken($token))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+        expect(fn() => $this->service->openExportByToken($token))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.');
     });
 
     it('finds the earlier requests of a guest email in any letter case', function () {
@@ -838,7 +838,7 @@ describe('an erasure', function () {
         $canceled = $this->service->cancelForCustomer((int) $request->getId(), (int) $customer->getId());
 
         expect($canceled->getStatus())->toBe(Request::STATUS_CANCELED)
-            ->and(fn() => $this->service->confirm(privacyToken($canceled)))->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+            ->and(fn() => $this->service->confirm(privacyToken($canceled)))->toThrow(Mage_Core_Exception::class, 'This link is not valid or has expired.');
     });
 
     it('cannot be canceled by another customer', function () {
