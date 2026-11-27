@@ -536,6 +536,33 @@ describe('an erasure', function () {
             ->toContain('The erasure failed: Pest eraser failure');
     });
 
+    it('adds no failure note to a completed erasure when an observer of privacy_after_erase throws', function () {
+        Mage::register('_singleton/pest_privacy/observer', new class {
+            public function fail(): never
+            {
+                throw new RuntimeException('Pest observer failure');
+            }
+        });
+        $path = 'global/events/privacy_after_erase/observers/pest_privacy';
+        Mage::getConfig()->setNode("$path/type", 'singleton');
+        Mage::getConfig()->setNode("$path/class", 'pest_privacy/observer');
+        Mage::getConfig()->setNode("$path/method", 'fail');
+        $this->customers[] = $customer = privacyCustomer();
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $this->service->approve($this->service->confirm(privacyToken($request)), null);
+
+        try {
+            $this->service->processDueErasures();
+        } finally {
+            unset(Mage::getConfig()->getNode('global/events/privacy_after_erase/observers')->pest_privacy);
+            Mage::unregister('_singleton/pest_privacy/observer');
+        }
+
+        $saved = $this->service->getById((int) $request->getId());
+        expect($saved->getStatus())->toBe(Request::STATUS_COMPLETED)
+            ->and((string) $saved->getAdminNote())->not->toContain('The erasure failed');
+    });
+
     it('waits while the email of the customer has an open guest order', function () {
         $this->customers[] = $customer = privacyCustomer();
         $this->orders[] = privacyGuestOrder(strtoupper((string) $customer->getEmail()), Mage_Sales_Model_Order::STATE_PROCESSING);
