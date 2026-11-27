@@ -62,6 +62,8 @@ class Mage_Customer_Service_Customer
 
     public const int RATE_LIMIT_WINDOW = 3600;
 
+    public const int EMAIL_CHANGE_LINK_HOURS = 24;
+
     /**
      * Return the customer $id for a client that already has a login, such as a token to refresh.
      *
@@ -533,11 +535,15 @@ class Mage_Customer_Service_Customer
      * $requirePassword is true, when the customer changes the email, or when the transport gives a password. The
      * storefront form requires the password for each change. The API requires it for a new email only. A store that
      * registers customers without a password does not check it.
+     * When the store requires the confirmation of emails, a new email does not change the account: the customer
+     * keeps the old email, and the new email gets a link. confirmEmailChange() changes the email when the customer
+     * opens the link. The other changes of the save apply at once.
      * A new email or a new password, set with its confirmation,
      * ends the other sessions of the customer and invalidates the password reset link, and the customer gets an
      * email about the change at the old address.
      *
-     * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit
+     * @throws Mage_Core_Exception_TooManyRequests when the client or the customer is over the password change limit,
+     *                                              or the client or the new email is over the confirmation link limit
      * @throws Mage_Core_Exception when $currentPassword is wrong
      * @throws Mage_Core_Exception_Input with one error for each problem of the customer, or when a new email has
      *                                    no $currentPassword
@@ -564,11 +570,24 @@ class Mage_Customer_Service_Customer
 
         $this->assertValid($customer, true);
 
+        $newEmail = (string) $customer->getEmail();
+        $isPendingEmail = $isChangeEmail && strcasecmp($oldEmail, $newEmail) !== 0 && $customer->isConfirmationRequired();
+        if ($isPendingEmail) {
+            $this->assertEmailNotInUse($customer);
+            Mage::getService('customer/authentication')->throwIfTooManyConfirmationLinks($newEmail);
+            $customer->setEmail($oldEmail);
+            $isChangeEmail = false;
+        }
+
         if ($isChangeEmail || $isChangePassword) {
             $this->invalidateCredentials($customer);
         }
         $customer->cleanPasswordsValidationData();
         $customer->save();
+
+        if ($isPendingEmail) {
+            $this->requestEmailChange($customer, $newEmail);
+        }
 
         if ($isChangeEmail || $isChangePassword) {
             $customer->setOldEmail($oldEmail)
@@ -581,6 +600,65 @@ class Mage_Customer_Service_Customer
             }
         }
         return $customer;
+    }
+
+    /**
+     * Change the email of the customer to the new email of the link with $token. The other sessions of the customer
+     * end, the password reset link stops working, and the customer gets an email about the change at the old address.
+     * A token works once.
+     *
+     * @throws Mage_Core_Exception when no pending change has the token, or the link expired
+     * @throws Mage_Core_Exception_Conflict when another customer of the website took the new email
+     */
+    public function confirmEmailChange(#[\SensitiveParameter]
+        string $token): Customer
+    {
+        [$change, $tokenHash] = $this->findEmailChange($token);
+        $customer = $this->findById($change['customer_id']) ?? throw $this->invalidEmailChangeLink();
+        $oldEmail = (string) $customer->getEmail();
+        $customer->setEmail($change['email']);
+
+        $resource = $this->getEmailChangeResource();
+        $resource->beginTransaction();
+        try {
+            if (!$resource->consume($change['customer_id'], $tokenHash)) {
+                throw $this->invalidEmailChangeLink();
+            }
+            $this->invalidateCredentials($customer);
+            $customer->save();
+            $resource->commit();
+        } catch (Throwable $e) {
+            $resource->rollBack();
+            throw $e;
+        }
+
+        $customer->setOldEmail($oldEmail)->setIsChangeEmail(true)->setIsChangePassword(false);
+        try {
+            $customer->sendChangedPasswordOrEmail();
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+        return $customer;
+    }
+
+    /**
+     * Return the new email of the link with $token, and do not change the account.
+     *
+     * @throws Mage_Core_Exception when no pending change has the token, or the link expired
+     */
+    public function getEmailByChangeToken(#[\SensitiveParameter]
+        string $token): string
+    {
+        return $this->findEmailChange($token)[0]['email'];
+    }
+
+    /**
+     * Return the new email that waits for the confirmation link of $customer, or null when there is none or the
+     * link expired.
+     */
+    public function getPendingEmail(Customer $customer): ?string
+    {
+        return $customer->getId() ? $this->getEmailChangeResource()->getPendingEmail((int) $customer->getId()) : null;
     }
 
     /**
@@ -717,6 +795,60 @@ class Mage_Customer_Service_Customer
     protected function sendPasswordChangedEmail(Customer $customer): void
     {
         $customer->sendPasswordReminderEmail();
+    }
+
+    /**
+     * Save $newEmail as the pending change of $customer, in place of an older one, and email the link to $newEmail.
+     */
+    protected function requestEmailChange(Customer $customer, string $newEmail): void
+    {
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = Mage::app()->getLocale()->formatDateForDb(time() + self::EMAIL_CHANGE_LINK_HOURS * 3600);
+        $this->getEmailChangeResource()->savePending((int) $customer->getId(), $newEmail, hash('sha256', $token), $expiresAt);
+        try {
+            $this->sendEmailChangeLink($customer, $newEmail, $token);
+        } catch (Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
+    /**
+     * Email the link with $token, which confirms $newEmail, to $newEmail.
+     */
+    protected function sendEmailChangeLink(
+        Customer $customer,
+        string $newEmail,
+        #[\SensitiveParameter]
+        string $token,
+    ): void {
+        $customer->sendEmailChangeConfirmation($newEmail, $token, self::EMAIL_CHANGE_LINK_HOURS);
+    }
+
+    /**
+     * Return the pending change of the link with $token, and the hash of the token.
+     *
+     * @return array{array{customer_id: int, email: string, expires_at: string}, string}
+     * @throws Mage_Core_Exception
+     */
+    protected function findEmailChange(#[\SensitiveParameter]
+        string $token): array
+    {
+        $tokenHash = hash('sha256', $token);
+        $change = $this->getEmailChangeResource()->findByTokenHash($tokenHash);
+        if ($change === null || $change['expires_at'] <= Mage_Core_Model_Locale::nowUtc()) {
+            throw $this->invalidEmailChangeLink();
+        }
+        return [$change, $tokenHash];
+    }
+
+    protected function invalidEmailChangeLink(): Mage_Core_Exception
+    {
+        return new Mage_Core_Exception(Mage::helper('customer')->__('This link is not valid or has expired.'));
+    }
+
+    protected function getEmailChangeResource(): Mage_Customer_Model_Resource_Email_Change
+    {
+        return Mage::getResourceSingleton('customer/email_change');
     }
 
     /**

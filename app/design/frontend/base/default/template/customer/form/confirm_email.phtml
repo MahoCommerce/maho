@@ -1,0 +1,24 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Customer_Block_Account_Emailchange $this */
+?>
+<div class="page-title">
+    <h1><?= $this->__('Confirm Your New Email') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->toHtml() ?>
+<form action="<?= $this->escapeUrl($this->getPostUrl()) ?>" method="post" id="confirm-email-form" class="scaffold-form" data-turbo="false">
+    <?= $this->getBlockHtml('formkey') ?>
+    <input type="hidden" name="token" value="<?= $this->escapeHtml($this->getToken()) ?>">
+    <div class="fieldset">
+        <p><?= $this->__('Confirm that %s is the new email of your account.', '<strong>' . $this->escapeHtml($this->getNewEmail()) . '</strong>') ?></p>
+        <p><?= $this->__('After the confirmation, you log in with the new email.') ?></p>
+    </div>
+    <div class="buttons-set">
+        <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Confirm')) ?>"><span><?= $this->__('Confirm') ?></span></button>
+    </div>
+</form>

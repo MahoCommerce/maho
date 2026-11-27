@@ -104,7 +104,8 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     }
 
     /**
-     * Save customer addresses and set default addresses in attributes backend
+     * Save customer addresses and set default addresses in attributes backend. A new email ends the email change that
+     * waits for its confirmation link.
      *
      * @param Mage_Customer_Model_Customer $customer
      */
@@ -112,6 +113,10 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     protected function _afterSave(\Maho\DataObject $customer): static
     {
         $this->_saveAddresses($customer);
+        $oldEmail = (string) $customer->getOrigData('email');
+        if ($oldEmail !== '' && strcasecmp($oldEmail, (string) $customer->getEmail()) !== 0) {
+            Mage::getResourceSingleton('customer/email_change')->deleteForCustomer((int) $customer->getId());
+        }
         return parent::_afterSave($customer);
     }
 

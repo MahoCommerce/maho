@@ -198,6 +198,7 @@ The cart page and the checkout of the storefront and the API use the same rules 
 | POST | `/customers/magic-link` | None | Request an email with a login link (`email`) |
 | POST | `/customers/confirm` | None | Confirm an account with the values of the confirmation email (`customerId`, `key`) |
 | POST | `/customers/confirmation-link` | None | Send the confirmation email again (`email`, `captchaToken`) |
+| POST | `/customers/email-change/confirm` | None | Change the email with the token of the link that confirms a new email (`token`). The answer is a 204 |
 | POST | `/customers/me/two-factor/secret` | Customer | Get the secret for the authenticator app (`twofaSecret` in the answer) |
 | POST | `/customers/me/two-factor` | Customer | Turn two-factor authentication on or off (`currentPassword`, `twofaEnabled`, `twofaCode`) |
 
@@ -208,6 +209,8 @@ The cart page and the checkout of the storefront and the API use the same rules 
 **Account that is not active:** a customer with `isActive` set to `false` cannot log in. The `customer` and `magic_link` grants, the GraphQL login and the social sign-in give a 403, and `/auth/refresh` gives a 401.
 
 **Profile update:** `PUT /customers/me` and the `updateCustomer` mutation need `currentPassword` when the request changes the email. Without it, the answer is a 422 with an entry for `current_password` in `details.errors`. When the request sends `currentPassword` for another change, the API checks it too. A store that registers customers without a password does not ask for it.
+
+**Email change:** when **Require Emails Confirmation** is **Yes**, a new email in `PUT /customers/me` or in the `updateCustomer` mutation does not change the account at once. The account keeps the old email, `pendingEmail` holds the new one, and the store emails a link to the new email. The other changes of the request apply at once. Another customer of the website with the new email gives a 409. The link opens the storefront with a `token` parameter, and the link works once for 24 hours. A headless storefront sends that value to `POST /customers/email-change/confirm`, or to the `confirmEmailChange` mutation. A token that is not valid, that a request already used or that expired gives a 422. When another customer took the email after the request, the answer is a 409. After the change, the storefront sessions of the customer end, the password reset link stops working, and the old email gets a notice. `GET /customers/me` returns `pendingEmail` until the customer opens the link or the link expires. When the setting is **No**, the email changes at once.
 
 **Staff update:** `PUT /customers/{id}` applies the checks of the admin customer form: the first name, the last name and the email must not be empty, and a required date of birth, tax number or gender must have a value. A problem gives a 422 with the messages in `details.errors`.
 

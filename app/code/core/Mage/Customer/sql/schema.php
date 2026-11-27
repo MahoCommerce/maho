@@ -338,4 +338,27 @@ return function (SchemaEditor $schema): void {
             ->setComment('Customer flow password')
             ->create(),
     );
+
+    $schema->addTable(
+        Table::editor()
+            ->setUnquotedName('customer_email_change')
+            ->addColumn(Schema::column('customer_id', Types::INTEGER, unsigned: true))
+            ->addColumn(Schema::column('email', Types::STRING, length: 255))
+            ->addColumn(Schema::column('token_hash', Types::STRING, length: 64, comment: 'SHA-256 of the token of the confirmation link'))
+            ->addColumn(Schema::column('expires_at', Types::DATETIME_IMMUTABLE))
+            ->addColumn(Schema::column('created_at', Types::DATETIME_IMMUTABLE, default: new CurrentTimestamp()))
+            ->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('customer_id')->create())
+            ->addIndex(Index::editor()->setUnquotedColumnNames('token_hash'))
+            ->addForeignKeyConstraint(
+                ForeignKeyConstraint::editor()
+                    ->setUnquotedReferencingColumnNames('customer_id')
+                    ->setUnquotedReferencedTableName('customer_entity')
+                    ->setUnquotedReferencedColumnNames('entity_id')
+                    ->setOnUpdateAction(ReferentialAction::CASCADE)
+                    ->setOnDeleteAction(ReferentialAction::CASCADE)
+                    ->create(),
+            )
+            ->setComment('New email of a customer that waits for the confirmation link')
+            ->create(),
+    );
 };

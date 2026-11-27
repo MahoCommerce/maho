@@ -13,6 +13,7 @@ namespace Mage\Customer\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Http\RequestInput;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -25,6 +26,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
     /** Writable fields of other operations, which an update of the account does not read. */
     private const array FIELDS_NOT_UPDATED = ['password', 'newPassword', 'captchaToken', 'twofaEnabled', 'twofaCode', 'twofaSecret'];
+
+    private const array CONFIRM_EMAIL_CHANGE_FIELDS = ['token'];
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Customer
@@ -57,6 +60,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $operationName === 'magic_link_rest', $operationName === 'requestMagicLink' => $this->requestMagicLink($args),
             $operationName === 'confirm_rest', $operationName === 'confirm' => $this->confirm($args),
             $operationName === 'confirmation_link_rest', $operationName === 'sendConfirmationLink' => $this->sendConfirmationLink($args),
+            $operationName === 'confirm_email_change', $operationName === 'confirmEmailChange' => $this->confirmEmailChange($args),
             $operationName === 'two_factor_rest', $operationName === 'setTwoFactor' => $this->setTwoFactor($args),
             $operationName === 'two_factor_secret_rest', $operationName === 'createTwoFactorSecret' => $this->createTwoFactorSecret(),
             $operation instanceof Post => $this->createCustomer($data),
@@ -191,7 +195,22 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // The API asks the current password for a new email only, and checks it when the client sends it
-        return Customer::fromModel($this->getService()->updateAccount($customer, $currentPassword, requirePassword: false));
+        $dto = Customer::fromModel($this->getService()->updateAccount($customer, $currentPassword, requirePassword: false));
+        $dto->pendingEmail = $this->getService()->getPendingEmail($customer);
+        return $dto;
+    }
+
+    /**
+     * Change the email of a customer with the token of the confirmation link. The client has no token of the customer.
+     *
+     * @param array<array-key, mixed> $body
+     */
+    private function confirmEmailChange(array $body): Customer
+    {
+        self::rejectUnknownFields($body, self::CONFIRM_EMAIL_CHANGE_FIELDS);
+        $token = RequestInput::of($body)->string('token') ?? throw ValidationException::requiredField('token');
+        $this->getService()->confirmEmailChange($token);
+        return new Customer();
     }
 
     /**

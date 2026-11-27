@@ -42,6 +42,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const string XML_PATH_GENERATE_HUMAN_FRIENDLY_ID   = 'customer/create_account/generate_human_friendly_id';
     public const string XML_PATH_CHANGED_PASSWORD_OR_EMAIL_TEMPLATE = 'customer/changed_account/password_or_email_template';
     public const string XML_PATH_CHANGED_PASSWORD_OR_EMAIL_IDENTITY = 'customer/changed_account/password_or_email_identity';
+    public const string XML_PATH_EMAIL_CHANGE_TEMPLATE = 'customer/changed_account/email_change_template';
     public const string XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
     public const string XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
     public const string XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
@@ -761,6 +762,36 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             ['customer' => $this],
             $storeId,
             $this->getOldEmail(),
+        );
+
+        return $this;
+    }
+
+    /**
+     * Send the link that confirms the new email $newEmail to $newEmail. $token is the plain token of the link, which
+     * works for $hours hours.
+     *
+     * @return $this
+     */
+    public function sendEmailChangeConfirmation(
+        string $newEmail,
+        #[\SensitiveParameter]
+        string $token,
+        int $hours,
+    ): static {
+        $storeId = $this->getStoreId() ?: $this->_getWebsiteStoreId();
+        $linkUrl = Mage::app()->getStore($storeId)->getUrl('customer/account/confirmEmail', [
+            '_secure' => true,
+            '_nosid' => true,
+            '_query' => ['token' => $token],
+        ]);
+
+        $this->_sendEmailTemplate(
+            self::XML_PATH_EMAIL_CHANGE_TEMPLATE,
+            self::XML_PATH_CHANGED_PASSWORD_OR_EMAIL_IDENTITY,
+            ['customer' => $this, 'new_email' => $newEmail, 'link_url' => $linkUrl, 'link_hours' => $hours],
+            $storeId,
+            $newEmail,
         );
 
         return $this;

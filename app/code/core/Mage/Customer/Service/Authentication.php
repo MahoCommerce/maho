@@ -297,17 +297,27 @@ class Mage_Customer_Service_Authentication
         $this->emailConfirmationLink($email, $websiteId);
     }
 
+    /**
+     * Count one confirmation link to $email, for the client and for $email.
+     *
+     * @throws Mage_Core_Exception_TooManyRequests when the client or $email is over the confirmation link limit
+     */
+    public function throwIfTooManyConfirmationLinks(#[\SensitiveParameter]
+        string $email): void
+    {
+        $core = Mage::helper('core');
+        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
+        $limit = (int) Mage::getStoreConfig(self::XML_PATH_CONFIRMATION_LINK_RATE_LIMIT);
+        $core->rateLimiter('confirmation_link', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip)->attemptOrThrow();
+        $core->rateLimiterBy('confirmation_link', 'confirmation_link:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW)->attemptOrThrow();
+    }
+
     protected function emailConfirmationLink(
         #[\SensitiveParameter]
         string $email,
         int $websiteId,
     ): void {
-        $core = Mage::helper('core');
-
-        // The limit of the client comes first: a client that sends many addresses gets past the limit of one address
-        $limit = (int) Mage::getStoreConfig(self::XML_PATH_CONFIRMATION_LINK_RATE_LIMIT);
-        $core->rateLimiter('confirmation_link', $limit, self::RATE_LIMIT_WINDOW, RateLimitScope::Ip)->attemptOrThrow();
-        $core->rateLimiterBy('confirmation_link', 'confirmation_link:email:' . strtolower($email), $limit, self::RATE_LIMIT_WINDOW)->attemptOrThrow();
+        $this->throwIfTooManyConfirmationLinks($email);
 
         $customer = Mage::getModel('customer/customer')->setWebsiteId($websiteId)->loadByEmail($email);
         if ($customer->getId() && $customer->getConfirmation()) {
