@@ -514,9 +514,10 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         $this->_numBoxes = 1;
         $weight = (float) $this->convertWeightToLbs($weight);
         $maxPackageWeight = (float) $this->getConfigData('max_package_weight');
-        if ($weight > $maxPackageWeight && $maxPackageWeight != 0) {
-            $this->_numBoxes = (int) ceil($weight / $maxPackageWeight);
-            $weight = $weight / $this->_numBoxes;
+        if ($maxPackageWeight > 0.0 && $weight > $maxPackageWeight) {
+            $boxes = $weight / $maxPackageWeight;
+            $this->_numBoxes = (int) ceil($boxes - 2 * PHP_FLOAT_EPSILON * $boxes);
+            $weight = min($weight / $this->_numBoxes, $maxPackageWeight);
         }
         return $weight;
     }

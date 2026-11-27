@@ -150,39 +150,9 @@ class Mage_Shipping_Model_Shipping
             if (!$result instanceof Mage_Shipping_Model_Rate_Result_Error) {
                 if ($carrier->getConfigData('shipment_requesttype')) {
                     $packages = $this->composePackagesForCarrier($carrier, $request);
-                    if (!empty($packages)) {
-                        $sumResults = [];
-                        foreach ($packages as $weight => $packageCount) {
-                            //clone carrier for multi-requests
-                            $carrierObj = clone $carrier;
-                            $request->setPackageWeight($weight);
-                            $result = $carrierObj->collectRates($request);
-                            if (!$result) {
-                                return $this;
-                            }
-                            $result->updateRatePrice($packageCount);
-                            $sumResults[] = $result;
-                        }
-                        if (count($sumResults) > 1) {
-                            $result = [];
-                            foreach ($sumResults as $res) {
-                                if (empty($result)) {
-                                    $result = $res;
-                                    continue;
-                                }
-                                foreach ($res->getAllRates() as $method) {
-                                    foreach ($result->getAllRates() as $resultMethod) {
-                                        if ($method->getMethod() == $resultMethod->getMethod()) {
-                                            $resultMethod->setPrice($method->getPrice() + $resultMethod->getPrice());
-                                            continue;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        $result = $carrier->collectRates($request);
-                    }
+                    $result = empty($packages)
+                        ? $carrier->collectRates($request)
+                        : $this->collectPackageRates($carrier, $request, $packages);
                 } else {
                     $result = $carrier->collectRates($request);
                 }
@@ -202,6 +172,78 @@ class Mage_Shipping_Model_Shipping
         return $this;
     }
 
+    /** @param array<int|string, int> $packages */
+    private function collectPackageRates(
+        Mage_Shipping_Model_Carrier_Abstract $carrier,
+        Mage_Shipping_Model_Rate_Request $request,
+        array $packages,
+    ): ?Mage_Shipping_Model_Rate_Result {
+        $result = Mage::getModel('shipping/rate_result');
+        $rates = null;
+        $errors = [];
+        $singlePackage = count($packages) === 1;
+        foreach ($packages as $weight => $packageCount) {
+            $packageRequest = clone $request;
+            $packageRequest->setPackageWeight($weight);
+            $packageResult = (clone $carrier)->collectRates($packageRequest);
+            if ($packageResult instanceof Mage_Shipping_Model_Rate_Result_Error) {
+                $packageResult = Mage::getModel('shipping/rate_result')->append($packageResult);
+            }
+            if (!$packageResult instanceof Mage_Shipping_Model_Rate_Result) {
+                return null;
+            }
+            if ($singlePackage && $packageCount === 1) {
+                return $packageResult;
+            }
+
+            if ($packageResult->getError()) {
+                $result->setError(true);
+            }
+            foreach ($packageResult->getAllRates() as $rate) {
+                if ($rate instanceof Mage_Shipping_Model_Rate_Result_Error) {
+                    $errors[$rate->getCarrier() . '_' . $rate->getErrorMessage()] ??= $rate;
+                }
+            }
+
+            $packageRates = $this->pricePackageMethods($packageResult, $packageCount);
+            if ($rates === null) {
+                $rates = $packageRates;
+                continue;
+            }
+            $rates = array_intersect_key($rates, $packageRates);
+            foreach ($rates as $code => $rate) {
+                $packageRate = $packageRates[$code];
+                $rate->setPrice($rate->getPrice() + $packageRate->getPrice());
+                $cost = $rate->getCost();
+                $packageCost = $packageRate->getCost();
+                $rate->setCost($cost === null || $packageCost === null ? null : $cost + $packageCost);
+            }
+        }
+        foreach ($rates ?? [] as $rate) {
+            $result->append($rate);
+        }
+        foreach ($errors as $error) {
+            $result->append($error);
+        }
+        return $result;
+    }
+
+    /** @return array<string, Mage_Shipping_Model_Rate_Result_Method> */
+    private function pricePackageMethods(Mage_Shipping_Model_Rate_Result $packageResult, int $packageCount): array
+    {
+        $rates = [];
+        foreach ($packageResult->getAllRates() as $rate) {
+            if (!$rate instanceof Mage_Shipping_Model_Rate_Result_Method || $rate->getPrice() === null) {
+                continue;
+            }
+            $cost = $rate->getCost();
+            $rates[$rate->getCarrier() . '_' . $rate->getMethod()] = (clone $rate)
+                ->setPrice($rate->getPrice() * $packageCount)
+                ->setCost(is_numeric($cost) ? (float) $cost * $packageCount : null);
+        }
+        return $rates;
+    }
+
     /**
      * Compose Packages For Carrier.
      * Divides order into items and items into parts if it's necessary
@@ -216,6 +258,11 @@ class Mage_Shipping_Model_Shipping
         $fullItems  = [];
 
         $maxWeight  = (float) $carrier->getConfigData('max_package_weight');
+        $carrierUnitsPerStoreUnit = (float) $carrier->convertWeightToLbs(1.0);
+        if ($carrierUnitsPerStoreUnit > 0.0) {
+            $maxWeight /= $carrierUnitsPerStoreUnit;
+        }
+        $roundingTolerance = 2 * PHP_FLOAT_EPSILON * abs($maxWeight);
 
         foreach ($allItems as $item) {
             if ($item->getProductType() == Mage_Catalog_Model_Product_Type::TYPE_BUNDLE
@@ -242,22 +289,28 @@ class Mage_Shipping_Model_Shipping
             if ($item->getIsQtyDecimal() && $item->getProductType() != Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
                 $stockItem = $item->getProduct()->getStockItem();
                 if ($stockItem->getIsDecimalDivided()) {
-                    if ($stockItem->getEnableQtyIncrements() && $stockItem->getQtyIncrements()) {
-                        $itemWeight = $itemWeight * $stockItem->getQtyIncrements();
-                        $qty        = round(($item->getWeight() / $itemWeight) * $qty);
+                    $qtyIncrement = $stockItem->getEnableQtyIncrements() ? $stockItem->getQtyIncrements() : false;
+                    $parent = $item->getParentItem();
+                    $orderedQty = $parent ? $item->getTotalQty() : $qty;
+                    $incrementCount = $qtyIncrement ? $orderedQty / $qtyIncrement : 0.0;
+                    $wholeIncrements = round($incrementCount);
+                    // Bundle selections can be ordered outside the product's quantity increments.
+                    if ($qtyIncrement && (!$parent
+                        || abs($incrementCount - $wholeIncrements) <= 2 * PHP_FLOAT_EPSILON * abs($incrementCount))
+                    ) {
+                        $itemWeight *= $qtyIncrement;
+                        $qty        = $wholeIncrements;
                         $changeQty  = false;
                     } else {
                         $itemWeight = $itemWeight * $item->getQty();
-                        if ($itemWeight > $maxWeight) {
+                        if ($maxWeight > 0 && $itemWeight > $maxWeight) {
                             $qtyItem = floor($itemWeight / $maxWeight);
                             $decimalItems[] = ['weight' => $maxWeight, 'qty' => $qtyItem];
-                            $weightItem = Mage::helper('core')->getExactDivision($itemWeight, $maxWeight);
-                            if ($weightItem) {
-                                $decimalItems[] = ['weight' => $weightItem, 'qty' => 1];
+                            $weightItem = $itemWeight - $qtyItem * $maxWeight;
+                            if ($weightItem > 2 * PHP_FLOAT_EPSILON * $itemWeight) {
+                                $decimalItems[] = ['weight' => min($weightItem, $maxWeight), 'qty' => 1];
                             }
                             $checkWeight = false;
-                        } else {
-                            $itemWeight = $itemWeight * $item->getQty();
                         }
                     }
                 } else {
@@ -266,7 +319,10 @@ class Mage_Shipping_Model_Shipping
             }
 
             if ($checkWeight && $maxWeight && $itemWeight > $maxWeight) {
-                return [];
+                if ($itemWeight - $maxWeight > $roundingTolerance) {
+                    return [];
+                }
+                $itemWeight = $maxWeight;
             }
 
             if ($changeQty && !$item->getParentItem() && $item->getIsQtyDecimal()
@@ -304,6 +360,7 @@ class Mage_Shipping_Model_Shipping
         $pieces = [];
         if (!empty($items)) {
             $sumWeight = 0;
+            $roundingTolerance = 2 * PHP_FLOAT_EPSILON * abs($maxWeight);
 
             $reverseOrderItems = $items;
             arsort($reverseOrderItems);
@@ -314,16 +371,21 @@ class Mage_Shipping_Model_Shipping
                 }
                 unset($items[$key]);
                 $sumWeight = $weight;
+                $weightCorrection = 0.0;
                 foreach ($items as $keyItem => $weightItem) {
-                    if (($sumWeight + $weightItem) < $maxWeight) {
+                    $weightToAdd = $weightItem - $weightCorrection;
+                    $weightWithItem = $sumWeight + $weightToAdd;
+                    if ($weightWithItem < $maxWeight - $roundingTolerance) {
                         unset($items[$keyItem]);
-                        $sumWeight += $weightItem;
-                    } elseif (($sumWeight + $weightItem) > $maxWeight) {
+                        // Compensate for rounding when adding the next item.
+                        $weightCorrection = ($weightWithItem - $sumWeight) - $weightToAdd;
+                        $sumWeight = $weightWithItem;
+                    } elseif ($weightWithItem > $maxWeight + $roundingTolerance) {
                         $pieces[] = (string) (float) $sumWeight;
                         break;
                     } else {
                         unset($items[$keyItem]);
-                        $pieces[] = (string) (float) ($sumWeight + $weightItem);
+                        $pieces[] = (string) (float) $maxWeight;
                         $sumWeight = 0;
                         break;
                     }

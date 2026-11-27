@@ -172,6 +172,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
         }
 
         $maxAllowedWeight   = (float) $this->getConfigData('max_package_weight');
+        $roundingTolerance  = 2 * PHP_FLOAT_EPSILON * abs($maxAllowedWeight);
         $errorMsg           = '';
         $configErrorMsg     = $this->getConfigData('specificerrmsg');
         $defaultErrorMsg    = Mage::helper('shipping')->__('The shipping module is not available.');
@@ -193,7 +194,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
                     $weight = $weight * $item->getQty();
                 }
 
-                if ($doValidation && $weight > $maxAllowedWeight) {
+                if ($doValidation && $maxAllowedWeight !== 0.0
+                    && (float) $this->convertWeightToLbs($weight) - $maxAllowedWeight > $roundingTolerance
+                ) {
                     $errorMsg = $configErrorMsg ?: $defaultErrorMsg;
                     break;
                 }
