@@ -490,7 +490,9 @@ class Maho_PrivacyCenter_Service_Request
                 }
             } catch (Throwable $e) {
                 Mage::logException($e);
-                $this->save($request->appendAdminNote(Mage::helper('privacycenter')->__('The erasure failed: %s', $e->getMessage())));
+                if ($request->getStatus() !== Request::STATUS_COMPLETED) {
+                    $this->save($request->appendAdminNote(Mage::helper('privacycenter')->__('The erasure failed: %s', $e->getMessage())));
+                }
             }
         }
         return $count;

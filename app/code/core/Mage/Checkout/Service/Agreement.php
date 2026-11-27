@@ -161,21 +161,11 @@ class Mage_Checkout_Service_Agreement
     }
 
     /**
-     * The acceptances of the customer with $customerId, or of $email when $customerId is null, newest first.
+     * The acceptances of the customer with $customerId, newest first.
      */
-    public function getAcceptances(?int $customerId, #[\SensitiveParameter]
-        ?string $email = null): Mage_Checkout_Model_Resource_Agreement_Acceptance_Collection
+    public function getAcceptances(int $customerId): Mage_Checkout_Model_Resource_Agreement_Acceptance_Collection
     {
-        $collection = $this->getAcceptanceCollection();
-        if ($customerId !== null) {
-            $collection->addFieldToFilter('main_table.customer_id', $customerId);
-        } else {
-            $collection->getSelect()->where(
-                (string) $collection->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
-                (string) $email,
-            );
-        }
-        return $collection;
+        return $this->getAcceptanceCollection()->addFieldToFilter('main_table.customer_id', $customerId);
     }
 
     /**

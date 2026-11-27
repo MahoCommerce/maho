@@ -28,6 +28,9 @@ $sections = $this->getExportLabels();
                 <span class="badge badge-ghost"><?= $this->escapeHtml($section) ?></span>
             <?php endforeach ?>
         </div>
+        <?php if (array_find($requests, fn($request) => $request->isExportAvailable())): ?>
+            <div role="status" class="alert alert-success alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('Your data is ready. Open the link in the email that we sent you to download it.') ?></span></div>
+        <?php endif ?>
         <?php $open = array_find($requests, fn($request) => $request->isOpen()) ?>
         <?php if ($open?->getStatus() === Maho_PrivacyCenter_Model_Request::STATUS_PENDING): ?>
             <div role="status" class="alert alert-warning alert-soft [&>svg]:size-5"><?= $this->getIconSvg('mail') ?><span><?= $this->__('We sent you an email. Open the link in the email to confirm the request.') ?></span></div>

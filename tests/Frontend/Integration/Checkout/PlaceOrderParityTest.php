@@ -394,6 +394,26 @@ describe('the terms and conditions', function () {
                 ->and($acceptance->getVersionId())->toBeGreaterThan(0);
         }
     });
+
+    it('keeps no proof of an agreement that the checkout does not show', function () {
+        [, $apiCart] = $this->carts;
+        $agreementId = (int) $this->agreement->getId();
+        $registrationOnly = Mage::getModel('checkout/agreement')->setData([
+            'name' => 'Pest registration terms', 'content' => 'Terms', 'checkbox_text' => 'I agree', 'is_active' => 1,
+            'stores' => [0], 'show_on_checkout' => 0, 'show_on_registration' => 1,
+        ])->save();
+        try {
+            $api = placeOrderViaApi($apiCart, ['agreementIds' => [$agreementId, (int) $registrationOnly->getId()]]);
+            $acceptances = Mage::getResourceModel('checkout/agreement_acceptance_collection')
+                ->addFieldToFilter('order_id', (int) placeOrderOf($apiCart)->getId());
+            $ids = array_map(intval(...), $acceptances->getColumnValues('agreement_id'));
+        } finally {
+            $registrationOnly->delete();
+        }
+
+        expect($api['status'])->toBe(200)
+            ->and($ids)->toBe([$agreementId]);
+    });
 });
 
 it('refuses a placement while another connection places the same cart, on both transports', function () {

@@ -129,6 +129,21 @@ function privacyGiftcard(array $data): Maho_Giftcard_Model_Giftcard
     return $giftcard->save();
 }
 
+final class PestFailingEraser extends Maho_PrivacyCenter_Model_Eraser_AbstractEraser
+{
+    #[\Override]
+    public function getLabel(): string
+    {
+        return 'Pest';
+    }
+
+    #[\Override]
+    public function erase(Maho_PrivacyCenter_Model_Subject $subject): string
+    {
+        throw new RuntimeException('Pest eraser failure');
+    }
+}
+
 beforeEach(function () {
     $this->config = [
         Maho_PrivacyCenter_Helper_Data::XML_PATH_ENABLED => '1',
@@ -503,6 +518,22 @@ describe('an erasure', function () {
         $this->service->erase($request, force: true);
 
         expect($request->getStatus())->toBe(Request::STATUS_COMPLETED);
+    });
+
+    it('adds a note to the request when an eraser fails', function () {
+        Mage::getConfig()->setNode('global/privacycenter/erasers/pest_failing', PestFailingEraser::class);
+        $this->customers[] = $customer = privacyCustomer();
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $this->service->approve($this->service->confirm(privacyToken($request)), null);
+
+        try {
+            $this->service->processDueErasures();
+        } finally {
+            unset(Mage::getConfig()->getNode('global/privacycenter/erasers')->pest_failing);
+        }
+
+        expect((string) $this->service->getById((int) $request->getId())->getAdminNote())
+            ->toContain('The erasure failed: Pest eraser failure');
     });
 
     it('waits while the email of the customer has an open guest order', function () {

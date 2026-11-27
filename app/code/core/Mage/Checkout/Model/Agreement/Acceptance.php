@@ -135,7 +135,7 @@ class Mage_Checkout_Model_Agreement_Acceptance extends Mage_Core_Model_Abstract
     }
 
     /**
-     * The name of the accepted version. Only a collection of Mage_Checkout_Service_Agreement::getAcceptances() has it.
+     * The name of the accepted version. Only a collection of Mage_Checkout_Service_Agreement::getAcceptanceCollection() has it.
      */
     public function getAgreementName(): ?string
     {
@@ -144,7 +144,7 @@ class Mage_Checkout_Model_Agreement_Acceptance extends Mage_Core_Model_Abstract
     }
 
     /**
-     * The number of the accepted version. Only a collection of Mage_Checkout_Service_Agreement::getAcceptances() has it.
+     * The number of the accepted version. Only a collection of Mage_Checkout_Service_Agreement::getAcceptanceCollection() has it.
      */
     public function getAgreementVersion(): ?int
     {

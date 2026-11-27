@@ -198,7 +198,11 @@ describe('the acceptance of a customer', function () {
         Mage::register('isSecureArea', true, true);
         $customer->delete();
         Mage::unregister('isSecureArea');
-        $kept = Mage::getService('checkout/agreement')->getAcceptances(null, strtoupper((string) $customer->getEmail()));
+        $kept = Mage::getService('checkout/agreement')->getAcceptanceCollection();
+        $kept->getSelect()->where(
+            (string) $kept->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
+            strtoupper((string) $customer->getEmail()),
+        );
 
         expect($kept->getSize())->toBe(1)
             ->and($kept->getFirstItem()->getCustomerId())->toBeNull()
