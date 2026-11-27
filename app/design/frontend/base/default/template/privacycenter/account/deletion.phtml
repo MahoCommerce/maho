@@ -16,8 +16,6 @@ $kept = [$this->__('Orders and invoices'), $this->__('Shipments and refunds'), $
 <?= $this->getMessagesBlock()->getGroupedHtml() ?>
 
 <div class="privacy-center flex flex-col gap-6">
-    <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
-
     <div class="grid gap-4 md:grid-cols-2">
         <div class="rounded-box border border-base-300 bg-base-100 p-5">
             <h2 class="mb-3 font-semibold"><?= $this->__('What we delete') ?></h2>
@@ -91,4 +89,7 @@ $kept = [$this->__('Orders and invoices'), $this->__('Shipments and refunds'), $
         </table>
     </div>
     <?php endif ?>
+</div>
+<div class="buttons-set">
+    <p class="back-link"><a href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><small>&laquo; </small><?= $this->__('Back to the Privacy Center') ?></a></p>
 </div>

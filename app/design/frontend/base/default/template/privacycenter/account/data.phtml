@@ -15,8 +15,6 @@ $sections = $this->getExportLabels();
 <?= $this->getMessagesBlock()->getGroupedHtml() ?>
 
 <div class="privacy-center flex flex-col gap-6">
-    <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
-
     <div class="flex flex-col gap-4 rounded-box border border-base-300 bg-base-100 p-5">
         <div class="flex items-start gap-4">
             <span class="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary [&>svg]:size-5"><?= $this->getIconSvg('file-zip') ?></span>
@@ -69,4 +67,7 @@ $sections = $this->getExportLabels();
         </table>
     </div>
     <?php endif ?>
+</div>
+<div class="buttons-set">
+    <p class="back-link"><a href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><small>&laquo; </small><?= $this->__('Back to the Privacy Center') ?></a></p>
 </div>

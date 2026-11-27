@@ -16,7 +16,6 @@ $acceptances = $this->getAcceptances();
 
 <div class="privacy-center flex flex-col gap-6">
     <?php if (Mage::helper('privacycenter')->isEnabled()): ?>
-    <a class="link link-hover inline-flex items-center gap-1 text-sm [&>svg]:size-4 [&>svg]:rotate-180" href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><?= $this->getIconSvg('arrow-right') ?><?= $this->__('Back to the Privacy Center') ?></a>
     <?php endif ?>
 
     <?php if ($pending): ?>
@@ -28,7 +27,7 @@ $acceptances = $this->getAcceptances();
                 <p class="text-sm text-base-content/70"><?= $this->__('Our terms and conditions changed. Read them and accept them.') ?></p>
             </div>
         </div>
-        <form action="<?= $this->escapeUrl($this->getActionUrl('acceptAgreements')) ?>" method="post" data-turbo="false">
+        <form action="<?= $this->escapeUrl($this->getActionUrl('accept')) ?>" method="post" data-turbo="false">
             <?= $this->getBlockHtml('formkey') ?>
             <?= $this->getLayout()->createBlock('checkout/agreements')
                 ->setTemplate('checkout/agreements/form.phtml')
@@ -69,4 +68,7 @@ $acceptances = $this->getAcceptances();
             <p class="rounded-box bg-base-200 p-5 text-sm text-base-content/70"><?= $this->__('You have not accepted any terms and conditions yet.') ?></p>
         <?php endif ?>
     </div>
+</div>
+<div class="buttons-set">
+    <p class="back-link"><a href="<?= $this->escapeUrl($this->getOverviewUrl()) ?>"><small>&laquo; </small><?= $this->__('Back to the Privacy Center') ?></a></p>
 </div>
