@@ -119,9 +119,4 @@ class Maho_PrivacyCenter_Block_Account extends Mage_Core_Block_Template
     {
         return $this->getUrl("privacy/account/{$action}", $params + ['_secure' => true]);
     }
-
-    public function getOverviewUrl(): string
-    {
-        return $this->getUrl('privacy/account', ['_secure' => true]);
-    }
 }
