@@ -26,6 +26,7 @@ class Maho_PrivacyCenter_Model_Eraser_Logs extends Maho_PrivacyCenter_Model_Eras
         $adapter = $this->getConnection();
         $count = 0;
         if (!$subject->isGuest()) {
+            $count += $this->deleteVisits($subject->customerId);
             foreach (['log/customer', 'log/visitor_online'] as $alias) {
                 $table = $this->getTable($alias);
                 if ($adapter->isTableExists($table)) {
@@ -41,6 +42,30 @@ class Maho_PrivacyCenter_Model_Eraser_Logs extends Maho_PrivacyCenter_Model_Eras
         );
         $count += $this->deleteEmailLogs($subject->email);
         return Mage::helper('privacycenter')->__('%d log entries deleted', $count);
+    }
+
+    /**
+     * Delete the visits that log_customer links to $customerId: the IP address, the browser and the pages of each
+     * visit. Run it before the delete of log_customer, which holds the only link.
+     */
+    protected function deleteVisits(int $customerId): int
+    {
+        $adapter = $this->getConnection();
+        $customerTable = $this->getTable('log/customer');
+        if (!$adapter->isTableExists($customerTable)) {
+            return 0;
+        }
+        $visitorIds = array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()->from($customerTable, ['visitor_id'])->where('customer_id = ?', $customerId),
+        ));
+        if ($visitorIds === []) {
+            return 0;
+        }
+        $count = 0;
+        foreach (['log/url_table', 'log/visitor_info', 'log/quote_table', 'log/visitor'] as $alias) {
+            $count += $adapter->delete($this->getTable($alias), ['visitor_id IN (?)' => $visitorIds]);
+        }
+        return $count;
     }
 
     /**

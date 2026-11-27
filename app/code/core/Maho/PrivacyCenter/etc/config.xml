@@ -71,6 +71,7 @@ SPDX-License-Identifier: AFL-3.0
                 <reviews>privacycenter/eraser_reviews</reviews>
                 <newsletter>privacycenter/eraser_newsletter</newsletter>
                 <logs>privacycenter/eraser_logs</logs>
+                <orders>privacycenter/eraser_orders</orders>
                 <customer>privacycenter/eraser_customer</customer>
             </erasers>
         </privacycenter>

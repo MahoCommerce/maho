@@ -110,6 +110,25 @@ function privacySubscriberRow(int $customerId, string $email): Mage_Newsletter_M
         ->save();
 }
 
+/**
+ * A gift card with a value of 50 and the sender and recipient data in $data.
+ *
+ * @param array<string, string> $data
+ */
+function privacyGiftcard(array $data): Maho_Giftcard_Model_Giftcard
+{
+    $giftcard = Mage::getModel('giftcard/giftcard')
+        ->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+        ->setWebsiteIds([1])
+        ->setBalance(50.00)
+        ->setInitialBalance(50.00)
+        ->setMessage('Enjoy');
+    foreach ($data as $key => $value) {
+        $giftcard->setData($key, $value);
+    }
+    return $giftcard->save();
+}
+
 beforeEach(function () {
     $this->config = [
         Maho_PrivacyCenter_Helper_Data::XML_PATH_ENABLED => '1',
@@ -385,6 +404,24 @@ describe('an export', function () {
         expect($references)->toBe(['of-the-email', 'of-the-order']);
     });
 
+    it('holds the gift cards that the customer sent and received, with the balance of a received card only, and never a code', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $email = (string) $customer->getEmail();
+        $sent = privacyGiftcard(['sender_email' => strtoupper($email), 'recipient_email' => 'friend@example.com']);
+        $received = privacyGiftcard(['sender_email' => 'friend@example.com', 'recipient_email' => $email]);
+
+        $data = Mage::getModel('giftcard/privacy_exporter')->export(privacySubject($customer));
+        $sent->delete();
+        $received->delete();
+        $byRecipient = array_column($data, null, 'recipient_email');
+
+        expect($data)->toHaveCount(2)
+            ->and($byRecipient['friend@example.com'])->not->toHaveKey('balance')
+            ->and($byRecipient[$email])->toHaveKey('balance')
+            ->and(json_encode($data))->not->toContain((string) $sent->getCode())
+            ->and(json_encode($data))->not->toContain((string) $received->getCode());
+    });
+
     it('deletes the file when the download link expires', function () {
         $this->customers[] = $customer = privacyCustomer();
         $request = privacyConfirmedExport($customer);
@@ -554,6 +591,124 @@ describe('an erasure', function () {
         $adapter->delete($table, ['log_id IN (?)' => [$namedLogId, $otherLogId]]);
 
         expect(array_map(intval(...), $remaining))->toBe([$otherLogId]);
+    });
+
+    it('clears the IP address, the birth date and the gender of the orders, and keeps the invoice data', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->customers[] = $other = privacyCustomer();
+        $this->orders[] = $order = privacyOrder($customer, Mage_Sales_Model_Order::STATE_COMPLETE)
+            ->setRemoteIp('203.0.113.7')
+            ->setXForwardedFor('198.51.100.1')
+            ->setCustomerDob('1980-01-02 00:00:00')
+            ->setCustomerGender(2)
+            ->setCustomerTaxvat('IT01234567890')
+            ->save();
+        $this->orders[] = $guestOrder = privacyGuestOrder(strtoupper((string) $customer->getEmail()), Mage_Sales_Model_Order::STATE_COMPLETE)
+            ->setRemoteIp('203.0.113.8')
+            ->save();
+        $this->orders[] = $otherOrder = privacyOrder($other, Mage_Sales_Model_Order::STATE_COMPLETE)->setRemoteIp('203.0.113.9')->save();
+        $address = Mage::getModel('sales/order_address')->setData([
+            'parent_id' => (int) $order->getId(),
+            'address_type' => 'billing',
+            'customer_id' => (int) $customer->getId(),
+            'firstname' => 'Pri',
+            'lastname' => 'Vacy',
+        ])->save();
+
+        Mage::getModel('privacycenter/eraser_orders')->erase(privacySubject($customer));
+        $keptOrder = Mage::getModel('sales/order')->load($order->getId());
+        $keptAddress = Mage::getModel('sales/order_address')->load($address->getId());
+
+        expect($keptOrder->getRemoteIp())->toBeNull()
+            ->and($keptOrder->getXForwardedFor())->toBeNull()
+            ->and($keptOrder->getCustomerDob())->toBeNull()
+            ->and($keptOrder->getCustomerGender())->toBeNull()
+            ->and($keptOrder->getCustomerTaxvat())->toBe('IT01234567890')
+            ->and($keptOrder->getCustomerEmail())->toBe($customer->getEmail())
+            ->and(Mage::getModel('sales/order')->load($guestOrder->getId())->getRemoteIp())->toBeNull()
+            ->and(Mage::getModel('sales/order')->load($otherOrder->getId())->getRemoteIp())->toBe('203.0.113.9')
+            ->and($keptAddress->getCustomerId())->toBeNull()
+            ->and($keptAddress->getFirstname())->toBe('Pri');
+    });
+
+    it('deletes the gift messages of the carts, and keeps the gift message that an order shares with its cart', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $cartOnly = Mage::getModel('giftmessage/message')->setSender('Pri')->setRecipient('Friend')->setMessage('Happy birthday')->save();
+        $shared = Mage::getModel('giftmessage/message')->setSender('Pri')->setRecipient('Friend')->setMessage('Merry Christmas')->save();
+        foreach ([$cartOnly, $shared] as $message) {
+            Mage::getModel('sales/quote')->setStoreId(1)
+                ->setData('customer_id', (int) $customer->getId())
+                ->setGiftMessageId((int) $message->getId())
+                ->save();
+        }
+        $this->orders[] = privacyOrder($customer, Mage_Sales_Model_Order::STATE_COMPLETE)->setGiftMessageId((int) $shared->getId())->save();
+
+        Mage::getModel('privacycenter/eraser_quotes')->erase(privacySubject($customer));
+        $cartOnlyKept = Mage::getModel('giftmessage/message')->load($cartOnly->getId())->getId();
+        $sharedKept = Mage::getModel('giftmessage/message')->load($shared->getId())->getId();
+        $shared->delete();
+        if ($cartOnlyKept) {
+            $cartOnly->delete();
+        }
+
+        expect($cartOnlyKept)->toBeNull()
+            ->and($sharedKept)->not->toBeNull();
+    });
+
+    it('removes the name, the email and the message of the customer from the delivered gift cards, and keeps their value', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $email = (string) $customer->getEmail();
+        $sent = privacyGiftcard(['sender_name' => 'Pri', 'sender_email' => strtoupper($email), 'recipient_name' => 'Friend', 'recipient_email' => 'friend@example.com', 'email_sent_at' => '2026-11-01 10:00:00']);
+        $received = privacyGiftcard(['sender_name' => 'Friend', 'sender_email' => 'friend@example.com', 'recipient_name' => 'Pri', 'recipient_email' => $email, 'email_sent_at' => '2026-11-01 10:00:00']);
+        $pending = privacyGiftcard(['sender_name' => 'Pri', 'sender_email' => $email, 'recipient_name' => 'Friend', 'recipient_email' => 'friend@example.com']);
+
+        $result = Mage::getModel('giftcard/privacy_eraser')->erase(privacySubject($customer));
+        [$keptSent, $keptReceived, $keptPending] = array_map(
+            fn(Maho_Giftcard_Model_Giftcard $card): Maho_Giftcard_Model_Giftcard => Mage::getModel('giftcard/giftcard')->load($card->getId()),
+            [$sent, $received, $pending],
+        );
+        foreach ([$sent, $received, $pending] as $card) {
+            $card->delete();
+        }
+
+        expect($result)->toBe('2 gift cards changed, 1 kept until their email is sent')
+            ->and($keptSent->getSenderName())->toBeNull()
+            ->and($keptSent->getSenderEmail())->toBeNull()
+            ->and($keptSent->getMessage())->toBeNull()
+            ->and($keptSent->getRecipientEmail())->toBe('friend@example.com')
+            ->and($keptSent->getCode())->toBe($sent->getCode())
+            ->and($keptSent->getBalance())->toBe(50.0)
+            ->and($keptReceived->getRecipientEmail())->toBeNull()
+            ->and($keptReceived->getSenderEmail())->toBe('friend@example.com')
+            ->and($keptPending->getSenderEmail())->toBe($email);
+    });
+
+    it('clears the PayPal notifications that name the email, and keeps the ones that wait for processing', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $email = (string) $customer->getEmail();
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_write');
+        $table = $resource->getTableName('paypal/webhook_event');
+        $event = function (string $status, string $payerEmail) use ($adapter, $table): int {
+            $adapter->insert($table, [
+                'paypal_event_id' => 'WH-' . uniqid(),
+                'event_type' => 'CHECKOUT.ORDER.APPROVED',
+                'status' => $status,
+                'payload' => json_encode(['resource' => ['payer' => ['email_address' => $payerEmail, 'name' => ['given_name' => 'Pri']]]]),
+            ]);
+            return (int) $adapter->lastInsertId($table);
+        };
+        $processed = $event('processed', strtoupper($email));
+        $waiting = $event('received', $email);
+        $longer = $event('processed', 'x' . $email);
+
+        Mage::getModel('paypal/privacy_eraser')->erase(privacySubject($customer));
+        $payloads = $adapter->fetchPairs($adapter->select()->from($table, ['event_id', 'payload'])->where('event_id IN (?)', [$processed, $waiting, $longer]));
+        $adapter->delete($table, ['event_id IN (?)' => [$processed, $waiting, $longer]]);
+
+        expect($payloads[$processed])->toBeNull()
+            ->and($payloads[$waiting])->not->toBeNull()
+            ->and($payloads[$longer])->not->toBeNull();
     });
 
     it('can be canceled by its customer before it runs', function () {

@@ -38,7 +38,7 @@ The export is a ZIP file with two files:
 - `data.html`, for a person to read.
 - `data.json`, for another service to read.
 
-It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms, the privacy requests, the revocation requests and the social login links. The orders, the newsletter subscriptions and the revocation requests include the ones of the email without an account. It never holds a password or a security token. For a guest, it holds the guest orders, the newsletter subscription, the accepted terms and the revocation requests of the email.
+It holds the account, the address book, the orders, the product reviews, the wishlist, the newsletter subscription, the product alerts, the accepted terms, the privacy requests, the revocation requests, the social login links and the gift cards that the customer sent or received. The orders, the newsletter subscriptions and the revocation requests include the ones of the email without an account. It never holds a password, a security token or the code of a gift card. A gift card that the customer sent shows no balance, because the balance belongs to the recipient. For a guest, it holds the guest orders, the newsletter subscription, the accepted terms, the revocation requests and the gift cards of the email.
 
 The download link works for the time in **Download Link Lifetime (Hours)**. Then the cron deletes the file.
 
@@ -51,11 +51,17 @@ An erasure runs when each of these conditions is true:
 3. A user approved the erasure, when **Erasures Need Approval** is **Yes**.
 4. The customer has no open order. An order is open until it is complete, closed or canceled.
 
-The erasure deletes the customer account with its addresses, wishlist, carts, product alerts, newsletter subscription, saved PayPal payment methods and social login links. It deletes the logs that name the customer. It removes the name of the customer from the reviews, or deletes the reviews, as **Reviews of an Erased Customer** says.
+The erasure deletes the customer account with its addresses, wishlist, carts, product alerts, newsletter subscription, saved PayPal payment methods and social login links. It deletes the gift messages of the carts, the visits of the customer with their IP address and browser, and the other logs that name the customer. It removes the name of the customer from the reviews, or deletes the reviews, as **Reviews of an Erased Customer** says.
+
+The erasure also removes the data that no law requires from the records that it keeps:
+
+- On the orders, it removes the IP address, the birth date and the gender.
+- On the gift cards that the customer sent or received, it removes the name, the email and the message of the customer. The code and the balance stay, so the card keeps its value. A card whose email is not sent yet keeps its data until the email is sent.
+- On the PayPal payment notifications that the store keeps, it removes the content of each notification that names the email.
 
 The erasure keeps these records, because the law requires them:
 
-- The orders, the invoices, the shipments and the credit memos.
+- The orders, the invoices, the shipments and the credit memos, with the names, the email, the addresses, the phone and the VAT number. The orders also keep the values of the custom customer attributes, because a store can use one for invoice data, such as a fiscal code.
 - The proof of each accepted terms and conditions text.
 - The revocation requests, as the receipt of each withdrawal.
 - The privacy request itself, as the proof of the erasure.

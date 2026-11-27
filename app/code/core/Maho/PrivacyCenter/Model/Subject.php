@@ -48,4 +48,20 @@ final readonly class Maho_PrivacyCenter_Model_Subject
         $condition = "({$guest}) AND " . $adapter->getCaseInsensitiveEqualsSql($emailColumn, '?');
         return $this->isGuest() ? $condition : "{$customerColumn} = {$this->customerId} OR ({$condition})";
     }
+
+    /**
+     * The orders of the customer, and the guest orders of the email.
+     *
+     * @return list<int>
+     */
+    public function getOrderIds(): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        return array_map(intval(...), $adapter->fetchCol(
+            $adapter->select()
+                ->from($resource->getTableName('sales/order'), ['entity_id'])
+                ->where($this->getRowsCondition($adapter, 'customer_id', 'customer_email'), $this->email),
+        ));
+    }
 }

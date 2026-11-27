@@ -28,6 +28,11 @@ SPDX-License-Identifier: OSL-3.0
                 </entities>
             </paypal_resource>
         </models>
+        <privacycenter>
+            <erasers>
+                <paypal_webhook_events>paypal/privacy_eraser</paypal_webhook_events>
+            </erasers>
+        </privacycenter>
 
         <resources>
             <paypal_setup>

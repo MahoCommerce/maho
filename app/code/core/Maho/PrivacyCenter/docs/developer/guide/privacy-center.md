@@ -13,6 +13,8 @@ Each exporter and each eraser gets a `Maho_PrivacyCenter_Model_Subject`:
 - `customerId`: the customer account, or `null` for a guest.
 - `email`: the email of the request. Use it to find the data of a guest.
 - `storeId`: the store of the request.
+- `getRowsCondition()`: the SQL condition that selects the rows of the customer and the guest rows of the email.
+- `getOrderIds()`: the orders of the customer and the guest orders of the email.
 
 ## Add an exporter
 
