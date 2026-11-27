@@ -27,7 +27,7 @@ class Maho_Revocation_Model_Privacy_Exporter extends Maho_PrivacyCenter_Model_Ex
 
     /**
      * The requests of the email, which the confirmation link of the privacy request proves, and the requests of the
-     * orders of the customer.
+     * orders of the subject.
      */
     #[\Override]
     public function export(Subject $subject): array
@@ -35,13 +35,9 @@ class Maho_Revocation_Model_Privacy_Exporter extends Maho_PrivacyCenter_Model_Ex
         $requests = Mage::getResourceModel('revocation/request_collection');
         $adapter = $requests->getConnection();
         $condition = (string) $adapter->getCaseInsensitiveEqualsSql('main_table.email', '?');
-        if (!$subject->isGuest()) {
-            $orderIds = Mage::getResourceModel('sales/order_collection')
-                ->addFieldToFilter('customer_id', $subject->customerId)
-                ->getAllIds();
-            if ($orderIds !== []) {
-                $condition .= ' OR ' . $adapter->quoteInto('main_table.order_id IN (?)', array_map(intval(...), $orderIds));
-            }
+        $orderIds = $subject->getOrderIds();
+        if ($orderIds !== []) {
+            $condition .= ' OR ' . $adapter->quoteInto('main_table.order_id IN (?)', $orderIds);
         }
         $requests->getSelect()->where($condition, $subject->email);
 

@@ -294,7 +294,7 @@ describe('an export', function () {
         $request = privacyConfirmedExport($customer);
 
         $this->service->export($request);
-        $file = $this->service->openExportForCustomer((int) $request->getId(), (int) $customer->getId());
+        $file = $this->service->openExportForStaff($request);
         $zipFile = (string) tempnam(sys_get_temp_dir(), 'privacy-test');
         file_put_contents($zipFile, stream_get_contents($file['stream']));
         $zip = new ZipArchive();
@@ -312,14 +312,48 @@ describe('an export', function () {
             ->and($html)->toContain(htmlspecialchars((string) $customer->getEmail()));
     });
 
-    it('gives the file only to its customer', function () {
-        $this->customers[] = $owner = privacyCustomer();
-        $this->customers[] = $other = privacyCustomer();
-        $request = privacyConfirmedExport($owner);
-        $this->service->export($request);
+    it('writes the export of a staff request when the queue runs its message', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $request = $this->service->submitByStaff($customer, Request::TYPE_EXPORT, null);
 
-        expect(fn() => $this->service->openExportForCustomer((int) $request->getId(), (int) $other->getId()))
-            ->toThrow(Mage_Core_Exception_NoSuchEntity::class);
+        new Maho_PrivacyCenter_Model_ExportMessageHandler()->export(new Maho_PrivacyCenter_Model_ExportMessage((int) $request->getId()));
+        $done = $this->service->getById((int) $request->getId());
+
+        expect($done->getStatus())->toBe(Request::STATUS_COMPLETED)
+            ->and($done->getExportFile())->not->toBeNull();
+    });
+
+    it('sends a new download link that replaces the old one', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $request = privacyConfirmedExport($customer);
+        $this->service->export($request);
+        $oldToken = privacyToken($request);
+
+        $this->service->resendEmail($request);
+
+        expect(fn() => $this->service->openExportByToken($oldToken))->toThrow(Mage_Core_Exception_NoSuchEntity::class)
+            ->and($this->service->getById((int) $request->getId())->isExportAvailable())->toBeTrue();
+    });
+
+    it('holds the terms that the email of the account accepted in a guest checkout', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $agreement = Mage::getModel('checkout/agreement')->setData([
+            'name' => 'Pest privacy terms ' . uniqid(), 'content' => 'Text', 'checkbox_text' => 'I agree',
+            'is_active' => 1, 'is_html' => 0, 'stores' => [0], 'show_on_checkout' => 1,
+        ])->save();
+        $agreementId = (int) $agreement->getId();
+        Mage::getModel('checkout/agreement_acceptance')
+            ->setAgreementId($agreementId)
+            ->setVersionId(Mage::getResourceSingleton('checkout/agreement')->getCurrentVersionIds([$agreementId])[$agreementId])
+            ->setEmail(strtoupper((string) $customer->getEmail()))
+            ->setStoreId(1)
+            ->setContext(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_CHECKOUT)
+            ->save();
+
+        $data = Mage::getModel('privacycenter/export_agreements')->export(privacySubject($customer));
+        $agreement->delete();
+
+        expect(array_column($data, 'name'))->toBe([$agreement->getName()]);
     });
 
     it('opens the file with the download link, and never lets that link confirm the request', function () {
@@ -469,6 +503,34 @@ describe('an erasure', function () {
         $this->service->erase($request, force: true);
 
         expect($request->getStatus())->toBe(Request::STATUS_COMPLETED);
+    });
+
+    it('waits while the email of the customer has an open guest order', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $this->orders[] = privacyGuestOrder(strtoupper((string) $customer->getEmail()), Mage_Sales_Model_Order::STATE_PROCESSING);
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
+
+        expect(fn() => $this->service->erase($request))->toThrow(Mage_Core_Exception_Conflict::class);
+    });
+
+    it('deletes the export files of the earlier requests of the customer and of the guest requests of its email', function () {
+        $this->customers[] = $customer = privacyCustomer();
+        $export = privacyConfirmedExport($customer);
+        $this->service->export($export);
+        $guestExport = Mage::getModel('privacycenter/request')->setStoreId(1)->setEmail((string) $customer->getEmail())
+            ->setType(Request::TYPE_EXPORT)->setStatus(Request::STATUS_CONFIRMED)->save();
+        $this->service->export($guestExport);
+        $paths = [(string) $export->getExportFile(), (string) $guestExport->getExportFile()];
+        $request = $this->service->submitForCustomer($customer, Request::TYPE_ERASURE, new \Maho\DataObject(['store_id' => 1]));
+        $request = $this->service->approve($this->service->confirm(privacyToken($request)), null);
+
+        $this->service->erase($request);
+        $storage = Mage::helper('privacycenter')->getStorage();
+
+        expect($storage->fileExists($paths[0]))->toBeFalse()
+            ->and($storage->fileExists($paths[1]))->toBeFalse()
+            ->and($this->service->getById((int) $guestExport->getId())->getTokenHash())->toBeNull();
     });
 
     it('deletes the account, keeps the orders, and removes the name from the reviews', function () {

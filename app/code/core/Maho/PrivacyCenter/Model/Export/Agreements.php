@@ -23,8 +23,13 @@ class Maho_PrivacyCenter_Model_Export_Agreements extends Maho_PrivacyCenter_Mode
     #[\Override]
     public function export(Subject $subject): array
     {
+        $acceptances = Mage::getService('checkout/agreement')->getAcceptanceCollection();
+        $acceptances->getSelect()->where(
+            $subject->getRowsCondition($acceptances->getConnection(), 'main_table.customer_id', 'main_table.email'),
+            $subject->email,
+        );
         $data = [];
-        foreach (Mage::getService('checkout/agreement')->getAcceptances($subject->customerId, $subject->email) as $acceptance) {
+        foreach ($acceptances as $acceptance) {
             $data[] = $this->clean(array_intersect_key(
                 $acceptance->getData(),
                 array_flip(['name', 'version', 'checkbox_text', 'context', 'order_id', 'remote_ip', 'user_agent', 'created_at']),

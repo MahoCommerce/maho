@@ -84,10 +84,10 @@ This grid lists every request. The counters above the grid show the requests tha
 
 Open a request to act on it:
 
-- **Approve Erasure**: the erasure runs at the end of its cooling-off period.
+- **Approve**: the erasure runs at the end of its cooling-off period.
 - **Export Now** or **Erase Now**: run the request now. **Erase Now** skips the cooling-off period and the open order check. You cannot undo an erasure.
-- **Send Email Again**: send a new confirmation link, or a new download link.
-- **Download Export**: get the export file, to give it to the customer by another channel.
+- **Resend**: send a new confirmation link, or a new download link.
+- **Download**: get the export file, to give it to the customer by another channel.
 - **Reject**: refuse the request. Add the reason in a note, and tell the customer.
 
 The **History** box shows each step of the request, with the result of each part of an erasure.
@@ -101,7 +101,7 @@ Each save of **Sales > Terms and Conditions** that changes the name, the checkbo
 The **Placement and Consent** box of the edit page has three settings:
 
 - **Show in the Checkout**: the customer accepts the terms to place an order.
-- **Show in the Registration Form**: the customer accepts the terms to create an account. An existing customer who did not accept them sees a notice in the customer account.
+- **Show in the Registration Form**: the customer accepts the terms in the registration form. An account from the checkout, from Social Login or from a guest order does not use this form. A customer with no acceptance of the terms sees a notice in the customer account and accepts them there. An acceptance of the same terms in the checkout also counts.
 - **Ask Again When the Text Changes**: with **Yes**, a customer who accepted an older version must accept the new version.
 
 The store saves an acceptance in the checkout, in the registration form, in the customer account and through the API. Each acceptance keeps the version, the date, the order, the IP address and the browser of the customer. The **Privacy** tab of the customer page lists them.

@@ -37,7 +37,7 @@ class Maho_PrivacyCenter_Block_Adminhtml_Request_View extends Mage_Adminhtml_Blo
         $status = $request->getStatus();
         if ($request->isErasure() && $status === Request::STATUS_CONFIRMED && !$request->getApprovedAt()) {
             $this->_addButton('approve', [
-                'label' => $helper->__('Approve Erasure'),
+                'label' => $helper->__('Approve'),
                 'onclick' => $js->getConfirmSetLocationJs($this->getActionUrl('approve'), $helper->__('Approve this erasure? It runs at the end of its cooling-off period.')),
                 'class' => 'save',
             ]);
@@ -56,13 +56,13 @@ class Maho_PrivacyCenter_Block_Adminhtml_Request_View extends Mage_Adminhtml_Blo
         }
         if ($status === Request::STATUS_PENDING || ($request->isExport() && $status === Request::STATUS_COMPLETED && $request->getExportFile())) {
             $this->_addButton('resend', [
-                'label' => $helper->__('Send Email Again'),
+                'label' => $helper->__('Resend'),
                 'onclick' => $js->getConfirmSetLocationJs($this->getActionUrl('resend'), $helper->__('Send the email again to %s?', $request->getEmail())),
             ]);
         }
         if ($request->isExport() && $request->getExportFile()) {
             $this->_addButton('download', [
-                'label' => $helper->__('Download Export'),
+                'label' => $helper->__('Download'),
                 'onclick' => $js->getSetLocationJs($this->getActionUrl('download')),
             ]);
         }
@@ -100,18 +100,6 @@ class Maho_PrivacyCenter_Block_Adminhtml_Request_View extends Mage_Adminhtml_Blo
     {
         $customerId = $this->getPrivacyRequest()?->getCustomerId();
         return $customerId ? $this->getUrl('*/customer/edit', ['id' => $customerId]) : null;
-    }
-
-    public function getTypeLabel(): string
-    {
-        $request = $this->getPrivacyRequest();
-        return $request ? (Mage::getModel('privacycenter/source_type')->toOptionHash()[$request->getType()] ?? '') : '';
-    }
-
-    public function getStatusLabel(): string
-    {
-        $request = $this->getPrivacyRequest();
-        return $request ? (Mage::getModel('privacycenter/source_status')->toOptionHash()[$request->getStatus()] ?? '') : '';
     }
 
     public function formatDateTime(?string $utc): string

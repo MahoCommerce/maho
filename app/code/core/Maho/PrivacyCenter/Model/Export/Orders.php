@@ -28,7 +28,6 @@ class Maho_PrivacyCenter_Model_Export_Orders extends Maho_PrivacyCenter_Model_Ex
         'customer_gender', 'customer_note', 'remote_ip', 'x_forwarded_for', 'shipping_description',
     ];
 
-    /** The fields of an order address. */
     private const array ADDRESS_FIELDS = [
         'prefix', 'firstname', 'middlename', 'lastname', 'suffix', 'company', 'street', 'city', 'region',
         'postcode', 'country_id', 'telephone', 'fax', 'email', 'vat_id',

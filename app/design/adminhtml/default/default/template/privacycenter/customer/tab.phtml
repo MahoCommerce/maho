@@ -31,8 +31,8 @@ $acceptances = $this->getAcceptances();
             <?php foreach ($requests as $request): ?>
                 <tr>
                     <td><a href="<?= $this->escapeUrl($this->getRequestUrl($request)) ?>">#<?= (int) $request->getId() ?></a></td>
-                    <td><?= $this->escapeHtml($this->getTypeLabel((string) $request->getType())) ?></td>
-                    <td><?= $this->escapeHtml($this->getStatusLabel((string) $request->getStatus())) ?></td>
+                    <td><?= $this->escapeHtml($request->getTypeLabel()) ?></td>
+                    <td><?= $this->escapeHtml($request->getStatusLabel()) ?></td>
                     <td><?= $this->escapeHtml($this->formatDateTime($request->getCreatedAt())) ?></td>
                     <td><?= $this->escapeHtml($this->formatDateTime($request->getProcessedAt())) ?></td>
                 </tr>

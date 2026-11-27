@@ -49,6 +49,17 @@ class Mage_Checkout_Service_Agreement
     }
 
     /**
+     * The IDs of the agreements of getActive().
+     *
+     * @param string $location an Agreement::LOCATION_* value
+     * @return list<int>
+     */
+    public function getActiveIds(int $storeId, string $location): array
+    {
+        return array_map(fn(Agreement $agreement): int => (int) $agreement->getId(), $this->getActive($storeId, $location));
+    }
+
+    /**
      * Check that $agreementIds holds each agreement that $storeId requires at $location.
      *
      * @param list<int> $agreementIds
@@ -56,8 +67,7 @@ class Mage_Checkout_Service_Agreement
      */
     public function assertAccepted(array $agreementIds, int $storeId, string $location): void
     {
-        $required = array_map(fn(Agreement $agreement): int => (int) $agreement->getId(), $this->getActive($storeId, $location));
-        if (array_diff($required, $agreementIds) !== []) {
+        if (array_diff($this->getActiveIds($storeId, $location), $agreementIds) !== []) {
             throw new Mage_Core_Exception_Input()->addError(
                 'agreement_ids',
                 Mage::helper('checkout')->__('Please agree to all the terms and conditions.'),
@@ -67,15 +77,17 @@ class Mage_Checkout_Service_Agreement
 
     /**
      * Save one acceptance of the current version of each agreement in $agreementIds. Each row takes the customer,
-     * the email, the order, the store, the context and the client of $template. An ID with no agreement is skipped.
+     * the email, the order, the store, the context and the client of $template. An ID that the store of $template
+     * does not show at $location is skipped.
      *
      * @param list<int> $agreementIds
+     * @param string $location an Agreement::LOCATION_* value
      * @return list<Acceptance>
      */
-    public function recordAcceptances(array $agreementIds, Acceptance $template): array
+    public function recordAcceptances(array $agreementIds, string $location, Acceptance $template): array
     {
-        $versionIds = Mage::getResourceSingleton('checkout/agreement')
-            ->getCurrentVersionIds(array_values(array_unique(array_map(intval(...), $agreementIds))));
+        $shownIds = array_intersect($this->getActiveIds((int) $template->getStoreId(), $location), array_map(intval(...), $agreementIds));
+        $versionIds = Mage::getResourceSingleton('checkout/agreement')->getCurrentVersionIds(array_values($shownIds));
         $acceptances = [];
         foreach ($versionIds as $agreementId => $versionId) {
             $acceptance = Mage::getModel('checkout/agreement_acceptance')
@@ -145,7 +157,7 @@ class Mage_Checkout_Service_Agreement
             ->setEmail($customer->getEmail())
             ->setStoreId($storeId)
             ->setContext(Acceptance::CONTEXT_ACCOUNT);
-        return $this->recordAcceptances($agreementIds, $template);
+        return $this->recordAcceptances($agreementIds, Agreement::LOCATION_REGISTRATION, $template);
     }
 
     /**
@@ -154,13 +166,7 @@ class Mage_Checkout_Service_Agreement
     public function getAcceptances(?int $customerId, #[\SensitiveParameter]
         ?string $email = null): Mage_Checkout_Model_Resource_Agreement_Acceptance_Collection
     {
-        $resource = Mage::getSingleton('core/resource');
-        $collection = Mage::getResourceModel('checkout/agreement_acceptance_collection');
-        $collection->getSelect()->joinLeft(
-            ['v' => $resource->getTableName('checkout/agreement_version')],
-            'v.version_id = main_table.version_id',
-            ['version', 'name', 'checkbox_text'],
-        );
+        $collection = $this->getAcceptanceCollection();
         if ($customerId !== null) {
             $collection->addFieldToFilter('main_table.customer_id', $customerId);
         } else {
@@ -169,6 +175,20 @@ class Mage_Checkout_Service_Agreement
                 (string) $email,
             );
         }
+        return $collection;
+    }
+
+    /**
+     * All the acceptances, newest first, with the version, the name and the checkbox text of each accepted version.
+     */
+    public function getAcceptanceCollection(): Mage_Checkout_Model_Resource_Agreement_Acceptance_Collection
+    {
+        $collection = Mage::getResourceModel('checkout/agreement_acceptance_collection');
+        $collection->getSelect()->joinLeft(
+            ['v' => Mage::getSingleton('core/resource')->getTableName('checkout/agreement_version')],
+            'v.version_id = main_table.version_id',
+            ['version', 'name', 'checkbox_text'],
+        );
         return $collection->setOrder('main_table.created_at', \Maho\Data\Collection::SORT_ORDER_DESC);
     }
 }

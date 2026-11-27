@@ -26,11 +26,11 @@ $customerUrl = $this->getCustomerUrl();
         <table class="form-list" cellspacing="0">
             <tr>
                 <td class="label"><?= $helper->__('Type') ?></td>
-                <td class="value"><strong><?= $this->escapeHtml($this->getTypeLabel()) ?></strong></td>
+                <td class="value"><strong><?= $this->escapeHtml($request->getTypeLabel()) ?></strong></td>
             </tr>
             <tr>
                 <td class="label"><?= $helper->__('Status') ?></td>
-                <td class="value"><?= $this->escapeHtml($this->getStatusLabel()) ?></td>
+                <td class="value"><?= $this->escapeHtml($request->getStatusLabel()) ?></td>
             </tr>
             <tr>
                 <td class="label"><?= $helper->__('Email') ?></td>

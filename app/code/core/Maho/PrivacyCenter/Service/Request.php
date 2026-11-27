@@ -411,21 +411,6 @@ class Maho_PrivacyCenter_Service_Request
     }
 
     /**
-     * The export file of the request $requestId of the customer $customerId.
-     *
-     * @return array{request: Request, stream: resource, size: int, filename: string}
-     * @throws Mage_Core_Exception_NoSuchEntity when the customer has no available export with this ID
-     */
-    public function openExportForCustomer(int $requestId, int $customerId): array
-    {
-        $request = Mage::getModel('privacycenter/request')->load($requestId);
-        if (!$request->getId() || $request->getCustomerId() !== $customerId || !$request->isExportAvailable()) {
-            throw new Mage_Core_Exception_NoSuchEntity(Mage::helper('privacycenter')->__('The export is not available.'));
-        }
-        return $this->openExport($request);
-    }
-
-    /**
      * The export file of $request, for the staff, who hands it to the customer by another channel.
      *
      * @return array{request: Request, stream: resource, size: int, filename: string}
@@ -505,6 +490,7 @@ class Maho_PrivacyCenter_Service_Request
                 }
             } catch (Throwable $e) {
                 Mage::logException($e);
+                $this->save($request->appendAdminNote(Mage::helper('privacycenter')->__('The erasure failed: %s', $e->getMessage())));
             }
         }
         return $count;
@@ -734,21 +720,17 @@ class Maho_PrivacyCenter_Service_Request
     }
 
     /**
-     * The requests of $subject: those of its customer, or those of its email for a guest.
+     * The requests of $subject: those of its customer, and the guest requests of its email.
      *
      * @return list<Request>
      */
     public function getSubjectRequests(Subject $subject): array
     {
         $requests = Mage::getResourceModel('privacycenter/request_collection');
-        if ($subject->isGuest()) {
-            $requests->getSelect()->where(
-                (string) $requests->getConnection()->getCaseInsensitiveEqualsSql('main_table.email', '?'),
-                $subject->email,
-            );
-        } else {
-            $requests->addFieldToFilter('customer_id', $subject->customerId);
-        }
+        $requests->getSelect()->where(
+            $subject->getRowsCondition($requests->getConnection(), 'main_table.customer_id', 'main_table.email'),
+            $subject->email,
+        );
         return array_values($requests->getItems());
     }
 
@@ -756,14 +738,10 @@ class Maho_PrivacyCenter_Service_Request
     {
         $orders = Mage::getResourceModel('sales/order_collection')
             ->addFieldToFilter('state', ['nin' => self::FINAL_ORDER_STATES]);
-        if ($subject->isGuest()) {
-            $orders->getSelect()->where(
-                (string) $orders->getConnection()->getCaseInsensitiveEqualsSql('main_table.customer_email', '?'),
-                $subject->email,
-            );
-        } else {
-            $orders->addFieldToFilter('customer_id', $subject->customerId);
-        }
+        $orders->getSelect()->where(
+            $subject->getRowsCondition($orders->getConnection(), 'main_table.customer_id', 'main_table.customer_email'),
+            $subject->email,
+        );
         return (int) $orders->getSize();
     }
 

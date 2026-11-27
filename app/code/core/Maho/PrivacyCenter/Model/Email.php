@@ -70,7 +70,7 @@ class Maho_PrivacyCenter_Model_Email
                 null,
                 $vars + [
                     'request_id' => $request->getId(),
-                    'request_type' => Mage::getModel('privacycenter/source_type')->toOptionHash()[$request->getType()] ?? '',
+                    'request_type' => $request->getTypeLabel(),
                     'is_export' => $request->isExport(),
                     'is_erasure' => $request->isErasure(),
                     'email' => (string) $request->getEmail(),

@@ -116,7 +116,8 @@ describe('agreement versions', function () {
         $this->agreements[] = $agreement = acceptanceAgreement();
         $acceptances = Mage::getService('checkout/agreement')->recordAcceptances(
             [(int) $agreement->getId()],
-            Mage::getModel('checkout/agreement_acceptance')->setEmail('proof@example.com')->setContext('checkout'),
+            Mage_Checkout_Model_Agreement::LOCATION_CHECKOUT,
+            Mage::getModel('checkout/agreement_acceptance')->setEmail('proof@example.com')->setStoreId(1)->setContext('checkout'),
         );
 
         expect(fn() => $acceptances[0]->setEmail('other@example.com')->save())->toThrow(Mage_Core_Exception::class);
@@ -234,5 +235,24 @@ describe('the registration', function () {
         expect($acceptance->getContext())->toBe(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_REGISTRATION)
             ->and($acceptance->getRemoteIp())->toBe('203.0.113.7')
             ->and($acceptance->getAgreementVersion())->toBe(1);
+    });
+
+    it('keeps no proof of an agreement that the registration form does not show', function () {
+        $this->agreements[] = $registration = acceptanceAgreement();
+        $this->agreements[] = $checkoutOnly = acceptanceAgreement(['show_on_registration' => 0]);
+        $this->agreements[] = $inactive = acceptanceAgreement(['is_active' => 0]);
+        $customer = Mage::getModel('customer/customer')->setWebsiteId(1)->setEmail('register-' . uniqid() . '@example.com')
+            ->setFirstname('New')->setLastname('Customer')->setPassword('Password123!')->setPasswordConfirmation('Password123!');
+
+        Mage::getService('customer/customer')->register(
+            $customer,
+            1,
+            [],
+            agreementIds: [(int) $registration->getId(), (int) $checkoutOnly->getId(), (int) $inactive->getId()],
+        );
+        $this->customers[] = $customer;
+        $accepted = Mage::getService('checkout/agreement')->getAcceptances((int) $customer->getId())->getColumnValues('agreement_id');
+
+        expect(array_map(intval(...), $accepted))->toBe([(int) $registration->getId()]);
     });
 });

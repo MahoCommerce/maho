@@ -92,38 +92,16 @@ class Maho_PrivacyCenter_AccountController extends Mage_Core_Controller_Front_Ac
         $this->_redirect('*/*/deletion');
     }
 
-    #[Maho\Config\Route('/privacy/account/download', name: 'privacy.account.download', methods: ['GET'])]
-    public function downloadAction(): void
-    {
-        try {
-            $file = Mage::getService('privacycenter/request')->openExportForCustomer(
-                (int) $this->getRequest()->getParam('id'),
-                (int) $this->getSession()->getCustomerId(),
-            );
-        } catch (Mage_Core_Exception $e) {
-            $this->getSession()->addError($e->getMessage());
-            $this->_redirect('*/*/data');
-            return;
-        }
-        $this->_prepareDownloadResponse($file['filename'], [
-            'value' => $file['stream'],
-            'type' => 'stream',
-        ], 'application/zip', $file['size']);
-    }
-
     #[Maho\Config\Route('/privacy/account/accept', name: 'privacy.account.accept', methods: ['POST'])]
     public function acceptAction(): void
     {
         $session = $this->getSession();
-        $http = Mage::helper('core/http');
         try {
             Mage::getService('checkout/agreement')->acceptForCustomer(
                 $session->getCustomer(),
                 (int) Mage::app()->getStore()->getId(),
                 array_map(intval(...), array_keys((array) $this->getRequest()->getPost('agreement', []))),
-                Mage::getModel('checkout/agreement_acceptance')
-                    ->setRemoteIp($http->getRemoteAddr() ?: null)
-                    ->setUserAgent($http->getHttpUserAgent() ?: null),
+                Mage::helper('checkout')->getAcceptanceClient(),
             );
             $session->addSuccess($this->__('Thank you. Your acceptance has been saved.'));
         } catch (Mage_Core_Exception_Input $e) {

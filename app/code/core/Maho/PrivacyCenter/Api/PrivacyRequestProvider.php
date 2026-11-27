@@ -28,21 +28,23 @@ final class PrivacyRequestProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Request
     {
         StoreContext::ensureStore();
-        $collection = \Mage::getResourceModel('privacycenter/request_collection');
+        $service = \Mage::getService('privacycenter/request');
 
         if ($operation->getName() === 'my_privacy_requests') {
-            $collection->addFieldToFilter('customer_id', $this->requireCustomerId());
-            return $this->paginateRequests($collection, $context);
+            return $this->paginateRequests($service->getForCustomer($this->requireCustomerId()), $context);
         }
 
         AdminAcl::checkPath(PrivacyRequest::ACL_VIEW);
-        $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
         if (!$operation instanceof CollectionOperationInterface) {
-            $request = \Mage::getService('privacycenter/request')->getById((int) ($uriVariables['id'] ?? 0));
+            $request = $service->getById((int) ($uriVariables['id'] ?? 0));
             $this->assertStoreAllowed($request->getStoreId(), $this->requireUser(), 'privacy request');
             return $request;
         }
 
+        $collection = \Mage::getResourceModel('privacycenter/request_collection')
+            ->setOrder('created_at', 'DESC')
+            ->setOrder('request_id', 'DESC');
+        $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
         if ($allowedStoreIds !== null) {
             $collection->addFieldToFilter('store_id', ['in' => $allowedStoreIds ?: [-1]]);
         }
@@ -67,8 +69,7 @@ final class PrivacyRequestProvider extends \Maho\ApiPlatform\Provider
     private function paginateRequests(\Maho_PrivacyCenter_Model_Resource_Request_Collection $collection, array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, $this->defaultPageSize, $this->maxPageSize);
-        $collection->setOrder('created_at', 'DESC')->setOrder('request_id', 'DESC')
-            ->setPageSize($pageSize)->setCurPage($page);
+        $collection->setPageSize($pageSize)->setCurPage($page);
         $items = [];
         foreach ($collection->getItems() as $request) {
             if ($request instanceof Request) {

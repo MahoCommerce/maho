@@ -52,6 +52,18 @@ class Maho_PrivacyCenter_Model_Request extends Mage_Core_Model_Abstract
         return $this->getType() === self::TYPE_ERASURE;
     }
 
+    public function getTypeLabel(): string
+    {
+        $type = (string) $this->getType();
+        return Mage::getModel('privacycenter/source_type')->toOptionHash()[$type] ?? $type;
+    }
+
+    public function getStatusLabel(): string
+    {
+        $status = (string) $this->getStatus();
+        return Mage::getModel('privacycenter/source_status')->toOptionHash()[$status] ?? $status;
+    }
+
     /**
      * Whether the request is still open: not completed, rejected, canceled or expired.
      */

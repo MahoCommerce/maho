@@ -29,12 +29,8 @@ final class AgreementAcceptanceProcessor extends \Maho\ApiPlatform\Processor
         self::rejectUnknownFields($body, self::FIELDS);
         $agreementId = RequestInput::of($body)->int('agreementId') ?? throw ValidationException::requiredField('agreementId');
 
-        $http = \Mage::helper('core/http');
-        $client = \Mage::getModel('checkout/agreement_acceptance')
-            ->setRemoteIp($http->getRemoteAddr() ?: null)
-            ->setUserAgent(($context['request'] ?? null)?->headers->get('User-Agent') ?: null);
         $customer = \Mage::getService('customer/customer')->getById($this->requireCustomerId());
-        $acceptances = \Mage::getService('checkout/agreement')->acceptForCustomer($customer, (int) StoreContext::getStoreId(), [$agreementId], $client);
+        $acceptances = \Mage::getService('checkout/agreement')->acceptForCustomer($customer, (int) StoreContext::getStoreId(), [$agreementId], \Mage::helper('checkout')->getAcceptanceClient());
 
         $acceptance = \Mage::getService('checkout/agreement')->getAcceptances((int) $customer->getId())
             ->addFieldToFilter('main_table.acceptance_id', (int) $acceptances[0]->getId())

@@ -49,16 +49,6 @@ class Maho_PrivacyCenter_Block_Adminhtml_Customer_Edit_Tab_Privacy extends Mage_
         return Mage::getSingleton('admin/session')->isAllowed('customer/privacy/process');
     }
 
-    public function getTypeLabel(string $type): string
-    {
-        return Mage::getModel('privacycenter/source_type')->toOptionHash()[$type] ?? $type;
-    }
-
-    public function getStatusLabel(string $status): string
-    {
-        return Mage::getModel('privacycenter/source_status')->toOptionHash()[$status] ?? $status;
-    }
-
     public function formatDateTime(?string $utc): string
     {
         return $utc ? Mage::helper('core')->formatDate($utc, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true) : '';

@@ -136,6 +136,20 @@ describe('POST /api/rest/v2/privacy-requests (guest)', function (): void {
         expect($response['json']['customerId'] ?? null)->toBeNull();
     });
 
+    it('answers the same for the email of a customer account, also when a request is already pending', function (): void {
+        enablePrivacyCenter();
+        \Mage::app();
+        $email = (string) \Mage::getModel('customer/customer')->load((int) fixtures('customer_id'))->getEmail();
+
+        $first = apiPost('/api/rest/v2/privacy-requests', ['email' => $email, 'type' => 'export']);
+        $second = apiPost('/api/rest/v2/privacy-requests', ['email' => $email, 'type' => 'export']);
+
+        expect($first['status'])->toBe(202)
+            ->and($second['status'])->toBe(202)
+            ->and($second['json']['id'] ?? null)->toBeNull()
+            ->and($second['json']['customerId'] ?? null)->toBeNull();
+    });
+
     it('refuses an unknown field', function (): void {
         enablePrivacyCenter();
 
@@ -222,7 +236,7 @@ describe('/api/rest/v2/privacy-requests (staff)', function (): void {
         expect($response['status'])->toBe(400);
     });
 
-    it('approves a confirmed erasure, and refuses to approve it twice', function (): void {
+    it('approves a confirmed erasure, and refuses to approve it after a rejection', function (): void {
         $id = createPrivacyRequest('erasure', 'confirmed');
 
         $approved = apiPost("/api/rest/v2/privacy-requests/{$id}/approve", [], adminToken());

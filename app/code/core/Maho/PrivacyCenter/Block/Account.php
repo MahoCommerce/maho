@@ -92,16 +92,6 @@ class Maho_PrivacyCenter_Block_Account extends Mage_Core_Block_Template
             ->toHtml();
     }
 
-    public function getTypeLabel(Request $request): string
-    {
-        return Mage::getModel('privacycenter/source_type')->toOptionHash()[$request->getType()] ?? (string) $request->getType();
-    }
-
-    public function getStatusLabel(Request $request): string
-    {
-        return Mage::getModel('privacycenter/source_status')->toOptionHash()[$request->getStatus()] ?? (string) $request->getStatus();
-    }
-
     public function formatUtcDate(?string $utc, bool $withTime = false): string
     {
         return $utc ? Mage::helper('core')->formatDate($utc, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, $withTime) : '';

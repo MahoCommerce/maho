@@ -48,7 +48,6 @@ $sections = $this->getExportLabels();
                 <tr>
                     <th><?= $this->__('Requested') ?></th>
                     <th><?= $this->__('Status') ?></th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -56,11 +55,6 @@ $sections = $this->getExportLabels();
                 <tr>
                     <td><?= $this->escapeHtml($this->formatUtcDate($request->getCreatedAt(), true)) ?></td>
                     <td><?= $this->getStatusBadgeHtml($request) ?></td>
-                    <td class="text-right">
-                        <?php if ($request->isExportAvailable()): ?>
-                            <a class="btn btn-sm btn-primary btn-soft [&>svg]:size-4" href="<?= $this->escapeUrl($this->getActionUrl('download', ['id' => (int) $request->getId()])) ?>"><?= $this->getIconSvg('download') ?><?= $this->__('Download') ?></a>
-                        <?php endif ?>
-                    </td>
                 </tr>
             <?php endforeach ?>
             </tbody>

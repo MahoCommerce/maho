@@ -125,7 +125,7 @@ class Maho_PrivacyCenter_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Blo
         $this->setMassactionIdField('request_id');
         $this->getMassactionBlock()->setFormFieldName('request');
         $this->getMassactionBlock()->addItem('approve', [
-            'label' => $helper->__('Approve Erasure'),
+            'label' => $helper->__('Approve'),
             'url' => $this->getUrl('*/*/massApprove'),
             'confirm' => $helper->__('Approve the selected erasure requests? Each one runs at the end of its cooling-off period.'),
         ]);

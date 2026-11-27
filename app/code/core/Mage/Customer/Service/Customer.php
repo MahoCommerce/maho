@@ -279,7 +279,7 @@ class Mage_Customer_Service_Customer
                 ->setEmail($customer->getEmail())
                 ->setStoreId($storeId)
                 ->setContext(Mage_Checkout_Model_Agreement_Acceptance::CONTEXT_REGISTRATION);
-            $agreements->recordAcceptances($agreementIds, $template);
+            $agreements->recordAcceptances($agreementIds, Mage_Checkout_Model_Agreement::LOCATION_REGISTRATION, $template);
         }
         return $customer;
     }

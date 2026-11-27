@@ -20,6 +20,6 @@ $class = match ($request->getStatus()) {
     Maho_PrivacyCenter_Model_Request::STATUS_COMPLETED => 'badge-success',
     default => 'badge-neutral',
 };
-$label = Mage::getModel('privacycenter/source_status')->toOptionHash()[$request->getStatus()] ?? (string) $request->getStatus();
+$label = $request->getStatusLabel();
 ?>
 <span class="badge badge-soft <?= $class ?>"><?= $this->escapeHtml($label) ?></span>

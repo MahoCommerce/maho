@@ -684,7 +684,7 @@ The body of `POST /products/{productId}/reviews` and the input of `submitReview`
 
 ### Privacy requests (GDPR) <span class="version-badge">v27.1+</span>
 
-A customer or a guest asks for a copy of the personal data (`export`) or for its erasure (`erasure`). A guest, and the erasure of a customer, wait for the link of a confirmation email. An erasure then waits for its cooling-off period, for the approval of the staff when the store asks for it, and for the end of the open orders of the customer. The endpoints answer 404 when the store has the Privacy Center turned off.
+A customer or a guest asks for a copy of the personal data (`export`) or for its erasure (`erasure`). Each request waits for the link of a confirmation email, except a request that the staff creates. An erasure then waits for its cooling-off period, for the approval of the staff when the store asks for it, and for the end of the open orders of the customer. The endpoints answer 404 when the store has the Privacy Center turned off.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|

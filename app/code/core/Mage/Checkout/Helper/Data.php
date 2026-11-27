@@ -70,11 +70,19 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $storeId = (int) Mage::app()->getStore()->getId();
         $key = "{$location}_{$storeId}";
-        $this->_agreements[$key] ??= array_map(
-            fn(Mage_Checkout_Model_Agreement $agreement): int => (int) $agreement->getId(),
-            Mage::getService('checkout/agreement')->getActive($storeId, $location),
-        );
+        $this->_agreements[$key] ??= Mage::getService('checkout/agreement')->getActiveIds($storeId, $location);
         return $this->_agreements[$key];
+    }
+
+    /**
+     * The client of the current request, for the log of the accepted agreements.
+     */
+    public function getAcceptanceClient(): Mage_Checkout_Model_Agreement_Acceptance
+    {
+        $http = Mage::helper('core/http');
+        return Mage::getModel('checkout/agreement_acceptance')
+            ->setRemoteIp($http->getRemoteAddr() ?: null)
+            ->setUserAgent($http->getHttpUserAgent() ?: null);
     }
 
     /**
